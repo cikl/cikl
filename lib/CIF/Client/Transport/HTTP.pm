@@ -57,7 +57,11 @@ sub send {
     my $self = shift;
     my $data = shift;
     
-    return $self->_send($data);
+    my ($err, $ret) = $self->_send($data->encode());
+
+    return $err if($err);
+
+    return ($err, MessageType->decode($ret));
 }
 
 sub send_json {

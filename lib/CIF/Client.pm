@@ -143,10 +143,9 @@ sub search {
     });
     
     debug('sending query') if($::debug);
-    my ($err,$ret) = $self->send($msg->encode());
+    my ($err,$ret) = $self->send($msg);
     
     return $err if($err);
-    $ret = MessageType->decode($ret);
  
     unless($ret->get_status() == MessageType::StatusType::SUCCESS()){
         return('failed: '.@{$ret->get_data()}[0]) if($ret->get_status() == MessageType::StatusType::FAILED());
