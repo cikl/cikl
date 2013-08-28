@@ -1,5 +1,5 @@
 package CIF::Client::Transport::HTTP;
-use base 'Class::Accessor';
+use base 'CIF::Client::Transport';
 use base 'LWP::UserAgent';
 
 use strict;
@@ -12,17 +12,11 @@ use JSON::XS;
 
 our $AGENT = 'libcif/'.$CIF::VERSION.' (collectiveintel.org)';
 
-__PACKAGE__->follow_best_practice();
-__PACKAGE__->mk_accessors(qw(config));
-
 sub new {
     my $class = shift;
     my $args = shift;
- 
-    my $self = {};
-    bless($self,$class);
-        
-    $self->set_config($args->{'config'});
+
+    my $self = $class->SUPER::new($args);
      
     # seems to be a bug if you don't set this
     $self->{'max_redirect'}    = $args->{'max_redirect'} || 5;
