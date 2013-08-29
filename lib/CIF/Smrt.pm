@@ -592,14 +592,13 @@ sub process {
         # waiting for sender
         if($poller->has_event('return')){
             debug('return msg received') if($::debug && $::debug > 1);
-            $msg = $return->recv();
-            if($msg->data() =~ /^ERROR: /){
-                $err = $msg->data();
+            my $resp = $return->recv_as('json');
+            if($resp->{'err'}){
+                $err = $resp->{'err'};
                 $sent_recs = -1;
             } else {
-                $msg = MessageType->decode($msg->data());
                 # size of the array returned +1
-                $sent_recs += ($#{$msg->get_data()} + 1);
+                $sent_recs += ($#{$resp->{'data'}} + 1);
             }
             $msg = undef;
         }
@@ -659,7 +658,7 @@ sub worker_routine {
        
     my $done = 0;
     my $recs = 0;
-    my (@results,$tmp_results);
+    my (@results);
     while(!$done){
         debug('polling...') if($::debug > 5);
         $poller->poll();
@@ -699,34 +698,30 @@ sub worker_routine {
                     my $err;
                     foreach my $i (@$iodef){
                         try {
-                            $tmp_results = $p->process($self,$i);
+                            my $tmp_results = $p->process($self,$i);
+                            foreach (@$tmp_results) {
+                                $_ = IODEFDocumentType->new({ lang => 'EN', Incident => [$_] });
+                                $sender->send($_->encode());
+                                $workers_sum->send('ADDED:1');
+                            }
+
                         } catch {
                             $err = shift;
                         };
+
+                        
                         debug($err) if($::debug && $err);
-                        #push(@results,@$array) if($array && @$array);
-                        push(@results,@$tmp_results) if($tmp_results && @$tmp_results);
                     }
-                    $tmp_results = undef;
                 };
 
-                # we don't do +1 here cause the parent already knows about the
-                # original record
-                if($#results > -1){
-                    @results = map { IODEFDocumentType->new({ lang => 'EN', Incident => $_ })->encode() } @results;
-                    # sometimes the $sender->send_as will get there faster
-                    # than the $workers_sum will make it up and over to the sender
-                    # it's possible we'll have to re-work this with the sender thread, but it works for now
-                    $workers_sum->send('ADDED:'.($#results+1));
-                    nanosleep NSECS_PER_MSEC;
-                }
             }
             
-            push(@results,map { $_->encode() } @$iodef);
-                       
             debug('sending message...') if($::debug && $::debug > 2);
-            $sender->send_as('json' => \@results);
+            foreach (@$iodef) {
+              $sender->send($_->encode());
+            }
             debug('message sent...') if($::debug && $::debug > 2);
+
             $workers_sum->send('COMPLETED:1');
             
             # clear the global var
@@ -805,10 +800,13 @@ sub sender_routine {
         # we need to move this out of the if/then incase we're waiting on a kill
         if($poller->has_event('sender')){
             debug('found event...') if($::debug > 2);
-            my $msg = $sender->recv_as('json');
-            my $num_msgs = ($#{$msg}+1);
+            my $msg = $sender->recv()->data();
+            #$msg = Iodef::Pb::Simple->new($msg);
+            $msg = IODEFDocumentType->decode($msg);
+            #my $num_msgs = ($#{$msg}+1);
+            my $num_msgs = 1;
             debug('msgs recvieved: '.$num_msgs) if($::debug > 2);
-            push(@$queue,@$msg);
+            push(@$queue,$msg);
             debug('msgs in queue: '.($#{$queue}+1)) if($::debug > 2);
         }
         
@@ -829,11 +827,13 @@ sub sender_routine {
             debug('sending data to router: '.($#{$queue}+1)) if($::debug);
             my ($err,$ret) = $self->send($queue);
             debug('returning answer from router...') if($::debug);
+            my $json_msg = {};
             if($err){
-                $return->send($err);
+                $json_msg->{'err'} = $err;
             } else {
-                $return->send($ret->encode());
+                $json_msg->{'data'} = $ret;
             }
+            $return->send_as(json => $json_msg);
             $sent_recs += ($#{$queue}+1);
             $queue = [];
             debug('getting ready to poll...') if($::debug);
@@ -852,14 +852,7 @@ sub send {
     my $self = shift;
     my $data = shift;
 
-    debug('creating new submission') if($::debug);
-    my $ret = $self->get_client->new_submission({
-        guid    => $self->get_rules->{'guid'},
-        data    => $data,
-    });
-    
-    debug('submitting...') if($::debug);
-    return $self->get_client->submit($ret);    
+    return $self->get_client->submit($self->get_rules->{'guid'}, $data);    
 }
 
 sub throttle {
