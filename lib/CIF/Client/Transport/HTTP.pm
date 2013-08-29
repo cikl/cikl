@@ -37,6 +37,10 @@ sub query {
     my $self = shift;
     my $queries = shift;
 
+    foreach (@$queries) {
+      $_ = $_->encode();
+    }
+
     my $msg = CIF::MsgHelpers::msg_wrap_queries($queries);
     my ($err, $msg2) = $self->_send_msg($msg);
 

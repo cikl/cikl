@@ -61,7 +61,7 @@ sub new {
         feed        => $args->{'feed'},
     });
             
-    return (undef,$msg->encode());
+    return (undef,$msg);
 }
 
 # skel
