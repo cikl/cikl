@@ -37,10 +37,6 @@ sub query {
     my $self = shift;
     my $queries = shift;
 
-    foreach (@$queries) {
-      $_ = $_->encode();
-    }
-
     my $msg = CIF::MsgHelpers::msg_wrap_queries($queries);
     my ($err, $msg2) = $self->_send_msg($msg);
 
@@ -54,10 +50,6 @@ sub submit {
     my $apikey = shift;
     my $guid = shift;
     my $iodefs = shift;
-
-    foreach (@$iodefs) {
-      $_ = $_->encode();
-    }
 
     my $msg = CIF::MsgHelpers::build_submission_msg($apikey, $guid, $iodefs);
     my ($err, $ret) = $self->_send_msg($msg);

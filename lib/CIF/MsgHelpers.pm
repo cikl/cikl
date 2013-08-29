@@ -27,6 +27,11 @@ sub msg_wrap {
 
 sub msg_wrap_queries {
     my $queries = shift;
+
+    foreach (@$queries) {
+      $_ = $_->encode();
+    }
+
     return msg_wrap($queries, MessageType::MsgType::QUERY());
 }
 
@@ -34,18 +39,22 @@ sub build_submission {
     my $iodefs = shift;
     my $guid = shift;
 
+    foreach (@$iodefs) {
+      $_ = $_->encode();
+    }
+
     my @encoded_data;
 
     $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
     $iodefs = (ref($iodefs) eq 'ARRAY') ? $iodefs : [$iodefs];
 
-    foreach my $iodef (@$iodefs){
-        push(@encoded_data, encode_base64(Compress::Snappy::compress($iodef)));
-    }
+    #foreach my $iodef (@$iodefs){
+      #push(@encoded_data, encode_base64(Compress::Snappy::compress($iodef)));
+      #}
     
     my $submission = MessageType::SubmissionType->new({
         guid    => $guid,
-        data    => \@encoded_data,
+        data    => $iodefs,
     });
 
     return $submission;
