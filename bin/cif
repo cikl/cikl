@@ -35,6 +35,7 @@ BEGIN {
 use CIF::Client;
 use Getopt::Std;
 use Data::Dumper;
+use JSON::XS;
 use CIF qw/debug/;
 
 ## TODO -- generate CIF::Format to wrap this
@@ -205,14 +206,17 @@ my $ret;
 # it already takes care of some of the heavy lifting
 # TODO -- migrate that code to libcif so we can do it here too
 if($input) {
+    # force the client to use JSON
     my @input = <STDIN>;
-    my $json = $input[0];
-    if($#input > 0){
-        # if we get \n delimited json
-        $json = '['.join(',',@input).']';   
+    my $json = '['.join(',',@input).']';   
+    my $iodefs = decode_json($json);
+    foreach (@$iodefs) {
+        $_ = Iodef::Pb::Simple->new($_);
     }
-    $ret = $cli->send_json($json);
-    print $ret."\n";
+    my ($err, $ret) = $cli->submit("everyone", $iodefs);
+    if ($ret) {
+      print encode_json($ret) . "\n";
+    }
     exit(0);
 }
 

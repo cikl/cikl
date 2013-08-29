@@ -22,7 +22,7 @@ use CIF::Msg::Feed;
 
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
-    config driver_config global_config driver apikey 
+    config global_config driver apikey 
     nolog limit guid filter_me no_maprestrictions
     table_nowarning related
 ));
@@ -43,8 +43,6 @@ sub new {
     
     $self->set_global_config(   $args->{'config'});
     $self->set_config(          $args->{'config'}->param(-block => 'client'));
-    $self->set_driver(          $self->get_config->{'driver'} || 'HTTP');
-    $self->set_driver_config(   $args->{'config'}->param(-block => 'client_'.lc($self->get_driver())));
     $self->set_apikey(          $args->{'apikey'} || $self->get_config->{'apikey'});
     
     $self->{'guid'}             = $args->{'guid'}               || $self->get_config->{'default_guid'};
@@ -66,11 +64,22 @@ sub new {
         @{$self->{'fields'}} = split(/,/,$args->{'fields'}); 
     } 
     
-    my $driver     = 'CIF::Client::Transport::'.$self->get_driver();
+    my $err = $self->_init_driver($self->get_config->{'driver'} || 'HTTP');
+    return($err) if ($err);
+
+    return (undef,$self);
+}
+
+sub _init_driver {
+    my $self = shift;
+    my $driver_name = shift;
+    my $driver_config = $self->get_global_config->param(-block => 'client_'.lc($driver_name));
+    my $driver_class     = 'CIF::Client::Transport::'.$driver_name;
     my $err;
+    my $driver;
     try {
-        $driver     = $driver->new({
-            config  => $self->get_driver_config()
+        $driver     = $driver_class->new({
+            config  => $driver_config
         });
     } catch {
         $err = shift;
@@ -81,7 +90,7 @@ sub new {
     }
     
     $self->set_driver($driver);
-    return (undef,$self);
+    return undef;
 }
 
 sub search {
@@ -91,6 +100,10 @@ sub search {
     my $filter_me   = $args->{'filter_me'} || $self->get_filter_me();
     my $nolog       = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_nolog();
     my $no_decode   = $args->{'no_decode'};
+
+    if ($no_decode) {
+        return("ERROR: no_decode is deprecated. You're going to have to deal with encoding feeds yourself!");
+    }
     
     unless($args->{'apikey'}){
         $args->{'apikey'} = $self->get_apikey();
@@ -140,9 +153,6 @@ sub search {
       return(0);
     }
     my $uuid = generate_uuid_ns($args->{'apikey'});
-    
-    # MPR TODO, caller is going to have to deal with decoded data. Sorry.
-    #return(undef,$feeds) if($no_decode);
     
     my $query_had_ips = $ip_tree->climb();
 

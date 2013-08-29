@@ -23,7 +23,7 @@ sub query {
     my $self = shift;
     my $queries = shift;
 
-    return(blessed($self) . " has not implemented the send_query() method!");
+    return(blessed($self) . " has not implemented the query() method!");
 }
 
 sub submit {
@@ -32,7 +32,7 @@ sub submit {
     my $guid = shift;
     my $iodefs = shift;
 
-    return(blessed($self) . " has not implemented the send_submission() method!");
+    return(blessed($self) . " has not implemented the submit() method!");
 }
 
 1;
