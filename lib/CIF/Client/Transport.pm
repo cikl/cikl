@@ -19,11 +19,19 @@ sub new {
     return($self);
 }
 
-sub send {
+sub send_query {
     my $self = shift;
-    my $data = shift;
+    my $queries = shift;
 
-    return(blessed($self) . " has not implemented the send() method!");
+    return(blessed($self) . " has not implemented the send_query() method!");
+}
+
+sub send_submission {
+    my $self = shift;
+    my $apikey = shift;
+    my $iodefs = shift;
+
+    return(blessed($self) . " has not implemented the send_submission() method!");
 }
 
 1;

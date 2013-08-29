@@ -9,6 +9,7 @@ use CIF qw/debug/;
 require LWP::UserAgent;
 use Try::Tiny;
 use JSON::XS;
+use CIF::MsgHelpers;
 
 our $AGENT = 'libcif/'.$CIF::VERSION.' (collectiveintel.org)';
 
@@ -47,15 +48,43 @@ sub new {
     return($self);
 }
 
-sub send {
+sub _send_msg {
     my $self = shift;
     my $data = shift;
     
-    my ($err, $ret) = $self->_send($data->encode());
+    my ($err, $resp) = $self->_send($data->encode());
 
     return $err if($err);
 
-    return ($err, MessageType->decode($ret));
+    my $msg = MessageType->decode($resp);
+
+    $err = CIF::MsgHelpers::get_msg_error($msg);
+    return $err if ($err);
+
+    return(undef, $msg);
+}
+
+sub send_query {
+    my $self = shift;
+    my $queries = shift;
+
+    my $msg = CIF::MsgHelpers::msg_wrap_queries($queries);
+    my ($err, $msg2) = $self->_send_msg($msg);
+
+    return ($err) if (defined($err));
+
+    return CIF::MsgHelpers::decode_msg_feeds($msg2);
+}
+
+sub send_submission {
+    my $self = shift;
+    my $apikey = shift;
+    my $iodefs = shift;
+
+    my $msg = CIF::MsgHelpers::msg_wrap_submission($iodefs, $apikey);
+    my ($err, $ret) = $self->_send_msg($msg);
+    return $err if ($err);
+    return (undef, $ret->get_data());
 }
 
 sub send_json {

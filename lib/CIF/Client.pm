@@ -133,109 +133,49 @@ sub search {
         push(@queries,$ret) if($ret);
     }        
         
-    my $msg = MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::QUERY(),
-        # encode it here, message type only knows about bytes
-        ## TODO -- the Query Packet should have each of these attributes (confidence, nolog, guid, limit)
-        ## query shouldn't be repated the QueryType should foreach ($args->{'query'})
-        data    => \@queries,
-    });
-    
     debug('sending query') if($::debug);
-    my ($err,$ret) = $self->send($msg);
+    my ($err,$feeds) = $self->send_query(\@queries);
     
     return $err if($err);
  
-    unless($ret->get_status() == MessageType::StatusType::SUCCESS()){
-        return('failed: '.@{$ret->get_data()}[0]) if($ret->get_status() == MessageType::StatusType::FAILED());
-        return('unauthorized') if($ret->get_status() == MessageType::StatusType::UNAUTHORIZED());
+    if ($#{$feeds} == -1) {
+      return(0);
     }
-    return(0) unless($ret->{'data'});
     my $uuid = generate_uuid_ns($args->{'apikey'});
     
-    return(undef,$ret->get_data()) if($no_decode);
+    # MPR TODO, caller is going to have to deal with decoded data. Sorry.
+    #return(undef,$feeds) if($no_decode);
+    
+    my $query_had_ips = $ip_tree->climb();
 
-    debug('decoding...') if($::debug);
-        ## TODO: finish this so feeds are inline with reg queries
+    my @ip_queries;
+    foreach my $q (@orig_queries) {
+      next unless ($q =~ /^$RE{'net'}{'IPv4'}/);
+      push(@ip_queries, $q);
+    }
+
+    debug('filtering...') if($::debug);
+    ## TODO: finish this so feeds are inline with reg queries
     ## TODO: try to base64 decode and decompress first in try { } catch;
-    foreach my $feed (@{$ret->get_data()}){
+    foreach my $feed (@{$feeds}){
         my @array;
-        my $err;
-        my $test;
-        try {
-            $test = Compress::Snappy::decompress(decode_base64($feed));
-        } catch {
-            $err = shift;
-        };
-        $feed = $test if($test);
-        $err = undef;
+        my $err = undef;
 
-        try {
-            $feed = FeedType->decode($feed);
-        } catch {
-            $err = shift;
-        };
-
-        if($err){
-            return($err);
-        }
         next unless($feed->get_data());
-        my %uuids;
+
         debug('processing: '.($#{$feed->get_data}+1).' items') if($::debug);
         foreach my $e (@{$feed->get_data()}){
-            $e = Compress::Snappy::decompress(decode_base64($e));
-            try {
-                $e = IODEFDocumentType->decode($e);
-            } catch {
-                $err = shift;
-            };
-            # we've got a feed
-            if($err && $err =~ /Unexpected end of group/){
-                if(is_uuid(@{$args->{'query'}}[0])){
-                    return('querying feeds by uuid is not yet supported');   
-                }
-                return('unknown error: '.$err);
-            }
             if($filter_me){
                 my $id = @{$e->get_Incident()}[0]->get_IncidentID->get_name();
                 # filter out my searches
                 next if($id eq $uuid);
             }
-            my $docid = @{$e->get_Incident()}[0]->get_IncidentID->get_content();
-            if($ip_tree->climb()){
-                my $addresses = iodef_addresses($e);
-                
-                # if there are no addresses, we've got nothing or hashes
-                my $found = (@$addresses) ? 0 : 1;
-                foreach my $a (@$addresses){
-                    next unless ($a->get_content =~ /^$RE{'net'}{'IPv4'}/);               
-                    # if we have a match great
-                    # if we don't we need to test and see if this address
-                    # contains our original query
-                    unless($ip_tree->match_string($a->get_content())){
-                        my $ip_tree2 = Net::Patricia->new();
-                        $ip_tree2->add_string($a->get_content());
-                        foreach (@orig_queries){
-                            ## TODO -- work-around for uuid searches
-                            unless(/^$RE{'net'}{'IPv4'}/){ $found = 1; last; }
-                            if($ip_tree2->match_string($_)){
-                                $found = 1;
-                                last;
-                            }
-                        }
-                    } else {
-                        $found = 1;
-                        last;
-                    }
-                }
-                next unless($found);
+            if($query_had_ips){
+                next unless(ip_in_scope($uuid, $ip_tree, $e, \@ip_queries));
             }
-            unless($uuids{$docid}){
-                push(@array,$e);
-                $uuids{$docid} = 1;
-            }
+            push(@array,$e);
         }
+
         if($#array > -1){
             debug('final results: '.($#array+1)) if($::debug);
             $feed->set_data(\@array);
@@ -245,7 +185,41 @@ sub search {
     }
     
     debug('done processing');
-    return(undef,$ret->get_data());
+    return(undef,$feeds);
+}
+
+sub ip_in_scope {
+    my $uuid = shift;
+    my $ip_tree = shift;
+    my $iodef = shift;
+    my $ip_queries = shift;
+
+    my $addresses = iodef_addresses($iodef);
+
+    # if there are no addresses, we've got nothing or hashes
+    unless (@$addresses) {
+      return 1;
+    }
+
+    foreach my $a (@$addresses) {
+      next unless ($a->get_content =~ /^$RE{'net'}{'IPv4'}/);               
+      # if we have a match great
+      # if we don't we need to test and see if this address
+      # contains our original query
+      if ($ip_tree->match_string($a->get_content())){
+        return 1;
+      } 
+
+      my $ip_tree2 = Net::Patricia->new();
+      $ip_tree2->add_string($a->get_content());
+      foreach my $ip (@$ip_queries){
+        if($ip_tree2->match_string($ip)){
+          return 1;
+        }
+      }
+    }
+
+    return 1;
 }
 
 sub send {
@@ -253,6 +227,21 @@ sub send {
     my $msg = shift;
     
     return $self->get_driver->send($msg);
+}
+
+sub send_query {
+    my $self = shift;
+    my $queries = shift;
+    
+    return $self->get_driver->send_query($queries);
+}
+
+sub send_submission {
+    my $self = shift;
+    my $apikey = shift;
+    my $data = shift;
+    
+    return $self->get_driver->send_submission($apikey, $data);
 }
 
 sub send_json {
@@ -294,25 +283,8 @@ sub submit {
     my $self = shift;
     my $data = shift;
     
-    my $msg = MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::SUBMISSION(),
-        apikey  => $self->get_apikey(),
-        # encode it here, message type only knows about bytes
-        ## TODO -- the Query Packet should have each of these attributes (confidence, nolog, guid, limit)
-        ## query shouldn't be repated the QueryType should foreach ($args->{'query'})
-        data    => $data,
-    });
-    
-    my ($err,$ret) = $self->send($msg->encode());
+    my ($err,$ret) = $self->send_submission($self->get_apikey(), $data);
     return('ERROR: server failure, contact system administrator: '.$err) unless($ret);
-    
-    $ret = MessageType->decode($ret);
-    
-    unless($ret->get_status() == MessageType::StatusType::SUCCESS()){
-        return('ERROR: '.@{$ret->get_data()}[0]) if($ret->get_status() == MessageType::StatusType::FAILED());
-        return('ERROR: unauthorized') if($ret->get_status() == MessageType::StatusType::UNAUTHORIZED());
-    }
     
     return (undef,$ret);
 }    
