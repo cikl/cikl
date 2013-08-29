@@ -20,7 +20,8 @@ sub _send_msg {
     my $self = shift;
     my $data = shift;
 
-    my ($err, $resp) = $self->_http_post($data->encode());
+    my ($err, $resp) = $self->_http_post($data->encode(), 
+      {'Content-Type' => 'application/x-protobuf'});
 
     return $err if($err);
 

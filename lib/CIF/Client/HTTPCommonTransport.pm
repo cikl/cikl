@@ -60,6 +60,10 @@ sub _init_useragent {
 sub _http_post {
     my $self = shift;
     my $data = shift;
+    my $headers = shift || {};
+
+    $headers->{'Content'} = $data;
+
     return unless($data);
     
     my ($err,$ret);
@@ -68,7 +72,7 @@ sub _http_post {
     do {
         debug('posting data...') if($::debug);
         try {
-            $ret = $self->{'ua'}->post($self->get_config->{'host'},Content => $data);
+            $ret = $self->{'ua'}->post($self->get_config->{'host'},%$headers);
         } catch {
             $err = shift;
         };
