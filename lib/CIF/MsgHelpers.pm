@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Try::Tiny;
-use MIME::Base64;
-use Compress::Snappy;
 use CIF qw(generate_uuid_ns is_uuid debug);
 
 our @EXPORT = qw/msg_wrap_queries/;
@@ -48,10 +46,6 @@ sub build_submission {
     $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
     $iodefs = (ref($iodefs) eq 'ARRAY') ? $iodefs : [$iodefs];
 
-    #foreach my $iodef (@$iodefs){
-      #push(@encoded_data, encode_base64(Compress::Snappy::compress($iodef)));
-      #}
-    
     my $submission = MessageType::SubmissionType->new({
         guid    => $guid,
         data    => $iodefs,
@@ -83,7 +77,6 @@ sub decode_feed_data {
 
     foreach my $e (@{$feed->get_data()}){
       my $err = undef;
-      $e = Compress::Snappy::decompress(decode_base64($e));
       try {
         $e = IODEFDocumentType->decode($e);
       } catch {
