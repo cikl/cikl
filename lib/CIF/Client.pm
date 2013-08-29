@@ -8,8 +8,6 @@ use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
 use Config::Simple;
 use Digest::SHA qw/sha1_hex/;
-use Compress::Snappy;
-use MIME::Base64;
 use Iodef::Pb::Simple qw/iodef_addresses iodef_confidence iodef_impacts/;
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
@@ -134,7 +132,7 @@ sub search {
     }        
         
     debug('sending query') if($::debug);
-    my ($err,$feeds) = $self->send_query(\@queries);
+    my ($err,$feeds) = $self->get_driver->query(\@queries);
     
     return $err if($err);
  
@@ -229,21 +227,6 @@ sub send {
     return $self->get_driver->send($msg);
 }
 
-sub send_query {
-    my $self = shift;
-    my $queries = shift;
-    
-    return $self->get_driver->send_query($queries);
-}
-
-sub send_submission {
-    my $self = shift;
-    my $apikey = shift;
-    my $data = shift;
-    
-    return $self->get_driver->send_submission($apikey, $data);
-}
-
 sub send_json {
     my $self = shift;
     my $msg = shift;
@@ -268,47 +251,18 @@ sub send_keypairs {
         unless(exists($_->{'id'})){
             $_->{'id'} = generate_uuid_random();
         }
-        $_ = Iodef::Pb::Simple->new($_)->encode();
+        $_ = Iodef::Pb::Simple->new($_);
     }
  
-    my $ret = $self->new_submission({
-        guid    => $guid,
-        data    => $data,
-    });
-    return $self->submit($ret);
+    return $self->submit($guid, $data);
 }
     
-
 sub submit {
     my $self = shift;
+    my $guid = shift;
     my $data = shift;
-    
-    my ($err,$ret) = $self->send_submission($self->get_apikey(), $data);
-    return('ERROR: server failure, contact system administrator: '.$err) unless($ret);
-    
-    return (undef,$ret);
+    return $self->get_driver->submit($self->get_apikey(), $guid, $data);
 }    
-
-sub new_submission {
-    my $self = shift;
-    my $args = shift;
-    
-    my $guid = $args->{'guid'};
-    $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
-    
-    my $data = (ref($args->{'data'}) eq 'ARRAY') ? $args->{'data'} : [$args->{'data'}];
-
-    foreach (@$data){
-        $_ = encode_base64(Compress::Snappy::compress($_));
-    }
-    
-    my $msg = MessageType::SubmissionType->new({
-        guid    => $guid,
-        data    => $data,
-    });
-
-    return $msg->encode();
-}
 
 # confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)
 #

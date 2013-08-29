@@ -64,7 +64,7 @@ sub _send_msg {
     return(undef, $msg);
 }
 
-sub send_query {
+sub query {
     my $self = shift;
     my $queries = shift;
 
@@ -76,12 +76,13 @@ sub send_query {
     return CIF::MsgHelpers::decode_msg_feeds($msg2);
 }
 
-sub send_submission {
+sub submit {
     my $self = shift;
     my $apikey = shift;
+    my $guid = shift;
     my $iodefs = shift;
 
-    my $msg = CIF::MsgHelpers::msg_wrap_submission($iodefs, $apikey);
+    my $msg = CIF::MsgHelpers::build_submission_msg($apikey, $guid, $iodefs);
     my ($err, $ret) = $self->_send_msg($msg);
     return $err if ($err);
     return (undef, $ret->get_data());

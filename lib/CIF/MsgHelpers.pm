@@ -6,6 +6,7 @@ use warnings;
 use Try::Tiny;
 use MIME::Base64;
 use Compress::Snappy;
+use CIF qw(generate_uuid_ns is_uuid debug);
 
 our @EXPORT = qw/msg_wrap_queries/;
 
@@ -29,11 +30,40 @@ sub msg_wrap_queries {
     return msg_wrap($queries, MessageType::MsgType::QUERY());
 }
 
+sub build_submission {
+    my $iodefs = shift;
+    my $guid = shift;
+
+    my @encoded_data;
+
+    $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
+    $iodefs = (ref($iodefs) eq 'ARRAY') ? $iodefs : [$iodefs];
+
+    foreach my $iodef (@$iodefs){
+        push(@encoded_data, encode_base64(Compress::Snappy::compress($iodef)));
+    }
+    
+    my $submission = MessageType::SubmissionType->new({
+        guid    => $guid,
+        data    => \@encoded_data,
+    });
+
+    return $submission;
+}
+
 sub msg_wrap_submission {
     my $data = shift;
     my $apikey = shift;
 
     return msg_wrap($data, MessageType::MsgType::SUBMISSION(), $apikey);
+}
+
+sub build_submission_msg {
+    my $apikey = shift;
+    my $guid = shift;
+    my $iodefs = shift;
+
+    return msg_wrap_submission(build_submission($iodefs, $guid)->encode(), $apikey);
 }
 
 # Decodes and deduplicates feed response.
