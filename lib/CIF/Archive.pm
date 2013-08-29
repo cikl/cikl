@@ -140,11 +140,7 @@ sub search {
     foreach (@recs){
         # protect against orphans
         next unless($_->{'data'});
-        if($data->{'decode'}){
-            push(@rr,Compress::Snappy::decompress(decode_base64($_->{'data'})));
-        } else {
-            push(@rr,$_->{'data'});
-        }
+        push(@rr,Compress::Snappy::decompress(decode_base64($_->{'data'})));
     }
     return(undef,\@rr);
 }
