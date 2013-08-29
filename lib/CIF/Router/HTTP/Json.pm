@@ -151,11 +151,7 @@ sub handler {
                 
             }
 
-            $ret = $cli->new_submission({
-                guid    => $guid,
-                data    => $buffer,
-            });
-            ($err,$ret) = $cli->submit($ret);
+            ($err,$ret) = $cli->submit($guid, $buffer);
             
             if($err){
                 debug($err);
