@@ -34,12 +34,12 @@ sub insert {
     my $data        = shift;
     my $isUpdate    = shift;
         
-    my $msg = Compress::Snappy::decompress(decode_base64($data->{'data'}));
+    my $msg; 
 
     if($data->{'format'} && $data->{'format'} eq 'feed'){
-        $msg = FeedType->decode($msg);
+        $msg = FeedType->decode($data->{'data'});
     } else {
-        $msg = IODEFDocumentType->decode($msg);
+        $msg = IODEFDocumentType->decode($data->{'data'});
         $data->{'uuid'}         = @{$msg->get_Incident}[0]->get_IncidentID->get_content();
         $data->{'reporttime'}   = @{$msg->get_Incident}[0]->get_ReportTime();
         $data->{'guid'}         = iodef_guid(@{$msg->get_Incident}[0]) || $data->{'guid'};
@@ -52,13 +52,14 @@ sub insert {
     $data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
     $data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
    
+    my $encoded = encode_base64(Compress::Snappy::compress($msg->encode()));
     my ($err,$id);
     try {
         $id = $class->SUPER::insert({
             uuid        => $data->{'uuid'},
             guid        => $data->{'guid'},
             format      => $CIF::VERSION,
-            data        => $data->{'data'},
+            data        => $encoded,
             created     => $data->{'created'},
             reporttime  => $data->{'reporttime'},
         });
