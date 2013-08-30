@@ -34,12 +34,16 @@ sub insert {
     my $data        = shift;
     my $isUpdate    = shift;
         
-    my $msg; 
+    my $msg = $data->{'data'}; 
 
     if($data->{'format'} && $data->{'format'} eq 'feed'){
-        $msg = FeedType->decode($data->{'data'});
+        unless (UNIVERSAL::isa($msg, 'FeedType')) {
+          $msg = FeedType->decode($msg);
+        }
     } else {
-        $msg = IODEFDocumentType->decode($data->{'data'});
+        unless (UNIVERSAL::isa($msg, 'IODEFDocumentType')) {
+          $msg = IODEFDocumentType->decode($msg);
+        }
         $data->{'uuid'}         = @{$msg->get_Incident}[0]->get_IncidentID->get_content();
         $data->{'reporttime'}   = @{$msg->get_Incident}[0]->get_ReportTime();
         $data->{'guid'}         = iodef_guid(@{$msg->get_Incident}[0]) || $data->{'guid'};
@@ -228,7 +232,7 @@ sub log_search {
     ($err,$id) = $class->insert({
         uuid        => $uuid,
         guid        => $guid,
-        data        => encode_base64(Compress::Snappy::compress($doc->encode())),
+        data        => $doc,
         created     => $dt,
         feeds       => $data->{'feeds'},
         datatypes   => $data->{'datatypes'},

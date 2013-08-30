@@ -224,7 +224,7 @@ sub process {
 
             foreach my $f (@$ret){
                 my ($err,$id) = CIF::Archive->insert({
-                    data        => encode_base64(Compress::Snappy::compress($f->encode())),
+                    data        => $f,
                     guid        => $f->get_guid(),
                     created     => $f->get_ReportTime(),
                     reporttime  => $f->get_ReportTime(),
