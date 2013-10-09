@@ -1,15 +1,15 @@
 [submodule "cif-router"]
 	path = cif-router
-	url = https://github.com/collectiveintel/cif-router.git
+	url = https://github.com/justfalter/cif-router.git
 [submodule "cif-smrt"]
 	path = cif-smrt
-	url = https://github.com/collectiveintel/cif-smrt.git
+	url = https://github.com/justfalter/cif-smrt.git
 [submodule "libcif"]
 	path = libcif
-	url = https://github.com/collectiveintel/libcif.git
+	url = https://github.com/justfalter/libcif.git
 [submodule "libcif-dbi"]
 	path = libcif-dbi
-	url = https://github.com/collectiveintel/libcif-dbi.git
+	url = https://github.com/justfalter/libcif-dbi.git
 [submodule "libcif-dbi-cc"]
 	path = libcif-dbi-cc
 	url = https://github.com/collectiveintel/libcif-dbi-cc.git
