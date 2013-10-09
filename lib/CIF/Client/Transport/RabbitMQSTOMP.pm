@@ -34,7 +34,6 @@ sub new {
     my $uuid = $stomp->uuid();
 
     my $reply_queue = "/temp-queue/$uuid";
-    warn "Reply queue: ", $reply_queue, "\n";
 
     $self->{reply_queue} = $reply_queue;
 
@@ -48,7 +47,6 @@ sub _queue_data {
     my $headers = shift || {};
 
     $headers->{destination} = $dest;
-    print Dumper $headers;
     my $frameopts = {
       body => $body
     };
