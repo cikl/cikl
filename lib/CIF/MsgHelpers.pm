@@ -11,16 +11,30 @@ our @EXPORT = qw/msg_wrap_queries/;
 sub msg_wrap {
     my $data = shift;
     my $type = shift;
-    my $apikey = shift; # effectively optional.
-
-    my $msg = MessageType->new({
+    my $opts = shift || {}; # effectively optional.
+    my $params = {
         version => $CIF::VERSION,
         type    => $type,
-        data    => $data,
-        apikey  => $apikey
-    });
+        data    => $data
+    };
+    if (defined($opts->{apikey})) {
+      $params->{'apikey'} = $opts->{apikey};
+    }
+    if (defined($opts->{status})) {
+      $params->{'status'} = $opts->{status};
+    }
+
+    my $msg = MessageType->new($params);
 
     return $msg;
+}
+
+sub msg_wrap_reply {
+    my $data = shift;
+
+    return msg_wrap($data, MessageType::MsgType::REPLY(), 
+      {status => MessageType::StatusType::SUCCESS()}
+    );
 }
 
 sub msg_wrap_queries {
@@ -58,7 +72,7 @@ sub msg_wrap_submission {
     my $data = shift;
     my $apikey = shift;
 
-    return msg_wrap($data, MessageType::MsgType::SUBMISSION(), $apikey);
+    return msg_wrap($data, MessageType::MsgType::SUBMISSION(), {apikey => $apikey});
 }
 
 sub build_submission_msg {
@@ -136,3 +150,14 @@ sub get_msg_error {
     return undef;
 }
 
+sub get_uuids {
+  my $iodefs = shift;
+  my @uuids; 
+  foreach my $iodef (@$iodefs) {
+    my $i = ${$iodef->get_Incident()}[0];
+    my $uuid = Iodef::Pb::Simple::iodef_uuid($i);
+    push(@uuids, $uuid);
+  }
+
+  return \@uuids;
+}
