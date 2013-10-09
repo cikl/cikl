@@ -55,15 +55,12 @@ __PACKAGE__->mk_accessors(qw(
     config feeds_config feeds threads 
     entries defaults feed rules load_full goback 
     client wait_for_server name instance 
-    batch_control client_config postprocess apikey
+    batch_control client_config apikey
     severity_map proxy
 ));
 
 my @preprocessors = __PACKAGE__->plugins();
 @preprocessors = grep(/Preprocessor::[0-9a-zA-Z_]+$/,@preprocessors);
-
-our @postprocessors = __PACKAGE__->plugins();
-@postprocessors = grep(/Postprocessor::[0-9a-zA-Z_]+$/,@postprocessors);
 
 sub new {
     my $class = shift;
@@ -95,16 +92,6 @@ sub init {
     $self->set_apikey(          $args->{'apikey'}           || $self->get_config->{'apikey'}            || return('missing apikey'));
     $self->set_proxy(           $args->{'proxy'}            || $self->get_config->{'proxy'});
    
-    ($err,$ret) = $self->init_postprocessors($args);
-    return($err) if($err);
-    
-    if($self->get_postprocess()){
-        debug('postprocessing enabled...') if($::debug);
-        debug('processors: '.join(',',@{$self->get_postprocess()})) if($::debug > 1);
-    } else {
-        debug('postprocessing disabled...') if($::debug);
-    }
-    
     $self->set_goback(time() - ($self->get_goback() * 84600));
     
     if($::debug){
@@ -118,29 +105,6 @@ sub init {
     
     $self->init_feeds($args);
     return($err,$ret) if($err);
-    return(undef,1);
-}
-
-sub init_postprocessors {
-    my $self = shift;
-    my $args = shift;
-    
-    my $things = $args->{'postprocess'} || $self->get_config->{'postprocess'};
-    return unless($things);
-    
-    if($things eq '1'){
-        $self->set_postprocess(\@postprocessors);
-    } else {
-        my $enabled;
-        foreach (@$things){
-            foreach my $p (@postprocessors){
-                if(lc($p) =~ /::$_$/){
-                    push(@$enabled,$p);
-                }               
-            }
-        }
-        $self->set_postprocess($enabled);
-    }
     return(undef,1);
 }
 
@@ -690,30 +654,6 @@ sub worker_routine {
                 debug('ADDING:'.($#{$iodef}));
                 $workers_sum->send('ADDED:'.($#{$iodef}));
                 nanosleep NSECS_PER_MSEC;
-            }
-            #my @results;
-            if($self->get_postprocess()){
-                foreach my $p (@{$self->get_postprocess}){
-                    #my ($err,$array);
-                    my $err;
-                    foreach my $i (@$iodef){
-                        try {
-                            my $tmp_results = $p->process($self,$i);
-                            foreach (@$tmp_results) {
-                                $_ = IODEFDocumentType->new({ lang => 'EN', Incident => [$_] });
-                                $sender->send($_->encode());
-                                $workers_sum->send('ADDED:1');
-                            }
-
-                        } catch {
-                            $err = shift;
-                        };
-
-                        
-                        debug($err) if($::debug && $err);
-                    }
-                };
-
             }
             
             debug('sending message...') if($::debug && $::debug > 2);

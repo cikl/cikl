@@ -41,14 +41,13 @@ use CIF qw/debug/;
 use Sys::MemInfo qw(totalmem);
 
 my %opts;
-getopts('g:z:hNA:s:T:t:dC:f:r:v:Pp:',\%opts);
+getopts('g:hNA:s:T:t:dC:f:r:v:p:',\%opts);
 our $debug = $opts{'d'} || 0;
 $debug = $opts{'v'} if($opts{'v'});
 
 my $config      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
 my $rules       = $opts{'r'};
 my $feed        = $opts{'f'};
-my $postprocess = $opts{'P'} || $opts{'p'} || 0;
 
 my $rules_dir    = '/opt/cif/etc';
 my $throttle    = $opts{'T'} || 'medium';
@@ -72,47 +71,6 @@ if(!$threads){
     $threads = CIF::Smrt::throttle($throttle);
 }
 
-# this is for the doc
-my @p1 = @CIF::Smrt::postprocessors;
-foreach (@p1){
-    $_ =~ s/CIF::Smrt::Plugin::Postprocessor:://;
-    $_ = lc($_);
-}
-my $pp = join(',',@p1);
-# end doc
-
-if($postprocess){
-    if($postprocess eq 1){
-        $postprocess = join(',',@p1);
-    }
-    my @stuff = split(/,/,$postprocess);
-    # check validity of the pp's
-    foreach (@stuff){
-        my $found = 0;
-        foreach my $p (@p1){
-            next unless(lc($_) eq $p);
-            $found = 1;
-        }
-        unless($found){
-            print 'unknown postprocessor: '.$_."\n";
-            exit(-1);   
-        }
-    }
-    # if we want to disable certain postprocessors
-    if($disable_p){
-        my @tmp;
-        foreach my $d (split(/,/,$disable_p)){
-            foreach my $s (@stuff){
-                next if(lc($s) eq lc($d));
-                push(@tmp,$s);
-            }
-        }
-        @stuff = @tmp;
-    }
-    $postprocess = \@stuff;
-}
-
-# this needs to go after the postprocessor code to fill in the blanks
 die usage() if($opts{'h'} || !$rules);
 
 sub usage {
@@ -128,13 +86,6 @@ Usage: perl $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f malwaredomainlist -T 
 Advanced:
     -g  --go-back:          change the default 'goback' behavior
                             (how far back in-days to process a given feed, default: $goback)
-    -P  --post-processors:  resolve domains, resolve bgp, resolve urls, etc
-                            (default: $postprocess)
-                            
-    -p  --post-processors:  only run specific postprocessors ($pp)
-                            (default: $postprocess)
-                            
-    -z  --disable:          enable all postprocessors, disable a set of specific ones (csv list)
                             
     -T  --throttle:         throttle (how man threads to use, default: $throttle)
                             low:    threads = number of cores * 0.5
@@ -148,10 +99,10 @@ Advanced:
                             (default: $admin)
                         
 Examples:
-    $0 -C /home/cif/.cif -r $rules_dir/spyeyetracker.cfg -f binaries -T medium -P
-    $0 -C /home/cif/.cif -r $rules_dir/malwaredomains.cfg -f domains -T high -d -P
+    $0 -C /home/cif/.cif -r $rules_dir/spyeyetracker.cfg -f binaries -T medium 
+    $0 -C /home/cif/.cif -r $rules_dir/malwaredomains.cfg -f domains -T high -d
     $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f spamhaus_drop -d -p ip,malware
-    $0 -r $rules_dir/misc.cfg -f spamhaus_drop -d -P -z ip,malware
+    $0 -r $rules_dir/misc.cfg -f spamhaus_drop -d 
 EOF
 }
 
@@ -161,7 +112,6 @@ my ($err,$smrt) = CIF::Smrt->new({
     threads         => $threads,
     feed            => $feed,
     rules           => $rules,
-    postprocess     => $postprocess,
     goback          => $goback,
 });
 

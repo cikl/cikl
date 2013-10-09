@@ -38,7 +38,7 @@ use MIME::Lite;
 use Try::Tiny;
 
 my %opts;
-getopts('z:b:A:Nadt:T:C:c:p:c:hL:S:PF:v:',\%opts);
+getopts('b:A:Nadt:T:C:c:p:c:hL:S:F:v:',\%opts);
 my $period          = $opts{'p'} || 'daily';
 my $throttle        = $opts{'T'} || 'medium';
 my $threads         = $opts{'t'};
@@ -48,11 +48,9 @@ my $debug           = $opts{'d'};
 my $debug_level     = $opts{'v'};
 my $mutex           = $opts{'L'} || '/tmp/cif_crontool.lock.'.$period;
 my $start_at        = $opts{'S'};
-my $postprocess     = $opts{'P'};
 my $dir             = $opts{'F'} || '/opt/cif';
 my $admin           = $opts{'A'} || 'root';
 my $fail_closed     = $opts{'N'} || 0;
-my $d_postprocessor = $opts{'z'};
 
 if(! -e $cron_tool){
     if(-e './bin/'.$cron_tool){
@@ -144,7 +142,6 @@ Common:
                     high:   threads = number of cores * 8
 
 Advanced:
-    -P  --post-process: enable the post-processor
     -F  --FeedDir:      what directory $0 should look at for feed configs (eg: /opt/cif/)
                         if you've installed to a non-standard directory
     -N  --fail-closed:  error out if one of the jobs fail, mail the -A admin
@@ -155,7 +152,7 @@ Advanced:
 Examples:
     $0 -T high -f -d
     $0 -T medium -p daily
-    $0 -p daily -P -A root -N
+    $0 -p daily -A root -N
 
 Current Feeds:
 $f
@@ -189,10 +186,6 @@ foreach(@crons){
     if($fail_closed){
         $cmd .= ' -A '.$admin if($admin);
         $cmd .= ' -N' if($fail_closed);
-    }
-    $cmd .= ' -P' if($postprocess);
-    if($d_postprocessor){
-        $cmd .= ' -z '.$d_postprocessor;
     }
     
     warn $cmd if($debug);
