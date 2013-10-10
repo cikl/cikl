@@ -9,19 +9,6 @@ use threads;
 our $VERSION = '0.99_03';
 $VERSION = eval $VERSION;  # see L<perlmodstyle>
 
-# we're using ipc instead of inproc cause perl sucks
-# at sharing context's with certain types of sockets (ZMQ_PUSH in particular)
-use constant WORKER_CONNECTION      => 'ipc://workers';
-# this is used to return back the total sum of recs processed by the analytics
-# i'm sure there's a better way to do this
-use constant WORKER_SUM_CONNECTION  => 'ipc://workers_sum';
-use constant RETURN_CONNECTION      => 'ipc://return';
-use constant SENDER_CONNECTION      => 'ipc://sender';
-use constant CTRL_CONNECTION        => 'ipc://ctrl';
-
-# for figuring out throttle
-use constant DEFAULT_THROTTLE_FACTOR => 4;
-
 # default severity mapping
 use constant DEFAULT_SEVERITY_MAP => {
     botnet      => 'high',
@@ -41,14 +28,6 @@ use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
 
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug normalize_timestamp/;
-
-use Time::HiRes qw/nanosleep/;
-use ZeroMQ qw/:all/;
-
-# the lower this is, the higher the chance of 
-# threading collisions resulting in a seg fault.
-# the higher the thread count, the higher this number needs to be
-use constant NSECS_PER_MSEC     => 1_000_000;
 
 __PACKAGE__->follow_best_practice;
 __PACKAGE__->mk_accessors(qw(
@@ -85,7 +64,6 @@ sub init {
     ($err,$ret) = $self->init_rules($args);
     return($err) if($err);
 
-    $self->set_threads(         $args->{'threads'}          || $self->get_config->{'threads'}           || 1);
     $self->set_goback(          $args->{'goback'}           || $self->get_config->{'goback'}            || 3);
     $self->set_wait_for_server( $args->{'wait_for_server'}  || $self->get_config->{'wait_for_server'}   || 0);
     $self->set_batch_control(   $args->{'batch_control'}    || $self->get_config->{'batch_control'}     || 2500); # arbitrary
@@ -104,6 +82,13 @@ sub init {
     $self->set_instance(    $args->{'instance'} || $self->get_config->{'instance'}  || 'localhost');
     
     $self->init_feeds($args);
+
+    my ($err2,$client) = CIF::Client->new({
+        config  => $self->get_client_config(),
+        apikey  => $self->get_apikey(),
+    });
+    $self->set_client($client);
+
     return($err,$ret) if($err);
     return(undef,1);
 }
@@ -452,363 +437,45 @@ sub process {
     my $self = shift;
     my $args = shift;
     
-    # do this first so the threads don't copy the recs into their mem
-    debug('setting up zmq interfaces...') if($::debug);
-   
-    my $context = ZeroMQ::Context->new();
-    my $workers = $context->socket(ZMQ_PUSH);
-    $workers->bind(WORKER_CONNECTION());
-    
-    my $ctrl = $context->socket(ZMQ_PUB);
-    $ctrl->bind(CTRL_CONNECTION());
-    
-    # feature of zmq, pub/sub's need a warm up msg
-    debug('sending ctrl warm-up msg...');
-    $ctrl->send('WARMING_UP');
-    
-    my $return = $context->socket(ZMQ_PULL);
-    $return->bind(RETURN_CONNECTION());
-    
-    my $workers_sum = $context->socket(ZMQ_PULL);
-    $workers_sum->bind(WORKER_SUM_CONNECTION());
-    
-    # this needs to be started first
-    debug('starting sender thread...');
-    threads->create('sender_routine',$self)->detach();
-    # thread/zmq safety requirement
-    # if the workers start too fast, this gets messed up, give it a 'tick' head-start
-    # if we still see a race condition, send a warmup message to the sender either here
-    # or through the workers as a 'checkin'
-    nanosleep NSECS_PER_MSEC;
-    
-    ## TODO -- req/reply checkins?
-    debug('creating '.$self->get_threads().' worker threads...');
-    for (1 ... $self->get_threads()) {
-        threads->create('worker_routine', $self)->detach();
-    }
-       
-    debug('done...') if($::debug);
     
     debug('running preprocessor routine...') if($::debug);
-    ## TODO -- figure out if this really needs to be threaded out or not
-    # there are implications with how we return errors
-    #my ($err,$array) = threads->create('preprocess_routine',$self)->join();
     my ($err,$array) = $self->preprocess_routine();
     return($err) if($err);
 
     return (undef,'no records') unless($#{$array} > -1);
-    
-    my $master_count = ($#{$array} + 1);
-    debug('processing: '.$master_count.' records...');
 
-    debug('master count: '.$master_count);
+    my @stuff;
 
-    ## TODO -- batch this out a little
-    debug('sending to workers...') if($::debug);
-    $workers->send_as(json => $_) foreach(@$array);
-    
-    my $poller = ZeroMQ::Poller->new(
-        {
-            name    => 'workers_sum',
-            socket  => $workers_sum,
-            events  => ZMQ_POLLIN,
-        },
-        {
-            name    => 'return',
-            socket  => $return,
-            events  => ZMQ_POLLIN,
-        },
-    );
-    
-    my $done = 0;
-    my $total_recs = $master_count;
-    my $sent_recs = 0;
-    my $msg;
-    debug('starting with '.$master_count.' recs...');
-    do {
-        debug('waiting on message...') if($::debug && $::debug > 1);
-        
-        debug('polling...') if($::debug > 5);
-        $poller->poll();
-        debug('found msg') if($::debug && $::debug > 1);
-        if($poller->has_event('workers_sum')){
-            $msg = $workers_sum->recv()->data();
-            for($msg){
-                if(/^COMPLETED:(\d+)$/){
-                    $master_count -= $1; 
-                    last;
-                }
-                if(/^ADDED:(\d+)$/){
-                    $total_recs += $1;
-                    last;
-                }
-            }
-            $msg = undef;
-        }
-        
-        ## TODO -- should this be after the return check?
-        debug('master count: '.$master_count) if($::debug && $::debug > 1);  
-        if($master_count == 0){
-            debug('sending total: '.$total_recs) if($::debug && $::debug > 1);
-            $ctrl->send('TOTAL:'.$total_recs);
-            $ctrl->send('WRK_DONE');
-        }
-        # waiting for sender
-        if($poller->has_event('return')){
-            debug('return msg received') if($::debug && $::debug > 1);
-            my $resp = $return->recv_as('json');
-            if($resp->{'err'}){
-                $err = $resp->{'err'};
-                $sent_recs = -1;
-            } else {
-                # size of the array returned +1
-                $sent_recs += ($#{$resp->{'data'}} + 1);
-            }
-            $msg = undef;
-        }
-        nanosleep NSECS_PER_MSEC;
-        # total_recs is based on 0 ... X not -1 ... X
-        debug('sent recs: '.$sent_recs) if($::debug && $::debug > 1);
-        debug('total recs: '.$total_recs) if($::debug && $::debug > 1);
-    } while($sent_recs != -1 && $sent_recs < $total_recs);
-    
-    debug('sent recs: '.$sent_recs);
-
-    $ctrl->send('WRK_DONE');
-    
-    $workers->close();
-    $workers_sum->close();
-    $ctrl->close();
-    $return->close();
-    $context->term();
-    
-    return $err unless($sent_recs > -1);
+    foreach my $data (@$array) {
+      my $iodefs = generate_iodef($data);
+      foreach my $iodef (@$iodefs) {
+        push (@stuff, $iodef);
+      }
+    }
+    $self->submit(\@stuff);
     return(undef,1);
 }
 
-sub worker_routine {
-    my $self = shift;
-   
-    require Iodef::Pb::Simple;
-    my $context = ZeroMQ::Context->new();
-    
-    debug('starting worker: '.threads->tid()) if($::debug > 1);
-    
-    my $receiver = $context->socket(ZMQ_PULL);
-    $receiver->connect(WORKER_CONNECTION());
-    
-    my $sender = $context->socket(ZMQ_PUSH);
-    $sender->connect(SENDER_CONNECTION());
-    
-    my $ctrl = $context->socket(ZMQ_SUB);
-    $ctrl->setsockopt(ZMQ_SUBSCRIBE,''); 
-    $ctrl->connect(CTRL_CONNECTION());
-    
-    my $workers_sum = $context->socket(ZMQ_PUSH);
-    $workers_sum->connect(WORKER_SUM_CONNECTION());
-    
-     my $poller = ZeroMQ::Poller->new(
-        {
-            name    => 'worker',
-            socket  => $receiver,
-            events  => ZMQ_POLLIN,
-        },
-        {
-            name    => 'ctrl',
-            socket  => $ctrl,
-            events  => ZMQ_POLLIN,
-        },
-    ); 
-       
-    my $done = 0;
-    my $recs = 0;
-    my (@results);
-    while(!$done){
-        debug('polling...') if($::debug > 5);
-        $poller->poll();
-        debug('checking control...') if($::debug > 5);
-        if($poller->has_event('ctrl')){
-            my $msg = $ctrl->recv()->data();
-            debug('ctrl sig received: '.$msg) if($::debug > 5 && $msg eq 'WRK_DONE');
-            $done = 1 if($msg eq 'WRK_DONE');
-        }
-        debug('checking event...') if($::debug > 4);
-        if($poller->has_event('worker')){
-            debug('receiving event...') if($::debug > 4);
-            my $msg = $receiver->recv_as('json');
-            debug('processing message...') if($::debug > 4);
-            
-            debug('generating uuid...') if($::debug > 4);
-            $msg->{'id'} = generate_uuid_random();
-            
-            if($::debug > 1){
-                my $thing = $msg->{'address'} || $msg->{'malware_md5'} || $msg->{'malware_sha1'} || 'NA -- SOMETHING BROKEN IN THE FEED CONFIG';
-                debug('uuid: '.$msg->{'id'}.' - '.$msg->{'reporttime'}.' - '.$thing.' - '.$msg->{'assessment'}.' - '.$msg->{'description'});
-            }
-    
-            debug('generating iodef...') if($::debug > 3);
+sub generate_iodef {
+    my $msg = shift;
 
-            my $iodef = Iodef::Pb::Simple->new($msg);
-            $iodef = [ $iodef ] unless(ref($iodef) eq 'ARRAY');
-            if($#{$iodef} > 0){
-                debug('ADDING:'.($#{$iodef}));
-                $workers_sum->send('ADDED:'.($#{$iodef}));
-                nanosleep NSECS_PER_MSEC;
-            }
-            
-            debug('sending message...') if($::debug && $::debug > 2);
-            foreach (@$iodef) {
-              $sender->send($_->encode());
-            }
-            debug('message sent...') if($::debug && $::debug > 2);
-
-            $workers_sum->send('COMPLETED:1');
-            
-            # clear the global var
-            $#results = -1;
-        }
-        # thread/zmq safety requirement
-        nanosleep NSECS_PER_MSEC;
+    if($::debug > 1){
+      my $thing = $msg->{'address'} || $msg->{'malware_md5'} || $msg->{'malware_sha1'} || 'NA -- SOMETHING BROKEN IN THE FEED CONFIG';
+      debug('uuid: '.$msg->{'id'}.' - '.$msg->{'reporttime'}.' - '.$thing.' - '.$msg->{'assessment'}.' - '.$msg->{'description'});
     }
-    debug('done...') if($::debug > 2);
-    $sender->close();
-    $ctrl->close();
-    $receiver->close();
-    $workers_sum->close();
-    $context->term();
+    
+    debug('generating uuid...') if($::debug > 4);
+    $msg->{'id'} = generate_uuid_random();
+    my $iodef = Iodef::Pb::Simple->new($msg);
+    $iodef = [ $iodef ] unless(ref($iodef) eq 'ARRAY');
+    return $iodef;
 }
 
-sub sender_routine {
-    my $self        = shift;
-    #my $total_recs  = shift;
-      
-    # do this within the thread
-    require CIF::Client;
-    my ($err,$client) = CIF::Client->new({
-        config  => $self->get_client_config(),
-        apikey  => $self->get_apikey(),
-    });
-    $self->set_client($client);
-    
-    my $batch_control = $self->get_batch_control();
-    
-    my $context = ZeroMQ::Context->new();
-    
-    debug('starting sender thread...') if($::debug > 1);
-       
-    my $sender = $context->socket(ZMQ_PULL);
-    $sender->bind(SENDER_CONNECTION());
-    
-    my $ctrl = $context->socket(ZMQ_SUB);
-    $ctrl->setsockopt(ZMQ_SUBSCRIBE,'');
-    $ctrl->connect(CTRL_CONNECTION());
-    
-    my $return = $context->socket(ZMQ_PUSH);
-    $return->connect(RETURN_CONNECTION());
-    
-    my $poller = ZeroMQ::Poller->new(
-        {
-            name    => 'sender',
-            socket  => $sender,
-            events  => ZMQ_POLLIN,
-        },
-        {
-            name    => 'ctrl',
-            socket  => $ctrl,
-            events  => ZMQ_POLLIN,
-        },
-    ); 
-                 
-    my $queue; 
-    my $done = 0;
-    my ($total_recs,$sent_recs) = (0,0);
-    do {
-        debug('polling...') if($::debug > 4);
-        $poller->poll();
-        # we wanna check this one first, since it'll come in later
-        if($poller->has_event('ctrl')){
-            my $msg = $ctrl->recv()->data();
-            debug('ctrl sig received: '.$msg) if($::debug > 2);
-            for($msg){
-                if(/^TOTAL:(\d+)$/){
-                    $total_recs = $1;
-                    debug('total received: '.$total_recs) if($::debug > 2);
-                    last;
-                }
-            }
-        }
-        # we need to move this out of the if/then incase we're waiting on a kill
-        if($poller->has_event('sender')){
-            debug('found event...') if($::debug > 2);
-            my $msg = $sender->recv()->data();
-            #$msg = Iodef::Pb::Simple->new($msg);
-            $msg = IODEFDocumentType->decode($msg);
-            #my $num_msgs = ($#{$msg}+1);
-            my $num_msgs = 1;
-            debug('msgs recvieved: '.$num_msgs) if($::debug > 2);
-            push(@$queue,$msg);
-            debug('msgs in queue: '.($#{$queue}+1)) if($::debug > 2);
-        }
-        
-        # we're not done till we at-least have a total from the 
-        # master thread
-        # if what's in the queue is the difference between sent and total
-        # we're done
-        if($total_recs && ($sent_recs + (($#{$queue}+1)) == $total_recs)){
-            $done = 1;
-        }
-        # if we have a total number and it's equal to our sent number
-        # we're done
-        if($total_recs && ($sent_recs == $total_recs)){
-            $done = 1;
-        }
-
-        if($#{$queue} > $batch_control || $done){
-            debug('sending data to router: '.($#{$queue}+1)) if($::debug);
-            my ($err,$ret) = $self->send($queue);
-            debug('returning answer from router...') if($::debug);
-            my $json_msg = {};
-            if($err){
-                $json_msg->{'err'} = $err;
-            } else {
-                $json_msg->{'data'} = $ret;
-            }
-            $return->send_as(json => $json_msg);
-            $sent_recs += ($#{$queue}+1);
-            $queue = [];
-            debug('getting ready to poll...') if($::debug);
-        }
-        nanosleep NSECS_PER_MSEC;
-    } while (!$done);
-    
-    debug('sender done...') if($::debug > 1);;
-    $sender->close();
-    $return->close();
-    $ctrl->close();
-    $context->term();
-}
-
-sub send {
+sub submit {
     my $self = shift;
     my $data = shift;
 
     return $self->get_client->submit($self->get_rules->{'guid'}, $data);    
-}
-
-sub throttle {
-    my $throttle = shift;
-
-    require Linux::Cpuinfo;
-    my $cpu = Linux::Cpuinfo->new();
-    return(DEFAULT_THROTTLE_FACTOR()) unless($cpu);
-    
-    my $cores = $cpu->num_cpus();
-    return(DEFAULT_THROTTLE_FACTOR()) unless($cores && $cores =~ /^\d+$/);
-    return(DEFAULT_THROTTLE_FACTOR()) if($cores eq 1);
-    
-    return($cores * (DEFAULT_THROTTLE_FACTOR() * 2))    if($throttle eq 'high');
-    return($cores * DEFAULT_THROTTLE_FACTOR())          if($throttle eq 'medium');
-    return($cores / 2)                                  if($throttle eq 'low');
 }
 
 1;

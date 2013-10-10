@@ -41,7 +41,7 @@ use CIF qw/debug/;
 use Sys::MemInfo qw(totalmem);
 
 my %opts;
-getopts('g:hNA:s:T:t:dC:f:r:v:p:',\%opts);
+getopts('g:hNA:s:dC:f:r:v:p:',\%opts);
 our $debug = $opts{'d'} || 0;
 $debug = $opts{'v'} if($opts{'v'});
 
@@ -50,8 +50,6 @@ my $rules       = $opts{'r'};
 my $feed        = $opts{'f'};
 
 my $rules_dir    = '/opt/cif/etc';
-my $throttle    = $opts{'T'} || 'medium';
-my $threads     = $opts{'t'};
 my $admin       = $opts{'A'} || 'root';
 my $fail_closed = $opts{'N'} || 0;
 my $disable_p   = $opts{'z'};
@@ -67,15 +65,11 @@ if((&totalmem / (1024*1024*1024)) < 1){
     print '*** WARNING ***'."\n";
 }
 
-if(!$threads){
-    $threads = CIF::Smrt::throttle($throttle);
-}
-
 die usage() if($opts{'h'} || !$rules);
 
 sub usage {
     return <<EOF;
-Usage: perl $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f malwaredomainlist -T low
+Usage: perl $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f malwaredomainlist 
 
     -h  --help:     this message
     -f  --feed:     feed name (eg: section header in the configuration file)
@@ -87,11 +81,6 @@ Advanced:
     -g  --go-back:          change the default 'goback' behavior
                             (how far back in-days to process a given feed, default: $goback)
                             
-    -T  --throttle:         throttle (how man threads to use, default: $throttle)
-                            low:    threads = number of cores * 0.5
-                            medium: threads = number of cores
-                            high:   threads = number of cores * 2
-
     -N  --fail-closed:      error out if one of the jobs fail, mail the -A $admin
                             (default: $fail_closed)
                             
@@ -99,8 +88,8 @@ Advanced:
                             (default: $admin)
                         
 Examples:
-    $0 -C /home/cif/.cif -r $rules_dir/spyeyetracker.cfg -f binaries -T medium 
-    $0 -C /home/cif/.cif -r $rules_dir/malwaredomains.cfg -f domains -T high -d
+    $0 -C /home/cif/.cif -r $rules_dir/spyeyetracker.cfg -f binaries  
+    $0 -C /home/cif/.cif -r $rules_dir/malwaredomains.cfg -f domains  -d
     $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f spamhaus_drop -d -p ip,malware
     $0 -r $rules_dir/misc.cfg -f spamhaus_drop -d 
 EOF
@@ -109,7 +98,6 @@ EOF
 my $ret;
 my ($err,$smrt) = CIF::Smrt->new({
     config          => $config,
-    threads         => $threads,
     feed            => $feed,
     rules           => $rules,
     goback          => $goback,
