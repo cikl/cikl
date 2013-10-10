@@ -39,14 +39,6 @@ BEGIN {
     }
 }
 
-require CIF::Router::RabbitMQSTOMP;
-use Data::Dumper;
-use CIF qw/init_logging/;
-
-
-my $stomp = CIF::Router::RabbitMQSTOMP->new(
-  "cif-submission-processor", 
-  "/topic/cif-submit", 1);
-print "Started\n";
-$stomp->run();
+use CIF::Router::Server;
+my $server = CIF::Router::Server->run_submit_server();
 1;

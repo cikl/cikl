@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Try::Tiny;
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Config::Simple;
 
 require CIF::Archive;
@@ -23,12 +22,10 @@ use Data::Dumper;
 # later on we'll do some partitioning to clean this up a bit
 use constant QUERY_DEFAULT_LIMIT => 50;
 
-my @drivers = __PACKAGE__->plugins();
-
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
     config db_config
-    driver driver_config restriction_map 
+    restriction_map 
     group_map groups feeds feeds_map feeds_config 
     archive_config datatypes query_default_limit
 ));
@@ -41,8 +38,6 @@ sub new {
       
     return('missing config file') unless($args->{'config'});
     
-    $args->{'config'} = Config::Simple->new($args->{'config'}) || return('missing config file');
-    
     my $self = {};
     bless($self,$class);
     $self->set_config($args->{'config'}->param(-block => 'router'));
@@ -54,25 +49,6 @@ sub new {
     my $ret = $self->init($args);
     return unless($ret);
      
-    my $driver = $args->{'driver'} || 'HTTP';
-    
-    if($args->{'config'}->param(-block => 'router_'.lc($driver))){
-        $self->set_driver_config($args->{'config'}->param(-block => 'router_'.lc($driver)));
-        $args->{'driver_config'} = $self->get_driver_config();
-    }
-    
-    if($driver){
-        $driver = 'CIF::Router::'.$driver;
-    
-        my $err;
-        try {
-            $driver = $driver->new($args);
-        } catch {
-            $err = shift;
-            debug($err);
-        };
-        $self->set_driver($driver);
-    }
     return(undef,$self);
 }
 
