@@ -4,7 +4,8 @@ use strict;
 use warnings;
 
 use Try::Tiny;
-use CIF qw(generate_uuid_ns is_uuid debug);
+use CIF qw(generate_uuid_ns is_uuid debug generate_uuid_random);
+require Iodef::Pb::Simple;
 
 our @EXPORT = qw/msg_wrap_queries/;
 
@@ -161,3 +162,14 @@ sub get_uuids {
 
   return \@uuids;
 }
+
+sub generate_iodef {
+    my $msg = shift;
+
+    $msg->{'id'} = generate_uuid_random();
+    my $iodef = Iodef::Pb::Simple->new($msg);
+    $iodef = [ $iodef ] unless(ref($iodef) eq 'ARRAY');
+    return $iodef;
+}
+
+

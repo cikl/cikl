@@ -271,7 +271,16 @@ sub submit {
     my $self = shift;
     my $guid = shift;
     my $data = shift;
-    return $self->get_driver->submit($self->get_apikey(), $guid, $data);
+
+    my @stuff;
+
+    foreach my $data (@$data) {
+      my $iodefs = CIF::MsgHelpers::generate_iodef($data);
+      foreach my $iodef (@$iodefs) {
+        push (@stuff, $iodef);
+      }
+    }
+    return $self->get_driver->submit($self->get_apikey(), $guid, \@stuff);
 }    
 
 # confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)
