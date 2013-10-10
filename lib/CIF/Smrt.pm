@@ -14,6 +14,7 @@ use constant DEFAULT_SEVERITY_MAP => {
     botnet      => 'high',
 };
 
+use CIF::Client;
 use Regexp::Common qw/net URI/;
 use Regexp::Common::net::CIDR;
 use Encode qw/encode_utf8/;
@@ -256,10 +257,7 @@ sub parse {
     my $return;
     ## TODO -- this mess will be cleaned up and plugin-ized in v2
     try {
-        if($content =~ /^application\/cif/){
-            require CIF::Smrt::ParseCifFeed;
-            $return = CIF::Smrt::ParseCifFeed::parse($f,$content);
-        } elsif(my $d = $f->{'delimiter'}){
+        if(my $d = $f->{'delimiter'}){
             require CIF::Smrt::ParseDelim;
             $return = CIF::Smrt::ParseDelim::parse($f,$content,$d);
         } else {
@@ -268,11 +266,7 @@ sub parse {
             ## todo -- very hard to detect iodef-pb strings
             # might have to rely on base64 encoding decode first?
             ## TODO -- pull this out
-            if($content =~ /^application\/base64\+snappy\+pb\+iodef\n([\S\n]+)\n$/){
-                require CIF::Smrt::ParsePbIodef;
-                $return = CIF::Smrt::ParsePbIodef::parse($f,$content);
-                # in case they are just sending us <rss...>
-            } elsif(($f->{'driver'} && $f->{'driver'} eq 'xml') || $content =~ /^(<\?xml version=|<rss version=)/){
+            if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $content =~ /^(<\?xml version=|<rss version=)/){
                 if($content =~ /<rss version=/ && !$f->{'nodes'}){
                     require CIF::Smrt::ParseRss;
                     $return = CIF::Smrt::ParseRss::parse($f,$content);
@@ -282,13 +276,8 @@ sub parse {
                 }
             } elsif($content =~ /^\[?{/){
                 ## TODO -- remove, legacy
-                if($content =~ /urn:ietf:params:xmls:schema:iodef-1.0/) {
-                    require CIF::Smrt::ParseJsonIodef;
-                    $return = CIF::Smrt::ParseJsonIodef::parse($f,$content);
-                } else {
-                    require CIF::Smrt::ParseJson;
-                    $return = CIF::Smrt::ParseJson::parse($f,$content);
-                }
+                require CIF::Smrt::ParseJson;
+                $return = CIF::Smrt::ParseJson::parse($f,$content);
             } elsif($content =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
                 # ParseCSV only works on strictly formated CSV files
                 # o/w you should be using ParseDelim and specifying the "delimiter" field
@@ -443,32 +432,7 @@ sub process {
     return($err) if($err);
 
     return (undef,'no records') unless($#{$array} > -1);
-
-    my @stuff;
-
-    foreach my $data (@$array) {
-      my $iodefs = generate_iodef($data);
-      foreach my $iodef (@$iodefs) {
-        push (@stuff, $iodef);
-      }
-    }
-    $self->submit(\@stuff);
-    return(undef,1);
-}
-
-sub generate_iodef {
-    my $msg = shift;
-
-    if($::debug > 1){
-      my $thing = $msg->{'address'} || $msg->{'malware_md5'} || $msg->{'malware_sha1'} || 'NA -- SOMETHING BROKEN IN THE FEED CONFIG';
-      debug('uuid: '.$msg->{'id'}.' - '.$msg->{'reporttime'}.' - '.$thing.' - '.$msg->{'assessment'}.' - '.$msg->{'description'});
-    }
-    
-    debug('generating uuid...') if($::debug > 4);
-    $msg->{'id'} = generate_uuid_random();
-    my $iodef = Iodef::Pb::Simple->new($msg);
-    $iodef = [ $iodef ] unless(ref($iodef) eq 'ARRAY');
-    return $iodef;
+    return $self->submit($array);
 }
 
 sub submit {
