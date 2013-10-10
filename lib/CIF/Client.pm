@@ -64,7 +64,7 @@ sub new {
         @{$self->{'fields'}} = split(/,/,$args->{'fields'}); 
     } 
     
-    my $err = $self->_init_driver($self->get_config->{'driver'} || 'HTTP');
+    my $err = $self->_init_driver($self->get_config->{'driver'} || 'RabbitMQ');
     return($err) if ($err);
 
     return (undef,$self);
