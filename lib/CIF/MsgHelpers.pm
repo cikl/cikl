@@ -166,7 +166,6 @@ sub get_uuids {
 sub generate_iodef {
     my $msg = shift;
 
-    $msg->{'id'} = generate_uuid_random();
     my $iodef = Iodef::Pb::Simple->new($msg);
     $iodef = [ $iodef ] unless(ref($iodef) eq 'ARRAY');
     return $iodef;

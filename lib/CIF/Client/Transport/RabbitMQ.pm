@@ -17,6 +17,7 @@ use CIF::MsgHelpers;
 sub new {
     my $class = shift;
     my $args = shift;
+    $args->{driver_name} = "rabbitmq";
 
     my $self = $class->SUPER::new($args);
 
@@ -82,26 +83,34 @@ sub query {
     }
 }
 
-sub submit {
+sub submit_event {
     my $self = shift;
     my $apikey = shift;
     my $guid = shift;
-    my $iodefs = shift;
+    my $event = shift;
 
-    my $uuids = CIF::MsgHelpers::get_uuids($iodefs);
-
-    foreach my $iodef (@$iodefs) {
-      my $msg = CIF::MsgHelpers::build_submission_msg($apikey, $guid, [$iodef]);
-      my $body = $msg->encode();
-      $self->{channel}->publish(
-        exchange => $self->{exchange_name},
-        routing_key => $self->{submit_key},
-        body => $body 
-      );
-    }
-
-    return (undef, $uuids);
+    my $body = $self->{encoder}->encode_submission($apikey, $guid, $event);
+    $self->{channel}->publish(
+      exchange => $self->{exchange_name},
+      routing_key => $self->{submit_key},
+      body => $body 
+    );
 }
+#sub submit_json_event {
+#    my $self = shift;
+#    my $apikey = shift;
+#    my $guid = shift;
+#    my $event = shift;
+#
+#    my $msg = CIF::MsgHelpers::build_submission_msg($apikey, $guid, [$iodef]);
+#    my $body = $msg->encode();
+#    $self->{channel}->publish(
+#      exchange => $self->{exchange_name},
+#      routing_key => $self->{submit_key},
+#      body => $body 
+#    );
+#
+#}
 
 1;
 

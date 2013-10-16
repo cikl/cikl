@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Scalar::Util qw(blessed);
 use Data::Dumper;
+use CIF qw(generate_uuid_random);
 require JSON;
 #use Tie::Hash;
 #our @ISA = 'Tie::StdHash';
@@ -42,12 +43,22 @@ use constant FIELDS => {
 
 sub new {
   my $class = shift;
+  my $guid = shift;
   my $data = shift || {};
   my $self = {};
   #tie %{$self}, $class;
   map { $self->{$_} = $data->{$_} } keys %{$data};
+  $self->{guid} = $guid;
+  if (!defined($self->{id})) {
+    $self->{id} = generate_uuid_random();
+  }
   bless $self, $class;
   return $self;
+}
+
+sub guid {
+  my $self = shift;
+  return $self->{guid};
 }
 
 sub to_json {

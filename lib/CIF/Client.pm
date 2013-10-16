@@ -73,13 +73,12 @@ sub new {
 sub _init_driver {
     my $self = shift;
     my $driver_name = shift;
-    my $driver_config = $self->get_global_config->param(-block => 'client_'.lc($driver_name));
     my $driver_class     = 'CIF::Client::Transport::'.$driver_name;
     my $err;
     my $driver;
     try {
         $driver     = $driver_class->new({
-            config  => $driver_config
+            config => $self->get_global_config()
         });
     } catch {
         $err = shift;
@@ -99,12 +98,7 @@ sub search {
     
     my $filter_me   = $args->{'filter_me'} || $self->get_filter_me();
     my $nolog       = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_nolog();
-    my $no_decode   = $args->{'no_decode'};
 
-    if ($no_decode) {
-        return("ERROR: no_decode is deprecated. You're going to have to deal with encoding feeds yourself!");
-    }
-    
     unless($args->{'apikey'}){
         $args->{'apikey'} = $self->get_apikey();
     }
@@ -123,7 +117,7 @@ sub search {
     my $ip_tree = Net::Patricia->new();
     
     debug('generating query') if($::debug);
-    foreach my $q (@{$args->{'query'}}){
+    foreach my $q (@orig_queries) {
         debug('query: '.$q);
         debug('query sha1: '.sha1_hex($q));
         my ($err,$ret) = CIF::Client::Query->new({
@@ -270,17 +264,9 @@ sub send_keypairs {
 sub submit {
     my $self = shift;
     my $guid = shift;
-    my $data = shift;
+    my $events = shift;
 
-    my @stuff;
-
-    foreach my $data (@$data) {
-      my $iodefs = CIF::MsgHelpers::generate_iodef($data);
-      foreach my $iodef (@$iodefs) {
-        push (@stuff, $iodef);
-      }
-    }
-    return $self->get_driver->submit($self->get_apikey(), $guid, \@stuff);
+    return $self->get_driver->submit($self->get_apikey(), $guid, $events);
 }    
 
 # confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)
