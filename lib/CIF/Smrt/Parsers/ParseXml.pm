@@ -1,46 +1,48 @@
-package CIF::Smrt::ParseXml;
+package CIF::Smrt::Parsers::ParseXml;
+use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
 require XML::LibXML;
 
 sub parse {
-    my $f = shift;
+    my $self = shift;
     my $content = shift;
     
     my $parser      = XML::LibXML->new();
     my $doc         = $parser->load_xml(string => $content);
-    my @nodes       = $doc->findnodes('//'.$f->{'node'});
-    my @subnodes    = $doc->findnodes('//'.$f->{'subnode'}) if($f->{'subnode'});
+    my @nodes       = $doc->findnodes('//'.$self->config->node);
+    my @subnodes    = $doc->findnodes('//'.$self->config->subnode) if($self->config->subnode);
     
     return unless(@nodes);
     
     my @array;
-    my @elements        = split(',', $f->{'elements'})       if($f->{'elements'});
-    my @elements_map    = split(',', $f->{'elements_map'})   if($f->{'elements_map'});
-    my @attributes_map  = split(',', $f->{'attributes_map'}) if($f->{'attributes_map'});
-    my @attributes      = split(',', $f->{'attributes'})     if($f->{'attributes'});
+    my @elements        = $self->config->elements; 
+    my @elements_map    = $self->config->elements_map; 
+    my @attributes_map  = $self->config->attributes_map; 
+    my @attributes      = $self->config->attributes; 
     
     my %regex;
-    foreach my $k (keys %$f){
+    # TODO MPR: clean this up. Modifying the config is bonkers.
+    foreach my $k (keys %{$self->config}){
         # pull out any custom regex
         for($k){
             if(/^regex_(\S+)$/){
-                $regex{$1} = qr/$f->{$k}/;
-                delete($f->{$k});
+                $regex{$1} = qr/$self->config->{$k}/;
+                delete($self->config->{$k});
                 last;
             }
             # clean up the hash, so we can re-map the default values later
             if(/^(elements_?|attributes_?|node|subnode)/){
-                delete($f->{$k});
+                delete($self->config->{$k});
                 last;
             }
         }
     }
    
     foreach my $node (@nodes){
-        my $h = {};
-        map { $h->{$_} = $f->{$_} } keys %$f;
+        my $h = $self->create_event();
+        map { $h->{$_} = $self->config->{$_} } keys %{$self->config};
         my $found = 0;
         if(@elements_map){
             foreach my $e (0 ... $#elements_map){
@@ -76,6 +78,7 @@ sub parse {
             }
         }
         push(@array,$h) if($found);
+
     }
     return(\@array);
 }

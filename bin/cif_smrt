@@ -116,13 +116,14 @@ unless($err){
     exit(0);
 }
 
-print '[cif-smrt] failure: '.$smrt->get_rules()->{'source'}."\n";
+use Data::Dumper;
+print '[cif-smrt] failure: '.$rules."\n";
 print $err."\n";
 
 if(!$fail_closed){
     my $msg = MIME::Lite->new(
         To      => $admin,
-        Subject => 'cif-smrt failure: '.$smrt->get_rules()->{'source'}.' -- '.$feed,
+        Subject => 'cif-smrt failure: '.$rules.' -- '.$feed,
         Data    => "$err\nfeed: $feed"
     )->send();
     if($err =~ /contact system administrator/){

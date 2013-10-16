@@ -1,17 +1,20 @@
-package CIF::Smrt::ParseCsv;
+package CIF::Smrt::Parsers::ParseDelim;
+use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
-use Text::CSV;
 
 sub parse {
-    my $f = shift;
+    my $self = shift;
     my $content = shift;
-    
+
+    my $split = $self->config->delimiter;
+
     my @lines = split(/[\r\n]/,$content);
+    my @cols = $self->config->values;
     my @array;
     
-    if(my $l = $f->{'feed_limit'}){
+    if(my $l = $self->config->feed_limit){
         my ($start,$end);
         if(ref($l) eq 'ARRAY'){
             ($start,$end) = @{$l};
@@ -26,27 +29,19 @@ sub parse {
             @lines = @lines[$start..$end];
         }
     }
-    
-    my $csv = Text::CSV->new({binary => 1});
-    my @cols = split(',',$f->{'values'});
 
-    shift @lines if($f->{'skipfirst'});
-    
+    shift @array if($self->config->skipfirst);
+
     foreach(@lines){
-        next if(/^(#|<|$)/);
-        my $row = $csv->parse($_);
-        next unless($csv->parse($_));
-        my $h;
-        my @m = $csv->fields();
+        next if(/^(#|$|<)/);
+        my @m = split($split,$_);
+        my $h = $self->create_event(); 
         foreach (0 ... $#cols){
-            next if($cols[$_] eq 'null');
             $h->{$cols[$_]} = $m[$_];
         }
-        map { $h->{$_} = $f->{$_} } keys %$f;
         push(@array,$h);
     }
     return(\@array);
-
 }
 
 1;

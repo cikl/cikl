@@ -1,22 +1,23 @@
-package CIF::Smrt::ParseTxt;
+package CIF::Smrt::Parsers::ParseTxt;
+use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
 
 sub parse {
-    my $f = shift;
+    my $self = shift;
     my $content = shift;
-    
-    return unless($f->{'regex'});
+    my $re = $self->config->regex;
+    return unless($re);
     
     my @lines = split(/[\r\n]/,$content);
     my @array;
     foreach(@lines){
         next if(/^(#|<|$)/);
-        my @m = ($_ =~ /$f->{'regex'}/);
+        my @m = ($_ =~ /$re/);
         next unless(@m);
-        my $h;
-        my @cols = (ref($f->{'regex_values'}) eq 'ARRAY') ? @{$f->{'regex_values'}} : split(',',$f->{'regex_values'});
+        my $h = $self->create_event();
+        my @cols = $self->config->regex_values;
         foreach (0 ... $#cols){
             $m[$_] = '' unless($m[$_]);
             for($m[$_]){
@@ -30,7 +31,6 @@ sub parse {
         if($h->{'address_mask'}){
             $h->{'address'} .= '/'.$h->{'address_mask'};
         }
-        map { $h->{$_} = $f->{$_} } keys %$f;
         push(@array,$h);
     }
     return(\@array);

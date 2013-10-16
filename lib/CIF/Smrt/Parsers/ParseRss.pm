@@ -1,11 +1,12 @@
-package CIF::Smrt::ParseRss;
+package CIF::Smrt::Parsers::ParseRss;
+use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
 use XML::RSS;
 
 sub parse {
-    my $f = shift;
+    my $self = shift;
     my $content = shift;
     
     # fix malformed RSS
@@ -26,17 +27,16 @@ sub parse {
     $rss->parse($content);
     my @array;
     foreach my $item (@{$rss->{items}}){
-        my $h;
+        my $h = $self->create_event();
         foreach my $key (keys %$item){
-            if(my $r = $f->{'regex_'.$key}){
+            if(my $r = $self->config->keyed_regex($key)){
                 my @m = ($item->{$key} =~ /$r/);
-                my @cols = split(',',$f->{'regex_'.$key.'_values'});
+                my @cols = $self->config->keyed_regex_values($key);
                 foreach (0 ... $#cols){
                     $h->{$cols[$_]} = $m[$_];
                 }
             }
         }
-        map { $h->{$_} = $f->{$_} } keys %$f;
         push(@array,$h);
     }
     return(\@array);
