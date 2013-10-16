@@ -15,6 +15,7 @@ use CIF qw/is_uuid generate_uuid_ns generate_uuid_random debug/;
 use CIF::Msg;
 use CIF::Msg::Feed;
 use Data::Dumper;
+use CIF::Models::Event;
 
 # this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
 # most people just want a quick answer, if they override this (via the client), they'll expect the
@@ -46,6 +47,8 @@ sub new {
     $self->set_restriction_map( $args->{'config'}->param(-block => 'restriction_map'));
     $self->set_archive_config(  $args->{'config'}->param(-block => 'cif_archive'));
    
+    $self->{commit_interval} = $self->get_config->{'dbi_commit_size'} || 10000;
+    $self->{inserts} = 0;
     my $ret = $self->init($args);
     return unless($ret);
      
@@ -268,8 +271,8 @@ sub process {
         status  => MessageType::StatusType::FAILED(),
     });
     
-    my $pversion = sprintf("%4f",$msg->get_version());
-    if($pversion != $CIF::VERSION){
+  my $pversion = sprintf("%4f",$msg->get_version());
+   if($pversion != $CIF::VERSION){
         $reply->set_data('invalid protocol version: '.$pversion.', should be: '.$CIF::VERSION);
         return $reply->encode();
     }
@@ -280,7 +283,7 @@ sub process {
             last;
         }
         if($_ == MessageType::MsgType::SUBMISSION()){
-            $reply = $self->process_submission($msg);
+            $reply = $self->process_submissions($msg, $msg->get_apikey());
             last;
         }
     }
@@ -429,74 +432,106 @@ sub process_query {
     return $reply;
 }
 
-sub process_submission {
+sub process_submissions {
     my $self = shift;
     my $msg = shift;
+    my $apikey = shift;
 
     debug('type: submission...');
-    my $ret = $self->authorized_write($msg->get_apikey());
+    my $auth = $self->authorized_write($apikey);
     my $reply = MessageType->new({
         version => $CIF::VERSION,
         type    => MessageType::MsgType::REPLY(),
         status  => MessageType::StatusType::UNAUTHORIZED(),
     });
-    return $reply unless($ret);
+    return $reply unless($auth);
     
     my $err;
-    my $state = 0;
-    my $commit_size = $self->get_config->{'dbi_commit_size'} || 10000;
-    my $default_guid = $ret->{'default_guid'} || 'everyone';
+    my $default_guid = $auth->{'default_guid'} || 'everyone';
+    my @ret;
     
-    $ret = [];
-    foreach (@{$msg->get_data()}){
-        my $m = MessageType::SubmissionType->decode($_);
-     
-        my $array   = $m->get_data();
-        my $guid    = $m->get_guid() || $default_guid;
-        $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
-        ## TODO -- copy foreach loop from SMRT; commit every X objects
-        
-        debug('entries: '.($#{$array} + 1));
-        for(my $i = 0; $i <= $#{$array}; $i++){
-            next unless(@{$array}[$i] && @{$array}[$i] ne '');
-            $state = 0;
-            debug('inserting...') if($debug > 4);
-            my ($err,$id) = CIF::Archive->insert({
-                data        => @{$array}[$i],
-                guid        => $guid,
-                feeds       => $self->get_feeds(),
-                datatypes   => $self->get_datatypes(),
-            });
-            if($err){
-                debug($err);
-                return MessageType->new({
-                    version => $CIF::VERSION,
-                    type    => MessageType::MsgType::REPLY(),
-                    status  => MessageType::StatusType::FAILED(),
-                    data    => 'submission failed: contact system administrator',
-                });
-            }
-            debug($id) if($debug > 4);
-            push(@$ret,$id);
-            ## TODO -- make the 1000 a variable
-            if($i % $commit_size == 0){
-                CIF::Archive->dbi_commit();
-                debug('committing...');
-                $state = 1;
-            }           
-        }
+    foreach my $submission (@{$msg->get_data()}){
+      my ($err, $ids) = $self->process_submission($submission, $default_guid);
+      if ($err) {
+        return MessageType->new({
+            version => $CIF::VERSION,
+            type    => MessageType::MsgType::REPLY(),
+            status  => MessageType::StatusType::FAILED(),
+            data    => 'submission failed: contact system administrator',
+          });
+      }
+      @ret = (@ret, @$ids);
     }
-    unless($state){
-        debug('final commit...');
-        CIF::Archive->dbi_commit();
-    }
+    $self->flush();
     debug('done...');
     return MessageType->new({
         version => $CIF::VERSION,
         type    => MessageType::MsgType::REPLY(),
         status  => MessageType::StatusType::SUCCESS(),
-        data    => $ret,
+        data    => \@ret
     });
+}
+
+sub process_submission {
+  my $self = shift;
+  my $data = shift;
+  my $default_guid = shift;
+  my $m = MessageType::SubmissionType->decode($data);
+
+  my $iodefs = $m->get_data();
+  my $guid    = $m->get_guid() || $default_guid;
+  $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
+  ## TODO -- copy foreach loop from SMRT; commit every X objects
+
+  my @ret;
+  debug('entries: '.($#{$iodefs} + 1));
+  foreach my $iodef (@{$iodefs}) {
+    if (!defined($iodef) or $iodef eq '') {
+      next;
+    }
+    debug('inserting...') if($debug > 4);
+    my ($err,$id) = $self->insert_iodef($guid, $iodef);
+
+    if($err){
+      return($err);
+    }
+    push(@ret, $id);
+  }
+  return(undef, \@ret);
+}
+
+sub flush {
+  my $self = shift;
+  return if ($self->{inserts} == 0);
+  debug('committing...');
+  CIF::Archive->dbi_commit();
+}
+
+sub insert_iodef {
+  my $self = shift;
+  my $guid = shift;
+  my $iodef = shift;
+  $self->{inserts} += 1;
+  my ($err, $ret) = (CIF::Archive->insert({
+      data        => $iodef,
+      guid        => $guid,
+      feeds       => $self->get_feeds(),
+      datatypes   => $self->get_datatypes(),
+    }));
+
+  if ($self->{inserts} >= $self->{commit_interval} == 0) {
+    $self->flush();
+    $self->{inserts} = 0;
+  }
+  return ($err, $ret);
+}
+
+sub process_event {
+    my $self = shift;
+    my $apikey = shift;
+    my $event = shift;
+
+
 }
 
 sub send {}

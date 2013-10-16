@@ -69,7 +69,11 @@ sub query_processor {
 sub process {
     my $self = shift;
     my $payload = shift;
-    return($self->{router}->process($payload));
+    if ($self->is_submission()) {
+      return($self->{router}->process($payload));
+    } elsif ($self->is_query()) {
+      return($self->{router}->process($payload));
+    }
 }
 
 sub run {
