@@ -1,4 +1,6 @@
-package CIF::Models::Data;
+package CIF::Models::Event;
+
+use Scalar::Util qw(blessed);
 use Data::Dumper;
 
 require JSON;
@@ -6,7 +8,9 @@ require JSON;
 sub new {
   my $class = shift;
   my $data = shift || {};
-  my $self = bless $data, $class;
+  my $self = {};
+  map { $self->{$_} = $data->{$_} } keys %{$data};
+  bless $self, $class;
   return $self;
 }
 
