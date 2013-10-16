@@ -103,6 +103,11 @@ sub new {
   return $self;
 }
 
+sub guid {
+  my $self = shift;
+  return $self->{guid};
+}
+
 sub default_event_data {
   my $self = shift;
   return (dclone($self->{event_fields}));
