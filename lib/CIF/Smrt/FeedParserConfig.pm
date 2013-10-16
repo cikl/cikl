@@ -7,6 +7,36 @@ use Config::Simple;
 use Try::Tiny;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug normalize_timestamp/;
 
+use constant FIELDS => {
+  guid => 'everyone',
+  feed => undef,
+  source => undef,
+  feed_limit => undef,
+  values => undef,
+  skipfirst => undef,
+  delimiter => undef,
+  fields => undef,
+  fields_map => undef,
+  mirror => undef,
+  zip_filename => undef,
+  regex => undef,
+  regex_values => undef,
+  node => undef,
+  subnode => undef,
+  period => undef,
+  disabled => undef,
+  elements => undef,
+  elements_map => undef,
+  attributes => undef, 
+  attributes_map => undef
+};
+
+use constant REQUIRED_FIELDS => {
+  guid => 1,
+  feed => 1,
+  source => 1
+};
+
 sub new {
   my $class = shift;
   my $config_file = shift;
@@ -33,45 +63,65 @@ sub new {
 
   # Override any configuration with sub config.
   map { $config_data->{$_} = $feed_rules->{$_} } keys (%$feed_rules);
-  
-  my $guid = _get('guid', $config_data, 'everyone');
-  my $feed = _get('feed', $config_data, undef);
-  my $source = _get('source', $config_data, undef);
-  my $feed_limit = _get('feed_limit', $config_data, undef);
 
-  unless(is_uuid($guid)){
-    $guid = generate_uuid_url($guid);
+  my $self = {};
+
+  my @feed_config_fields = keys(FIELDS);
+
+  # Catch any dynamically named fields.
+  foreach my $name (keys(%$config_data)) {
+    if ($name =~ /^regex_/) {
+      push(@feed_config_fields, $name);
+    }
+  }
+  
+  foreach my $name (@feed_config_fields) {
+    my $v = delete($config_data->{$name}) || FIELDS->{$name};
+
+    if (defined($v)) {
+      $self->{$name} = $v;
+    }
   }
 
-  die_if_undefined($config_file, $feed_name, $feed, 'feed');
-  die_if_undefined($config_file, $feed_name, $source, 'source');
 
+  foreach my $required (keys(REQUIRED_FIELDS)) {
+    if (!exists($self->{$required})) {
+      die "Missing required configuration '$required' from '$config_file' - [$feed_name]";
+    }
+  }
 
-  $config_data->{'guid'} = $guid;
-  $config_data->{'feed'} = $feed;
-  $config_data->{'source'} = $source;
-  $config_data->{'feed_limit'} = $feed_limit;
+  unless(is_uuid($self->{guid})){
+    $self->{guid} = generate_uuid_url($self->{guid});
+  }
 
-  my $self = bless($config_data,$class);
+  bless($self,$class);
+
+  my $event_fields = {};
+  foreach my $key (keys(CIF::Models::Event::FIELDS)) {
+    my $v = $self->{$key} || delete($config_data->{$key});
+    if (defined($v)) {
+      $event_fields->{$key} = $v;
+    }
+  }
+  $self->{event_fields} = $event_fields;
+
+  foreach my $key (keys(%$config_data)) {
+    warn "Unknown configuration option: $key";
+  }
 
   return $self;
 }
 
-sub _get {
-  my $key = shift;
-  my $c1 = shift;
-  my $default = shift;
-  return(delete($c1->{$key}) || $default);
+sub event_field_keys {
+  my $self = shift;
+  my @keys = keys(%{$self->{event_fields}});
+  return(@keys);
 }
 
-sub die_if_undefined {
-  my $config_file = shift;
-  my $feed_name = shift;
-  my $v= shift;
+sub event_field { 
+  my $self = shift;
   my $key = shift;
-  if (!defined($v)) {
-    die "Missing required configuration '$key' from '$config_file' - [$feed_name]";
-  }
+  return($self->{event_fields}->{$key});
 }
 
 sub values {
@@ -124,6 +174,12 @@ sub regex_values {
     return $self->{'regex_values'};
   }
   return split(',',$self->{'regex_values'});
+}
+
+sub regex_for {
+  my $self = shift;
+  my $name = shift;
+  return $self->{"regex_$name"};
 }
 
 sub keyed_regex {
