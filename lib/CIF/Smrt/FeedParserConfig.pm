@@ -5,6 +5,7 @@ use warnings;
 use Data::Dumper;
 use Config::Simple;
 use Try::Tiny;
+use Storable qw/dclone/;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug normalize_timestamp/;
 
 use constant FIELDS => {
@@ -96,32 +97,15 @@ sub new {
 
   bless($self,$class);
 
-  my $event_fields = {};
-  foreach my $key (keys(CIF::Models::Event::FIELDS)) {
-    my $v = $self->{$key} || delete($config_data->{$key});
-    if (defined($v)) {
-      $event_fields->{$key} = $v;
-    }
-  }
-  $self->{event_fields} = $event_fields;
-
-  foreach my $key (keys(%$config_data)) {
-    warn "Unknown configuration option: $key";
-  }
+  # The remaining fields will act as defaults for events, when they are created.
+  $self->{event_fields} = $config_data;
 
   return $self;
 }
 
-sub event_field_keys {
+sub default_event_data {
   my $self = shift;
-  my @keys = keys(%{$self->{event_fields}});
-  return(@keys);
-}
-
-sub event_field { 
-  my $self = shift;
-  my $key = shift;
-  return($self->{event_fields}->{$key});
+  return (dclone($self->{event_fields}));
 }
 
 sub values {

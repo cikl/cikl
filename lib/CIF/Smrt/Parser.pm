@@ -30,8 +30,7 @@ sub parse {
 
 sub create_event {
   my $self = shift;
-  my $ret = CIF::Models::Event->new();
-  map { $ret->{$_} = $self->config->event_field($_) } $self->config->event_field_keys();
+  my $ret = CIF::Models::Event->new($self->config->default_event_data());
   return $ret;
 }
 
