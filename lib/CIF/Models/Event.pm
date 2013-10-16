@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Scalar::Util qw(blessed);
 use Data::Dumper;
+require JSON;
 #use Tie::Hash;
 #our @ISA = 'Tie::StdHash';
 
@@ -39,7 +40,6 @@ use constant FIELDS => {
   timestamp_epoch => 1
 };
 
-require JSON;
 sub new {
   my $class = shift;
   my $data = shift || {};
@@ -57,6 +57,13 @@ sub to_json {
     $data->{$key} = $self->{$key};
   }
   return JSON::encode_json($data);
+}
+
+sub from_json {
+  my $class = shift;
+  my $data = JSON::decode_json(shift);
+
+  return($class->new($data));
 }
 
 
