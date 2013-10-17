@@ -97,6 +97,7 @@ sub new {
 
   bless($self,$class);
 
+  $config_data->{guid} = $self->{guid};
   # The remaining fields will act as defaults for events, when they are created.
   $self->{event_fields} = $config_data;
 
