@@ -43,12 +43,13 @@ use constant FIELDS => {
 
 sub new {
   my $class = shift;
-  my $guid = shift;
   my $data = shift || {};
   my $self = {};
   #tie %{$self}, $class;
   map { $self->{$_} = $data->{$_} } keys %{$data};
-  $self->{guid} = $guid;
+  if (!defined($self->{guid})) {
+    die "Event requires a GUID!";
+  }
   if (!defined($self->{id})) {
     $self->{id} = generate_uuid_random();
   }

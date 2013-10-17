@@ -4,7 +4,7 @@ use base 'Class::Accessor';
 use strict;
 use warnings;
 use Scalar::Util qw(blessed);
-use CIF::Encoder::Legacy;
+use CIF::Encoder::JSON;
 use CIF::Models::Submission;
 
 __PACKAGE__->follow_best_practice();
@@ -20,7 +20,7 @@ sub new {
     my $global_config = $args->{'config'};
     my $driver_config = $global_config->param(-block => 'client_'.$args->{driver_name});
 
-    $self->{encoder} = CIF::Encoder::Legacy->new();
+    $self->{encoder} = CIF::Encoder::JSON->new();
     $self->set_config($driver_config);
     $self->set_global_config($global_config);
     return($self);
@@ -29,7 +29,7 @@ sub new {
 sub encode_submission {
   my $self = shift;
   my $submission = shift;
-  return $submission->encode($self->{encoder});
+  return $self->{encoder}->encode_submission($submission);
 }
 
 sub query {
