@@ -34,7 +34,7 @@ sub insert {
     my $data        = shift;
     my $isUpdate    = shift;
         
-    my $msg = $data->{'data'}; 
+    my $msg = Iodef::Pb::Simple->new($data->{'event'});
 
     if($data->{'format'} && $data->{'format'} eq 'feed'){
         unless (UNIVERSAL::isa($msg, 'FeedType')) {
