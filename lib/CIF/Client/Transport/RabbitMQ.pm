@@ -83,35 +83,18 @@ sub query {
     }
 }
 
-sub submit_event {
+sub submit {
     my $self = shift;
-    my $apikey = shift;
-    my $guid = shift;
-    my $event = shift;
+    my $submission = shift;
 
-    my $body = $self->{encoder}->encode_submission($apikey, $guid, $event);
+    my $body = $self->encode_submission($submission);
     $self->{channel}->publish(
       exchange => $self->{exchange_name},
       routing_key => $self->{submit_key},
       body => $body 
     );
+    return undef;
 }
-#sub submit_json_event {
-#    my $self = shift;
-#    my $apikey = shift;
-#    my $guid = shift;
-#    my $event = shift;
-#
-#    my $msg = CIF::MsgHelpers::build_submission_msg($apikey, $guid, [$iodef]);
-#    my $body = $msg->encode();
-#    $self->{channel}->publish(
-#      exchange => $self->{exchange_name},
-#      routing_key => $self->{submit_key},
-#      body => $body 
-#    );
-#
-#}
-
 1;
 
 

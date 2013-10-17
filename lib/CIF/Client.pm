@@ -15,6 +15,7 @@ use Net::Patricia;
 use URI::Escape;
 use Digest::MD5 qw/md5_hex/;
 use Encode qw(encode_utf8);
+use CIF::Models::Submission;
 
 use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 use CIF::Msg;
@@ -264,9 +265,10 @@ sub send_keypairs {
 sub submit {
     my $self = shift;
     my $guid = shift;
-    my $events = shift;
+    my $event = shift;
 
-    return $self->get_driver->submit($self->get_apikey(), $guid, $events);
+    my $submission = CIF::Models::Submission->new($self->get_apikey(), $guid, $event);
+    return $self->get_driver()->submit($submission);
 }    
 
 # confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)

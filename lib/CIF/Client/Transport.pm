@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw(blessed);
 use CIF::Encoder::Legacy;
+use CIF::Models::Submission;
 
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(config global_config));
@@ -25,36 +26,24 @@ sub new {
     return($self);
 }
 
+sub encode_submission {
+  my $self = shift;
+  my $submission = shift;
+  return $submission->encode($self->{encoder});
+}
+
 sub query {
     my $self = shift;
     my $queries = shift;
 
-    return(blessed($self) . " has not implemented the query() method!");
+    die(blessed($self) . " has not implemented the query() method!");
 }
 
 sub submit {
     my $self = shift;
-    my $apikey = shift;
-    my $guid = shift;
-    my $events = shift;
+    my $submission = shift;
 
-    my @uuids;
-    foreach my $event (@$events) {
-      push(@uuids, $event->{id});
-      $self->submit_event($apikey, $guid, $event);
-    }
-
-    return (undef, \@uuids);
-}
-
-
-sub submit_event {
-    my $self = shift;
-    my $apikey = shift;
-    my $guid = shift;
-    my $event = shift;
-
-    return(blessed($self) . " has not implemented the submit_event() method!");
+    die(blessed($self) . " has not implemented the submit_event() method!");
 }
 
 1;

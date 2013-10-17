@@ -52,13 +52,12 @@ sub query {
     }
 }
 
-sub submit_event {
+sub submit {
     my $self = shift;
-    my $apikey = shift;
-    my $guid = shift;
-    my $event = shift;
-    my $body = $self->{encoder}->encode_submission($apikey, $guid, $event);
-    my $response = $self->{router}->process($body);
+    my $submission = shift;
+    my $body = $self->encode_submission($submission);
+    my $ret = $self->{router}->process($body);
+    return (undef,$ret);
 }
 
 1;
