@@ -20,6 +20,7 @@ sub new {
     my $config = shift;
     my $router = shift;
     my $type = shift;
+    my $encoder = shift;
  
     my $self = { };
     bless($self,$class);
@@ -27,6 +28,7 @@ sub new {
     $self->{router} = $router;
     $self->{config} = $config;
     $self->{type} = $type;
+    $self->{encoder} = $encoder;
 
     my $debug = $router->get_config->{'debug'} || 0;
 
@@ -70,7 +72,8 @@ sub process {
     my $self = shift;
     my $payload = shift;
     if ($self->is_submission()) {
-      return($self->{router}->process($payload));
+      my $submission = $self->{encoder}->decode_submission($payload);
+      return($self->{router}->process_submission($submission));
     } elsif ($self->is_query()) {
       return($self->{router}->process($payload));
     }

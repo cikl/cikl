@@ -282,10 +282,6 @@ sub process {
             $reply = $self->process_query($msg);
             last;
         }
-        if($_ == MessageType::MsgType::SUBMISSION()){
-            $reply = $self->process_submissions($msg, $msg->get_apikey());
-            last;
-        }
     }
 
     debug($err) if($err);
@@ -432,88 +428,37 @@ sub process_query {
     return $reply;
 }
 
-sub process_submissions {
-    my $self = shift;
-    my $msg = shift;
-    my $apikey = shift;
-
-    debug('type: submission...');
-    my $auth = $self->authorized_write($apikey);
-    my $reply = MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::REPLY(),
-        status  => MessageType::StatusType::UNAUTHORIZED(),
-    });
-    return $reply unless($auth);
-    
-    my $err;
-    my $default_guid = $auth->{'default_guid'} || 'everyone';
-    my @ret;
-    
-    foreach my $submission (@{$msg->get_data()}){
-      my ($err, $ids) = $self->process_submission($submission, $default_guid);
-      if ($err) {
-        return MessageType->new({
-            version => $CIF::VERSION,
-            type    => MessageType::MsgType::REPLY(),
-            status  => MessageType::StatusType::FAILED(),
-            data    => 'submission failed: contact system administrator',
-          });
-      }
-      @ret = (@ret, @$ids);
-    }
-    $self->flush();
-    debug('done...');
-    return MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::REPLY(),
-        status  => MessageType::StatusType::SUCCESS(),
-        data    => \@ret
-    });
-}
-
 sub process_submission {
   my $self = shift;
-  my $data = shift;
-  my $default_guid = shift;
-  my $m = MessageType::SubmissionType->decode($data);
+  my $submission = shift;
+  my $auth = $self->authorized_write($submission->apikey());
+  my $default_guid = $auth->{'default_guid'} || 'everyone';
 
-  my $iodefs = $m->get_data();
-  my $guid    = $m->get_guid() || $default_guid;
+  my $guid    = $submission->guid() || $default_guid;
   $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
-  ## TODO -- copy foreach loop from SMRT; commit every X objects
 
-  my @ret;
-  debug('entries: '.($#{$iodefs} + 1));
-  foreach my $iodef (@{$iodefs}) {
-    if (!defined($iodef) or $iodef eq '') {
-      next;
-    }
-    debug('inserting...') if($debug > 4);
-    my ($err,$id) = $self->insert_iodef($guid, $iodef);
+  debug('inserting...') if($debug > 4);
+  my ($err, $id) = $self->insert_event($guid, $submission->event());
+  if ($err) { return $err }
 
-    if($err){
-      return($err);
-    }
-    push(@ret, $id);
-  }
-  return(undef, \@ret);
+  $self->flush();
 }
 
 sub flush {
   my $self = shift;
   return if ($self->{inserts} == 0);
+  $self->{inserts} = 0;
   debug('committing...');
   CIF::Archive->dbi_commit();
 }
 
-sub insert_iodef {
+sub insert_event {
   my $self = shift;
   my $guid = shift;
-  my $iodef = shift;
+  my $event = shift;
   $self->{inserts} += 1;
   my ($err, $ret) = (CIF::Archive->insert({
-      data        => $iodef,
+      event       => $event,
       guid        => $guid,
       feeds       => $self->get_feeds(),
       datatypes   => $self->get_datatypes(),
@@ -521,17 +466,8 @@ sub insert_iodef {
 
   if ($self->{inserts} >= $self->{commit_interval} == 0) {
     $self->flush();
-    $self->{inserts} = 0;
   }
   return ($err, $ret);
-}
-
-sub process_event {
-    my $self = shift;
-    my $apikey = shift;
-    my $event = shift;
-
-
 }
 
 sub send {}

@@ -6,6 +6,7 @@ use CIF::Router::Transport;
 use Config::Simple;
 use CIF::Router;
 use Try::Tiny;
+use CIF::Encoder::JSON;
 
 use CIF qw/init_logging/;
 
@@ -19,6 +20,8 @@ sub new {
     my $config = "/home/mryan/code/cif-v1-dev/cif.conf";
     $self->{config} = Config::Simple->new($config);
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
+
+    $self->{encoder} = CIF::Encoder::JSON->new();
 
     init_logging($self->{config}->{'debug'} || 0);
 
@@ -37,7 +40,7 @@ sub new {
 
     my $driver;
     try {
-      $driver = $driver_class->new($driver_config, $router, $type);
+      $driver = $driver_class->new($driver_config, $router, $type, $self->{encoder});
     } catch {
       $err = shift;
       die "Driver ($driver_class) failed to load: $err";
