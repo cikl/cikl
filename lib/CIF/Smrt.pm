@@ -424,7 +424,14 @@ sub submit {
     my $self = shift;
     my $data = shift;
 
-    return $self->get_client->submit($self->get_feedparser_config->{'guid'}, $data);    
+    my ($err, $ret);
+    foreach my $event (@$data) {
+      ($err, $ret) = $self->get_client->submit($self->get_feedparser_config->{'guid'}, $event);    
+      if ($err) {
+        return $err;
+      }
+    }
+    return undef;
 }
 
 1;
