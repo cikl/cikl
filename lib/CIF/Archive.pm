@@ -14,6 +14,7 @@ require Compress::Snappy;
 use Digest::SHA qw/sha1_hex/;
 use Data::Dumper;
 use POSIX ();
+use CIF::Client::Query;
 
 use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
@@ -102,6 +103,60 @@ sub insert_index {
     return(undef,1);
 }
 
+sub normalize_query {
+    my $class = shift;
+    my $query = shift;
+    my $splitup = $query->splitup();
+    my @ret;
+
+    foreach my $q (@$splitup) {
+      my @new_queries; 
+      foreach my $plugin (CIF::Client::Query->plugins()){
+        my ($err,$r) = $plugin->process($q->to_hash);
+        return($err) if($err);
+        next unless($r);
+        $r = [$r] unless ref($r) eq "ARRAY";
+
+        foreach my $x (@$r) {
+          push(@new_queries, CIF::Models::Query->from_existing($q, $x));
+        }
+        last;
+      }
+      if ($#new_queries > -1) {
+        @ret = (@ret, @new_queries);
+      } else {
+        push(@ret, $q);
+      }
+
+    }
+    return undef, \@ret;
+}
+
+sub search2 {
+    my $class = shift;
+    my $query = shift;
+
+    my ($err, $normalized_queries) = $class->normalize_query($query);
+    return (undef, $normalized_queries);
+    my @queries; 
+    my ($pb_query);
+    my $split_query = $query->split_query;
+    foreach my $q (@$split_query) {
+      ($err,$pb_query) = CIF::Client::Query->new({
+          apikey      => $query->apikey,
+          guid        => $query->guid,
+          query       => $q,
+
+          nolog       => $query->nolog,
+          limit       => $query->limit,
+          confidence  => $query->confidence,
+          description => $query->description
+        });
+      if ($err) { die $err }
+      push(@queries, $pb_query);
+    }
+    return (undef, \@queries);
+}
 sub search {
     my $class = shift;
     my $data = shift;
@@ -118,11 +173,11 @@ sub search {
         );
     } else {
         # log the query first
-        unless($data->{'nolog'}){
-            debug('logging search');
-            my ($err,$ret) = $class->log_search($data);
-            return($err) if($err);
-        }
+#        unless($data->{'nolog'}){
+#            debug('logging search');
+#            my ($err,$ret) = $class->log_search($data);
+#            return($err) if($err);
+#        }
         foreach my $p (@plugins){
             my $err;
             try {
