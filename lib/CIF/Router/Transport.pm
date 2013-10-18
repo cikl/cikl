@@ -75,7 +75,9 @@ sub process {
       my $submission = $self->{encoder}->decode_submission($payload);
       return($self->{router}->process_submission($submission));
     } elsif ($self->is_query()) {
-      return($self->{router}->process($payload));
+      my $query = $self->{encoder}->decode_query($payload);
+      my $answer = $self->{router}->process_query($query);
+      return($self->{encoder}->encode_answer($answer));
     }
 }
 

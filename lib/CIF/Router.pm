@@ -16,6 +16,7 @@ use CIF::Msg;
 use CIF::Msg::Feed;
 use Data::Dumper;
 use CIF::Models::Event;
+use CIF::MsgHelpers qw/msg_reply_fail msg_reply_unauthorized msg_reply_success/;
 
 # this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
 # most people just want a quick answer, if they override this (via the client), they'll expect the
@@ -223,25 +224,6 @@ sub authorized_read {
     return(undef,$ret); # all good
 }
 
-## TODO -- this is probably backwards..
-sub authorized_read_query {
-    my $self = shift;
-    my $args = shift;
-    
-    my @recs = CIF::APIKeyRestrictions->search(uuid => $args->{'apikey'});
-    
-    # if there are no restrictions, return 1
-    return 1 unless($#recs > -1);
-    foreach (@recs){
-        # if we've given explicit access to that query (eg: domain/malware, domain/botnet, etc...)
-        # return 1
-        debug('access: '.$_->access());
-        return 1 if($_->access() eq $args->{'query'});
-    }
-    # fail closed
-    return;
-}
-
 sub authorized_write {
     my $self = shift;
     my $key = shift;
@@ -265,28 +247,23 @@ sub process {
     
     $msg = MessageType->decode($msg);
     
-    my $reply = MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::REPLY(),
-        status  => MessageType::StatusType::FAILED(),
-    });
     
   my $pversion = sprintf("%4f",$msg->get_version());
    if($pversion != $CIF::VERSION){
-        $reply->set_data('invalid protocol version: '.$pversion.', should be: '.$CIF::VERSION);
-        return $reply->encode();
+        my $ret = msg_reply_fail('invalid protocol version: '.$pversion.', should be: '.$CIF::VERSION);
+        return $ret->encode();
     }
     my $err;
     for($msg->get_type()){
         if($_  == MessageType::MsgType::QUERY()){
-            $reply = $self->process_query($msg);
+            return $self->process_query($msg);
             last;
         }
     }
 
     debug($err) if($err);
     
-    return $reply->encode();
+    return msg_reply_fail()->encode();
 }
 
 sub connect_retry {
@@ -309,123 +286,86 @@ sub connect_retry {
 
 sub process_query {
     my $self = shift;
-    my $msg = shift;
-    
+    my $query = shift;
+    #my $msg = shift;
+
     my $results = [];
     
-    my $data = $msg->get_data();
-    my $apikey_info;
+    #my $data = $msg->get_data();
     my $is_feed_query = 0;
-    
-    my $reply;
-    my $authorized = 0;
-    
-    foreach my $m (@$data){
-        $m = MessageType::QueryType->decode($m);
-        # we can skip this if the first packet contains a valid apikey
-        # later on; as we figure out what we're doing, we may want to
-        # turn this off and check each time -- dunno why you'd search
-        # with multiple apikeys; but just in case *shrug*
-        unless($authorized){
-            my $apikey = $m->get_apikey();
-            debug('apikey: '.$apikey) if($debug > 3);
-            my ($err, $ret) = $self->authorized_read($apikey);
-            unless($ret){
-                return(
-                    MessageType->new({
-                        version => $CIF::VERSION,
-                        type    => MessageType::MsgType::REPLY(),
-                        status  => MessageType::StatusType::UNAUTHORIZED(),
-                        data    => $err,
-                    })
-                );
-            }
-            $apikey_info = $ret; 
-        }
-        $authorized = 1;
+
+    my $default_limit = $self->get_query_default_limit();
+    my $feeds = $self->get_feeds();
+    my $datatypes = $self->get_datatypes();
+    my $restriction_map = $self->get_restriction_map();
+    debug('apikey: '.$query->apikey) if($debug > 3);
+    my ($err2, $apikey_info) = $self->authorized_read($query->apikey);
+    unless($apikey_info){
+      return(msg_reply_unauthorized($err2));
+    }
+
+    my ($err, $ret) = CIF::Archive->search2($query);
+
+    my @res;
+    foreach my $m (@$ret){
         debug('authorized stage1') if($debug > 3);
-        my @res;
         
         # so we can tell the client how we limited the query
-        my $limit = $m->get_limit() || $self->get_query_default_limit();
-        foreach my $q (@{$m->get_query()}){
-            debug('query: '.$q->get_query()) if($debug > 3);
-            ## TODO -- there has got to be a better way to do this...
-            unless($self->authorized_read_query({ apikey => $m->get_apikey(), query => $q->get_query})){
-                return (
-                    MessageType->new({
-                        version => $CIF::VERSION,
-                        type    => MessageType::MsgType::REPLY(),
-                        status  => MessageType::StatusType::UNAUTHORIZED(),
-                        data    => 'no access to that type of query',
-                    })
-                );
-            }
-            debug('authorized to make this query') if($debug > 3);
-            my ($err,$s) = CIF::Archive->search({
-                query           => $q->get_query(),
-                limit           => $limit,
-                confidence      => $m->get_confidence(),
-                guid            => $m->get_guid() || $apikey_info->{'default_guid'},
-                guid_default    => $apikey_info->{'default_guid'},
-                nolog           => $q->get_nolog(),
-                source          => $m->get_apikey(),
-                description     => $m->get_description(),
-                feeds           => $self->get_feeds(),
-                datatypes       => $self->get_datatypes(),
-            });
-            if($err){
-                debug($err);
-                return(
-                    MessageType->new({
-                        version => $CIF::VERSION,
-                        type    => MessageType::MsgType::REPLY(),
-                        status  => MessageType::StatusType::FAILED(),
-                        data    => 'query failed, contact system administrator',
-                    })
-                );
-            }
-            next unless($s);
-            push(@res,@$s);
+        #my $hashed_query = $q->get_query();
+        my $hashed_query = $m->hashed_query();
+        debug('query: '.$hashed_query) if($debug > 3);
+        ## TODO -- there has got to be a better way to do this...
+        unless(CIF::APIKeyRestrictions->authorized_read_query($query->apikey(), $hashed_query)){
+          return (msg_reply_unauthorized('no access to that type of query'));
         }
-        if($#res > -1){
-            ## TODO: SHIM, gatta be a more elegant way to do this
-            unless($m->get_feed()){
-                debug('generating feed');
-                my $dt = DateTime->from_epoch(epoch => time());
-                $dt = $dt->ymd().'T'.$dt->hms().'Z';
-                
-                my $f = FeedType->new({
-                    version         => $CIF::VERSION,
-                    confidence      => $m->get_confidence(),
-                    description     => $m->get_description(),
-                    ReportTime      => $dt,
-                    group_map       => $apikey_info->{'group_map'}, # so they can't see other groups they're not in
-                    restriction_map => $self->get_restriction_map(),
-                    data            => \@res,
-                    uuid            => generate_uuid_random(),
-                    guid            => $apikey_info->{'default_guid'},
-                    query_limit     => $limit,
-                    # todo -- make this avail to to libcif
-                    # https://github.com/collectiveintel/cif-router/issues/5
-                    #feeds_map       => $self->get_feeds_map(),
-                });  
-                push(@$results,$f->encode());
-            } else {
-                push(@$results,@res);
-            }
+        debug('authorized to make this query') if($debug > 3);
+        my ($err,$s) = CIF::Archive->search({
+            query           => $hashed_query,
+
+            description     => $m->description(),
+            limit           => $m->limit() || $default_limit,
+            confidence      => $m->confidence(),
+            guid            => $m->guid() || $apikey_info->{'default_guid'},
+
+            guid_default    => $apikey_info->{'default_guid'},
+            nolog           => $m->nolog(),
+            source          => $m->apikey(),
+
+            feeds           => $feeds,
+            datatypes       => $datatypes,
+          });
+        if($err){
+          debug($err);
+          return(msg_reply_fail('query failed, contact system administrator'));
         }
+        next unless($s);
+        push(@res,@$s);
+    }
+
+    if($#res > -1){
+      debug('generating feed');
+      my $dt = DateTime->from_epoch(epoch => time());
+      $dt = $dt->ymd().'T'.$dt->hms().'Z';
+
+      my $f = FeedType->new({
+          version         => $CIF::VERSION,
+          confidence      => $query->confidence(),
+          description     => $query->description(),
+          ReportTime      => $dt,
+          group_map       => $apikey_info->{'group_map'}, # so they can't see other groups they're not in
+          restriction_map => $restriction_map,
+          data            => \@res,
+          uuid            => generate_uuid_random(),
+          guid            => $apikey_info->{'default_guid'},
+          query_limit     => $query->limit() || $default_limit,
+          # todo -- make this avail to to libcif
+          # https://github.com/collectiveintel/cif-router/issues/5
+          #feeds_map       => $self->get_feeds_map(),
+        });  
+      push(@$results,$f->encode());
     }
     debug('replying...');
-                    
-    $reply = MessageType->new({
-        version => $CIF::VERSION,
-        type    => MessageType::MsgType::REPLY(),
-        status  => MessageType::StatusType::SUCCESS(),
-        data    => $results,
-    });
-
-    return $reply;
+    return(msg_reply_success($results));
 }
 
 sub process_submission {
@@ -442,6 +382,7 @@ sub process_submission {
   if ($err) { return $err }
 
   $self->flush();
+  return undef;
 }
 
 sub flush {
