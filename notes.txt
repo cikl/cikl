@@ -1,0 +1,2 @@
+- Broke query logging (it no longer logs queries).
+- Broke querying of feeds.
