@@ -6,13 +6,9 @@ use warnings;
 use JSON qw{encode_json};
 use Data::Dumper;
 
-use Carp;
-$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
-
 use Net::RabbitFoot;
 use Messaging::Message;
 use CIF qw/debug/;
-use CIF::MsgHelpers;
 
 sub new {
     my $class = shift;
@@ -42,9 +38,8 @@ sub new {
 
 sub query {
     my $self = shift;
-    my $queries = shift;
-    my $msg = CIF::MsgHelpers::msg_wrap_queries($queries);
-    my $body = $msg->encode();
+    my $query = shift;
+    my $body = $self->encode_query($query);
 
     my $result = $self->{channel}->declare_queue( 
       queue => "",
@@ -77,7 +72,7 @@ sub query {
     my $response = $cv->recv;
     undef($timer);
     if (defined($response)) {
-      return CIF::MsgHelpers::decode_msg_feeds(MessageType->decode($response));
+      return $self->decode_answer($response);
     } else {
       return("Timed out while waiting for reply.");
     }

@@ -9,9 +9,6 @@ use JSON qw{encode_json};
 use Data::Dumper;
 use CIF::Router;
 
-use Carp;
-$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
-
 use Messaging::Message;
 use CIF qw/debug/;
 use CIF::MsgHelpers;

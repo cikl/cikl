@@ -4,13 +4,42 @@ use strict;
 use warnings;
 use CIF::MsgHelpers;
 use CIF::Models::Submission;
+use CIF::Models::Query;
+use CIF::Client::Query;
+use Data::Dumper;
+use Try::Tiny;
 require JSON;
-
 
 sub new {
   my $class = shift;
 }
 
+sub encode_query {
+  my $self = shift;
+  my $query = shift;
+  my $data = {};
+  map { $data->{$_} = $query->{$_} } keys %{$query};
+  return JSON::encode_json($data);
+}
+
+sub decode_query {
+  my $self = shift;
+  my $json = shift;
+  my $data = JSON::decode_json($json);
+  return CIF::Models::Query->new($data);
+}
+
+sub encode_answer {
+  my $self = shift;
+  my $answer = shift;
+  return $answer->encode();
+}
+
+sub decode_answer {
+  my $self = shift;
+  my $data = shift;
+  return CIF::MsgHelpers::decode_msg_feeds(MessageType->decode($data));
+}
 
 sub encode_submission {
   my $self = shift;

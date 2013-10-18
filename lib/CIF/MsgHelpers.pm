@@ -2,12 +2,31 @@ package CIF::MsgHelpers;
 
 use strict;
 use warnings;
+our @ISA = 'Exporter';
+use CIF;
 
 use Try::Tiny;
 use CIF qw(generate_uuid_ns is_uuid debug generate_uuid_random);
 require Iodef::Pb::Simple;
 
-our @EXPORT = qw/msg_wrap_queries/;
+our @EXPORT_OK = qw/
+build_submission
+build_submission_msg
+decode_feed_data
+decode_msg_feeds
+generate_iodef
+get_msg_error
+get_uuids
+msg_wrap_queries 
+msg_reply
+msg_reply_fail 
+msg_reply_unauthorized 
+msg_reply_success
+msg_wrap
+msg_wrap_queries
+msg_wrap_reply
+msg_wrap_submission
+/;
 
 sub msg_wrap {
     my $data = shift;
@@ -171,4 +190,34 @@ sub generate_iodef {
     return $iodef;
 }
 
+sub msg_reply {
+  my $status = shift;
+  my $data = shift;
+  my $msg = MessageType->new({
+      version => $CIF::VERSION,
+      type    => MessageType::MsgType::REPLY(),
+      status  => $status,
+    });
 
+  if (defined($data)) {
+    $msg->set_data($data);
+  }
+  return $msg;
+}
+
+sub msg_reply_fail {
+  my $data = shift;
+  return(msg_reply(MessageType::StatusType::FAILED(), $data));
+}
+
+sub msg_reply_unauthorized {
+  my $data = shift;
+  return(msg_reply(MessageType::StatusType::UNAUTHORIZED(), $data));
+}
+
+sub msg_reply_success {
+  my $data = shift;
+  return(msg_reply(MessageType::StatusType::SUCCESS(), $data));
+}
+
+1;

@@ -31,6 +31,8 @@ sub process {
         ## should this be set server side?
         confidence  => defined($args->{'confidence'}) ? $args->{'confidence'} : 95,
     };
+    use Data::Dumper;
+    print Dumper $query;
 
     return(undef,$query);  
 }

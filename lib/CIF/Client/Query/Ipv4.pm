@@ -15,8 +15,8 @@ sub process {
     return unless($args->{'query'} =~ /^$RE{'net'}{'IPv4'}/);
     $args->{'query'} = normalize_address($args->{'query'});
   
-    my $pt = $args->{'pt'};
-    $pt->add_string($args->{'query'});
+    #my $pt = $args->{'pt'};
+    #$pt->add_string($args->{'query'});
     
     my @array = split(/\./,$args->{'query'});
     my $queries;

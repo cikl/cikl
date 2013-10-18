@@ -3,6 +3,7 @@ use base 'Class::Accessor';
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
@@ -16,6 +17,7 @@ use URI::Escape;
 use Digest::MD5 qw/md5_hex/;
 use Encode qw(encode_utf8);
 use CIF::Models::Submission;
+use CIF::Models::Query;
 
 use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 use CIF::Msg;
@@ -95,8 +97,16 @@ sub _init_driver {
 
 sub search {
     my $self = shift;
+    my $query = shift;
     my $args = shift;
     
+    my $err;
+    my $orig_query = $query;
+    # make sure if there are no spaces between queries
+    $query =~ s/\s//g;
+
+    my @orig_queries = split(/,/,$query);
+
     my $filter_me   = $args->{'filter_me'} || $self->get_filter_me();
     my $nolog       = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_nolog();
 
@@ -104,43 +114,36 @@ sub search {
         $args->{'apikey'} = $self->get_apikey();
     }
 
-    unless(ref($args->{'query'}) eq 'ARRAY'){
-        my @a = split(/,/,$args->{'query'});
-        $args->{'query'} = \@a;
-    }
-    
     my @queries;
-    my @orig_queries = @{$args->{'query'}};
     
     # we have to pass this along so we can check it later in the code
     # for our original queries since the server will give us back more 
     # than we asked for
     my $ip_tree = Net::Patricia->new();
     
-    debug('generating query') if($::debug);
-    foreach my $q (@orig_queries) {
-        debug('query: '.$q);
-        debug('query sha1: '.sha1_hex($q));
-        my ($err,$ret) = CIF::Client::Query->new({
-            query       => $q,
-            apikey      => $args->{'apikey'},
-            limit       => $args->{'limit'},
-            confidence  => $args->{'confidence'},
-            guid        => $args->{'guid'},
-            nolog       => $args->{'nolog'},
-            description => $args->{'description'} || 'search '.$q,
-            pt          => $ip_tree,
-            
-            ## TODO -- not sure how else to do this atm
-            ## needs to be passed to the IPv4 query so we
-            ## can get back the tree and check it against the feed
-        });
-        return($err) if($err);
-        push(@queries,$ret) if($ret);
-    }        
-        
-    debug('sending query') if($::debug);
-    my ($err,$feeds) = $self->get_driver->query(\@queries);
+    my $query_model;
+    try {
+      $query_model = CIF::Models::Query->new(
+        {
+          apikey      => $args->{'apikey'},
+          guid        => $args->{'guid'},
+          query       => $orig_query,
+          nolog       => $nolog,
+          limit       => $args->{'limit'},
+          confidence  => $args->{'confidence'},
+          description => $args->{'description'},
+        }
+      );
+    } catch {
+      $err = $_;
+    };
+
+    if (!defined($query_model)) {
+      return("Failed to create query object: $err");
+    }
+
+    my $feeds;
+    ($err,$feeds) = $self->get_driver->query($query_model);
     
     return $err if($err);
  
@@ -149,14 +152,25 @@ sub search {
     }
     my $uuid = generate_uuid_ns($args->{'apikey'});
     
-    my $query_had_ips = $ip_tree->climb();
+    filter_response($feeds, $uuid, $filter_me, $ip_tree, \@orig_queries);
+    
+    debug('done processing');
+    return(undef,$feeds);
+}
 
+sub filter_response {
+    my $feeds = shift; 
+    my $uuid = shift;
+    my $filter_me = shift;
+    my $ip_tree = shift;
+    my $orig_queries = shift;
+
+    my $query_had_ips = $ip_tree->climb();
     my @ip_queries;
-    foreach my $q (@orig_queries) {
+    foreach my $q (@$orig_queries) {
       next unless ($q =~ /^$RE{'net'}{'IPv4'}/);
       push(@ip_queries, $q);
     }
-
     debug('filtering...') if($::debug);
     ## TODO: finish this so feeds are inline with reg queries
     ## TODO: try to base64 decode and decompress first in try { } catch;
@@ -186,9 +200,6 @@ sub search {
             $feed->set_data(undef);
         }
     }
-    
-    debug('done processing');
-    return(undef,$feeds);
 }
 
 sub ip_in_scope {

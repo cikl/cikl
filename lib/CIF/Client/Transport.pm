@@ -32,6 +32,18 @@ sub encode_submission {
   return $self->{encoder}->encode_submission($submission);
 }
 
+sub encode_query {
+  my $self = shift;
+  my $query = shift;
+  return $self->{encoder}->encode_query($query);
+}
+
+sub decode_answer {
+  my $self = shift;
+  my $answer = shift;
+  return $self->{encoder}->decode_answer($answer);
+}
+
 sub query {
     my $self = shift;
     my $queries = shift;

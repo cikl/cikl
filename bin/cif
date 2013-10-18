@@ -34,7 +34,6 @@ BEGIN {
 
 use CIF::Client;
 use Getopt::Std;
-use Data::Dumper;
 use JSON::XS;
 use CIF qw/debug/;
 
@@ -51,8 +50,6 @@ our $debug       = ($opts{'d'}) ? 1 : 0;
 my $config      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
 my $outfile     = $opts{'O'};
 my $query       = $opts{'q'} || shift;
-
-my $input       = $opts{'i'};
 
 # query options
 my $nolog       = $opts{'n'} || 0;
@@ -82,7 +79,7 @@ my $exclude_assessment   = $opts{'e'};
 my $csv_noheader        = $opts{'x'};
 my $new_only            = $opts{'m'} || 0;
 
-die usage() unless($query || $input);
+die usage() unless($query);
 die usage() if($opts{'h'});
 
 sub usage {
@@ -201,37 +198,19 @@ if($err){
 
 my $ret;
 
-# if we're doing input via STDIN
-# assuming we're getting JSON keypairs here, so we'll use the legacy interface for now
-# it already takes care of some of the heavy lifting
-# TODO -- migrate that code to libcif so we can do it here too
-if($input) {
-    # force the client to use JSON
-    my @input = <STDIN>;
-    my $json = '['.join(',',@input).']';   
-    my $iodefs = decode_json($json);
-    foreach (@$iodefs) {
-        $_ = Iodef::Pb::Simple->new($_);
-    }
-    my ($err, $ret) = $cli->submit("everyone", $iodefs);
-    if ($ret) {
-      print encode_json($ret) . "\n";
-    }
-    exit(0);
-}
-
 # else we're doing query
 if($outfile){
     open(F,">",$outfile) || die($!);
 }
 
+my $orig_query = $query;
+
 # make sure if there are no spaces between queries
 $query =~ s/\s//g;
 
-my @q = split(/,/,$query);
+#my @q = split(/,/,$query);
 
-($err,$ret) = $cli->search({
-    query               => \@q,
+($err,$ret) = $cli->search($orig_query, {
     filter_me           => $filter_me,
     nolog               => $nolog,
     no_maprestrictions  => $nomap,
@@ -298,7 +277,7 @@ foreach my $feed (0 ... $#{$feeds}){
         # with the original $feeds array, or if there is a gap in $feeds
         # compared to the $q array, we should make sure the router returns
         # are in-sync
-        query               => $q[$x],
+        #query               => "ASDFASDF",
     });
     
     #$t .= "\n";
