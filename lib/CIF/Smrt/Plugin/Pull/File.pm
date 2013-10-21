@@ -20,21 +20,12 @@ sub pull {
             $file = $bin_path.'/../'.$file;
         }
     }
+    my $orig_sep = $/;
+    local $/ = undef;
     open(F,$file) || return($!.': '.$file);
-    my @lines = <F>;
+    my $content = <F>;
     close(F);
-    
-    if(my $l = $f->{'feed_limit'}){
-        my ($start,$end);
-        if(ref($l) eq 'ARRAY'){
-            ($start,$end) = @{$l};
-        } else {
-            ($start,$end) = (0,$l-1);
-        }
-        $end = $#lines if ($end > $#lines);
-        @lines = @lines[$start..$end];
-    }
-    my $content = join('',@lines) || '';
+    $/ = $orig_sep;
     return(undef,$content);
 }
 
