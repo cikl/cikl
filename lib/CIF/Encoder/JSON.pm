@@ -12,6 +12,9 @@ require JSON;
 
 sub new {
   my $class = shift;
+  my $self = {};
+  bless($self,$class);
+  return $self;
 }
 
 sub encode_query {
