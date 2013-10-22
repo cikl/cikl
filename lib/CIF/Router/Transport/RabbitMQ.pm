@@ -7,6 +7,7 @@ use warnings;
 use Data::Dumper;
 use Net::RabbitFoot;
 use Coro;
+use CIF qw/debug/;
 
 sub new {
     my $class = shift;
@@ -96,7 +97,7 @@ sub run {
         }
       }
     );
-    print "Ready\n";
+    debug("Ready");
     $cv->recv;
 }
 

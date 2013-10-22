@@ -23,7 +23,7 @@ sub new {
 
     $self->{encoder} = CIF::Encoder::JSON->new();
 
-    init_logging($self->{config}->{'debug'} || 0);
+    init_logging($self->{server_config}->{'debug'} || 0);
 
     # Initialize the router.
     my ($err,$router) = CIF::Router->new({
