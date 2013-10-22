@@ -109,6 +109,10 @@ sub decode_feed_data {
     my $uuids = shift;
     my @filtered_data;
 
+    my $data = $feed->get_data();
+    if (!defined($data)) {
+      return(undef, $feed);
+    }
     foreach my $e (@{$feed->get_data()}){
       my $err = undef;
       try {
