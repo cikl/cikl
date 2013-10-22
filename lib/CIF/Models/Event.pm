@@ -57,10 +57,10 @@ sub new {
   return $self;
 }
 
-sub guid {
-  my $self = shift;
-  return $self->{guid};
-}
+sub uuid { $_[0]->{id}}
+sub reporttime { $_[0]->{reporttime}}
+sub guid { $_[0]->{guid}}
+
 
 sub to_json {
   my $self = shift;
