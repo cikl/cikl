@@ -3,3 +3,13 @@
 - post-processors have been removed.
 
 - Probably broke hash lookups.
+  + Turns out I didn't.
+
+
+Places that still have IODEF / Protocol Buffers:
+- libcif-dbi/lib/CIF/Archive/Plugin/* 
+  - I wanted to knock out the protocol abstraction prior to rolling back all
+  the iodef stuff in the archive plugins.
+- libcif/lib/CIF/Client*
+- libcif/bin/cif - Relies upon Iodef::Simple::format to format output. ugh.
+
