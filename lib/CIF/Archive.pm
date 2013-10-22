@@ -34,12 +34,6 @@ my $dbencoder = CIF::Encoder::JSON->new();
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
 
-sub encode_event {
-    my $class = shift;
-    my $event = shift;
-    return Iodef::Pb::Simple->new($event);
-}
-
 sub insert {
     my $class       = shift;
     my $data        = shift;
@@ -55,15 +49,16 @@ sub insert {
     #$data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
     $data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
    
-    my $msg = $class->encode_event($event);
-    my $encoded = encode_base64(Compress::Snappy::compress($msg->encode()));
+    #my $msg = $class->encode_event($event);
+    #my $encoded = encode_base64(Compress::Snappy::compress($msg->encode()));
+
     my ($err,$id);
     try {
         $id = $class->SUPER::insert({
             uuid        => $data->{'uuid'},
             guid        => $data->{'guid'},
             format      => $CIF::VERSION,
-            data        => $encoded,
+            data        => $dbencoder->encode_event($event),
             created     => $data->{'created'},
             reporttime  => $data->{'reporttime'},
         });
@@ -73,17 +68,20 @@ sub insert {
     };
     return ($err) if($err);
     
-    $data->{'data'} = $msg;
+    #$data->{'data'} = $msg;
     
     my $ret;
-    ($err,$ret) = $class->insert_index($data);
+    ($err,$ret) = $class->insert_index($event, $data);
     return($err) if($err);
     return(undef,$data->{'uuid'});
 }
 
 sub insert_index {
     my $class   = shift;
+    my $event = shift;
     my $args    = shift;
+
+    $args->{data} = Iodef::Pb::Simple->new($event);
 
     my $err;
     foreach my $p (@plugins){
@@ -204,7 +202,10 @@ sub search2 {
     foreach (@recs){
         # protect against orphans
         next unless($_->{'data'});
-        push(@rr,Compress::Snappy::decompress(decode_base64($_->{'data'})));
+        my $e = $dbencoder->decode_event($_->{'data'});
+
+        my $encoded = Iodef::Pb::Simple->new($e);
+        push(@rr,$encoded->encode());
     }
     return(undef,\@rr);
 }
