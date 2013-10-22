@@ -30,10 +30,6 @@ sub new {
     $self->{type} = $type;
     $self->{encoder} = $encoder;
 
-    my $debug = $router->get_config->{'debug'} || 0;
-
-    init_logging($debug);
-
     return($self);
 }
 

@@ -29,7 +29,7 @@ __PACKAGE__->mk_accessors(qw(
     config db_config
     restriction_map 
     group_map groups feeds feeds_map feeds_config 
-    archive_config datatypes query_default_limit
+    archive_config datatypes 
 ));
 
 our $debug = 0;
@@ -68,7 +68,6 @@ sub init {
     $self->init_archive();
     
     $debug = $self->get_config->{'debug'} || 0;
-    $self->set_query_default_limit($self->get_config->{'query_default_limit'} || QUERY_DEFAULT_LIMIT());
     
     return ($ret);
 }
@@ -86,6 +85,7 @@ sub init_db {
     
     my $dbi = 'DBI:Pg:database='.$db.';host='.$host;
     my $ret = CIF::DBI->connection($dbi,$user,$password,{ AutoCommit => 0});
+    debug("ret: " . $ret);
     return $ret;
 }
 
@@ -290,59 +290,22 @@ sub process_query {
     #my $msg = shift;
 
     my $results = [];
-    
-    #my $data = $msg->get_data();
-    my $is_feed_query = 0;
 
-    my $default_limit = $self->get_query_default_limit();
-    my $feeds = $self->get_feeds();
-    my $datatypes = $self->get_datatypes();
     my $restriction_map = $self->get_restriction_map();
-    debug('apikey: '.$query->apikey) if($debug > 3);
     my ($err2, $apikey_info) = $self->authorized_read($query->apikey);
     unless($apikey_info){
       return(msg_reply_unauthorized($err2));
     }
-
-    my ($err, $ret) = CIF::Archive->search2($query);
-
-    my @res;
-    foreach my $m (@$ret){
-        debug('authorized stage1') if($debug > 3);
-        
-        # so we can tell the client how we limited the query
-        #my $hashed_query = $q->get_query();
-        my $hashed_query = $m->hashed_query();
-        debug('query: '.$hashed_query) if($debug > 3);
-        ## TODO -- there has got to be a better way to do this...
-        unless(CIF::APIKeyRestrictions->authorized_read_query($query->apikey(), $hashed_query)){
-          return (msg_reply_unauthorized('no access to that type of query'));
-        }
-        debug('authorized to make this query') if($debug > 3);
-        my ($err,$s) = CIF::Archive->search({
-            query           => $hashed_query,
-
-            description     => $m->description(),
-            limit           => $m->limit() || $default_limit,
-            confidence      => $m->confidence(),
-            guid            => $m->guid() || $apikey_info->{'default_guid'},
-
-            guid_default    => $apikey_info->{'default_guid'},
-            nolog           => $m->nolog(),
-            source          => $m->apikey(),
-
-            feeds           => $feeds,
-            datatypes       => $datatypes,
-          });
-        if($err){
-          debug($err);
-          return(msg_reply_fail('query failed, contact system administrator'));
-        }
-        next unless($s);
-        push(@res,@$s);
+    if (!defined($query->guid())) {
+      $query->set_guid($apikey_info->{'default_guid'});
     }
 
-    if($#res > -1){
+    my ($err, $res) = CIF::Archive->search($query);
+    if ($err) {
+      return(msg_reply_fail($err));
+    }
+
+    if($#{$res} > -1){
       debug('generating feed');
       my $dt = DateTime->from_epoch(epoch => time());
       $dt = $dt->ymd().'T'.$dt->hms().'Z';
@@ -354,10 +317,10 @@ sub process_query {
           ReportTime      => $dt,
           group_map       => $apikey_info->{'group_map'}, # so they can't see other groups they're not in
           restriction_map => $restriction_map,
-          data            => \@res,
+          data            => $res,
           uuid            => generate_uuid_random(),
           guid            => $apikey_info->{'default_guid'},
-          query_limit     => $query->limit() || $default_limit,
+          query_limit     => $query->limit(),
           # todo -- make this avail to to libcif
           # https://github.com/collectiveintel/cif-router/issues/5
           #feeds_map       => $self->get_feeds_map(),
@@ -379,7 +342,10 @@ sub process_submission {
 
   debug('inserting...') if($debug > 4);
   my ($err, $id) = $self->insert_event($guid, $submission->event());
-  if ($err) { return $err }
+  if ($err) { 
+    debug("ERR: " . $err);
+    return $err;
+  }
 
   $self->flush();
   return undef;
