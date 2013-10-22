@@ -17,6 +17,8 @@ use POSIX ();
 use CIF::Client::Query;
 use CIF::APIKeyRestrictions;
 use CIF::Encoder::JSON;
+use CIF::Models::Query;
+use CIF::Models::QueryResults;
 
 use Devel::StackTrace;
 use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/;
@@ -204,9 +206,9 @@ sub search2 {
         next unless($_->{'data'});
         my $e = $dbencoder->decode_event($_->{'data'});
 
-        my $encoded = Iodef::Pb::Simple->new($e);
-        push(@rr,$encoded->encode());
+        push(@rr,$e);
     }
+
     return(undef,\@rr);
 }
 
