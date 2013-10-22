@@ -7,14 +7,22 @@ use CIF::Models::Submission;
 use CIF::Models::Event;
 use CIF::Models::Query;
 use CIF::Client::Query;
+use CIF::Msg::Feed;
 use Try::Tiny;
+use CIF::MsgHelpers qw/msg_reply_success/;
 require JSON;
+use Data::Dumper;
+use CIF qw/debug/;
 
 sub new {
   my $class = shift;
   my $self = {};
   bless($self,$class);
   return $self;
+}
+
+sub content_type {
+  return "application/json";
 }
 
 sub encode_query {
@@ -32,16 +40,20 @@ sub decode_query {
   return CIF::Models::Query->new($data);
 }
 
-sub encode_answer {
+sub encode_query_results {
   my $self = shift;
-  my $answer = shift;
-  return $answer->encode();
+  my $query_results = shift;
+  return(JSON::encode_json($query_results->to_hash()));
+
 }
 
-sub decode_answer {
+sub decode_query_results {
   my $self = shift;
-  my $data = shift;
-  return CIF::MsgHelpers::decode_msg_feeds(MessageType->decode($data));
+  my $json = shift;
+  my $data = JSON::decode_json($json);
+  my $query_results = CIF::Models::QueryResults->from_hash($data);
+
+  return ($query_results);
 }
 
 sub encode_event {

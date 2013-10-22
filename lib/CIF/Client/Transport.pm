@@ -38,10 +38,11 @@ sub encode_query {
   return $self->{encoder}->encode_query($query);
 }
 
-sub decode_answer {
+sub decode_query_results {
   my $self = shift;
+  my $content_type = shift;
   my $answer = shift;
-  return $self->{encoder}->decode_answer($answer);
+  return $self->{encoder}->decode_query_results($answer);
 }
 
 sub query {

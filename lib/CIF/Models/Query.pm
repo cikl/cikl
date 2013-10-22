@@ -62,6 +62,25 @@ sub splitup {
   return \@ret;
 }
 
+sub to_hash {
+  my $self = shift;
+  return {
+    apikey => $self->apikey,
+    guid => $self->guid,
+    query => $self->query,
+    nolog => $self->nolog,
+    limit => $self->limit,
+    confidence => $self->confidence,
+    description => $self->description
+  }
+}
+
+sub from_hash {
+  my $class = shift;
+  my $data = shift;
+  return $class->new($data);
+}
+
 sub from_existing {
   my $class = shift;
   my $existing = shift;
@@ -77,20 +96,6 @@ sub from_existing {
     description => $data->{description} // $existing->description
   });
 }
-
-sub to_hash {
-  my $self = shift;
-  return {
-    apikey => $self->apikey,
-    guid => $self->guid,
-    query => $self->query,
-    nolog => $self->nolog,
-    limit => $self->limit,
-    confidence => $self->confidence,
-    description => $self->description
-  }
-}
-
 
 1;
 

@@ -4,7 +4,6 @@ use base 'CIF::Client::Transport';
 use strict;
 use warnings;
 use JSON qw{encode_json};
-use Data::Dumper;
 
 use Net::RabbitFoot;
 use Messaging::Message;
@@ -56,7 +55,7 @@ sub query {
         no_ack => 1, 
         on_consume => sub {
           my $resp = shift;
-          $cv->send($resp->{body}->{payload});
+          $cv->send($resp);
         }
     );
 
@@ -72,9 +71,15 @@ sub query {
     my $response = $cv->recv;
     undef($timer);
     if (defined($response)) {
-      return $self->decode_answer($response);
+      my $content_type = $response->{header}->{content_type};
+      my $message_type = $response->{header}->{type};
+      if ($message_type eq 'query_response') {
+        return $self->decode_query_results($content_type, $response->{body}->{payload});
+      } else {
+        die($response->{body}->{payload});
+      }
     } else {
-      return("Timed out while waiting for reply.");
+      die("Timed out while waiting for reply.");
     }
 }
 

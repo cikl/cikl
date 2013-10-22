@@ -142,16 +142,41 @@ sub search {
       return("Failed to create query object: $err");
     }
 
-    my $feeds;
-    ($err,$feeds) = $self->get_driver->query($query_model);
-    
+    my $query_results;
+    try {
+      $query_results = $self->get_driver->query($query_model);
+    } catch {
+      $err = shift;
+    };
     return $err if($err);
- 
-    if ($#{$feeds} == -1) {
-      return(0);
+
+    my $dt = DateTime->from_epoch(epoch => $query_results->reporttime);
+    my @res;
+    foreach my $event (@{$query_results->events}) {
+      my $iodef = Iodef::Pb::Simple->new($event);
+      push (@res, $iodef);
     }
-    my $uuid = generate_uuid_ns($args->{'apikey'});
+    $dt = $dt->ymd().'T'.$dt->hms().'Z';
+
+    my $f = FeedType->new({
+        version         => $CIF::VERSION,
+        confidence      => $query_results->query->confidence(),
+        description     => $query_results->query->description(),
+        ReportTime      => $dt,
+        group_map       => $query_results->group_map, # so they can't see other groups they're not in
+        restriction_map => $query_results->restriction_map,
+        data            => \@res,
+        uuid            => $query_results->uuid,
+        guid            => $query_results->guid,
+        query_limit     => $query_results->query_limit,
+        # todo -- make this avail to to libcif
+        # https://github.com/collectiveintel/cif-router/issues/5
+        #feeds_map       => $self->get_feeds_map(),
+      });  
     
+ 
+    my $uuid = generate_uuid_ns($args->{'apikey'});
+    my $feeds = [ $f ];
     filter_response($feeds, $uuid, $filter_me, $ip_tree, \@orig_queries);
     
     debug('done processing');
