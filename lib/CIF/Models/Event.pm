@@ -2,7 +2,6 @@ package CIF::Models::Event;
 use strict;
 use warnings;
 use Scalar::Util qw(blessed);
-use Data::Dumper;
 use CIF qw(generate_uuid_random);
 require JSON;
 #use Tie::Hash;
@@ -57,25 +56,38 @@ sub new {
   return $self;
 }
 
+sub address { $_[0]->{address}}
+sub assessment { $_[0]->{assessment}}
+sub confidence { $_[0]->{confidence}}
 sub uuid { $_[0]->{id}}
 sub reporttime { $_[0]->{reporttime}}
 sub guid { $_[0]->{guid}}
 
-
-sub to_json {
+sub to_hash {
   my $self = shift;
   my $data = {};
   foreach my $key (keys %$self) {
     $data->{$key} = $self->{$key};
   }
-  return JSON::encode_json($data);
+  return $data;
+}
+
+sub from_hash {
+  my $class = shift;
+  my $data = shift;
+  return $class->new($data);
+}
+
+sub to_json {
+  my $self = shift;
+  return JSON::encode_json($self->to_hash());
 }
 
 sub from_json {
   my $class = shift;
   my $data = JSON::decode_json(shift);
 
-  return($class->new($data));
+  return($class->from_hash($data));
 }
 
 

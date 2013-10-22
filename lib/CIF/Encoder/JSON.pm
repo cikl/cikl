@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use CIF::MsgHelpers;
 use CIF::Models::Submission;
+use CIF::Models::Event;
 use CIF::Models::Query;
 use CIF::Client::Query;
-use Data::Dumper;
 use Try::Tiny;
 require JSON;
 
@@ -44,34 +44,32 @@ sub decode_answer {
   return CIF::MsgHelpers::decode_msg_feeds(MessageType->decode($data));
 }
 
+sub encode_event {
+  my $self = shift;
+  my $event = shift;
+  my $e = $event->to_hash();
+  return JSON::encode_json($event->to_hash());
+}
+
+sub decode_event {
+  my $self = shift;
+  my $json = shift;
+  my $data = JSON::decode_json($json);
+  return CIF::Models::Event->from_hash($data);
+}
+
 sub encode_submission {
   my $self = shift;
   my $submission = shift;
 
-  my $event = $submission->event();
-  my $event_data = {};
-  map { $event_data->{$_} = $event->{$_} } keys %{$event};
-
-  my $submission_data = {
-    apikey => $submission->apikey,
-    guid => $submission->guid,
-    event => $event_data
-  };
-
-  return JSON::encode_json($submission_data);
-
-  #my $iodefs = CIF::MsgHelpers::generate_iodef($submission->event());
-  #my $msg = CIF::MsgHelpers::build_submission_msg($submission->apikey, $submission->guid, $iodefs);
-  #return($msg->encode());
+  return JSON::encode_json($submission->to_hash());
 }
 
 sub decode_submission {
   my $self = shift;
   my $json = shift;
   my $data = JSON::decode_json($json);
-
-  my $event = CIF::Models::Event->new($data->{event});
-  return CIF::Models::Submission->new($data->{apikey}, $data->{guid}, $event);
+  return CIF::Models::Submission->from_hash($data);
 }
 
 
