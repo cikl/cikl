@@ -15,7 +15,10 @@ use Digest::SHA qw/sha1_hex/;
 use Data::Dumper;
 use POSIX ();
 use CIF::Client::Query;
+use CIF::APIKeyRestrictions;
+use CIF::Encoder::JSON;
 
+use Devel::StackTrace;
 use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
@@ -26,37 +29,33 @@ __PACKAGE__->columns(Essential => qw/id uuid guid data created/);
 __PACKAGE__->sequence('archive_id_seq');
 
 my @plugins = __PACKAGE__->plugins();
+my $dbencoder = CIF::Encoder::JSON->new();
 
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
+
+sub encode_event {
+    my $class = shift;
+    my $event = shift;
+    return Iodef::Pb::Simple->new($event);
+}
 
 sub insert {
     my $class       = shift;
     my $data        = shift;
     my $isUpdate    = shift;
+    my $event = $data->{'event'};
         
-    my $msg = Iodef::Pb::Simple->new($data->{'event'});
-
-    if($data->{'format'} && $data->{'format'} eq 'feed'){
-        unless (UNIVERSAL::isa($msg, 'FeedType')) {
-          $msg = FeedType->decode($msg);
-        }
-    } else {
-        unless (UNIVERSAL::isa($msg, 'IODEFDocumentType')) {
-          $msg = IODEFDocumentType->decode($msg);
-        }
-        $data->{'uuid'}         = @{$msg->get_Incident}[0]->get_IncidentID->get_content();
-        $data->{'reporttime'}   = @{$msg->get_Incident}[0]->get_ReportTime();
-        $data->{'guid'}         = iodef_guid(@{$msg->get_Incident}[0]) || $data->{'guid'};
-    }
-    
-    $data->{'uuid'} = generate_uuid_random() unless($data->{'uuid'});
+    $data->{'uuid'}         = $event->uuid;
+    $data->{'reporttime'}   = $event->reporttime;
+    $data->{'guid'}         = $event->guid || $data->{'guid'};
    
     return ('id must be a uuid') unless(is_uuid($data->{'uuid'}));
     
-    $data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
+    #$data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
     $data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
    
+    my $msg = $class->encode_event($event);
     my $encoded = encode_base64(Compress::Snappy::compress($msg->encode()));
     my ($err,$id);
     try {
@@ -132,44 +131,36 @@ sub normalize_query {
     return undef, \@ret;
 }
 
-sub search2 {
+sub search {
     my $class = shift;
     my $query = shift;
 
     my ($err, $normalized_queries) = $class->normalize_query($query);
-    return (undef, $normalized_queries);
-    my @queries; 
-    my ($pb_query);
-    my $split_query = $query->split_query;
-    foreach my $q (@$split_query) {
-      ($err,$pb_query) = CIF::Client::Query->new({
-          apikey      => $query->apikey,
-          guid        => $query->guid,
-          query       => $q,
 
-          nolog       => $query->nolog,
-          limit       => $query->limit,
-          confidence  => $query->confidence,
-          description => $query->description
-        });
-      if ($err) { die $err }
-      push(@queries, $pb_query);
+    my @res;
+    foreach my $m (@$normalized_queries){
+        my $hashed_query = $m->hashed_query();
+        my ($err2,$s) = CIF::Archive->search2($m);
+        if($err){
+          return('query failed, contact system administrator');
+        }
+        next unless($s);
+        @res = (@res, @$s);
     }
-    return (undef, \@queries);
-}
-sub search {
-    my $class = shift;
-    my $data = shift;
 
-    $data->{'confidence'}   = 0 unless(defined($data->{'confidence'}));
-    $data->{'query'}        = lc($data->{'query'});
+    return(undef, \@res);
+}
+
+sub search2 {
+    my $class = shift;
+    my $query = shift;
+
  
     my $ret;
-    debug('running query: '.$data->{'query'});
-    if(is_uuid($data->{'query'})){
+    if(is_uuid($query->query())) {
         $ret = $class->search_lookup(
-            $data->{'query'},
-            $data->{'source'},
+            $query->query(),
+            $query->apikey(),
         );
     } else {
         # log the query first
@@ -178,10 +169,24 @@ sub search {
 #            my ($err,$ret) = $class->log_search($data);
 #            return($err) if($err);
 #        }
+#
+        
+        my $hashed_query = $query->hashed_query();
         foreach my $p (@plugins){
             my $err;
             try {
-                $ret = $p->query($data);
+                $ret = $p->query({
+                  query           => $hashed_query,
+
+                  description     => $query->description(),
+                  limit           => $query->limit(),
+                  confidence      => $query->confidence(),
+                  guid            => $query->guid(),
+
+                  nolog           => $query->nolog(),
+                  source          => $query->apikey(),
+                  apikey          => $query->apikey()
+                });
             } catch {
                 $err = shift;
             };
@@ -204,6 +209,16 @@ sub search {
     return(undef,\@rr);
 }
 
+sub hash_querystring {
+    my $class = shift;
+    my $querystring = shift;
+    if ($querystring =~ /^([a-f0-9]{40}|[a-f0-9]{32})$/i) {
+      return lc($querystring);
+    }
+    return lc(sha1_hex(lc($querystring))); 
+}
+
+# TODO: MPR, I've disabled this, for now. I don't feel like dealing with it.
 sub log_search {
     my $class = shift;
     my $data = shift;
