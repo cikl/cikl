@@ -5,6 +5,8 @@
 - Probably broke hash lookups.
   + Turns out I didn't.
 
+- Database inserts are NOT optimal, at the moment. Commits are being
+  performed between each insert.
 
 Places that still have IODEF / Protocol Buffers:
 - libcif-dbi/lib/CIF/Archive/Plugin/* 
