@@ -293,42 +293,28 @@ sub process_query {
 
     my $restriction_map = $self->get_restriction_map();
     my ($err2, $apikey_info) = $self->authorized_read($query->apikey);
-    unless($apikey_info){
-      return(msg_reply_unauthorized($err2));
+    if(!defined($apikey_info) or defined($err2)){
+      die($err2);
     }
     if (!defined($query->guid())) {
       $query->set_guid($apikey_info->{'default_guid'});
     }
 
-    my ($err, $res) = CIF::Archive->search($query);
-    if ($err) {
-      return(msg_reply_fail($err));
+    my ($err, $events) = CIF::Archive->search($query);
+    if (defined($err)) {
+      die($err);
     }
 
-    if($#{$res} > -1){
-      debug('generating feed');
-      my $dt = DateTime->from_epoch(epoch => time());
-      $dt = $dt->ymd().'T'.$dt->hms().'Z';
 
-      my $f = FeedType->new({
-          version         => $CIF::VERSION,
-          confidence      => $query->confidence(),
-          description     => $query->description(),
-          ReportTime      => $dt,
-          group_map       => $apikey_info->{'group_map'}, # so they can't see other groups they're not in
-          restriction_map => $restriction_map,
-          data            => $res,
-          uuid            => generate_uuid_random(),
-          guid            => $apikey_info->{'default_guid'},
-          query_limit     => $query->limit(),
-          # todo -- make this avail to to libcif
-          # https://github.com/collectiveintel/cif-router/issues/5
-          #feeds_map       => $self->get_feeds_map(),
-        });  
-      push(@$results,$f->encode());
-    }
-    debug('replying...');
-    return(msg_reply_success($results));
+    my $query_results = CIF::Models::QueryResults->new({
+        query => $query,
+        events => $events,
+        reporttime => time(),
+        group_map => $apikey_info->{'group_map'},
+        restriction_map => $restriction_map,
+        guid => $apikey_info->{'default_guid'}
+      });
+    return $query_results;
 }
 
 sub process_submission {

@@ -7,6 +7,7 @@ use warnings;
 use Data::Dumper;
 use Net::RabbitFoot;
 use Coro;
+use Try::Tiny;
 use CIF qw/debug/;
 
 sub new {
@@ -87,14 +88,35 @@ sub run {
       on_consume => sub {
         my $msg = shift;
         my $payload = $msg->{body}->payload;
-        my $reply = $self->process($payload);
-        if (my $reply_queue = $msg->{header}->{reply_to}) {
-          $self->{channel}->publish(
-            exchange => $self->{exchange_name},
-            routing_key => $reply_queue,
-            body => $reply
-          );
-        }
+        my $reply;
+        try {
+          $reply = $self->process($payload);
+          if (my $reply_queue = $msg->{header}->{reply_to}) {
+            $self->{channel}->publish(
+              exchange => $self->{exchange_name},
+              routing_key => $reply_queue,
+              body => $reply,
+              header => {
+                content_type => $self->content_type,
+                type => "query_response"
+              }
+            );
+          }
+        } catch {
+          my $err = shift;
+          debug("Sending error reply");
+          if (my $reply_queue = $msg->{header}->{reply_to}) {
+            $self->{channel}->publish(
+              exchange => $self->{exchange_name},
+              routing_key => $reply_queue,
+              header => {
+                content_type => "text/plain",
+                type => "query_error"
+              },
+              body => $err
+            );
+          }
+        };
       }
     );
     debug("Ready");

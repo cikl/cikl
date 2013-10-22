@@ -38,6 +38,11 @@ sub type {
     return $self->{type};
 }
 
+sub content_type {
+    my $self = shift;
+    return $self->{encoder}->content_type;
+}
+
 sub is_submission() {
     my $self = shift;
     return($self->{type} == SUBMISSION);
@@ -72,9 +77,10 @@ sub process {
       return($self->{router}->process_submission($submission));
     } elsif ($self->is_query()) {
       my $query = $self->{encoder}->decode_query($payload);
-      my $answer = $self->{router}->process_query($query);
-      return($self->{encoder}->encode_answer($answer));
+      my $results = $self->{router}->process_query($query);
+      return($self->{encoder}->encode_query_results($results));
     }
+    return("Unknown mode");
 }
 
 sub run {
