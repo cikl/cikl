@@ -5,7 +5,6 @@ use warnings;
 use strict;
 
 use Digest::SHA qw/sha1_hex/;
-use Iodef::Pb::Simple qw/iodef_guid iodef_confidence/;
 use CIF qw/debug/;
 use List::MoreUtils qw/any/;
 use CIF::Archive::Hash;

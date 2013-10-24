@@ -9,7 +9,6 @@ use warnings;
 use Try::Tiny;
 
 use MIME::Base64;
-use Iodef::Pb::Simple qw/iodef_guid/;
 require Compress::Snappy;
 use Digest::SHA qw/sha1_hex/;
 use Data::Dumper;
