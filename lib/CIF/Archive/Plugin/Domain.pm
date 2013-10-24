@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use Iodef::Pb::Simple qw(iodef_addresses iodef_confidence iodef_guid);
 use Digest::SHA qw/sha1_hex/;
 use CIF qw/debug/;
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
@@ -22,67 +21,82 @@ sub datatype { return DATATYPE; }
 
 sub query { } # handled by the address module
 
-sub insert {
-    my $class = shift;
-    my $data = shift;
-    my $event = $data->{event};
-    
-    return unless(ref($data->{'data'}) eq 'IODEFDocumentType');
+sub match_event {
+  my $class = shift;
+  my $event = shift;
+  my $ret = $class->SUPER::match_event($event);
+  if ($ret == 0) {
+    return 0;
+  }
 
-    my $tbl = $class->table();
-    my @ids;
- 
-    foreach my $i (@{$data->{'data'}->get_Incident()}){
-        foreach my $plugin (@plugins){
-            if($plugin->prepare($i)){
-                $class->table($class->sub_table($plugin));
-                last;
-            }
-        }
-        my $reporttime = $i->get_ReportTime();
-        my $uuid = $i->get_IncidentID->get_content();
-             
-        my $addresses = iodef_addresses($i);
-        return unless(@$addresses);
-        
-        my $confidence = iodef_confidence($i);
-        $confidence = @{$confidence}[0]->get_content();
-        
-        foreach my $address (@$addresses){
-            my $addr = lc($address->get_content());
-            next if($addr =~ /^(ftp|https?):\/\//);
-            # this way we can change the regex as we go if needed
-            next if(CIF::Archive::Plugin::Email::is_email($addr));
-            next unless($addr =~ /[a-z0-9.\-_]+\.[a-z]{2,6}$/);
-            if($class->test_feed($data)){
-                $class->SUPER::insert({
-                    uuid        => $data->{'uuid'},
-                    guid        => $data->{'guid'},
-                    hash        => sha1_hex($addr),
-                    address     => $addr,
-                    confidence  => $confidence,
-                    reporttime  => $reporttime,
-                });
-            }
-            
-            my @a1 = reverse(split(/\./,$addr));
-            my @a2 = @a1;
-            foreach (0 ... $#a1-1){
-                my $a = join('.',reverse(@a2));
-                pop(@a2);
-                #my $hash = generate_sha1_if_needed($a);
-                my $id = $class->insert_hash({ 
-                    uuid        => $data->{'uuid'}, 
-                    guid        => $data->{'guid'}, 
-                    confidence  => $confidence,
-                    reporttime  => $reporttime,
-                },$a);
-                push(@ids,$id);
-            }
-        }
+  my $address = $event->address();
+  if (!defined($address)) {
+    return 0;
+  }
+  $address = lc($address);
+  if($address =~ /^(ftp|https?):\/\//) {
+    return 0;
+  }
+  if(CIF::Archive::Plugin::Email::is_email($address)) {
+    return 0;
+  }
+  unless($address =~ /[a-z0-9.\-_]+\.[a-z]{2,6}$/) {
+    return 0;
+  }
+
+  return 1;
+}
+
+sub insert {
+  my $class = shift;
+  my $data = shift;
+  my $event = $data->{event};
+
+  my $tbl = $class->table();
+
+  foreach my $plugin (@plugins){
+    if($plugin->match_event($event)){
+      $class->table($class->sub_table($plugin));
+      last;
     }
-    $class->table($tbl);
-    return(undef,\@ids);
+  }
+
+  my @ids;
+
+  my $address = lc($event->address());
+
+  return if($address =~ /^(ftp|https?):\/\//);
+  # this way we can change the regex as we go if needed
+  return if(CIF::Archive::Plugin::Email::is_email($address));
+  return unless($address =~ /[a-z0-9.\-_]+\.[a-z]{2,6}$/);
+  if($class->test_feed($data)){
+    $class->SUPER::insert({
+        uuid        => $event->uuid,
+        guid        => $event->guid,
+        hash        => sha1_hex($address),
+        address     => $address,
+        confidence  => $event->confidence,
+        reporttime  => $event->reporttime,
+      });
+  }
+
+  my @a1 = reverse(split(/\./,$address));
+  my @a2 = @a1;
+  foreach (0 ... $#a1-1){
+    my $a = join('.',reverse(@a2));
+    pop(@a2);
+    #my $hash = generate_sha1_if_needed($a);
+    my $id = $class->insert_hash({ 
+        uuid        => $event->uuid, 
+        guid        => $event->guid, 
+        confidence  => $event->confidence,
+        reporttime  => $event->reporttime,
+      },$a);
+    push(@ids,$id);
+  }
+
+  $class->table($tbl);
+  return(undef,\@ids);
 }
 
 1;
