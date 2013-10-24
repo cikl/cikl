@@ -19,9 +19,10 @@ use CIF::APIKeyRestrictions;
 use CIF::Encoder::JSON;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
+use List::MoreUtils qw/any/;
 
 use Devel::StackTrace;
-use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/;
+use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/, sub_name => '__plugins';
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
 __PACKAGE__->table('archive');
@@ -30,11 +31,39 @@ __PACKAGE__->columns(All => qw/id uuid guid data format reporttime created/);
 __PACKAGE__->columns(Essential => qw/id uuid guid data created/);
 __PACKAGE__->sequence('archive_id_seq');
 
-my @plugins = __PACKAGE__->plugins();
 my $dbencoder = CIF::Encoder::JSON->new();
 
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
+our $archive_plugins        = undef; # Not loaded, yet.
+
+sub plugins {
+    my $class = shift;
+    if (!defined($archive_plugins)) {
+      die("$class->load_plugins has not been called, yet!");
+    }
+    return $archive_plugins;
+}
+
+sub load_plugins {
+    if (defined($archive_plugins)) {
+      return 1;
+    }
+    
+    my $class = shift;
+    my $datatypes = shift;
+    $archive_plugins = [];
+    my @all_plugins = $class->__plugins();
+
+    foreach my $plugin (@all_plugins) {
+      if (any { $_ eq $plugin->datatype() } @$datatypes) {
+        push(@$archive_plugins, $plugin);
+      }
+    }
+    print Dumper {plugins_loaded => $archive_plugins, all_plugins => \@all_plugins};
+    return 1;
+}
+
 
 sub insert {
     my $class       = shift;
@@ -82,6 +111,7 @@ sub insert_index {
     my $class   = shift;
     my $event = shift;
     my $args    = shift;
+    my @plugins = @{$class->plugins};
 
     $args->{data} = Iodef::Pb::Simple->new($event);
 
@@ -89,6 +119,7 @@ sub insert_index {
     foreach my $p (@plugins){
         my ($pid,$err);
         try {
+            $p->dispatch($args);
             ($err,$pid) = $p->insert($args);
         } catch {
             $err = shift;
@@ -154,7 +185,6 @@ sub search {
 sub search2 {
     my $class = shift;
     my $query = shift;
-
  
     my $ret;
     if(is_uuid($query->query())) {
@@ -172,29 +202,26 @@ sub search2 {
 #
         
         my $hashed_query = $query->hashed_query();
-        foreach my $p (@plugins){
-            my $err;
-            try {
-                $ret = $p->query({
-                  query           => $hashed_query,
+        my $err;
+        try {
+          $ret = CIF::Archive::Hash->query({
+              query           => $hashed_query,
 
-                  description     => $query->description(),
-                  limit           => $query->limit(),
-                  confidence      => $query->confidence(),
-                  guid            => $query->guid(),
+              description     => $query->description(),
+              limit           => $query->limit(),
+              confidence      => $query->confidence(),
+              guid            => $query->guid(),
 
-                  nolog           => $query->nolog(),
-                  source          => $query->apikey(),
-                  apikey          => $query->apikey()
-                });
-            } catch {
-                $err = shift;
-            };
-            if($err){
-                warn $err;
-                return($err);
-            }
-            last if(defined($ret));
+              nolog           => $query->nolog(),
+              source          => $query->apikey(),
+              apikey          => $query->apikey()
+            });
+        } catch {
+          $err = shift;
+        };
+        if($err){
+          warn $err;
+          return($err);
         }
     }
 

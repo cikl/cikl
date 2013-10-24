@@ -10,6 +10,9 @@ use CIF qw/debug/;
 
 my @plugins = __PACKAGE__->plugins();
 
+use constant DATATYPE => 'url';
+sub datatype { return DATATYPE; }
+
 __PACKAGE__->table('url');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw/id uuid guid hash confidence reporttime created/);
@@ -43,7 +46,7 @@ sub insert {
             my $addr = lc($address->get_content());
             next unless($addr =~ /^(ftp|https?):\/\//);
             ## TODO -- pull this out of the IODEF ?
-            my $hash = $class->SUPER::generate_sha1($addr);
+            my $hash = generate_sha1_if_needed($addr);
             if($class->test_feed($data)){
                 $class->SUPER::insert({
                     guid        => iodef_guid($i) || $data->{'guid'},
@@ -59,7 +62,7 @@ sub insert {
                     guid        => $data->{'guid'}, 
                     confidence  => $confidence,
                     reporttime  => $reporttime,
-                },$hash);
+                },$addr);
             push(@ids,$id);
         }
     }

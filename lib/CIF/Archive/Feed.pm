@@ -1,10 +1,11 @@
-package CIF::Archive::Plugin::Feed;
-use base 'CIF::Archive::Plugin';
+package CIF::Archive::Feed;
+use base 'CIF::Archive';
 
 use warnings;
 use strict;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 my @plugins = __PACKAGE__->plugins();
 
@@ -33,7 +34,8 @@ sub insert {
     return unless(ref($data->{'data'}) eq 'FeedType');
 
     my $hash    = $data->{'data'}->get_description();
-    $hash       = $class->SUPER::generate_sha1($hash);
+
+    $hash       = generate_sha1_if_needed($hash);
     
     $data->{'confidence'} = $data->{'data'}->get_confidence();
         

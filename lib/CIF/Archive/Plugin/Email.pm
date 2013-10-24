@@ -7,6 +7,7 @@ use warnings;
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Digest::SHA qw(sha1_hex);
 use Iodef::Pb::Simple qw(iodef_addresses iodef_confidence iodef_guid);
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 __PACKAGE__->table('email');
 __PACKAGE__->columns(Primary => 'id');
@@ -15,6 +16,8 @@ __PACKAGE__->sequence('email_id_seq');
 
 my @plugins = __PACKAGE__->plugins();
 
+use constant DATATYPE => 'email';
+sub datatype { return DATATYPE; }
 
 sub is_email {
     my $e = shift;
@@ -50,10 +53,10 @@ sub insert {
         foreach my $address (@$addresses){
             my $addr = lc($address->get_content());
             next unless(is_email($addr));
-            my $hash = $class->SUPER::generate_sha1($addr);
+            my $hash = generate_sha1_if_needed($addr);
             if($class->test_feed($data)){
                 $class->SUPER::insert({
-                    uuid        => $data->{'uuid'},
+                   uuid        => $data->{'uuid'},
                     guid        => $data->{'guid'},
                     hash        => $hash,
                     confidence  => $confidence,
@@ -67,13 +70,12 @@ sub insert {
             foreach (0 ... $#a1-1){
                 my $a = join('.',reverse(@a2));
                 pop(@a2);
-                my $hash = $class->SUPER::generate_sha1($a);
                 my $id = $class->insert_hash({ 
                     uuid        => $data->{'uuid'}, 
                     guid        => $data->{'guid'}, 
                     confidence  => $confidence,
                     reporttime  => $reporttime,
-                },$hash);
+                },$a);
                 push(@ids,$id);
             }
         }

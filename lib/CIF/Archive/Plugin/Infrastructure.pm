@@ -11,10 +11,14 @@ use Digest::SHA qw/sha1_hex/;
 use Parse::Range qw(parse_range);
 use JSON::XS;
 use CIF qw/debug/;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 use Iodef::Pb::Simple qw(iodef_confidence iodef_systems iodef_guid);
 
 my @plugins = __PACKAGE__->plugins();
+
+use constant DATATYPE => 'infrastructure';
+sub datatype { return DATATYPE; }
 
 __PACKAGE__->table('infrastructure');
 __PACKAGE__->columns(Primary => 'id');
@@ -131,13 +135,13 @@ sub insert {
                             }     
                         }
                     }
-                    foreach (@index){
+                    foreach my $x (@index){
                         $id = $class->insert_hash({ 
                             uuid        => $data->{'uuid'}, 
                             guid        => $data->{'guid'}, 
                             confidence  => $confidence ,
                             reporttime  => $reporttime,
-                        },$class->SUPER::generate_sha1($_));
+                        },$x);
                         push(@ids,$id);
                     }
                 }

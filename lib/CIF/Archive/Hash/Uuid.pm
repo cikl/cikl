@@ -1,15 +1,21 @@
-package CIF::Archive::Plugin::Hash::Md5;
-use base 'CIF::Archive::Plugin::Hash';
+package CIF::Archive::Hash::Uuid;
+use base 'CIF::Archive::Hash';
 
 use strict;
 use warnings;
 
-__PACKAGE__->table('hash_md5');
+__PACKAGE__->table('hash_uuid');
+
+use constant HASH_REGEX => qr/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+sub hash_regex {
+  return HASH_REGEX;
+}
 
 sub prepare {
     my $class = shift;
     my $data = shift;
-    return unless(lc($data) =~ /^[a-f0-9]{32}$/);
+    return unless(lc($data) =~ HASH_REGEX);
     return(1);
 }
 

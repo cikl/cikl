@@ -8,6 +8,7 @@ use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Iodef::Pb::Simple qw(iodef_addresses iodef_confidence iodef_guid);
 use Digest::SHA qw/sha1_hex/;
 use CIF qw/debug/;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 __PACKAGE__->table('domain');
 __PACKAGE__->columns(Primary => 'id');
@@ -16,11 +17,15 @@ __PACKAGE__->sequence('domain_id_seq');
 
 my @plugins = __PACKAGE__->plugins();
 
+use constant DATATYPE => 'domain';
+sub datatype { return DATATYPE; }
+
 sub query { } # handled by the address module
 
 sub insert {
     my $class = shift;
     my $data = shift;
+    my $event = $data->{event};
     
     return unless($class->test_datatype($data));
     return unless(ref($data->{'data'}) eq 'IODEFDocumentType');
@@ -29,9 +34,9 @@ sub insert {
     my @ids;
  
     foreach my $i (@{$data->{'data'}->get_Incident()}){
-        foreach(@plugins){
-            if($_->prepare($i)){
-                $class->table($class->sub_table($_));
+        foreach my $plugin (@plugins){
+            if($plugin->prepare($i)){
+                $class->table($class->sub_table($plugin));
                 last;
             }
         }
@@ -66,13 +71,13 @@ sub insert {
             foreach (0 ... $#a1-1){
                 my $a = join('.',reverse(@a2));
                 pop(@a2);
-                my $hash = $class->SUPER::generate_sha1($a);
+                #my $hash = generate_sha1_if_needed($a);
                 my $id = $class->insert_hash({ 
                     uuid        => $data->{'uuid'}, 
                     guid        => $data->{'guid'}, 
                     confidence  => $confidence,
                     reporttime  => $reporttime,
-                },$hash);
+                },$a);
                 push(@ids,$id);
             }
         }

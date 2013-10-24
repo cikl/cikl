@@ -16,6 +16,9 @@ __PACKAGE__->sequence('search_id_seq');
 
 my @plugins = __PACKAGE__->plugins();
 
+use constant DATATYPE => 'search';
+sub datatype { return DATATYPE; }
+
 sub query { } # handled by the hash module
 
 sub is_search {

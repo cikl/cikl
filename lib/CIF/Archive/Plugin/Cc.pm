@@ -7,9 +7,11 @@ use warnings;
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
 use Iodef::Pb::Simple qw(iodef_confidence iodef_bgp);
-use Digest::SHA qw/sha1_hex/;
 
 my @plugins = __PACKAGE__->plugins();
+
+use constant DATATYPE => 'cc';
+sub datatype { return DATATYPE; }
 
 sub query { } # handled by the address module
 
@@ -41,13 +43,12 @@ sub insert {
         foreach my $e (@$bgp){
             next unless($e->{'cc'} && $e->{'cc'} =~ /^[a-zA-Z]{2}$/);
             $e->{'cc'} = lc($e->{'cc'});
-            my $hash = sha1_hex($e->{'cc'});
             my $id = $class->insert_hash({ 
                 uuid        => $data->{'uuid'}, 
                 guid        => $data->{'guid'}, 
                 confidence  => $confidence,
                 reporttime  => $data->{'reporttime'},
-            },$hash);
+            },$e->{'cc'});
         
             push(@ids,$id);
         }

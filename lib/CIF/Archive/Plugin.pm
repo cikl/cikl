@@ -6,6 +6,9 @@ use strict;
 
 use Digest::SHA qw/sha1_hex/;
 use Iodef::Pb::Simple qw/iodef_guid iodef_confidence/;
+use CIF qw/debug/;
+use List::MoreUtils qw/any/;
+use CIF::Archive::Hash;
 
 sub query {}
 
@@ -19,14 +22,6 @@ sub sub_table {
     $plug =~ m/Plugin::(\S+)::(\S+)$/;
     my ($type,$subtype) = (lc($1),lc($2));
     return $type.'_'.$subtype;
-}
-
-sub generate_sha1 {
-    my $self    = shift;
-    my $thing   = shift || return;
-    
-    return $thing if(lc($thing) =~ /^[a-f0-9]{40}$/);
-    return sha1_hex($thing);
 }
 
 sub test_feed {
@@ -44,34 +39,68 @@ sub test_feed {
 }
 
 sub test_datatype {
-    my $class   = shift;
-    my $data    = shift;
-    
-    return unless($data);
-    $data = $data->{'datatypes'};
-    return unless($data);
-    $data = [$data] unless(ref($data) eq 'ARRAY');
-    
-    foreach (@$data){
-        return 1 if(lc($class) =~ /$_$/);
-    }    
+    return 1;
 }
     
 sub insert_hash {
     my $class = shift;
     my $data = shift;
-    my $hash = shift;
+    my $key = shift;
     
-    $hash = sha1_hex($hash) unless($hash =~ /^[a-f0-9]{40}$/);
+    $key = sha1_hex($key) unless($key=~ /^[a-f0-9]{40}$/);
     
-    my $id = CIF::Archive::Plugin::Hash->insert({
+    my $id = CIF::Archive::Hash->insert({
         uuid        => $data->{'uuid'},
         guid        => $data->{'guid'},
         confidence  => $data->{'confidence'},
-        hash        => $hash,
+        hash        => $key,
         reporttime  => $data->{'reporttime'},
     });
     return ($id);
+}
+
+sub datatype {
+  my $class = shift;
+  die("$class->datatype has not been implemented");
+}
+
+sub assessment_regex {
+  return undef;
+}
+
+sub match_event {
+  my $class = shift;
+  my $event = shift;
+  if (my $re = $class->assessment_regex()) {
+    unless (defined($event->assessment())) {
+      # No assessment on the event? no match.
+      return 0;
+    }
+    # If the event's assessment doesn't match the regex, no match.
+    if ($event->assessment() !~ $re) {
+      return 0;
+    }
+  }
+
+  # Default to matching.
+  return 1;
+}
+
+sub dispatch {
+    my $class = shift;
+    my $data = shift;
+    my $event = $data->{event};
+
+    my $matching_plugin;
+    foreach my $plugin ($class->plugins()){
+      if ($plugin->match_event($event) == 1) {
+        $matching_plugin = $plugin;
+        last;
+      }
+    }
+    if ($matching_plugin) {
+      debug("Match $class : $matching_plugin");
+    }
 }
 
 1;

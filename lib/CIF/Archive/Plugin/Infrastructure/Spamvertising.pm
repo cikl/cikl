@@ -8,6 +8,12 @@ use Iodef::Pb::Simple qw(iodef_impacts);
 
 __PACKAGE__->table('infrastructure_spamvertising');
 
+use constant EVENT_REGEX => qr/^spamvertising$/;
+
+sub assessment_regex {
+  return EVENT_REGEX;;
+}
+
 sub prepare {
     my $class = shift;
     my $data = shift;

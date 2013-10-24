@@ -11,6 +11,9 @@ use Digest::SHA qw/sha1_hex/;
 
 my @plugins = __PACKAGE__->plugins();
 
+use constant DATATYPE => 'rir';
+sub datatype { return DATATYPE; }
+
 sub query { } # handled by the address module
 
 sub insert {
@@ -41,13 +44,12 @@ sub insert {
         foreach my $e (@$bgp){
             next unless($e->{'rir'} && lc($e->{'rir'}) =~ /^(afrinic|apnic|arin|lacnic|ripencc)$/);
             $e->{'rir'} = lc($e->{'rir'});
-            my $hash = sha1_hex($e->{'rir'});
             my $id = $class->insert_hash({ 
                 uuid        => $data->{'uuid'}, 
                 guid        => $data->{'guid'}, 
                 confidence  => $confidence,
                 reporttime  => $data->{'reporttime'},
-            },$hash);
+            },$e->{'rir'});
         
             push(@ids,$id);
         }

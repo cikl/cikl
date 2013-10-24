@@ -7,9 +7,11 @@ use warnings;
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
 use Iodef::Pb::Simple qw(iodef_confidence iodef_bgp);
-use Digest::SHA qw/sha1_hex/;
 
 my @plugins = __PACKAGE__->plugins();
+
+use constant DATATYPE => 'asn';
+sub datatype { return DATATYPE; }
 
 sub insert {
     my $class = shift;
@@ -39,13 +41,12 @@ sub insert {
         foreach my $e (@$bgp){
             next unless($e->{'asn'} && $e->{'asn'} =~ /^\d+/);
             my $asn = 'as'.$e->{'asn'};
-            my $hash = sha1_hex($asn);
             my $id = $class->insert_hash({ 
                 uuid        => $data->{'uuid'}, 
                 guid        => $data->{'guid'},
                 confidence  => $confidence,
                 reporttime  => $data->{'reporttime'},
-            },$hash);
+            },$asn);
         
             push(@ids,$id);
         }

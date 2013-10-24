@@ -1,5 +1,5 @@
-package CIF::Archive::Plugin::Hash;
-use base 'CIF::Archive::Plugin';
+package CIF::Archive::Hash;
+use base 'CIF::DBI';
 
 use strict;
 use warnings;
@@ -39,6 +39,7 @@ sub insert {
 
     # we're explicitly placing a hash
     if($data->{'hash'}){
+        debug("Inserting hash");
         $confidence = $data->{'confidence'};
         
         if(my $t = return_table($data->{'hash'})){
@@ -71,6 +72,7 @@ sub insert {
                 if(my $t = return_table($hash)){
                     $class->table($t);
                 }
+                debug("Inserting something other than a hash");
                 my $id = $class->SUPER::insert({
                     hash        => $hash,
                     uuid        => $data->{'uuid'},
