@@ -29,7 +29,6 @@ sub insert {
     my $class = shift;
     my $data = shift;
 
-    return unless($class->test_datatype($data));
     return unless(ref($data->{'data'}) eq 'IODEFDocumentType');       
     my @ids;
    

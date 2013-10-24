@@ -38,10 +38,6 @@ sub test_feed {
     }
 }
 
-sub test_datatype {
-    return 1;
-}
-    
 sub insert_hash {
     my $class = shift;
     my $data = shift;

@@ -27,7 +27,6 @@ sub insert {
     my $data = shift;
     my $event = $data->{event};
     
-    return unless($class->test_datatype($data));
     return unless(ref($data->{'data'}) eq 'IODEFDocumentType');
 
     my $tbl = $class->table();
