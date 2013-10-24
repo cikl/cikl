@@ -109,6 +109,7 @@ sub init_feeds {
 sub init_archive {
     my $self = shift;
     my $dt = $self->get_archive_config->{'datatypes'} || ['infrastructure','domain','url','email','malware','search'];
+    CIF::Archive->load_plugins($dt);
     $self->set_datatypes($dt);
 }
 
