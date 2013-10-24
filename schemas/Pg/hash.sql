@@ -12,9 +12,3 @@ CREATE TABLE hash (
 
 CREATE TABLE hash_sha1 () INHERITS (hash);
 ALTER TABLE hash_sha1 ADD PRIMARY KEY (id);
-
-CREATE TABLE hash_md5 () INHERITS (hash);
-ALTER TABLE hash_md5 ADD PRIMARY KEY (id);
-
-CREATE TABLE hash_uuid () INHERITS (hash);
-ALTER TABLE hash_uuid ADD PRIMARY KEY (id);

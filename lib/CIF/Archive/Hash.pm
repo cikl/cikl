@@ -4,6 +4,7 @@ use base 'CIF::DBI';
 use strict;
 use warnings;
 
+use CIF::Archive::Helpers qw/is_sha1/;
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use CIF qw/debug/;
 
@@ -27,8 +28,6 @@ sub trigger_after_delete {
     $archive->delete() if($archive);
 }
 
-sub prepare {}
-
 sub insert {
     my $class   = shift;
     my $data    = shift;
@@ -39,9 +38,9 @@ sub insert {
     # we're explicitly placing a hash
     $confidence = $data->{'confidence'};
 
-    if(my $t = return_table($data->{'hash'})){
-      $class->table($t);
-    }
+#    if(my $t = return_table($data->{'hash'})){
+#      $class->table($t);
+#    }
     my $id = $class->SUPER::insert({
         hash        => $data->{'hash'},
         uuid        => $data->{'uuid'},
@@ -50,27 +49,22 @@ sub insert {
         reporttime  => $data->{'reporttime'},
       });
     push(@ids,$id);
-    $class->table($tbl);
+#    $class->table($tbl);
     return(undef,\@ids); 
 }
 
-sub return_table {
-    my $hash = shift;
-    foreach (@plugins){
-        next unless($_->prepare($hash));
-        return $_->table();
-        last;
-    }
-}
-
 sub query {
-    my $class   = shift;
-    my $data    = shift;
-    foreach (@plugins){
-        my $r = $_->query($data);
-        return ($r) if($r && $r->count());
-    }
-    return;
+    my $class = shift;
+    my $data = shift;
+ 
+    return unless(is_sha1($data->{'query'}));
+
+    return $class->search_lookup(
+        $data->{'query'},
+        $data->{'confidence'},
+        $data->{'source'},
+        $data->{'limit'},
+    );
 }
 
 sub purge_hashes {
@@ -108,7 +102,7 @@ __PACKAGE__->set_sql('lookup' => qq{
     SELECT t1.id,t1.uuid,archive.data
     FROM (
         SELECT t2.id, t2.hash, t2.uuid, t2.guid
-        FROM hash_sha1 t2
+        FROM hash t2
         LEFT JOIN apikeys_groups on t2.guid = apikeys_groups.guid
         WHERE
             hash = ?
