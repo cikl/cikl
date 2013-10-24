@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use Iodef::Pb::Simple qw(iodef_confidence iodef_additional_data iodef_guid);
 use CIF qw/debug/;
 
 # work-around for cif-v1
@@ -38,52 +37,19 @@ sub insert {
     my $tbl = $class->table();
 
     # we're explicitly placing a hash
-    if($data->{'hash'}){
-        debug("Inserting hash");
-        $confidence = $data->{'confidence'};
-        
-        if(my $t = return_table($data->{'hash'})){
-            $class->table($t);
-        }
-        my $id = $class->SUPER::insert({
-            hash        => $data->{'hash'},
-            uuid        => $data->{'uuid'},
-            guid        => $data->{'guid'},
-            confidence  => $confidence,
-            reporttime  => $data->{'reporttime'},
-        });
-        push(@ids,$id);
-    } elsif(ref($data->{'data'}) eq 'IODEFDocumentType') {
-        foreach my $i (@{$data->{'data'}->get_Incident()}){
-            $confidence = iodef_confidence($i);
-            $confidence = @{$confidence}[0]->get_content();
-         
-            # for now, we expect all hashes to be sent in
-            # under Incident.AdditionalData
-            # we can improve this in the future
-            my $ad = iodef_additional_data($i);
-            return unless($ad);
-            
-            my @ids;
-            foreach my $a (@$ad){
-                next unless($a->get_meaning() && lc($a->get_meaning()) =~ /^(md5|sha(\d+)|uuid|hash)$/);
-                next unless($a->get_content());
-                my $hash = $a->get_content();
-                if(my $t = return_table($hash)){
-                    $class->table($t);
-                }
-                debug("Inserting something other than a hash");
-                my $id = $class->SUPER::insert({
-                    hash        => $hash,
-                    uuid        => $data->{'uuid'},
-                    guid        => $data->{'guid'},
-                    confidence  => $confidence,
-                    reporttime  => $data->{'reporttime'},
-                });
-                push(@ids,$id);
-            }
-        }
+    $confidence = $data->{'confidence'};
+
+    if(my $t = return_table($data->{'hash'})){
+      $class->table($t);
     }
+    my $id = $class->SUPER::insert({
+        hash        => $data->{'hash'},
+        uuid        => $data->{'uuid'},
+        guid        => $data->{'guid'},
+        confidence  => $confidence,
+        reporttime  => $data->{'reporttime'},
+      });
+    push(@ids,$id);
     $class->table($tbl);
     return(undef,\@ids); 
 }
