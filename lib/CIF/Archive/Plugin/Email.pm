@@ -57,12 +57,17 @@ sub insert {
 
     my $address = lc($event->address());
 
+    my $matched_plugin;
     foreach my $plugin (@plugins){
       if($plugin->match_event($event)){
-        $class->table($plugin->table());
+        $matched_plugin = $plugin;
         last;
       }
     }
+    if (!defined($matched_plugin)) {
+      return;
+    }
+    $class->table($matched_plugin->table());
 
     my $hash = generate_sha1_if_needed($address);
     if($class->test_feed($data)){

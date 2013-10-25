@@ -54,12 +54,17 @@ sub insert {
 
   my $tbl = $class->table();
 
+  my $matched_plugin;
   foreach my $plugin (@plugins){
     if($plugin->match_event($event)){
-      $class->table($class->sub_table($plugin));
+      $matched_plugin = $plugin;
       last;
     }
   }
+  if (!defined($matched_plugin)) {
+    return;
+  }
+  $class->table($matched_plugin->table());
 
   my @ids;
 
