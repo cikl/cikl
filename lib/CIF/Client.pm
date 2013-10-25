@@ -154,6 +154,11 @@ sub search {
     my @res;
     foreach my $event (@{$query_results->events}) {
       my $iodef = Iodef::Pb::Simple->new($event);
+
+      # This is a hack to get the IODEF object formed properly. As it turns out,
+      # Iodef::Pb::Simple doesn't form the structure to spec. So, we encode 
+      # and then decode the whole thing.
+      $iodef = IODEFDocumentType->decode($iodef->encode());
       push (@res, $iodef);
     }
     $dt = $dt->ymd().'T'.$dt->hms().'Z';
