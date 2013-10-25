@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use Digest::SHA qw(sha1_hex);
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 __PACKAGE__->table('email');
@@ -52,11 +51,6 @@ sub insert {
     
     my $event = $data->{event};
 
-    my $tbl = $class->table();
-    my @ids;
-
-    my $address = lc($event->address());
-
     my $matched_plugin;
     foreach my $plugin (@plugins){
       if($plugin->match_event($event)){
@@ -67,7 +61,13 @@ sub insert {
     if (!defined($matched_plugin)) {
       return;
     }
+
+    my $tbl = $class->table();
+    my @ids;
+
     $class->table($matched_plugin->table());
+    my $address = lc($event->address());
+
 
     my $hash = generate_sha1_if_needed($address);
     if($class->test_feed($data)){
