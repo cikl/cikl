@@ -192,14 +192,6 @@ sub search2 {
             $query->apikey(),
         );
     } else {
-        # log the query first
-#        unless($data->{'nolog'}){
-#            debug('logging search');
-#            my ($err,$ret) = $class->log_search($data);
-#            return($err) if($err);
-#        }
-#
-        
         my $hashed_query = $query->hashed_query();
         my $err;
         try {
@@ -245,100 +237,6 @@ sub hash_querystring {
       return lc($querystring);
     }
     return lc(sha1_hex(lc($querystring))); 
-}
-
-# TODO: MPR, I've disabled this, for now. I don't feel like dealing with it.
-sub log_search {
-    my $class = shift;
-    my $data = shift;
-    
-    my $q               = lc($data->{'query'});
-    my $source          = $data->{'source'}         || 'unknown';
-    my $confidence      = $data->{'confidence'}     || 50;
-    my $restriction     = $data->{'restriction'}    || 'private';
-    my $guid            = $data->{'guid'}           || $data->{'guid_default'} || $root_uuid;
-    my $desc            = $data->{'description'}    || 'search';
-    
-    my $dt          = DateTime->from_epoch(epoch => time());
-    $dt = $dt->ymd().'T'.$dt->hms().'Z';
-    
-    $source = generate_uuid_ns($source);
-    
-    my $id;
-   
-    my ($q_type,$q_thing);
-    for(lc($desc)){
-        # reg hashes
-        if(/^search ([a-f0-9]{40}|[a-f0-9]{32})$/){
-            $q_type = 'hash';
-            $q_thing = $1;
-            last;
-        } 
-        # asn
-        if(/^search as(\d+)$/){
-            $q_type = 'hash';
-            $q_thing = sha1_hex($1); 
-            last;
-        } 
-        # cc
-        if(/^search ([a-z]{2})$/){
-            $q_type = 'hash';
-            $q_thing = sha1_hex($1);
-            last;
-        }
-        m/^search (\S+)$/;
-        $q_type = 'address',
-        $q_thing = $1;
-    }
-   
-    # thread friendly to load here
-    ## TODO this could go in the client...?
-    require Iodef::Pb::Simple;
-    my $uuid = generate_uuid_random();
-    
-    my $doc = Iodef::Pb::Simple->new({
-        description => $desc,
-        assessment  => AssessmentType->new({
-            Impact  => [
-                ImpactType->new({
-                    lang    => 'EN',
-                    content => MLStringType->new({
-                        content => 'search',
-                        lang    => 'EN',
-                    }),
-                }),
-            ],
-            
-            ## TODO -- change this to low|med|high
-            Confidence  => ConfidenceType->new({
-                content => $confidence,
-                rating  => ConfidenceType::ConfidenceRating::Confidence_rating_numeric(),
-            }),
-        }),
-        $q_type             => $q_thing,
-        IncidentID          => IncidentIDType->new({
-            content => $uuid,
-            name    => $source,
-        }),
-        detecttime  => $dt,
-        reporttime  => $dt,
-        restriction => $restriction,
-        guid        => $guid,
-        restriction => RestrictionType::restriction_type_private(),
-    });
-   
-    my $err;
-    ($err,$id) = $class->insert({
-        uuid        => $uuid,
-        guid        => $guid,
-        data        => $doc,
-        created     => $dt,
-        feeds       => $data->{'feeds'},
-        datatypes   => $data->{'datatypes'},
-    });
-    return($err) if($err);
-    $class->dbi_commit() unless($class->db_Main->{'AutoCommit'});
-    return(undef,$id);
 }
 
 sub load_page_info {
