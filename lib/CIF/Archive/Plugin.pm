@@ -87,15 +87,22 @@ sub dispatch {
     my $event = $data->{event};
 
     my $matching_plugin;
-    foreach my $plugin ($class->plugins()){
-      if ($plugin->match_event($event) == 1) {
-        $matching_plugin = $plugin;
-        last;
+    my @plugins = $class->plugins();
+    if ($#plugins > -1) {
+      foreach my $plugin ($class->plugins()){
+        if ($plugin->match_event($event) == 1) {
+          $matching_plugin = $plugin;
+          last;
+        }
       }
+    } elsif ($class->match_event($event)) {
+      $matching_plugin = $class;
     }
     if ($matching_plugin) {
       debug("Match $class : $matching_plugin");
     }
+
+    return $matching_plugin;
 }
 
 1;

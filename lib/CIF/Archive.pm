@@ -98,8 +98,6 @@ sub insert {
     };
     return ($err) if($err);
     
-    #$data->{'data'} = $msg;
-    
     my $ret;
     ($err,$ret) = $class->insert_index($event, $data);
     return($err) if($err);
@@ -111,8 +109,6 @@ sub insert_index {
     my $event = shift;
     my $args    = shift;
     my @plugins = @{$class->plugins};
-
-    $args->{data} = Iodef::Pb::Simple->new($event);
 
     my $err;
     foreach my $p (@plugins){
