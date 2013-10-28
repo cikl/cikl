@@ -12,11 +12,8 @@ require CIF::APIKey;
 require CIF::APIKeyGroups;
 require CIF::APIKeyRestrictions;
 use CIF qw/is_uuid generate_uuid_ns generate_uuid_random debug/;
-use CIF::Msg;
-use CIF::Msg::Feed;
 use Data::Dumper;
 use CIF::Models::Event;
-use CIF::MsgHelpers qw/msg_reply_fail msg_reply_unauthorized msg_reply_success/;
 
 # this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
 # most people just want a quick answer, if they override this (via the client), they'll expect the
@@ -97,10 +94,10 @@ sub init_feeds {
     
     my $array;
     foreach (@$feeds){
-        my $m = FeedType::MapType->new({
+        my $m = {
             key     => generate_uuid_ns($_),
             value   => $_,
-        });
+        };
         push(@$array,$m);
     }
     $self->set_feeds_map($array);
@@ -120,10 +117,10 @@ sub init_restriction_map {
     my $array;
     foreach (keys %{$self->get_restriction_map()}){
         ## TODO map to the correct Protobuf RestrictionType
-        my $m = FeedType::MapType->new({
+        my $m = {
             key => $_,
             value   => $self->get_restriction_map->{$_},
-        });
+        };
         push(@$array,$m);
     }
     $self->set_restriction_map($array);
@@ -137,10 +134,10 @@ sub init_group_map {
     push(@$g, qw(everyone root));
     my $array;
     foreach (@$g){
-        my $m = FeedType::MapType->new({
+        my $m = {
             key     => generate_uuid_ns($_),
             value   => $_,
-        });
+        };
         push(@$array,$m);
     }
     $self->set_group_map($array);
@@ -210,7 +207,7 @@ sub authorized_read {
     #debug('groups: '.join(',',map { $_->get_key() } @groups));
     
     foreach my $g (@groups){
-        next unless($rec->inGroup($g->get_key()));
+        next unless($rec->inGroup($g->{key}));
         push(@array,$g);
     }
 
@@ -240,31 +237,6 @@ sub authorized_write {
     return({
         default_guid    => $rec->default_guid(),
     });
-}
-
-sub process {
-    my $self = shift;
-    my $msg = shift;
-    
-    $msg = MessageType->decode($msg);
-    
-    
-  my $pversion = sprintf("%4f",$msg->get_version());
-   if($pversion != $CIF::VERSION){
-        my $ret = msg_reply_fail('invalid protocol version: '.$pversion.', should be: '.$CIF::VERSION);
-        return $ret->encode();
-    }
-    my $err;
-    for($msg->get_type()){
-        if($_  == MessageType::MsgType::QUERY()){
-            return $self->process_query($msg);
-            last;
-        }
-    }
-
-    debug($err) if($err);
-    
-    return msg_reply_fail()->encode();
 }
 
 sub connect_retry {
