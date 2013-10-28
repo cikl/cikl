@@ -1,5 +1,5 @@
 package CIF::Archive::Plugin::Url::Spamvertising;
-use base 'CIF::Archive::Plugin::Url';
+use base 'CIF::Archive::UrlPluginBase';
 
 use strict;
 use warnings;

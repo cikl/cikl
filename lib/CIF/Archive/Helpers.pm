@@ -9,6 +9,7 @@ our @ISA = 'Exporter';
 our @EXPORT_OK = qw/
 generate_sha1_if_needed
 is_sha1
+is_email
 /;
 
 sub is_sha1 {
@@ -31,5 +32,13 @@ sub generate_sha1_if_needed {
       return $thing;
     }
     return sha1_hex($thing);
+}
+
+sub is_email {
+    my $e = shift;
+    return unless($e);
+    return if($e =~ /^(ftp|https?):\/\//);
+    return unless(lc($e) =~ /^([\w+.-_]+\@[a-z0-9.-]+\.[a-z0-9.-]{2,8})$/);
+    return(1);
 }
 

@@ -1,14 +1,11 @@
-package CIF::Archive::Plugin::Url;
+package CIF::Archive::UrlPluginBase;
 use base 'CIF::Archive::Plugin';
 
 use strict;
 use warnings;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use CIF qw/debug/;
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
-
-my @plugins = __PACKAGE__->plugins();
 
 use constant DATATYPE => 'url';
 sub datatype { return DATATYPE; }

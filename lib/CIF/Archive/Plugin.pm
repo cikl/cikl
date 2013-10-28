@@ -81,24 +81,4 @@ sub match_event {
   return 1;
 }
 
-sub find_matching_plugin {
-    my $class = shift;
-    my $data = shift;
-    my $event = $data->{event};
-
-    my $matching_plugin;
-    my @plugins = $class->plugins();
-    if ($#plugins > -1) {
-      foreach my $plugin ($class->plugins()){
-        if ($plugin->match_event($event) == 1) {
-          $matching_plugin = $plugin;
-          last;
-        }
-      }
-    } elsif ($class->match_event($event)) {
-      $matching_plugin = $class;
-    }
-    return $matching_plugin;
-}
-
 1;

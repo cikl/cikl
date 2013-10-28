@@ -21,7 +21,7 @@ use CIF::Models::QueryResults;
 use List::MoreUtils qw/any/;
 
 use Devel::StackTrace;
-use Module::Pluggable require => 1, except => qr/::Plugin::\S+::/, sub_name => '__plugins';
+use Module::Pluggable require => 1, sub_name => '__plugins';
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
 __PACKAGE__->table('archive');
@@ -59,7 +59,6 @@ sub load_plugins {
         push(@$archive_plugins, $plugin);
       }
     }
-    print Dumper {plugins_loaded => $archive_plugins, all_plugins => \@all_plugins};
     return 1;
 }
 
@@ -112,12 +111,11 @@ sub insert_index {
 
     my $err;
     foreach my $p (@plugins){
-        my $plugin = $p->find_matching_plugin($args);
-        if (defined($plugin)) {
-          debug("Inserting into $plugin");
+        if ($p->match_event($event) == 1) {
+          #debug("Inserting into $p");
           my ($pid,$err);
           try {
-              ($err,$pid) = $plugin->insert($args);
+              ($err,$pid) = $p->insert($args);
           } catch {
               $err = shift;
           };

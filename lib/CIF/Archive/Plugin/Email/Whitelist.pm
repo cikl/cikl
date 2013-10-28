@@ -1,5 +1,5 @@
 package CIF::Archive::Plugin::Email::Whitelist;
-use base 'CIF::Archive::Plugin::Email';
+use base 'CIF::Archive::EmailPluginBase';
 
 use strict;
 use warnings;

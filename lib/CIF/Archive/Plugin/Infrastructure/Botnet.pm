@@ -1,5 +1,5 @@
 package CIF::Archive::Plugin::Infrastructure::Botnet;
-use base 'CIF::Archive::Plugin::Infrastructure';
+use base 'CIF::Archive::InfrastructurePluginBase';
 
 use strict;
 use warnings;

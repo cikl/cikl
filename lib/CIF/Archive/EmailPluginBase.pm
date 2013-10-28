@@ -1,29 +1,18 @@
-package CIF::Archive::Plugin::Email;
+package CIF::Archive::EmailPluginBase;
 use base 'CIF::Archive::Plugin';
 
 use strict;
 use warnings;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed is_email/;
 
 __PACKAGE__->table('email');
 __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(Essential => qw/id uuid guid hash confidence reporttime created/);
 __PACKAGE__->sequence('email_id_seq');
 
-my @plugins = __PACKAGE__->plugins();
-
 use constant DATATYPE => 'email';
 sub datatype { return DATATYPE; }
-
-sub is_email {
-    my $e = shift;
-    return unless($e);
-    return if($e =~ /^(ftp|https?):\/\//);
-    return unless(lc($e) =~ /^([\w+.-_]+\@[a-z0-9.-]+\.[a-z0-9.-]{2,8})$/);
-    return(1);
-}
 
 sub match_event {
   my $class = shift;

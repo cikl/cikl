@@ -5,14 +5,11 @@ use strict;
 use warnings;
 
 use CIF::Archive::Helpers qw/is_sha1/;
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use CIF qw/debug/;
 
 # work-around for cif-v1
 use Regexp::Common qw/net/;
 use Digest::SHA qw(sha1_hex);
-
-my @plugins = __PACKAGE__->plugins();
 
 __PACKAGE__->table('hash');
 __PACKAGE__->columns(Primary => 'id');

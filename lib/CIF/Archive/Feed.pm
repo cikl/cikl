@@ -4,10 +4,7 @@ use base 'CIF::Archive';
 use warnings;
 use strict;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
-
-my @plugins = __PACKAGE__->plugins();
 
 __PACKAGE__->table('feed');
 __PACKAGE__->columns(Primary => 'id');

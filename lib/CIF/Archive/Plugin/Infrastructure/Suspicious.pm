@@ -1,5 +1,5 @@
 package CIF::Archive::Plugin::Infrastructure::Suspicious;
-use base 'CIF::Archive::Plugin::Infrastructure';
+use base 'CIF::Archive::InfrastructurePluginBase';
 
 use strict;
 use warnings;

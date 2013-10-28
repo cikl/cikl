@@ -1,5 +1,5 @@
 package CIF::Archive::Plugin::Domain::Phishing;
-use base 'CIF::Archive::Plugin::Domain';
+use base 'CIF::Archive::DomainPluginBase';
 
 use strict;
 use warnings;

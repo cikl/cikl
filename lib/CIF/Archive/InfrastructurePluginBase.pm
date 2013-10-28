@@ -1,10 +1,9 @@
-package CIF::Archive::Plugin::Infrastructure;
+package CIF::Archive::InfrastructurePluginBase;
 use base 'CIF::Archive::Plugin';
 
 use warnings;
 use strict;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
 use Digest::SHA qw/sha1_hex/;
@@ -13,8 +12,6 @@ use JSON::XS;
 use CIF qw/debug/;
 use Data::Dumper;
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
-
-my @plugins = __PACKAGE__->plugins();
 
 use constant DATATYPE => 'infrastructure';
 sub datatype { return DATATYPE; }

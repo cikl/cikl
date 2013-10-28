@@ -4,10 +4,6 @@ use base 'CIF::Archive::Plugin';
 use strict;
 use warnings;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-
-my @plugins = __PACKAGE__->plugins();
-
 use constant DATATYPE => 'rir';
 sub datatype { return DATATYPE; }
 
