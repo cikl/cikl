@@ -62,6 +62,9 @@ sub confidence { $_[0]->{confidence}}
 sub uuid { $_[0]->{id}}
 sub reporttime { $_[0]->{reporttime}}
 sub guid { $_[0]->{guid}}
+sub asn { $_[0]->{asn}}
+sub cc { $_[0]->{cc}}
+sub rir { $_[0]->{rir}}
 
 sub to_hash {
   my $self = shift;
