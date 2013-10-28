@@ -9,7 +9,6 @@ use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
 use Config::Simple;
 use Digest::SHA qw/sha1_hex/;
-use Iodef::Pb::Simple qw/iodef_addresses/;
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
 use Net::Patricia;
@@ -150,120 +149,7 @@ sub search {
     };
     return $err if($err);
 
-    my $dt = DateTime->from_epoch(epoch => $query_results->reporttime);
-    my @res;
-    foreach my $event (@{$query_results->events}) {
-      my $iodef = Iodef::Pb::Simple->new($event);
-
-      # This is a hack to get the IODEF object formed properly. As it turns out,
-      # Iodef::Pb::Simple doesn't form the structure to spec. So, we encode 
-      # and then decode the whole thing.
-      $iodef = IODEFDocumentType->decode($iodef->encode());
-      push (@res, $iodef);
-    }
-    $dt = $dt->ymd().'T'.$dt->hms().'Z';
-
-    my $f = FeedType->new({
-        version         => $CIF::VERSION,
-        confidence      => $query_results->query->confidence(),
-        description     => $query_results->query->description(),
-        ReportTime      => $dt,
-        group_map       => $query_results->group_map, # so they can't see other groups they're not in
-        restriction_map => $query_results->restriction_map,
-        data            => \@res,
-        uuid            => $query_results->uuid,
-        guid            => $query_results->guid,
-        query_limit     => $query_results->query_limit,
-        # todo -- make this avail to to libcif
-        # https://github.com/collectiveintel/cif-router/issues/5
-        #feeds_map       => $self->get_feeds_map(),
-      });  
-    
- 
-    my $uuid = generate_uuid_ns($args->{'apikey'});
-    my $feeds = [ $f ];
-    filter_response($feeds, $uuid, $filter_me, $ip_tree, \@orig_queries);
-    
-    debug('done processing');
-    return(undef,$feeds);
-}
-
-sub filter_response {
-    my $feeds = shift; 
-    my $uuid = shift;
-    my $filter_me = shift;
-    my $ip_tree = shift;
-    my $orig_queries = shift;
-
-    my $query_had_ips = $ip_tree->climb();
-    my @ip_queries;
-    foreach my $q (@$orig_queries) {
-      next unless ($q =~ /^$RE{'net'}{'IPv4'}/);
-      push(@ip_queries, $q);
-    }
-    debug('filtering...') if($::debug);
-    ## TODO: finish this so feeds are inline with reg queries
-    ## TODO: try to base64 decode and decompress first in try { } catch;
-    foreach my $feed (@{$feeds}){
-        my @array;
-        my $err = undef;
-
-        next unless($feed->get_data());
-
-        debug('processing: '.($#{$feed->get_data}+1).' items') if($::debug);
-        foreach my $e (@{$feed->get_data()}){
-            if($filter_me){
-                my $id = @{$e->get_Incident()}[0]->get_IncidentID->get_name();
-                # filter out my searches
-                next if($id eq $uuid);
-            }
-            if($query_had_ips){
-                next unless(ip_in_scope($uuid, $ip_tree, $e, \@ip_queries));
-            }
-            push(@array,$e);
-        }
-
-        if($#array > -1){
-            debug('final results: '.($#array+1)) if($::debug);
-            $feed->set_data(\@array);
-        } else {
-            $feed->set_data(undef);
-        }
-    }
-}
-
-sub ip_in_scope {
-    my $uuid = shift;
-    my $ip_tree = shift;
-    my $iodef = shift;
-    my $ip_queries = shift;
-
-    my $addresses = iodef_addresses($iodef);
-
-    # if there are no addresses, we've got nothing or hashes
-    unless (@$addresses) {
-      return 1;
-    }
-
-    foreach my $a (@$addresses) {
-      next unless ($a->get_content =~ /^$RE{'net'}{'IPv4'}/);               
-      # if we have a match great
-      # if we don't we need to test and see if this address
-      # contains our original query
-      if ($ip_tree->match_string($a->get_content())){
-        return 1;
-      } 
-
-      my $ip_tree2 = Net::Patricia->new();
-      $ip_tree2->add_string($a->get_content());
-      foreach my $ip (@$ip_queries){
-        if($ip_tree2->match_string($ip)){
-          return 1;
-        }
-      }
-    }
-
-    return 1;
+    return(undef,$query_results);
 }
 
 sub send {

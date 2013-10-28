@@ -30,12 +30,24 @@ sub new {
 
 sub query { $_[0]->{query}; };
 sub events { $_[0]->{events}; };
+sub event_count { $#{$_[0]->{events}}; };
 sub reporttime { $_[0]->{reporttime}; };
 sub group_map { $_[0]->{group_map}; };
 sub restriction_map { $_[0]->{restriction_map}; };
 sub guid { $_[0]->{guid}; };
 sub uuid { $_[0]->{uuid}; };
 sub query_limit { $_[0]->{query}->limit(); };
+
+sub get_pretty_group_name {
+  my $self = shift;
+  my $guid = shift;
+  foreach my $x (@{$self->group_map()}) {
+    if ($guid eq $x->{key}) {
+      return $x->{value};
+    }
+  }
+  return undef;
+}
 
 sub to_hash {
   my $self = shift;

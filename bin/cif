@@ -10,7 +10,6 @@ BEGIN {
         "lib", 
         "local/lib",
         "../libcif/lib", # in case we're in -dev mode
-        "../../../iodef-pb-simple-perl/lib",
     );
     my $bin_path;
 
@@ -37,8 +36,10 @@ use Getopt::Std;
 use JSON::XS;
 use CIF qw/debug/;
 
-## TODO -- generate CIF::Format to wrap this
-use Iodef::Pb::Format;
+use CIF::Report::QueryResultsReport;
+use CIF::Report::CSVFormatter;
+use CIF::Report::TableFormatter;
+
 
 my %opts;
 getopt('D:S:O:G:l:g:THL:p:f:q:c:s:r:C:zP:Fe:', \%opts);
@@ -75,7 +76,6 @@ my $filter_me           = $opts{'F'};
 my $sortby              = $opts{'S'} || 'detecttime';
 my $sortby_direction    = $opts{'D'} || 'DESC';
 my $exclude_assessment   = $opts{'e'};
-my $csv_noheader        = $opts{'x'};
 my $new_only            = $opts{'m'} || 0;
 
 die usage() unless($query);
@@ -96,14 +96,13 @@ Query Options:
     -c  --confidence:       lowest tolerated confidence (0.00 -- 100.00), default $confidence
     
 Format Options:
-    -p  --plugin:           output plugin ('Table','Snort','Csv','Json','Html'), default: Table
+    -p  --plugin:           output plugin ('Table','Csv'), default: Table
     -f  --fields:           set default output fields for default table display
     -S  --summary:          consolidated Text::Table output (default: True)
     -N  --nomap:            don't map restrictions
     -g  --guid:             filter by a specific group id (guid), ex: group1.example.com
     -G  --groupmap:         turn group mapping (guid to 'group name') on/off, default: $group_map
     -e  --exclude:          exclude a specific assessment (search,botnet,malware, etc).
-    -x  --csv-noheader:     don't display the header when using the csv plugin
     
 Nonstandard Options:
     -z                      compact address field to 32 chars, applies only to defalt table output, default: 1 (0 turns it off)
@@ -122,7 +121,7 @@ Example Queries:
     
     \$> perl $0 -q malware
     \$> perl $0 -q malware
-    \$> perl $0 -q infrastructure/botnet -p Snort
+    \$> perl $0 -q infrastructure/botnet -p csv 
     \$> perl $0 -q domain/malware -p bindzone -c 95
     \$> perl $0 -q domain -c 40
     
@@ -149,34 +148,21 @@ Configuration:
     # proxy settings
     # proxy = https://localhost:5555
 
-Plugin Specific Configurations:
-
-    Table:
-        
-        [client]
-        table_nowarning = 1
-
-    Csv:
-        [client]
-        # when we filter out commas in the various fields, do we replace them with "_"'s or just spaces
-        csv_noseperator = 1
-
-    Bindzone:
-        
-        [client]
-        bindzone_path = /etc/namedb/
-
-    Snort:
-    
-        [client]
-        snort_startsid = 10000000
-
 EOF
 }
 
-if(lc($plugin) eq 'raw'){
+
+$plugin = lc($plugin);
+my $formatter;
+if ($plugin eq 'csv') {
+  $formatter = CIF::Report::CSVFormatter->new();
+} elsif ($plugin eq 'table') {
+  $formatter = CIF::Report::TableFormatter->new();
+}
+
+if (!defined($formatter)) {
     print usage();
-    print 'Raw plugin has been re-purposed, please use \'-p json\' instead'."\n";
+    print "ERROR: Unknown formatter ($plugin) specified.\n";
     exit(0);
 }
 
@@ -195,8 +181,6 @@ if($err){
     exit(-1);
 }
 
-my $ret;
-
 # else we're doing query
 if($outfile){
     open(F,">",$outfile) || die($!);
@@ -208,8 +192,8 @@ my $orig_query = $query;
 $query =~ s/\s//g;
 
 #my @q = split(/,/,$query);
-
-($err,$ret) = $cli->search($orig_query, {
+my $query_results;
+($err,$query_results) = $cli->search($orig_query, {
     filter_me           => $filter_me,
     nolog               => $nolog,
     no_maprestrictions  => $nomap,
@@ -221,12 +205,10 @@ if($err){
     print 'ERROR: '.$err."\n";
     exit(-1);
 }
-unless($ret){
+unless($query_results){
     debug('no results...') if($debug);
     exit(0);
 }
-
-my $feeds = $ret;
 
 debug('formatting as '.ucfirst($plugin).'...');
 
@@ -234,65 +216,16 @@ $fields = [ split(/,/,$fields) ] if($fields);
 
 my @text;
 
-foreach my $feed (0 ... $#{$feeds}){
-    my $x = $feed;
-    $feed = @{$feeds}[$feed];
-    next unless($feed->get_data());
-    my $query_limit = $limit || $feed->get_query_limit();
 
-    my $r_map = ($nomap) ? undef : $feed->get_restriction_map();
-    my $t = Iodef::Pb::Format->new({
-        config              => $cli->get_global_config(),
-        format              => ucfirst($plugin),
-        fields              => $fields,
-        data                => $feed->get_data(),
-        
-        group_map           => $feed->get_group_map(),
-        restriction_map     => $r_map,
-        
-        confidence          => $feed->get_confidence(),
-        guid                => $feed->get_guid(),
-        uuid                => $feed->get_uuid(),
-        description         => $feed->get_description(),
-        restriction         => $feed->get_restriction(),
-        reporttime          => $feed->get_ReportTime(),
-        
-        # config stuff
-        compress_address    => $compress_address,
-        table_nowarning     => $cli->get_table_nowarning(),
-        table_uuid          => $uuid,
-        table_relatedid     => $relateduuid,
-        table_showmeta      => $table_showmeta,
-        sortby              => $sortby,
-        sortby_direction    => $sortby_direction,
-        limit               => $query_limit,
-        round_confidence    => $round_confidence,
-        csv_noheader        => $csv_noheader,
-        
-        exclude_assessment  => $exclude_assessment,
-        new_only            => $new_only,
-        
-        # this is bound to cause us problems if not lined up properly
-        # with the original $feeds array, or if there is a gap in $feeds
-        # compared to the $q array, we should make sure the router returns
-        # are in-sync
-        #query               => "ASDFASDF",
-    });
-    
-    #$t .= "\n";
-    
-    ## TODO -- add feed meta data to this.
-    push(@text,$t);
-}
+my $output = *STDOUT;
 
 if($outfile){
-    foreach (@text){
-        print F $_;
-    }
-    close(F);
-} else {
-    foreach (@text){
-        print $_;
-    }
+  $output = *F;
 }
-debug('done');
+
+my $report = CIF::Report::QueryResultsReport->new($query_results);
+$formatter->generate_report($report, $output);
+
+if ($outfile) {
+  close(F);
+}
