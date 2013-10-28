@@ -66,12 +66,7 @@ sub insert {
   foreach (0 ... $#a1-1){
     my $a = join('.',reverse(@a2));
     pop(@a2);
-    my $id = $class->insert_hash({ 
-        uuid        => $event->uuid, 
-        guid        => $event->guid, 
-        confidence  => $event->confidence,
-        reporttime  => $event->reporttime,
-      },$a);
+    my $id = $class->insert_hash($event,$a);
     push(@ids,$id);
   }
 

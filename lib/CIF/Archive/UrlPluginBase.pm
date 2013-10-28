@@ -47,21 +47,10 @@ sub insert_into_feed {
 sub insert {
     my $class   = shift;
     my $data    = shift;
-    
     my $event = $data->{event};
-
-    my @ids;
-
     my $addr = lc($event->address());
-
-    my $id = $class->insert_hash({ 
-        uuid        => $event->uuid, 
-        guid        => $event->guid, 
-        confidence  => $event->confidence,
-        reporttime  => $event->reporttime,
-      },$addr);
-    push(@ids,$id);
-    return(undef,\@ids);
+    my $id = $class->insert_hash($event, $addr);
+    return(undef,[$id]);
 }
 
 1;

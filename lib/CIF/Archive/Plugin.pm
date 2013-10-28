@@ -71,17 +71,17 @@ sub index_event_for_feed {
 
 sub insert_hash {
     my $class = shift;
-    my $data = shift;
+    my $event = shift;
     my $key = shift;
     
     $key = sha1_hex($key) unless($key=~ /^[a-f0-9]{40}$/);
     
     my $id = CIF::Archive::Hash->insert({
-        uuid        => $data->{'uuid'},
-        guid        => $data->{'guid'},
-        confidence  => $data->{'confidence'},
+        uuid        => $event->uuid,
+        guid        => $event->guid,
+        confidence  => $event->confidence,
         hash        => $key,
-        reporttime  => $data->{'reporttime'},
+        reporttime  => $event->reporttime,
     });
     return ($id);
 }

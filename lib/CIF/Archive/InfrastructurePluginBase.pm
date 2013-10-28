@@ -82,16 +82,12 @@ sub insert {
   my @ids;
 
   my $id;
-  # we do this here cause it's faster than doing 
-  # it as a seperate check in the main class (1 less extra for loop)
-  my $hash = sha1_hex($address);
 
   ## TODO -- clean this up into a function, map with ipv6
   ## it'll evolve into pushing this search into the hash table
   ## the client will then do the final leg of the work (Net::Patricia, etc)
   ## right now postgres can do it, but down the road big-data warehouses might not
   ## this way we can do faster hash lookups for non-advanced CIDR queries
-  #my $id;
 
   my @index;
   if($address =~ /^$RE{'net'}{'IPv4'}$/){
@@ -118,14 +114,9 @@ sub insert {
       }     
     }
   }
-  foreach my $x (@index){
-    $id = $class->insert_hash({ 
-        uuid        => $event->uuid, 
-        guid        => $event->guid, 
-        confidence  => $event->confidence ,
-        reporttime  => $event->reporttime,
-      },$x);
 
+  foreach my $x (@index){
+    $id = $class->insert_hash($event,$x);
     push(@ids,$id);
   }
   return(undef,\@ids);
