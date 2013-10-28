@@ -2,14 +2,11 @@ package CIF::Encoder::JSON;
 
 use strict;
 use warnings;
-use CIF::MsgHelpers;
 use CIF::Models::Submission;
 use CIF::Models::Event;
 use CIF::Models::Query;
-use CIF::Client::Query;
-use CIF::Msg::Feed;
+use CIF::Models::QueryResults;
 use Try::Tiny;
-use CIF::MsgHelpers qw/msg_reply_success/;
 require JSON;
 use Data::Dumper;
 use CIF qw/debug/;

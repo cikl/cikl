@@ -9,8 +9,6 @@ $VERSION = eval $VERSION;
 
 use DateTime::Format::DateParse;
 use OSSP::uuid;
-use CIF::Msg;
-use CIF::Msg::Feed;
 
 require Exporter;
 

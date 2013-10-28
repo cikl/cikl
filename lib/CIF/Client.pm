@@ -19,8 +19,6 @@ use CIF::Models::Submission;
 use CIF::Models::Query;
 
 use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
-use CIF::Msg;
-use CIF::Msg::Feed;
 
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
