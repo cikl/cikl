@@ -5,55 +5,53 @@ use strict;
 use warnings;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use Try::Tiny;
-use Iodef::Pb::Simple qw(iodef_confidence iodef_bgp);
-use Digest::SHA qw/sha1_hex/;
 
 my @plugins = __PACKAGE__->plugins();
 
 use constant DATATYPE => 'rir';
 sub datatype { return DATATYPE; }
 
-sub query { } # handled by the address module
+sub match_event {
+  my $class = shift;
+  my $event = shift;
+  my $ret = $class->SUPER::match_event($event);
+  if ($ret == 0) {
+    return 0;
+  }
+
+  my $rir = $event->rir();
+  if (!defined($rir)) {
+    return 0;
+  }
+
+  unless ($rir =~ /^(afrinic|apnic|arin|lacnic|ripencc)$/i) {
+    return 0;
+  }
+
+  return 1;
+}
 
 sub insert {
     my $class = shift;
     my $data = shift;
+    my $event = $data->{event};
     
-    return unless(ref($data->{'data'}) eq 'IODEFDocumentType');
+    unless ($class->match_event($event)) {
+      return(undef);
+    }
 
-    my $tbl = $class->table();
     my @ids;
  
-    foreach my $i (@{$data->{'data'}->get_Incident()}){
-        foreach(@plugins){
-            if($_->prepare($i)){
-                $class->table($class->sub_table($_));
-                last;
-            }
-        }
+    my $rir = lc($event->rir);
 
-        my $uuid = $i->get_IncidentID->get_content();
-        
-        my $bgp = iodef_bgp($i);
-        next unless($bgp);
-        my $confidence = iodef_confidence($i);
-        $confidence = @{$confidence}[0]->get_content();
-        
-        foreach my $e (@$bgp){
-            next unless($e->{'rir'} && lc($e->{'rir'}) =~ /^(afrinic|apnic|arin|lacnic|ripencc)$/);
-            $e->{'rir'} = lc($e->{'rir'});
-            my $id = $class->insert_hash({ 
-                uuid        => $data->{'uuid'}, 
-                guid        => $data->{'guid'}, 
-                confidence  => $confidence,
-                reporttime  => $data->{'reporttime'},
-            },$e->{'rir'});
-        
-            push(@ids,$id);
-        }
-    }
-    $class->table($tbl);
+    my $id = $class->insert_hash({ 
+        uuid        => $event->uuid, 
+        guid        => $event->guid, 
+        confidence  => $event->confidence,
+        reporttime  => $event->reporttime,
+      },$rir);
+
+    push(@ids,$id);
     return(undef,\@ids);
 }
 

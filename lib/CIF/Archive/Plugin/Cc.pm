@@ -5,54 +5,53 @@ use strict;
 use warnings;
 
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
-use Try::Tiny;
-use Iodef::Pb::Simple qw(iodef_confidence iodef_bgp);
 
 my @plugins = __PACKAGE__->plugins();
 
 use constant DATATYPE => 'cc';
 sub datatype { return DATATYPE; }
 
-sub query { } # handled by the address module
+sub match_event {
+  my $class = shift;
+  my $event = shift;
+  my $ret = $class->SUPER::match_event($event);
+  if ($ret == 0) {
+    return 0;
+  }
+
+  my $cc = $event->cc();
+  if (!defined($cc)) {
+    return 0;
+  }
+
+  unless ($cc =~ /^[A-Za-z]{2}$/) {
+    return 0;
+  }
+
+  return 1;
+}
 
 sub insert {
     my $class = shift;
     my $data = shift;
-    
-    return unless(ref($data->{'data'}) eq 'IODEFDocumentType');
+    my $event = $data->{event};
 
-    my $tbl = $class->table();
+    unless ($class->match_event($event)) {
+      return(undef);
+    }
+
     my @ids;
  
-    foreach my $i (@{$data->{'data'}->get_Incident()}){
-        foreach(@plugins){
-            if($_->prepare($i)){
-                $class->table($class->sub_table($_));
-                last;
-            }
-        }
+    my $cc = lc($event->cc());
 
-        my $uuid = $i->get_IncidentID->get_content();
-        
-        my $bgp = iodef_bgp($i);
-        next unless($bgp);
-        my $confidence = iodef_confidence($i);
-        $confidence = @{$confidence}[0]->get_content();
-        
-        foreach my $e (@$bgp){
-            next unless($e->{'cc'} && $e->{'cc'} =~ /^[a-zA-Z]{2}$/);
-            $e->{'cc'} = lc($e->{'cc'});
-            my $id = $class->insert_hash({ 
-                uuid        => $data->{'uuid'}, 
-                guid        => $data->{'guid'}, 
-                confidence  => $confidence,
-                reporttime  => $data->{'reporttime'},
-            },$e->{'cc'});
-        
-            push(@ids,$id);
-        }
-    }
-    $class->table($tbl);
+    my $id = $class->insert_hash({ 
+        uuid        => $event->uuid, 
+        guid        => $event->guid,
+        confidence  => $event->confidence,
+        reporttime  => $event->reporttime,
+      },$cc);
+
+    push(@ids,$id);
     return(undef,\@ids);
 }
 
