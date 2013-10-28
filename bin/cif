@@ -39,7 +39,6 @@ use CIF qw/debug/;
 
 ## TODO -- generate CIF::Format to wrap this
 use Iodef::Pb::Format;
-use Iodef::Pb::Simple;
 
 my %opts;
 getopt('D:S:O:G:l:g:THL:p:f:q:c:s:r:C:zP:Fe:', \%opts);
