@@ -81,7 +81,7 @@ sub match_event {
   return 1;
 }
 
-sub dispatch {
+sub find_matching_plugin {
     my $class = shift;
     my $data = shift;
     my $event = $data->{event};
@@ -98,10 +98,6 @@ sub dispatch {
     } elsif ($class->match_event($event)) {
       $matching_plugin = $class;
     }
-    if ($matching_plugin) {
-      debug("Match $class : $matching_plugin");
-    }
-
     return $matching_plugin;
 }
 

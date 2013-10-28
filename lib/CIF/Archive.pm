@@ -112,17 +112,20 @@ sub insert_index {
 
     my $err;
     foreach my $p (@plugins){
-        my ($pid,$err);
-        try {
-            $p->dispatch($args);
-            ($err,$pid) = $p->insert($args);
-        } catch {
-            $err = shift;
-        };
-        if($err){
-            warn $err;
-            $class->dbi_rollback() unless($class->db_Main->{'AutoCommit'});
-            return $err;
+        my $plugin = $p->find_matching_plugin($args);
+        if (defined($plugin)) {
+          debug("Inserting into $plugin");
+          my ($pid,$err);
+          try {
+              ($err,$pid) = $plugin->insert($args);
+          } catch {
+              $err = shift;
+          };
+          if($err){
+              warn $err;
+              $class->dbi_rollback() unless($class->db_Main->{'AutoCommit'});
+              return $err;
+          }
         }
     }
     return(undef,1);

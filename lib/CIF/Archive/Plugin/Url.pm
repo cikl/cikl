@@ -46,19 +46,6 @@ sub insert {
     
     my $event = $data->{event};
 
-    my $matched_plugin;
-    foreach my $plugin (@plugins){
-      if($plugin->match_event($event)){
-        $matched_plugin = $plugin;
-        last;
-      }
-    }
-    if (!defined($matched_plugin)) {
-      return;
-    }
-    $class->table($matched_plugin->table());
-    
-    my $tbl = $class->table();
     my @ids;
 
     my $addr = lc($event->address());
@@ -80,7 +67,6 @@ sub insert {
         reporttime  => $event->reporttime,
       },$addr);
     push(@ids,$id);
-    $class->table($tbl);
     return(undef,\@ids);
 }
 

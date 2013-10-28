@@ -52,20 +52,6 @@ sub insert {
   my $address = $event->address;
   my @ids;
 
-  ## TODO -- clean this up, refactor
-  my $tbl = $class->table();
-  my $matched_plugin;
-  foreach my $plugin (@plugins){
-    if($plugin->match_event($event)){
-      $matched_plugin = $plugin;
-      last;
-    }
-  }
-  if (!defined($matched_plugin)) {
-    return;
-  }
-  $class->table($matched_plugin->table());
-
   my $id;
   # we do this here cause it's faster than doing 
   # it as a seperate check in the main class (1 less extra for loop)
@@ -149,7 +135,6 @@ sub insert {
 
     push(@ids,$id);
   }
-  $class->table($tbl);
   return(undef,\@ids);
 }
 
