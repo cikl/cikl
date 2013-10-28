@@ -6,7 +6,7 @@ use warnings;
 
 use Digest::SHA qw/sha1_hex/;
 use CIF qw/debug/;
-use CIF::Archive::Helpers qw/generate_sha1_if_needed is_email/;
+use CIF::Archive::Helpers qw/is_email/;
 
 __PACKAGE__->table('domain');
 __PACKAGE__->columns(Primary => 'id');
@@ -15,6 +15,7 @@ __PACKAGE__->sequence('domain_id_seq');
 
 use constant DATATYPE => 'domain';
 sub datatype { return DATATYPE; }
+sub feedtype { return DATATYPE; }
 
 sub query { } # handled by the address module
 
@@ -44,38 +45,27 @@ sub match_event {
   return 1;
 }
 
+sub insert_into_feed {
+  my $class = shift;
+  my $event = shift;
+  my $address = lc($event->address());
+  $class->index_event_for_feed($event, $address, {address => $address});
+}
+
 sub insert {
   my $class = shift;
   my $data = shift;
   my $event = $data->{event};
 
-  my $tbl = $class->table();
-
   my @ids;
 
   my $address = lc($event->address());
-
-  return if($address =~ /^(ftp|https?):\/\//);
-  # this way we can change the regex as we go if needed
-  return if(is_email($address));
-  return unless($address =~ /[a-z0-9.\-_]+\.[a-z]{2,6}$/);
-  if($class->test_feed($data)){
-    $class->SUPER::insert({
-        uuid        => $event->uuid,
-        guid        => $event->guid,
-        hash        => sha1_hex($address),
-        address     => $address,
-        confidence  => $event->confidence,
-        reporttime  => $event->reporttime,
-      });
-  }
 
   my @a1 = reverse(split(/\./,$address));
   my @a2 = @a1;
   foreach (0 ... $#a1-1){
     my $a = join('.',reverse(@a2));
     pop(@a2);
-    #my $hash = generate_sha1_if_needed($a);
     my $id = $class->insert_hash({ 
         uuid        => $event->uuid, 
         guid        => $event->guid, 

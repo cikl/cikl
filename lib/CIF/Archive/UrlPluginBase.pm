@@ -5,10 +5,10 @@ use strict;
 use warnings;
 
 use CIF qw/debug/;
-use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 use constant DATATYPE => 'url';
 sub datatype { return DATATYPE; }
+sub feedtype { return DATATYPE; }
 
 __PACKAGE__->table('url');
 __PACKAGE__->columns(Primary => 'id');
@@ -37,6 +37,13 @@ sub match_event {
   return 1;
 }
 
+sub insert_into_feed {
+  my $class = shift;
+  my $event = shift;
+  my $address = lc($event->address());
+  $class->index_event_for_feed($event, $address);
+}
+
 sub insert {
     my $class   = shift;
     my $data    = shift;
@@ -46,16 +53,6 @@ sub insert {
     my @ids;
 
     my $addr = lc($event->address());
-    my $hash = generate_sha1_if_needed($addr);
-    if($class->test_feed($data)){
-      $class->SUPER::insert({
-          guid        => $event->guid,,
-          uuid        => $event->uuid,
-          hash        => $hash,
-          confidence  => $event->confidence,
-          reporttime  => $event->reporttime,
-        });
-    }
 
     my $id = $class->insert_hash({ 
         uuid        => $event->uuid, 

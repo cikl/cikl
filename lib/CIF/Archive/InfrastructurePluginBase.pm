@@ -11,10 +11,10 @@ use Parse::Range qw(parse_range);
 use JSON::XS;
 use CIF qw/debug/;
 use Data::Dumper;
-use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 use constant DATATYPE => 'infrastructure';
 sub datatype { return DATATYPE; }
+sub feedtype { return DATATYPE; }
 
 __PACKAGE__->table('infrastructure');
 __PACKAGE__->columns(Primary => 'id');
@@ -41,20 +41,10 @@ sub match_event {
   return 1;
 }
 
-sub insert {
+sub insert_into_feed {
   my $class = shift;
-  my $data = shift;
-  my $event = $data->{event};
-
-  my $address = $event->address;
-  my @ids;
-
-  my $id;
-  # we do this here cause it's faster than doing 
-  # it as a seperate check in the main class (1 less extra for loop)
-  my $hash = sha1_hex($address);
-
-  if($class->test_feed($data)){
+  my $event = shift;
+  my $address = lc($event->address());
 ### TODO MPR: This is trying to make supplied port ranges indexable, but Ill 
     #have to come back to it later.
 ##    # we just need a unique hash based on port/protocol
@@ -80,15 +70,21 @@ sub insert {
 ##        $hash = sha1_hex($hash.$ranges);
 ##      }
 ##    }
-    $class->SUPER::insert({
-        guid        => $event->guid,
-        uuid        => $event->uuid,
-        confidence  => $event->confidence,
-        hash        => $hash,
-        address     => $address,
-        reporttime  => $event->reporttime,
-      }); 
-  }
+  $class->index_event_for_feed($event, $address, {address => $address});
+}
+
+sub insert {
+  my $class = shift;
+  my $data = shift;
+  my $event = $data->{event};
+
+  my $address = $event->address;
+  my @ids;
+
+  my $id;
+  # we do this here cause it's faster than doing 
+  # it as a seperate check in the main class (1 less extra for loop)
+  my $hash = sha1_hex($address);
 
   ## TODO -- clean this up into a function, map with ipv6
   ## it'll evolve into pushing this search into the hash table

@@ -8,6 +8,7 @@ use Digest::SHA qw/sha1_hex/;
 use CIF qw/debug/;
 use List::MoreUtils qw/any/;
 use CIF::Archive::Hash;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 sub query {}
 
@@ -26,6 +27,9 @@ sub sub_table {
 sub test_feed {
     my $class = shift;
     my $feeds = shift;
+
+    my $feedtype = $class->feedtype();
+    return unless(defined($feedtype));
    
     $feeds = $feeds->{'feeds'};
     return unless($feeds);
@@ -33,8 +37,36 @@ sub test_feed {
 
     return unless(@$feeds);
     foreach my $f (@$feeds){
-        return 1 if(lc($class) =~ /$f$/);
+        return 1 if($f eq $feedtype);
     }
+    return undef;
+}
+
+sub insert_into_feed {
+  my $class = shift;
+  my $event = shift;
+
+  # Don't do anything.
+}
+
+sub index_event_for_feed {
+    my $class = shift;
+    my $event = shift;
+    my $field_value = shift;
+    my $extra_fields = shift || {};
+    my $hash = generate_sha1_if_needed($field_value);
+    my $data = {
+      uuid        => $event->uuid,
+      guid        => $event->guid,
+      hash        => $hash,
+      confidence  => $event->confidence,
+      reporttime  => $event->reporttime,
+    };
+
+    # Merge things together.
+    %$data = (%$extra_fields, %$data);
+
+    $class->SUPER::insert($data);
 }
 
 sub insert_hash {
@@ -58,6 +90,8 @@ sub datatype {
   my $class = shift;
   die("$class->datatype has not been implemented");
 }
+
+sub feedtype { return undef; }
 
 sub assessment_regex {
   return undef;

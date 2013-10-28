@@ -116,6 +116,9 @@ sub insert_index {
           my ($pid,$err);
           try {
               ($err,$pid) = $p->insert($args);
+              if($p->test_feed($args)){
+                $p->insert_into_feed($event);
+              }
           } catch {
               $err = shift;
           };
@@ -125,6 +128,7 @@ sub insert_index {
               return $err;
           }
         }
+
     }
     return(undef,1);
 }

@@ -4,7 +4,7 @@ use base 'CIF::Archive::Plugin';
 use strict;
 use warnings;
 
-use CIF::Archive::Helpers qw/generate_sha1_if_needed is_email/;
+use CIF::Archive::Helpers qw/is_email/;
 
 __PACKAGE__->table('email');
 __PACKAGE__->columns(Primary => 'id');
@@ -13,6 +13,7 @@ __PACKAGE__->sequence('email_id_seq');
 
 use constant DATATYPE => 'email';
 sub datatype { return DATATYPE; }
+sub feedtype { return DATATYPE; }
 
 sub match_event {
   my $class = shift;
@@ -34,6 +35,13 @@ sub match_event {
   return 1;
 }
 
+sub insert_into_feed {
+  my $class = shift;
+  my $event = shift;
+  my $address = lc($event->address());
+  $class->index_event_for_feed($event, $address);
+}
+
 sub insert {
     my $class = shift;
     my $data = shift;
@@ -43,18 +51,6 @@ sub insert {
     my @ids;
 
     my $address = lc($event->address());
-
-
-    my $hash = generate_sha1_if_needed($address);
-    if($class->test_feed($data)){
-      $class->SUPER::insert({
-          uuid        => $event->uuid,
-          guid        => $event->guid,
-          hash        => $hash,
-          confidence  => $event->confidence,
-          reporttime  => $event->reporttime,
-        });
-    }
 
     # TODO MPR : I know this is attempting to 'index' the email address, but 
     # it's not clear exactly what is going on here. It seems to index both the 
