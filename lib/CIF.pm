@@ -25,7 +25,7 @@ our @ISA = qw(Exporter);
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
     is_uuid generate_uuid_random generate_uuid_url generate_uuid_hash 
-    normalize_timestamp generate_uuid_ns debug init_logging to_feed
+    normalize_timestamp generate_uuid_ns debug init_logging 
 ) ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw//;
