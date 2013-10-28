@@ -11,7 +11,6 @@ use DateTime::Format::DateParse;
 use OSSP::uuid;
 use CIF::Msg;
 use CIF::Msg::Feed;
-require Iodef::Pb::Simple;
 
 require Exporter;
 
@@ -204,38 +203,4 @@ sub normalize_timestamp {
 =back
 =cut
 
-sub to_feed {
-    my $args = shift;
-    
-    my $data        = $args->{'data'};
-    my $description = $args->{'description'}    || 'unknown';
-    my $confidence  = $args->{'confidence'}     || 0;
-    my $timestamp   = $args->{'timestamp'};
-    my $guid        = $args->{'guid'}           || generate_uuid_ns('everyone');
-    
-    unless($timestamp){
-        $timestamp = DateTime->from_epoch(epoch => time());
-        $timestamp = $timestamp->ymd().'T'.$timestamp->hms().'Z';
-    }
-    
-    my @feed;
-    foreach (@$data){
-        unless(ref($_) eq 'IODEFDocumentType'){
-            $_ = { $_ } unless(ref($_) eq 'HASH');
-            $_ = Iodef::Pb::Simple->new($_);
-        }
-        push(@feed,$_->encode());
-    }
-    
-    my $f = FeedType->new({
-        version         => $VERSION,
-        confidence      => $confidence,
-        description     => $description,
-        ReportTime      => $timestamp,
-        data            => \@feed,
-        uuid            => generate_uuid_random(),
-        guid            => $guid,
-    });
-    return $f->encode();
-}
 1;
