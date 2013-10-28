@@ -85,10 +85,14 @@ sub run {
     my $cv = AnyEvent->condvar;
 
     $self->{channel}->consume(
+      no_ack => 0,
       on_consume => sub {
         my $msg = shift;
         my $payload = $msg->{body}->payload;
         my $reply;
+        $self->{channel}->ack(delivery_tag => 
+          $msg->{deliver}->method_frame->delivery_tag
+        );
         try {
           $reply = $self->process($payload);
           if (my $reply_queue = $msg->{header}->{reply_to}) {
