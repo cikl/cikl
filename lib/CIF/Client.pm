@@ -283,26 +283,6 @@ sub send_json {
     });   
 }
 
-sub send_keypairs {
-    my $self = shift;
-    my $args = shift;
-    
-    my $guid = $args->{'guid'} || 'everyone';
-    my $data = $args->{'data'};
-    
-    return unless(ref($data) eq 'ARRAY' || ref($data) eq 'HASH');
-    $data = [$data] unless(ref($data) eq 'ARRAY');
-    
-    foreach (@$data){
-        unless(exists($_->{'id'})){
-            $_->{'id'} = generate_uuid_random();
-        }
-        $_ = Iodef::Pb::Simple->new($_);
-    }
- 
-    return $self->submit($guid, $data);
-}
-    
 sub submit {
     my $self = shift;
     my $guid = shift;
