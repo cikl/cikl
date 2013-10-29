@@ -8,7 +8,6 @@ use warnings;
 # to make jeff teh happies!
 use Try::Tiny;
 
-use MIME::Base64;
 use Digest::SHA qw/sha1_hex/;
 use Data::Dumper;
 use POSIX ();
