@@ -1,4 +1,3 @@
-SUBDIRS = protocol
 EXTRA_DIST = lib sbin bin
 
 ME=libcif
@@ -48,9 +47,6 @@ realclean:
 	rm configure
 	rm aclocal.m4
  
-bindings:
-	$(PERL) ./sbin/gen_protocol_bindings.pl
-
 reconf:
 	autoreconf -vf
 

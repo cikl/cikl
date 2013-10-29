@@ -8,7 +8,6 @@ SNAPSHOT=$(ME)-$(BUILD)
 all: default
 
 default:
-	$(PERL) libcif/sbin/gen_protocol_bindings.pl
 
 fixperms:
 	chmod 0755 $(prefix)
