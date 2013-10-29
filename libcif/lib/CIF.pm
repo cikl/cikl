@@ -8,7 +8,7 @@ our $VERSION = '0.99_05';
 $VERSION = eval $VERSION;
 
 use DateTime::Format::DateParse;
-use OSSP::uuid;
+use UUID::Tiny;
 
 require Exporter;
 
@@ -136,22 +136,12 @@ sub init_logging {
 =cut
 
 sub generate_uuid_random {
-    my $uuid    = OSSP::uuid->new();
-    $uuid->make('v4');
-    my $str = $uuid->export('str');
-    undef $uuid;
-    return($str);
+    return(create_UUID_as_string(UUID_V4));
 }
 
 sub generate_uuid_ns {
     my $source = shift;
-    my $uuid = OSSP::uuid->new();
-    my $uuid_ns = OSSP::uuid->new();
-    $uuid_ns->load('ns::URL');
-    $uuid->make("v3",$uuid_ns,$source);
-    my $str = $uuid->export('str');
-    undef $uuid;
-    return($str);
+    return(create_UUID_as_string(UUID_V3, UUID_NS_URL, $source));
 }
 
 # deprecate
