@@ -7,7 +7,6 @@ use strict;
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
 use Digest::SHA qw/sha1_hex/;
-use Parse::Range qw(parse_range);
 use JSON::XS;
 use CIF qw/debug/;
 use Data::Dumper;
@@ -47,6 +46,8 @@ sub insert_into_feed {
   my $address = lc($event->address());
 ### TODO MPR: This is trying to make supplied port ranges indexable, but Ill 
     #have to come back to it later.
+
+##    use Parse::Range qw(parse_range);
 ##    # we just need a unique hash based on port/protocol
 ##    # this is a fast way to stringify what we have and hash it
 ##    my $services = $system->get_Service();
