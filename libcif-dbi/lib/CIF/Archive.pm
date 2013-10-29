@@ -9,7 +9,6 @@ use warnings;
 use Try::Tiny;
 
 use MIME::Base64;
-require Compress::Snappy;
 use Digest::SHA qw/sha1_hex/;
 use Data::Dumper;
 use POSIX ();
@@ -20,7 +19,6 @@ use CIF::Models::Query;
 use CIF::Models::QueryResults;
 use List::MoreUtils qw/any/;
 
-use Devel::StackTrace;
 use Module::Pluggable require => 1, sub_name => '__plugins';
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
