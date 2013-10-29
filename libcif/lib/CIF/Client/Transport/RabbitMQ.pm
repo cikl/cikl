@@ -6,7 +6,6 @@ use warnings;
 use JSON qw{encode_json};
 
 use Net::RabbitFoot;
-use Messaging::Message;
 use CIF qw/debug/;
 
 sub new {
