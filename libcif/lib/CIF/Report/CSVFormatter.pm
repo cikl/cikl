@@ -4,7 +4,7 @@ use parent 'CIF::Report::Formatter';
 use strict;
 use warnings;
 
-use Text::CSV_XS;
+use Text::CSV;
 
 sub new {
   my $class = shift;
@@ -18,7 +18,7 @@ sub generate_report {
   my $self = shift;
   my $context = shift;
   my $fh = shift;
-  my $csv = Text::CSV_XS->new( {binary => 1} ) or die($!);
+  my $csv = Text::CSV->new( {binary => 1} ) or die($!);
   $csv->eol("\r\n");
   my $fields = $context->event_fields();
   $csv->print($fh, $fields);
