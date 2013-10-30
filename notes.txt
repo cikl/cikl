@@ -2,16 +2,14 @@
 - Broke querying of feeds.
 - post-processors have been removed.
 
-- Probably broke hash lookups.
-  + Turns out I didn't.
-
 - Database inserts are NOT optimal, at the moment. Commits are being
   performed between each insert.
 
-Places that still have IODEF / Protocol Buffers:
-- libcif-dbi/lib/CIF/Archive/Plugin/* 
-  - I wanted to knock out the protocol abstraction prior to rolling back all
-  the iodef stuff in the archive plugins.
-- libcif/lib/CIF/Client*
-- libcif/bin/cif - Relies upon Iodef::Simple::format to format output. ugh.
-
+Dependencies:
+  - AFAICT, the libs are down to:
+    - libc
+    - libpq (DBD::Pg)
+    - libssl (Net::SSLeay)
+    - libcrypto (Net::SSLeay)
+    - libxml2 (LibXML)
+    - libexpat (XML::Parser::Expat)
