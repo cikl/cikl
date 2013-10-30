@@ -41,3 +41,5 @@ requires 'Try::Tiny', '0.11';
 requires 'URI::Escape', '3.31';
 requires 'XML::LibXML', '1.89';
 requires 'XML::RSS', '1.48';
+requires 'File::Type';
+requires 'Sys::MemInfo';
