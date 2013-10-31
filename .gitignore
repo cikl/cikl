@@ -10,3 +10,4 @@ aclocal.m4
 install-sh
 missing
 local/
+cif.conf
