@@ -21,7 +21,7 @@ use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
-    config global_config driver apikey 
+    config global_config apikey 
     nolog limit guid filter_me no_maprestrictions
     table_nowarning related
 ));
@@ -69,6 +69,29 @@ sub new {
     return (undef,$self);
 }
 
+sub DESTROY {
+    my $self = shift;
+    $self->shutdown();
+}
+
+sub shutdown {
+    my $self = shift;
+    if ($self->{driver}) {
+      $self->{driver}->shutdown();
+      $self->{driver} = undef;
+    }
+    return 1;
+}
+
+sub get_driver {
+    my $self = shift;
+    if ($self->{driver}) {
+      return $self->{driver};
+    }
+    die("The driver has already been shutdown!");
+}
+
+
 sub _init_driver {
     my $self = shift;
     my $driver_name = shift;
@@ -87,7 +110,7 @@ sub _init_driver {
         return($err);
     }
     
-    $self->set_driver($driver);
+    $self->{driver} = $driver;
     return undef;
 }
 

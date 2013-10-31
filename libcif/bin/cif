@@ -200,6 +200,8 @@ my $query_results;
     confidence          => $confidence,
     limit               => $limit,
 });
+$cli->shutdown();
+
 
 if($err){
     print 'ERROR: '.$err."\n";

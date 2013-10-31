@@ -34,6 +34,26 @@ sub new {
     return $self;
 }
 
+sub shutdown {
+    my $self = shift;
+    if (!$self->SUPER::shutdown()) {
+      # We've already shutdown.
+      return 0;
+    }
+
+    if ($self->{channel}) {
+      $self->{channel}->close();
+      $self->{channel} = undef;
+    }
+
+    if ($self->{amqp}) {
+      $self->{amqp}->close();
+      $self->{amqp} = undef;
+    }
+
+    return 1;
+}
+
 sub query {
     my $self = shift;
     my $query = shift;

@@ -35,7 +35,7 @@ __PACKAGE__->follow_best_practice;
 __PACKAGE__->mk_accessors(qw(
     smrt_config feeds_config feeds threads 
     entries defaults feed feedparser_config load_full goback 
-    client wait_for_server name instance 
+    wait_for_server name instance 
     batch_control cif_config_filename apikey
     severity_map proxy
 ));
@@ -88,14 +88,20 @@ sub init {
     
     $self->init_feeds();
 
-    my ($err2,$client) = CIF::Client->new({
-        config  => $self->get_cif_config_filename(),
-        apikey  => $self->get_apikey(),
-    });
-    $self->set_client($client);
-
-    return($err,$ret) if($err);
     return(undef,1);
+}
+
+sub get_client {
+  my $self = shift;
+  my ($err,$client) = CIF::Client->new({
+      config  => $self->get_cif_config_filename(),
+      apikey  => $self->get_apikey(),
+    });
+
+  if ($err) {
+    die($err);
+  }
+  return($client);
 }
 
 sub init_config {
@@ -423,13 +429,24 @@ sub submit {
     my $self = shift;
     my $data = shift;
 
+    my $client = $self->get_client();
+
     my ($err, $ret);
-    foreach my $event (@$data) {
-      ($err, $ret) = $self->get_client->submit($self->get_feedparser_config->{'guid'}, $event);    
-      if ($err) {
-        return $err;
+    try {
+      foreach my $event (@$data) {
+        ($err, $ret) = $client->submit($self->get_feedparser_config->{'guid'}, $event);    
+        if ($err) {
+          die($err);
+        }
       }
-    }
+    } catch {
+      my $error = shift;
+      return($error);
+    } finally {
+      if ($client) {
+        $client->shutdown();
+      }
+    };
     return undef;
 }
 
