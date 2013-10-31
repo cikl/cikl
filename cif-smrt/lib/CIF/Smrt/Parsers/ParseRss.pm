@@ -3,7 +3,7 @@ use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
-use XML::RSS;
+use XML::RSS::LibXML;
 
 sub parse {
     my $self = shift;
@@ -14,7 +14,7 @@ sub parse {
         $content = '<?xml version="1.0"?>'."\n".$content;
     }
     
-    my $rss = XML::RSS->new();
+    my $rss = XML::RSS::LibXML->new();
     my @lines = split(/[\r\n]/,$content);
     # work-around for any < > & that is in the feed as part of a url
     # http://stackoverflow.com/questions/5199463/escaping-in-perl-generated-xml/5899049#5899049

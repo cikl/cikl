@@ -11,5 +11,4 @@ Dependencies:
     - libpq (DBD::Pg)
     - libssl (Net::SSLeay)
     - libcrypto (Net::SSLeay)
-    - libxml2 (LibXML)
-    - libexpat (XML::Parser::Expat)
+    - libxml2 (LibXML, XML::RSS::LibXML)
