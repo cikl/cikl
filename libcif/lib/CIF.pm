@@ -141,7 +141,14 @@ sub generate_uuid_random {
 
 sub generate_uuid_ns {
     my $source = shift;
-    return(create_UUID_as_string(UUID_V3, UUID_NS_URL, $source));
+    # NOTE: This isn't actually generating a URL namespaced UUID! There was 
+    # a bug in the original CIF implementation that caused it to generate 
+    # with a 'nil' namespace UUID. If we 'fix' this, it'll break existing 
+    # repositories. 
+    ## return(create_UUID_as_string(UUID_V3, UUID_NS_URL, $source));
+    #
+    # Instead, we generate using a nil namespace:
+    return(create_UUID_as_string(UUID_V3, $source));
 }
 
 # deprecate
