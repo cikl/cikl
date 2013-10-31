@@ -16,7 +16,7 @@ Dependencies:
 Installation instructions for UBUNTU 12.04:
 
 - Install dep libraries.
-sudo apt-get install openssl-devel libxml2-devel libpq-devel
+sudo apt-get install libssl-dev libxml2-dev libpq-dev
 
 sudo apt-get install perl rabbitmq-server postgresql
 
