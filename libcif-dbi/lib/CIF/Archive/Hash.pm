@@ -9,7 +9,6 @@ use CIF qw/debug/;
 
 # work-around for cif-v1
 use Regexp::Common qw/net/;
-use Digest::SHA qw(sha1_hex);
 
 __PACKAGE__->table('hash');
 __PACKAGE__->columns(Primary => 'id');

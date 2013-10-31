@@ -8,7 +8,6 @@ use Data::Dumper;
 use Module::Pluggable require => 1, search_path => [__PACKAGE__];
 use Try::Tiny;
 use Config::Simple;
-use Digest::SHA qw/sha1_hex/;
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
 use Net::Patricia;

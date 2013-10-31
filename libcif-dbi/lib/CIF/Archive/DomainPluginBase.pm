@@ -4,7 +4,6 @@ use base 'CIF::Archive::Plugin';
 use strict;
 use warnings;
 
-use Digest::SHA qw/sha1_hex/;
 use CIF qw/debug/;
 use CIF::Archive::Helpers qw/is_email/;
 
