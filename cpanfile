@@ -43,3 +43,4 @@ requires 'XML::LibXML', '1.89';
 requires 'XML::RSS::LibXML', '0.3102';
 requires 'File::Type', "0.22";
 requires 'Sys::MemInfo', "0.91";
+requires 'Getopt::Long';

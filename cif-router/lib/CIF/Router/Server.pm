@@ -10,15 +10,19 @@ use CIF::Encoder::JSON;
 
 use CIF qw/init_logging/;
 
+
+#  CIF::Router::Transport->QUERY
+#  CIF::Router::Transport->SUBMISSION
+
 sub new {
     my $class = shift;
     my $type = shift;
+    my $config = shift;
 
     my $self = {};
     bless($self,$class);
 
-    my $config = "/home/mryan/code/cif-v1-dev/cif.conf";
-    $self->{config} = Config::Simple->new($config);
+    $self->{config} = Config::Simple->new($config) || die("Could not load config file: '$config'");
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
 
     $self->{encoder} = CIF::Encoder::JSON->new();
@@ -56,17 +60,4 @@ sub run() {
     $self->{driver}->run();
 }
 
-sub run_query_server {
-    my $class = shift;
-    $class->new(CIF::Router::Transport->QUERY)->run();
-}
-
-sub run_submit_server {
-    my $class = shift;
-    $class->new(CIF::Router::Transport->SUBMISSION)->run();
-}
-
 1;
-
-
-
