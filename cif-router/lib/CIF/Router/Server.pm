@@ -2,6 +2,8 @@ package CIF::Router::Server;
 
 use strict;
 use warnings;
+use AnyEvent;
+use Coro;
 use CIF::Router::Transport;
 use Config::Simple;
 use CIF::Router;
@@ -44,6 +46,9 @@ sub new {
     my $driver_name = $self->{server_config}->{driver} || "RabbitMQ";
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
+
+    $self->{commit_interval} = $self->{server_config}->{commit_interval} || 2;
+
 
     my $driver;
     try {
@@ -98,16 +103,54 @@ sub process_submission {
     my $err = shift;
     return($err, "submission_error", 'text/plain');
   };
+  $self->schedule_flush();
   return($results, "submission_response", $self->{encoder}->content_type());
 }
 
-sub run() {
+sub schedule_flush {
+  my $self = shift;
+  if (!defined($self->{flush_timer})) {
+    # Create a timer that will flush two seconds after our first message 
+    # comes in.
+    my $cb = sub {
+      $self->{router}->flush();
+      $self->{flush_timer} = undef;
+    };
+    $self->{flush_timer} = AnyEvent->timer(after => $self->{commit_interval}, 
+      cb => $cb);
+  }
+}
+
+sub run {
     my $self = shift;
-    $self->{driver}->run();
+
+    $self->{driver}->start();
+
+    $self->{cv} = AnyEvent->condvar;
+
+    my $thr = async {
+      $self->{cv}->recv();
+      $self->{cv} = undef;
+    };
+
+    while ( defined( $self->{cv} ) ) {
+      Coro::AnyEvent::sleep 1;
+    }
+
+    $self->{driver}->stop();
+}
+
+sub stop {
+    my $self = shift;
+    if (my $cv = $self->{cv}) {
+      debug("Stopping");
+      $cv->send(undef);
+    }
 }
 
 sub shutdown {
     my $self = shift;
+
     if ($self->{driver}) {
       $self->{driver}->shutdown();
       $self->{driver} = undef;

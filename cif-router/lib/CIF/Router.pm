@@ -6,6 +6,7 @@ use warnings;
 
 use Try::Tiny;
 use Config::Simple;
+use Time::HiRes qw /time/;
 
 require CIF::Archive;
 require CIF::APIKey;
@@ -306,16 +307,20 @@ sub process_submission {
     return $err;
   }
 
-  $self->flush();
   return undef;
 }
 
 sub flush {
   my $self = shift;
   return if ($self->{inserts} == 0);
+  my $num_inserts = $self->{inserts};
   $self->{inserts} = 0;
-  debug('committing...');
+  debug("committing $num_inserts inserts...") if ($::debug > 1);
+  my $start = time;
   CIF::Archive->dbi_commit();
+  my $delta = time - $start;
+  debug("committed in $delta seconds...") if ($::debug > 1);
+
 }
 
 sub insert_event {
@@ -330,7 +335,7 @@ sub insert_event {
       datatypes   => $self->get_datatypes(),
     }));
 
-  if ($self->{inserts} >= $self->{commit_interval} == 0) {
+  if ($self->{inserts} >= $self->{commit_interval}) {
     $self->flush();
   }
   return ($err, $ret);

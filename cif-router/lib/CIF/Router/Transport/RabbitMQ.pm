@@ -144,38 +144,37 @@ sub setup_submission_processor {
     $self->_setup_processor($self->{submission_config}, $payload_callback);
 }
 
-sub run {
+sub start {
     my $self = shift;
-    $self->{cv} = AnyEvent->condvar;
-    my $thr = async {
-      $self->{cv}->recv();
-      $self->{cv} = undef;
+    if (!defined($self->{amqp})) {
+      die "The connection has already been shutdown!";
     }
-
-    debug("Ready");
-    while(defined($self->{cv})) {
-      Coro::AnyEvent::sleep 1;
+    if (($#{$self->{channels}} == -1)) {
+      die "Nothing to start! No services have been created!";
     }
-    debug("Shutting down...");
-    foreach my $channel (@{$self->{channels}}) {
-      $channel->close();
-    }
-    # Clear the closed channels;
-    $#{$self->{channels}} = -1;
-    $self->{amqp}->close();
 }
 
 sub stop {
     my $self = shift;
-    if (my $cv = $self->{cv}) {
-      $cv->send(undef);
-    }
 }
 
 # This gets called before shutdown.
 sub shutdown {
     my $self = shift;
-    $self->stop();
+
+    if (!defined($self->{amqp})) {
+      return;
+    }
+    debug("Shutting down");
+
+    foreach my $channel (@{$self->{channels}}) {
+      $channel->close();
+    }
+    # Clear the closed channels;
+    $#{$self->{channels}} = -1;
+
+    $self->{amqp}->close();
+    $self->{amqp} = undef;
 }
 
 1;

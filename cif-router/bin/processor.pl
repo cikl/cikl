@@ -79,11 +79,12 @@ if ($mode eq 'submit') {
 my $server = CIF::Router::Server->new($server_type, $config);
 
 $SIG{INT} = sub {
-  debug("Caught interrupt. Shutting down.");
-  $server->shutdown();
+  debug("Caught interrupt. Stopping server.");
+  $server->stop();
 };
 print "Running. Ctrl-C or SIGINT to shutdown.\n";
 $server->run();
+$server->shutdown();
 # Doesn't return!
 debug("All done!");
 
