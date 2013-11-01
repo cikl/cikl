@@ -40,6 +40,7 @@ BEGIN {
 use Getopt::Long;
 use CIF::Router::Server;
 use Pod::Usage;
+use CIF qw/debug/;
 
 my $help;
 my $man;
@@ -77,8 +78,14 @@ if ($mode eq 'submit') {
 
 my $server = CIF::Router::Server->new($server_type, $config);
 
+$SIG{INT} = sub {
+  debug("Caught interrupt. Shutting down.");
+  $server->shutdown();
+};
+print "Running. Ctrl-C or SIGINT to shutdown.\n";
 $server->run();
 # Doesn't return!
+debug("All done!");
 
 __END__
 

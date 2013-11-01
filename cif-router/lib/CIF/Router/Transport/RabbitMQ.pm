@@ -59,7 +59,57 @@ sub new {
     $self->{amqp} = $amqp;
     $self->{channel} = $channel;
 
+    $self->_init_consume();
+
     return($self);
+}
+
+sub _init_consume {
+    my $self = shift;
+    $self->{channel}->consume(
+      no_ack => 0,
+      on_consume => sub {
+        my $msg = shift;
+        $self->_handle_msg($msg);
+      }
+    );
+}
+
+sub _handle_msg {
+    my $self = shift;
+    my $msg = shift;
+    my $payload = $msg->{body}->payload;
+    $self->{channel}->ack(delivery_tag => 
+      $msg->{deliver}->method_frame->delivery_tag
+    );
+    my ($reply, $err);
+
+    try {
+      $reply = $self->process($payload);
+    } catch {
+      $err = shift;
+    };
+
+
+    if (my $reply_queue = $msg->{header}->{reply_to}) {
+      my $body = $reply;
+      my $content_type = $self->content_type;
+      my $type = "query_response";
+      if ($err) {
+        my $body = $err;
+        my $content_type = 'text/plain';
+        my $type = "query_error";
+      }
+      $self->{channel}->publish(
+        exchange => $self->{exchange_name},
+        routing_key => $reply_queue,
+        body => $body,
+        header => {
+          content_type => $content_type,
+          type => $type 
+        }
+      );
+    }
 }
 
 sub load_query_config {
@@ -82,49 +132,31 @@ sub load_submission_config {
 
 sub run {
     my $self = shift;
-    my $cv = AnyEvent->condvar;
+    $self->{cv} = AnyEvent->condvar;
+    my $thr = async {
+      $self->{cv}->recv();
+      $self->{cv} = undef;
+    }
 
-    $self->{channel}->consume(
-      no_ack => 0,
-      on_consume => sub {
-        my $msg = shift;
-        my $payload = $msg->{body}->payload;
-        my $reply;
-        $self->{channel}->ack(delivery_tag => 
-          $msg->{deliver}->method_frame->delivery_tag
-        );
-        try {
-          $reply = $self->process($payload);
-          if (my $reply_queue = $msg->{header}->{reply_to}) {
-            $self->{channel}->publish(
-              exchange => $self->{exchange_name},
-              routing_key => $reply_queue,
-              body => $reply,
-              header => {
-                content_type => $self->content_type,
-                type => "query_response"
-              }
-            );
-          }
-        } catch {
-          my $err = shift;
-          debug("Sending error reply");
-          if (my $reply_queue = $msg->{header}->{reply_to}) {
-            $self->{channel}->publish(
-              exchange => $self->{exchange_name},
-              routing_key => $reply_queue,
-              header => {
-                content_type => "text/plain",
-                type => "query_error"
-              },
-              body => $err
-            );
-          }
-        };
-      }
-    );
     debug("Ready");
-    $cv->recv;
+    while(defined($self->{cv})) {
+      Coro::AnyEvent::sleep 1;
+    }
+    $self->{channel}->close();
+    $self->{amqp}->close();
+}
+
+sub stop {
+    my $self = shift;
+    if (my $cv = $self->{cv}) {
+      $cv->send(undef);
+    }
+}
+
+# This gets called before shutdown.
+sub shutdown {
+    my $self = shift;
+    $self->stop();
 }
 
 1;

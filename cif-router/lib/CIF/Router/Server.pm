@@ -60,4 +60,12 @@ sub run() {
     $self->{driver}->run();
 }
 
+sub shutdown {
+    my $self = shift;
+    if ($self->{driver}) {
+      $self->{driver}->shutdown();
+      $self->{driver} = undef;
+    }
+}
+
 1;

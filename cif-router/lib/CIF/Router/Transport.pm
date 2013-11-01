@@ -33,6 +33,17 @@ sub new {
     return($self);
 }
 
+sub DESTROY {
+    my $self = shift;
+    $self->shutdown();
+}
+
+# This gets called before shutdown.
+sub shutdown {
+    my $self = shift;
+    return(blessed($self) . " has not implemented the shutdown() method!");
+}
+
 sub type {
     my $self = shift;
     return $self->{type};
