@@ -6,7 +6,6 @@ use warnings;
 
 use Try::Tiny;
 use Config::Simple;
-use Time::HiRes qw /time/;
 
 require CIF::Archive;
 require CIF::APIKey;
@@ -46,7 +45,9 @@ sub new {
     $self->set_restriction_map( $args->{'config'}->param(-block => 'restriction_map'));
     $self->set_archive_config(  $args->{'config'}->param(-block => 'cif_archive'));
    
+    $self->{auth_write_cache} = {};
     $self->{commit_interval} = $self->get_config->{'dbi_commit_size'} || 10000;
+    $self->{auth_cache_ageoff} = $self->get_config->{'auth_cache_ageoff'} || 60;
     $self->{inserts} = 0;
     my $ret = $self->init($args);
     return unless($ret);
@@ -223,21 +224,56 @@ sub authorized_read {
     return(undef,$ret); # all good
 }
 
+sub authorized_write_cache_store {
+    my $self = shift;
+    my $key = shift;
+    my $retval = shift;
+    $self->{auth_write_cache}->{$key} = {
+      'time' => time(),
+      'retval' => $retval
+    };
+
+    return $retval;
+}
+
+sub authorized_write_cache_get {
+    my $self = shift;
+    my $key = shift;
+
+    if (my $cached_auth = $self->{auth_write_cache}->{$key}) {
+      if (time() - $cached_auth->{time} <= 60) {
+        return $cached_auth->{retval};
+      }
+    }
+    return undef;
+}
+
 sub authorized_write {
     my $self = shift;
     my $key = shift;
+
+    my $retval = $self->authorized_write_cache_get($key);
+
+    if (defined($retval)) {
+      return($retval);
+    }
     
     my $rec = $self->key_retrieve($key);
-    
-    return(0) unless($rec);
-    
-    # we must meet all these requirements
-    return(0) unless($rec->write());
-    return(0) if($rec->revoked() || $rec->restricted_access());
-    return(0) if($rec->expired());
-    return({
+
+    my $ret;
+    if (!defined($rec) || 
+        !($rec->write()) ||
+        $rec->revoked() || 
+        $rec->restricted_access() ||
+        $rec->expired() ) {
+      $ret = 0;
+    } else {
+      $ret = {
         default_guid    => $rec->default_guid(),
-    });
+      };
+    }
+    $self->authorized_write_cache_store($key, $ret);
+    return($ret);
 }
 
 sub connect_retry {
@@ -294,6 +330,8 @@ sub process_query {
 sub process_submission {
   my $self = shift;
   my $submission = shift;
+  my $apikey = $submission->apikey();
+
   my $auth = $self->authorized_write($submission->apikey());
   my $default_guid = $auth->{'default_guid'} || 'everyone';
 
@@ -316,10 +354,7 @@ sub flush {
   my $num_inserts = $self->{inserts};
   $self->{inserts} = 0;
   debug("committing $num_inserts inserts...") if ($::debug > 1);
-  my $start = time;
   CIF::Archive->dbi_commit();
-  my $delta = time - $start;
-  debug("committed in $delta seconds...") if ($::debug > 1);
 
 }
 
