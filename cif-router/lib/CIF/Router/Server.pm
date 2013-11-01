@@ -10,9 +10,10 @@ use CIF::Encoder::JSON;
 
 use CIF qw/init_logging/;
 
-
-#  CIF::Router::Transport->QUERY
-#  CIF::Router::Transport->SUBMISSION
+use constant {
+  SUBMISSION => 1,
+  QUERY => 2
+};
 
 sub new {
     my $class = shift;

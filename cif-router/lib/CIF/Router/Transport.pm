@@ -8,11 +8,6 @@ use CIF qw/init_logging/;
 use Module::Pluggable search_path => [__PACKAGE__], require => 1;
 __PACKAGE__->plugins();
 
-use constant {
-  SUBMISSION => 1,
-  QUERY => 2
-};
-
 __PACKAGE__->follow_best_practice();
 
 sub new {
@@ -56,12 +51,12 @@ sub content_type {
 
 sub is_submission() {
     my $self = shift;
-    return($self->{type} == SUBMISSION);
+    return($self->{type} == CIF::Router::Server->SUBMISSION);
 }
 
 sub is_query() {
     my $self = shift;
-    return($self->{type} == QUERY);
+    return($self->{type} == CIF::Router::Server->QUERY);
 }
 
 sub config {
@@ -72,12 +67,12 @@ sub config {
 
 sub submit_processor {
     my $class = shift;
-    return $class->new(SUBMISSION);
+    return $class->new(CIF::Router::Server->SUBMISSION);
 }
 
 sub query_processor {
     my $class = shift;
-    return $class->new(QUERY);
+    return $class->new(CIF::Router::Server->QUERY);
 }
 
 sub process {

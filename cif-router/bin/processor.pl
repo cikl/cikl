@@ -68,9 +68,9 @@ my $mode = shift(@ARGV);
 
 my $server_type;
 if ($mode eq 'submit') {
-  $server_type = CIF::Router::Transport->SUBMISSION;
+  $server_type = CIF::Router::Server->SUBMISSION;
 } elsif ($mode eq 'query') {
-  $server_type = CIF::Router::Transport->QUERY;
+  $server_type = CIF::Router::Server->QUERY;
 } else {
   warn "ERROR: Unknown mode: $mode";
   pod2usage(2);
