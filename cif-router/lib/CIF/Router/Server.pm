@@ -8,7 +8,7 @@ use CIF::Router;
 use Try::Tiny;
 use CIF::Encoder::JSON;
 
-use CIF qw/init_logging/;
+use CIF qw/debug init_logging/;
 
 use constant {
   SUBMISSION => 1,
@@ -39,13 +39,15 @@ sub new {
       die $err;
     }
 
+    $self->{router} = $router;
+
     my $driver_name = $self->{server_config}->{driver} || "RabbitMQ";
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
 
     my $driver;
     try {
-      $driver = $driver_class->new($driver_config, $router, $type, $self->{encoder});
+      $driver = $driver_class->new($driver_config);
     } catch {
       $err = shift;
       die "Driver ($driver_class) failed to load: $err";
@@ -53,7 +55,50 @@ sub new {
 
     $self->{driver} = $driver;
 
+    if ($type == SUBMISSION) {
+      my $cb = sub {$self->process_submission(@_);};
+      $driver->setup_submission_processor($cb);
+
+    } elsif ($type == QUERY) {
+      my $cb = sub {$self->process_query(@_);};
+      $driver->setup_query_processor($cb);
+    } else {
+      die "Unknown type: $type";
+    }
+
+
     return($self);
+}
+
+sub process_query {
+  my $self = shift;
+  my $payload = shift;
+  my $content_type = shift;
+  my ($query, $results, $encoded_results);
+  try {
+    $query = $self->{encoder}->decode_query($payload);
+    $results = $self->{router}->process_query($query);
+    $encoded_results = $self->{encoder}->encode_query_results($results);
+  } catch {
+    my $err = shift;
+    return($err, "submission_error", 'text/plain');
+  };
+  return($encoded_results, "query_response", $self->{encoder}->content_type());
+}
+
+sub process_submission {
+  my $self = shift;
+  my $payload = shift;
+  my $content_type = shift;
+  my ($submission, $results);
+  try {
+    $submission = $self->{encoder}->decode_submission($payload);
+    $results = $self->{router}->process_submission($submission);
+  } catch {
+    my $err = shift;
+    return($err, "submission_error", 'text/plain');
+  };
+  return($results, "submission_response", $self->{encoder}->content_type());
 }
 
 sub run() {

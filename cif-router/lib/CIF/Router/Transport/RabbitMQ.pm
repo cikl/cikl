@@ -4,7 +4,6 @@ use base 'CIF::Router::Transport';
 use strict;
 use warnings;
 
-use Data::Dumper;
 use Net::RabbitFoot;
 use Coro;
 use Try::Tiny;
@@ -14,15 +13,7 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
-    my $exchange_name = $self->config("exchange") || "cif";
-
-    if ($self->is_submission()) {
-      $self->load_submission_config();
-    } elsif ($self->is_query()) {
-      $self->load_query_config();
-    } else {
-      die "Unknown type: ", $self->type();
-    }
+    $self->{exchange_name} = $self->config("exchange") || "cif";
 
     my $rabbitmq_opts = {
       host => $self->config("host") || "localhost",
@@ -32,78 +23,80 @@ sub new {
       vhost => $self->config("vhost") || "/",
     };
 
-    my $amqp = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
+    my $submission_config = {
+      queue_name => ($self->config("submission_queue") || "cif-submit-queue"),
+      routing_key => ($self->config("submission_key") || "submit"),
+      durable => 1,
+      auto_delete => 0
+    };
 
-    my $channel = $amqp->open_channel();
+    my $query_config = {
+      queue_name => ($self->config("query_queue") || "cif-query-queue"),
+      routing_key => ($self->config("query_key") || "query"),
+      durable => 0,
+      auto_delete => 1
+    };
 
-    $channel->qos(prefetch_count => $self->{prefetch_count});
+    $self->{submission_config} = $submission_config;
+    $self->{query_config} = $query_config;
+
+    $self->{amqp} = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
+    $self->{channels} = [];
+    return($self);
+}
+
+sub _init_channel {
+    my $self = shift;
+    my $channel = $self->{amqp}->open_channel();
+    my $config = shift;
+    my $payload_callback = shift;
+
+    $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
 
     $channel->declare_exchange(
-      exchange => $exchange_name,
+      exchange => $self->{exchange_name},
       type => 'topic',
       durable => 1
     );
 
-    my $result = $channel->declare_queue(
-      queue => $self->{queue_name},
-      durable => $self->{durable},
-      auto_delete => $self->{auto_delete}
-    );
+    $self->_init_queue($channel, $config);
+    $self->_init_consume($channel, $payload_callback);
 
-    $channel->bind_queue(
-      exchange => $exchange_name,
-      queue => $self->{queue_name},
-      routing_key => $self->{routing_key}
-    );
-
-    $self->{amqp} = $amqp;
-    $self->{channel} = $channel;
-
-    $self->_init_consume();
-
-    return($self);
+    return $channel;
 }
 
 sub _init_consume {
     my $self = shift;
-    $self->{channel}->consume(
+    my $channel = shift;
+    my $payload_callback = shift;
+    $channel->consume(
       no_ack => 0,
       on_consume => sub {
         my $msg = shift;
-        $self->_handle_msg($msg);
+        $self->_handle_msg($channel, $msg, $payload_callback);
       }
     );
 }
 
 sub _handle_msg {
     my $self = shift;
+    my $channel = shift;
     my $msg = shift;
+    my $payload_callback = shift;
+
     my $payload = $msg->{body}->payload;
-    $self->{channel}->ack(delivery_tag => 
+    $channel->ack(delivery_tag => 
       $msg->{deliver}->method_frame->delivery_tag
     );
-    my ($reply, $err);
 
-    try {
-      $reply = $self->process($payload);
-    } catch {
-      $err = shift;
-    };
-
+    my ($reply, $type, $content_type) = $payload_callback->($payload);
 
     if (my $reply_queue = $msg->{header}->{reply_to}) {
-      my $body = $reply;
-      my $content_type = $self->content_type;
-      my $type = "query_response";
-      if ($err) {
-        my $body = $err;
-        my $content_type = 'text/plain';
-        my $type = "query_error";
-      }
-      $self->{channel}->publish(
-        exchange => $self->{exchange_name},
+      $channel->publish(
+        # Note that we don't specify an exchange when replying.
+        exchange => '',
         routing_key => $reply_queue,
-        body => $body,
+        body => $reply,
         header => {
           content_type => $content_type,
           type => $type 
@@ -112,22 +105,43 @@ sub _handle_msg {
     }
 }
 
-sub load_query_config {
+sub _init_queue {
     my $self = shift;
-    $self->{queue_name} = $self->config("query_queue") || "cif-query-queue";
-    $self->{routing_key} = $self->config("query_key") || "query";
-    $self->{prefetch_count} = $self->config("query_prefetch") || 1;
-    $self->{durable} = 0;
-    $self->{auto_delete} = 1;
+    my $channel = shift;
+    my $config = shift;
+
+    my $result = $channel->declare_queue(
+      queue => $config->{queue_name},
+      durable => $config->{durable},
+      auto_delete => $config->{auto_delete}
+    );
+
+    $channel->bind_queue(
+      exchange => $self->{exchange_name},
+      queue => $config->{queue_name},
+      routing_key => $config->{routing_key}
+    );
 }
 
-sub load_submission_config {
+sub _setup_processor {
     my $self = shift;
-    $self->{queue_name} = $self->config("submission_queue") || "cif-submit-queue";
-    $self->{routing_key} = $self->config("submission_key") || "submit";
-    $self->{prefetch_count} = $self->config("submission_prefetch") || 10;
-    $self->{durable} = 1;
-    $self->{auto_delete} = 0;
+    my $config = shift;
+    my $payload_callback = shift;
+    my $channel = $self->_init_channel($config, $payload_callback);
+    push(@{$self->{channels}}, $channel); 
+    return undef;
+}
+
+sub setup_query_processor {
+    my $self = shift;
+    my $payload_callback = shift;
+    $self->_setup_processor($self->{query_config}, $payload_callback);
+}
+
+sub setup_submission_processor {
+    my $self = shift;
+    my $payload_callback = shift;
+    $self->_setup_processor($self->{submission_config}, $payload_callback);
 }
 
 sub run {
@@ -142,7 +156,12 @@ sub run {
     while(defined($self->{cv})) {
       Coro::AnyEvent::sleep 1;
     }
-    $self->{channel}->close();
+    debug("Shutting down...");
+    foreach my $channel (@{$self->{channels}}) {
+      $channel->close();
+    }
+    # Clear the closed channels;
+    $#{$self->{channels}} = -1;
     $self->{amqp}->close();
 }
 
