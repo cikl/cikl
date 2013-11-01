@@ -22,7 +22,7 @@ sub new {
 
     $self->{encoder} = CIF::Encoder::JSON->new();
     $self->{running} = 1;
-    $self->set_config($driver_config);
+    $self->{config} = $driver_config;
     $self->set_global_config($global_config);
     return($self);
 }
@@ -30,6 +30,12 @@ sub new {
 sub DESTROY {
     my $self = shift;
     $self->shutdown();
+}
+
+sub config {
+    my $self = shift;
+    my $opt = shift;
+    return $self->{config}->{$opt};
 }
 
 sub running {

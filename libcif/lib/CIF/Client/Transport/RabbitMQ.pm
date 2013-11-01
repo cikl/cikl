@@ -14,14 +14,14 @@ sub new {
     $args->{driver_name} = "rabbitmq";
 
     my $self = $class->SUPER::new($args);
-
+    my $config = $self->get_config();
 
     my $amqp = Net::RabbitFoot->new()->load_xml_spec()->connect(
-      host => 'localhost',
-      port => 5672,
-      user => 'guest',
-      pass => 'guest',
-      vhost => '/',
+      host => $self->config("host") || "localhost",
+      port => $self->config("port") || 5672,
+      user => $self->config("username") || "guest",
+      pass => $self->config("password") || "guest",
+      vhost => $self->config("vhost") || "/",
     );
     my $channel = $amqp->open_channel();
 
