@@ -75,19 +75,17 @@ sub insert {
     #$data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
     $data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
    
-    #my $msg = $class->encode_event($event);
-    #my $encoded = encode_base64(Compress::Snappy::compress($msg->encode()));
-
     my ($err,$id);
     try {
-        $id = $class->SUPER::insert({
-            uuid        => $data->{'uuid'},
-            guid        => $data->{'guid'},
-            format      => $CIF::VERSION,
-            data        => $dbencoder->encode_event($event),
-            created     => $data->{'created'},
-            reporttime  => $data->{'reporttime'},
-        });
+        $id = $class->sql_insert_into_archive->execute(
+            $data->{'uuid'},
+            $data->{'guid'},
+            $CIF::VERSION,
+            $dbencoder->encode_event($event),
+            $data->{'created'},
+            $data->{'reporttime'}
+        );
+
     }
     catch {
         $err = shift;
@@ -290,6 +288,12 @@ __PACKAGE__->set_sql('lookup' => qq{
     WHERE
         t1.uuid = ?
         AND apikeys_groups.uuid = ?
+});
+
+
+__PACKAGE__->set_sql('insert_into_archive' => qq{
+INSERT INTO archive (uuid, guid, format, data, created, reporttime)
+VALUES (?, ?, ?, ?, ?, ?)
 });
 
 1;
