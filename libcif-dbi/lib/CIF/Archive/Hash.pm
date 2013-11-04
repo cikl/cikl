@@ -29,23 +29,18 @@ sub insert {
     my $data    = shift;
     my $confidence;
     my @ids;
-    my $tbl = $class->table();
 
     # we're explicitly placing a hash
     $confidence = $data->{'confidence'};
 
-#    if(my $t = return_table($data->{'hash'})){
-#      $class->table($t);
-#    }
-    my $id = $class->SUPER::insert({
-        hash        => $data->{'hash'},
-        uuid        => $data->{'uuid'},
-        guid        => $data->{'guid'},
-        confidence  => $confidence,
-        reporttime  => $data->{'reporttime'},
-      });
+    my $id = $class->sql_insert_hash->execute(
+        $data->{'hash'},
+        $data->{'uuid'},
+        $data->{'guid'},
+        $confidence,
+        $data->{'reporttime'}
+    );
     push(@ids,$id);
-#    $class->table($tbl);
     return(undef,\@ids); 
 }
 
@@ -112,5 +107,9 @@ __PACKAGE__->set_sql('lookup' => qq{
         archive.uuid IS NOT NULL
 });
 
+__PACKAGE__->set_sql('insert_hash' => qq{
+  INSERT INTO hash (hash, uuid, guid, confidence, reporttime)
+  VALUES (?, ?, ?, ?, ?)
+});
 
 1;
