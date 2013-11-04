@@ -53,6 +53,7 @@ sub load_plugins {
 
     foreach my $plugin (@all_plugins) {
       if (any { $_ eq $plugin->datatype() } @$datatypes) {
+        $plugin->init_sql();
         push(@$archive_plugins, $plugin);
       }
     }

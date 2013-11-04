@@ -1,11 +1,11 @@
 package CIF::Archive::DomainPluginBase;
-use base 'CIF::Archive::Plugin';
+use base 'CIF::Archive::AddressPluginBase';
 
 use strict;
 use warnings;
 
 use CIF qw/debug/;
-use CIF::Archive::Helpers qw/is_email/;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed is_email/;
 
 __PACKAGE__->table('domain');
 __PACKAGE__->columns(Primary => 'id');
@@ -44,12 +44,6 @@ sub match_event {
   return 1;
 }
 
-sub insert_into_feed {
-  my $class = shift;
-  my $event = shift;
-  my $address = lc($event->address());
-  $class->index_event_for_feed($event, $address, {address => $address});
-}
 
 sub insert {
   my $class = shift;

@@ -10,7 +10,39 @@ use List::MoreUtils qw/any/;
 use CIF::Archive::Hash;
 use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
+our %dispatch_table;
+
 sub query {}
+
+sub init_sql {
+  my $class = shift;
+  my $table = $class->table();
+  my $sql = qq[INSERT INTO $table (hash, uuid, guid, confidence, reporttime)
+VALUES (?, ?, ?, ?, ?)];
+  $class->create_insert_feed($sql);
+}
+
+sub create_insert_feed {
+  my $class = shift;
+  my $sql = shift;
+  my $table = $class->table;
+  my $name = "insert_feed_$table";
+  $class->set_sql($name => $sql);
+
+  my $sql_name = "sql_$name";
+  $dispatch_table{$class} = $class->$sql_name;
+}
+
+sub get_hashed_query_param {
+  my $class = shift;
+  my $event = shift;
+  return(generate_sha1_if_needed(lc($event->address)));
+}
+
+sub get_feed_insert_sqlh {
+  my $class = shift;
+  return $dispatch_table{$class};
+}
 
 # sub tables are auto-defined by the plugin name
 # eg: Domain::Phishing translates to:
@@ -42,31 +74,28 @@ sub test_feed {
     return undef;
 }
 
+sub generate_feed_insert_params {
+  my $class = shift;
+  my $event = shift;
+  my $hash = $class->get_hashed_query_param($event);
+
+  return (
+      $hash,
+      $event->uuid,
+      $event->guid,
+      $event->confidence,
+      $event->reporttime,
+    );
+}
+
 sub insert_into_feed {
   my $class = shift;
   my $event = shift;
+  my $method = $class->get_feed_insert_sqlh();
 
-  # Don't do anything.
-}
-
-sub index_event_for_feed {
-    my $class = shift;
-    my $event = shift;
-    my $field_value = shift;
-    my $extra_fields = shift || {};
-    my $hash = generate_sha1_if_needed($field_value);
-    my $data = {
-      uuid        => $event->uuid,
-      guid        => $event->guid,
-      hash        => $hash,
-      confidence  => $event->confidence,
-      reporttime  => $event->reporttime,
-    };
-
-    # Merge things together.
-    %$data = (%$extra_fields, %$data);
-
-    $class->SUPER::insert($data);
+  $method->execute(
+    $class->generate_feed_insert_params($event)
+  );
 }
 
 sub insert_hash {

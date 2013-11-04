@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use CIF qw/debug/;
+use CIF::Archive::Helpers qw/generate_sha1_if_needed/;
 
 use constant DATATYPE => 'url';
 sub datatype { return DATATYPE; }
@@ -35,13 +36,6 @@ sub match_event {
   }
 
   return 1;
-}
-
-sub insert_into_feed {
-  my $class = shift;
-  my $event = shift;
-  my $address = lc($event->address());
-  $class->index_event_for_feed($event, $address);
 }
 
 sub insert {

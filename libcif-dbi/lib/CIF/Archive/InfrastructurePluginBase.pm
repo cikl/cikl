@@ -1,15 +1,12 @@
 package CIF::Archive::InfrastructurePluginBase;
-use base 'CIF::Archive::Plugin';
+use base 'CIF::Archive::AddressPluginBase';
 
 use warnings;
 use strict;
 
 use Regexp::Common qw/net/;
 use Regexp::Common::net::CIDR;
-use Digest::SHA qw/sha1_hex/;
-use JSON::XS;
 use CIF qw/debug/;
-use Data::Dumper;
 
 use constant DATATYPE => 'infrastructure';
 sub datatype { return DATATYPE; }
@@ -40,39 +37,39 @@ sub match_event {
   return 1;
 }
 
-sub insert_into_feed {
-  my $class = shift;
-  my $event = shift;
-  my $address = lc($event->address());
-### TODO MPR: This is trying to make supplied port ranges indexable, but Ill 
-    #have to come back to it later.
-
-##    use Parse::Range qw(parse_range);
-##    # we just need a unique hash based on port/protocol
-##    # this is a fast way to stringify what we have and hash it
-##    my $services = $system->get_Service();
-##    $services = (ref($system->get_Service()) eq 'ARRAY') ? $system->get_Service() : [$system->get_Service] if($services);
-##    if($services){
-##      my $ranges;
-##      foreach my $service (@$services){
-##        my $portlist = $service->get_Portlist();
-##        if($portlist){
-##          if($portlist =~ /^\d([\d,-]+)?$/){
-##            $portlist = parse_range($portlist);
-##            push(@{$ranges->{$service->get_ip_protocol()}},$portlist);
-##          } else {
-##            debug('invalid portlist format: '.$portlist);
-##            debug('uuid: '.$data->{'uuid'});
-##          }
-##        }
-##      }
-##      if($ranges){
-##        $ranges = encode_json($ranges);
-##        $hash = sha1_hex($hash.$ranges);
-##      }
-##    }
-  $class->index_event_for_feed($event, $address, {address => $address});
-}
+#sub insert_into_feed {
+#  my $class = shift;
+#  my $event = shift;
+#  my $address = lc($event->address());
+#### TODO MPR: This is trying to make supplied port ranges indexable, but Ill 
+#    #have to come back to it later.
+#
+###    use Parse::Range qw(parse_range);
+###    # we just need a unique hash based on port/protocol
+###    # this is a fast way to stringify what we have and hash it
+###    my $services = $system->get_Service();
+###    $services = (ref($system->get_Service()) eq 'ARRAY') ? $system->get_Service() : [$system->get_Service] if($services);
+###    if($services){
+###      my $ranges;
+###      foreach my $service (@$services){
+###        my $portlist = $service->get_Portlist();
+###        if($portlist){
+###          if($portlist =~ /^\d([\d,-]+)?$/){
+###            $portlist = parse_range($portlist);
+###            push(@{$ranges->{$service->get_ip_protocol()}},$portlist);
+###          } else {
+###            debug('invalid portlist format: '.$portlist);
+###            debug('uuid: '.$data->{'uuid'});
+###          }
+###        }
+###      }
+###      if($ranges){
+###        $ranges = encode_json($ranges);
+###        $hash = sha1_hex($hash.$ranges);
+###      }
+###    }
+#  $class->index_event_for_feed($event, $address, {address => $address});
+#}
 
 sub insert {
   my $class = shift;
