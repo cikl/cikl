@@ -8,6 +8,7 @@ require XML::LibXML;
 sub parse {
     my $self = shift;
     my $content = shift;
+    my $broker = shift;
     
     my $parser      = XML::LibXML->new();
     my $doc         = $parser->load_xml(string => $content);
@@ -16,7 +17,6 @@ sub parse {
     
     return unless(@nodes);
     
-    my @array;
     my @elements        = $self->config->elements; 
     my @elements_map    = $self->config->elements_map; 
     my @attributes_map  = $self->config->attributes_map; 
@@ -78,10 +78,10 @@ sub parse {
                 }
             }
         }
-        push(@array,$h) if($found);
+        $broker->emit($h) if ($found);
 
     }
-    return(\@array);
+    return(undef);
 }
 
 1;

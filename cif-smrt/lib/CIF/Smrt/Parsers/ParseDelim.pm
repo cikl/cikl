@@ -7,12 +7,12 @@ use warnings;
 sub parse {
     my $self = shift;
     my $content = shift;
+    my $broker = shift;
 
     my $split = $self->config->delimiter;
 
     my @lines = split(/[\r\n]/,$content);
     my @cols = $self->config->values;
-    my @array;
     
     if(my $l = $self->config->feed_limit){
         my ($start,$end);
@@ -30,7 +30,7 @@ sub parse {
         }
     }
 
-    shift @array if($self->config->skipfirst);
+    shift @lines if($self->config->skipfirst);
 
     foreach(@lines){
         next if(/^(#|$|<)/);
@@ -39,9 +39,9 @@ sub parse {
         foreach (0 ... $#cols){
             $h->{$cols[$_]} = $m[$_];
         }
-        push(@array,$h);
+        $broker->emit($h);
     }
-    return(\@array);
+    return(undef);
 }
 
 1;

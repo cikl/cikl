@@ -7,11 +7,11 @@ use warnings;
 sub parse {
     my $self = shift;
     my $content = shift;
+    my $broker = shift;
     my $re = $self->config->regex;
     return unless($re);
     
     my @lines = split(/[\r\n]/,$content);
-    my @array;
     foreach(@lines){
         next if(/^(#|<|$)/);
         my @m = ($_ =~ /$re/);
@@ -31,9 +31,9 @@ sub parse {
         if($h->{'address_mask'}){
             $h->{'address'} .= '/'.$h->{'address_mask'};
         }
-        push(@array,$h);
+        $broker->emit($h);
     }
-    return(\@array);
+    return(undef);
 
 }
 

@@ -8,6 +8,7 @@ use XML::RSS::LibXML;
 sub parse {
     my $self = shift;
     my $content = shift;
+    my $broker = shift;
     
     # fix malformed RSS
     unless($content =~ /^<\?xml version/){
@@ -25,7 +26,6 @@ sub parse {
     }
     $content = join("\n",@lines);
     $rss->parse($content);
-    my @array;
     foreach my $item (@{$rss->{items}}){
         my $h = $self->create_event();
         foreach my $key (keys %$item){
@@ -37,9 +37,9 @@ sub parse {
                 }
             }
         }
-        push(@array,$h);
+        $broker->emit($h);
     }
-    return(\@array);
+    return(undef);
 
 }
 

@@ -8,9 +8,9 @@ use Text::CSV;
 sub parse {
     my $self = shift;
     my $content = shift;
+    my $broker = shift;
     
     my @lines = split(/[\r\n]/,$content);
-    my @array;
     
     if(my $l = $self->config->feed_limit){
         my ($start,$end);
@@ -43,9 +43,9 @@ sub parse {
             next if($cols[$_] eq 'null');
             $h->{$cols[$_]} = $m[$_];
         }
-        push(@array,$h);
+        $broker->emit($h);
     }
-    return(\@array);
+    return(undef);
 
 }
 

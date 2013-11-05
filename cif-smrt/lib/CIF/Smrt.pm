@@ -25,6 +25,7 @@ use Module::Pluggable require => 1;
 use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
+use CIF::Smrt::Broker;
 
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
@@ -215,6 +216,7 @@ sub _pull_feed {
 ## TODO -- turn this into plugins
 sub parse {
     my $self = shift;
+    my $broker = shift;
     my $f = $self->get_feedparser_config();
     
     if($self->get_proxy()){
@@ -228,37 +230,44 @@ sub parse {
     my ($err,$content) = pull_feed($f);
     return($err) if($err);
     
-    my $parser;
+    my $parser_class;
     ## TODO -- this mess will be cleaned up and plugin-ized in v2
-    try {
-        if(my $d = $f->{'delimiter'}){
-            $parser = CIF::Smrt::Parsers::ParseDelim->new($f);
-        } else {
-            # try to auto-detect the file
-            debug('testing...');
-            ## todo -- very hard to detect iodef-pb strings
-            # might have to rely on base64 encoding decode first?
-            ## TODO -- pull this out
-            if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $content =~ /^(<\?xml version=|<rss version=)/){
-                if($content =~ /<rss version=/ && !$f->{'nodes'}){
-                    $parser = CIF::Smrt::Parsers::ParseRss->new($f);
-                } else {
-                    $parser = CIF::Smrt::Parsers::ParseXml->new($f);
-                }
-            } elsif($content =~ /^\[?{/){
-                ## TODO -- remove, legacy
-                $parser = CIF::Smrt::Parsers::ParseJson->new($f);
-            } elsif($content =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
-                # ParseCSV only works on strictly formated CSV files
-                # o/w you should be using ParseDelim and specifying the "delimiter" field
-                # in your config
-                $parser = CIF::Smrt::Parsers::ParseCsv->new($f);
+    if(my $d = $f->{'delimiter'}){
+        $parser_class = "CIF::Smrt::Parsers::ParseDelim";
+    } else {
+        # try to auto-detect the file
+        debug('testing...');
+        ## todo -- very hard to detect iodef-pb strings
+        # might have to rely on base64 encoding decode first?
+        ## TODO -- pull this out
+        if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $content =~ /^(<\?xml version=|<rss version=)/){
+            if($content =~ /<rss version=/ && !$f->{'nodes'}){
+                $parser_class = "CIF::Smrt::Parsers::ParseRss";
             } else {
-                $parser = CIF::Smrt::Parsers::ParseTxt->new($f);
+                $parser_class = "CIF::Smrt::Parsers::ParseXml";
             }
+        } elsif($content =~ /^\[?{/){
+            ## TODO -- remove, legacy
+            $parser_class = "CIF::Smrt::Parsers::ParseJson";
+        } elsif($content =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
+            # ParseCSV only works on strictly formated CSV files
+            # o/w you should be using ParseDelim and specifying the "delimiter" field
+            # in your config
+            $parser_class = "CIF::Smrt::Parsers::ParseCsv";
+        } else {
+            $parser_class = "CIF::Smrt::Parsers::ParseTxt";
         }
+    }
+
+    my $parser;
+    if (!defined($parser_class)) {
+        return("Could not initialize a parser class!");
+    }
+
+    try {
+      $parser = $parser_class->new($f);
     } catch {
-        $err = shift;
+      $err = shift;
     };
 
     if($err){
@@ -279,8 +288,8 @@ sub parse {
         return("Could not initialize parser!");
     }
 
-    my $return = $parser->parse($content);
-    return(undef,$return);
+    my $return = $parser->parse($content, $broker);
+    return(undef);
 }
 
 sub _decode {
@@ -338,10 +347,12 @@ sub _sort_timestamp {
 
 sub preprocess_routine {
     my $self = shift;
+    my $broker = CIF::Smrt::Broker->new();
 
     debug('parsing...') if($::debug);
-    my ($err,$recs) = $self->parse();
+    my ($err) = $self->parse($broker);
     return($err) if($err);
+    my $recs = $broker->data();
     
     debug('parsed records: '."\n".Dumper($recs)) if($::debug > 9);
     
