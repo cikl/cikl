@@ -6,12 +6,12 @@ use warnings;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
 
     my $split = $self->config->delimiter;
 
-    my @lines = split(/[\r\n]/,$content);
+    my @lines = split(/[\r\n]/,$$content_ref);
     my @cols = $self->config->values;
     
     if(my $l = $self->config->feed_limit){

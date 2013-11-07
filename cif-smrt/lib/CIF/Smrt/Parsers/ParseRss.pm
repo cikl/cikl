@@ -7,8 +7,9 @@ use XML::RSS::LibXML;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
+    my $content = $$content_ref;
     
     # fix malformed RSS
     unless($content =~ /^<\?xml version/){

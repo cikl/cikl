@@ -1,28 +1,35 @@
 package CIF::Smrt::Plugin::Decode::Zip;
+use parent CIF::Smrt::Decoder;
 
 use strict;
 use warnings;
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
 
+use constant MIME_TYPES => (
+  'application/x-zip',
+  'application/zip'
+);
+sub mime_types { return MIME_TYPES; }
+
 sub decode {
     my $class = shift;
-    my $data = shift;
-    my $type = shift;
-    my $f = shift;
-    return unless($type =~ /zip/ && $type !~ /gzip/);
+    my $dataref = shift;
+    my $args = shift;
 
     my $file;
-    if($f->{'zip_filename'}){
-        $file = $f->{'zip_filename'};
-    } else {
-        $f->{'feed'} =~ m/\/([a-zA-Z0-9_]+).zip$/;
+    if($args->{'zip_filename'}){
+        $file = $args->{'zip_filename'};
+    } elsif ($args->{'feed'} && $args->{'feed'} =~ m/\/([a-zA-Z0-9_]+).zip$/){
         $file = $1;
     }
-    return unless($file);
+
+    unless($file) {
+      die("Don't know what file to extract! Must specify 'zip_filename' in feed config.");
+    }
 
     my $unzipped;
-    unzip \$data => \$unzipped, Name => $file || die('unzip failed: '.$UnzipError);
-    return $unzipped;
+    unzip($dataref => \$unzipped, Name => $file) || die('unzip failed: '.$UnzipError);
+    return \$unzipped;
 }
 
 1;

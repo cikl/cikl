@@ -5,10 +5,10 @@ use JSON;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
 
-    my @feed        = @{from_json($content)};
+    my @feed        = @{from_json($$content_ref)};
     my @fields      = $self->config->fields;
     my @fields_map  = $self->config->fields_map;
     foreach my $a (@feed){

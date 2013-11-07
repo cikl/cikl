@@ -7,11 +7,11 @@ require XML::LibXML;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
     
     my $parser      = XML::LibXML->new();
-    my $doc         = $parser->load_xml(string => $content);
+    my $doc         = $parser->load_xml(string => $$content_ref);
     my @nodes       = $doc->findnodes('//'.$self->config->node);
     my @subnodes    = $doc->findnodes('//'.$self->config->subnode) if($self->config->subnode);
     

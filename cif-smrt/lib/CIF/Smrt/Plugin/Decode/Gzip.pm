@@ -1,19 +1,21 @@
 package CIF::Smrt::Plugin::Decode::Gzip;
+use parent CIF::Smrt::Decoder;
 
-use Compress::Zlib;
+use strict;
+use warnings;
+use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
+use constant MIME_TYPES => (
+  'application/x-gzip'
+);
+sub mime_types { return MIME_TYPES; }
 
 sub decode {
     my $class = shift;
-    my $data = shift;
-    my $type = shift;
-    return unless($type =~ /gzip/);
-
-    my $uncompressed = Compress::Zlib::memGunzip($data);
-    my $ft = File::Type->new();
-    my $t = $ft->mime_type($uncompressed);
-
-    return unless($t =~ /octet-stream/); #only return octect streams(aka text)
-    return $uncompressed;
+    my $dataref = shift;
+    my $args = shift;
+    my $uncompressed;
+    gunzip($dataref => \$uncompressed) or die($GunzipError);
+    return \$uncompressed;
 }
 
 1;

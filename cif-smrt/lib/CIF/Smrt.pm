@@ -21,6 +21,7 @@ use Encode qw/encode_utf8/;
 use Data::Dumper;
 use File::Type;
 use Module::Pluggable require => 1;
+use Module::Pluggable search_path => "CIF::Smrt::Plugin::Decode", require => 1, sub_name => 'decoders';
 use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
@@ -45,6 +46,23 @@ __PACKAGE__->mk_accessors(qw(
 
 my @preprocessors = __PACKAGE__->plugins();
 @preprocessors = grep(/Preprocessor::[0-9a-zA-Z_]+$/,@preprocessors);
+
+sub _init_decoders {
+  my $ret = {};
+  foreach my $decoder (__PACKAGE__->decoders()) {
+    foreach my $mime_type ($decoder->mime_types()) {
+      if (defined($ret->{$mime_type})) {
+        my $existing = $ret->{$mime_type};
+        die("Cannot associate $decoder with $mime_type. Already registered with $existing.");
+      }
+      $ret->{$mime_type} = $decoder;
+    }
+  }
+  return $ret;
+}
+
+our $decoder_map = _init_decoders();
+
 
 sub new {
     my $class = shift;
@@ -179,32 +197,32 @@ sub pull_feed {
     my $cv = AnyEvent->condvar;
 
     async {
-      my $r;
       try {
-        $r = _pull_feed($f);
+        $cv->send(_pull_feed($f));
       } catch {
         $cv->croak(shift);
       };
-      $cv->send($r);
     };
     while (!($cv->ready())) {
       Coro::AnyEvent::sleep 1;
     }
-    my $ret = $cv->recv();
+    my $retref = $cv->recv();
 
     # auto-decode the content if need be
-    $ret = _decode($ret,$f);
+    $retref = _decode($retref,$f);
 
-    return(undef,$ret) if($f->{'cif'} && $f->{'cif'} eq 'true');
+    ## TODO MPR : This looks like a hack for the utf8 and CR stuff below.
+    #return(undef,$ret) if($f->{'cif'} && $f->{'cif'} eq 'true');
 
+    ## Commenting this out as I haven't run into any issues, yet.  
     # encode to utf8
-    $ret = encode_utf8($ret);
+    #$ret = encode_utf8($ret);
     
     # remove any CR's
-    $ret =~ s/\r//g;
+    #$ret =~ s/\r//g;
     delete($f->{'feed'});
     
-    return(undef,$ret);
+    return(undef,$retref);
 }
 
 # we do this sep cause it's in a thread
@@ -236,7 +254,7 @@ sub _pull_feed {
           debug("No data!");
           next;
         }
-        return($ret);
+        return(\$ret);
     }
     die('ERROR: could not pull feed');
 }
@@ -256,7 +274,7 @@ sub parse {
     if($self->get_cif_config_filename()){
         $f->{'client_config'} = $self->get_cif_config_filename();
     }
-    my ($err,$content) = pull_feed($f);
+    my ($err,$content_ref) = pull_feed($f);
     die($err) if($err);
     
     my $parser_class;
@@ -269,16 +287,16 @@ sub parse {
         ## todo -- very hard to detect iodef-pb strings
         # might have to rely on base64 encoding decode first?
         ## TODO -- pull this out
-        if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $content =~ /^(<\?xml version=|<rss version=)/){
-            if($content =~ /<rss version=/ && !$f->{'nodes'}){
+        if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $$content_ref =~ /^(<\?xml version=|<rss version=)/){
+            if($$content_ref =~ /<rss version=/ && !$f->{'nodes'}){
                 $parser_class = "CIF::Smrt::Parsers::ParseRss";
             } else {
                 $parser_class = "CIF::Smrt::Parsers::ParseXml";
             }
-        } elsif($content =~ /^\[?{/){
+        } elsif($$content_ref =~ /^\[?{/){
             ## TODO -- remove, legacy
             $parser_class = "CIF::Smrt::Parsers::ParseJson";
-        } elsif($content =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
+        } elsif($$content_ref =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
             # ParseCSV only works on strictly formated CSV files
             # o/w you should be using ParseDelim and specifying the "delimiter" field
             # in your config
@@ -292,36 +310,37 @@ sub parse {
         die("Could not initialize a parser class!");
     }
 
+    debug("Parser class: $parser_class");
+
     my $parser = $parser_class->new($f);
-    my $return = $parser->parse($content, $broker);
+    my $return = $parser->parse($content_ref, $broker);
     return(undef);
 }
-
+use MU;
 sub _decode {
-    my $data = shift;
+    my $dataref = shift;
     my $f = shift;
 
     my $ft = File::Type->new();
-    my $t = $ft->mime_type($data);
-    my @plugs = __PACKAGE__->plugins();
-    @plugs = grep(/Decode/,@plugs);
-    foreach(@plugs){
-        if(my $ret = $_->decode($data,$t,$f)){
-            return($ret);
-        }
+    my $t = $ft->mime_type($$dataref);
+    my $decoder = $decoder_map->{$t};
+    unless($decoder) {
+      debug("Don't know how to decode $t");
+      return $dataref;
     }
-    return $data;
+    return $decoder->decode($dataref, $f);
 }
 
 sub process {
     my $self = shift;
     my $args = shift;
+    my ($err, $ret);
     
     my $client = $self->get_client();
     my $guid = $self->get_feedparser_config->{'guid'};
     my $emit_cb = sub {
       my $event = shift;
-      my ($err, $ret) = $client->submit($guid, $event);    
+      ($err, $ret) = $client->submit($guid, $event);    
       if ($err) {
         die($err);
       }
@@ -334,13 +353,15 @@ sub process {
         die($err);
       }
     } catch {
-      my $e = shift;
-      return($e);
+      $err = shift;
     } finally {
       if ($client) {
         $client->shutdown();
       }
     };
+    if ($err) {
+      return($err);
+    }
 
     if($::debug) {
       debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());

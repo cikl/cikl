@@ -6,12 +6,12 @@ use warnings;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
     my $re = $self->config->regex;
     return unless($re);
     
-    my @lines = split(/[\r\n]/,$content);
+    my @lines = split(/[\r\n]/,$$content_ref);
     foreach(@lines){
         next if(/^(#|<|$)/);
         my @m = ($_ =~ /$re/);

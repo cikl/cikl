@@ -7,10 +7,10 @@ use Text::CSV;
 
 sub parse {
     my $self = shift;
-    my $content = shift;
+    my $content_ref = shift;
     my $broker = shift;
     
-    my @lines = split(/[\r\n]/,$content);
+    my @lines = split(/[\r\n]/,$$content_ref);
     
     if(my $l = $self->config->feed_limit){
         my ($start,$end);
