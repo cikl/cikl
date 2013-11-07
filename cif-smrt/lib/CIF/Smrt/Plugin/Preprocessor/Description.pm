@@ -5,7 +5,6 @@ use warnings;
 
 sub process {
     my $class = shift;
-    my $rules = shift;
     my $rec = shift;
 
     $rec->{'assessment'} = lc($rec->{'assessment'}) if($rec->{'assessment'});

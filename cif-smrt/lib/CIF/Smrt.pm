@@ -4,7 +4,6 @@ use base 'Class::Accessor';
 use 5.008008;
 use strict;
 use warnings;
-use threads;
 
 our $VERSION = '0.99_03';
 $VERSION = eval $VERSION;  # see L<perlmodstyle>
@@ -26,6 +25,9 @@ use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
 use CIF::Smrt::Broker;
+use CIF::Smrt::EventNormalizer;
+use AnyEvent;
+use Coro;
 
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
@@ -34,7 +36,7 @@ use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug normalize_timest
 
 __PACKAGE__->follow_best_practice;
 __PACKAGE__->mk_accessors(qw(
-    smrt_config feeds_config feeds threads 
+    smrt_config feeds_config feeds 
     entries defaults feed feedparser_config load_full goback 
     wait_for_server name instance 
     batch_control cif_config_filename apikey
@@ -77,6 +79,14 @@ sub init {
     $self->set_proxy(           $args->{'proxy'}            || $self->get_smrt_config->{'proxy'});
    
     $self->set_goback(time() - ($self->get_goback() * 84600));
+
+    my $event_normalizer = CIF::Smrt::EventNormalizer->new({
+      refresh => $self->get_feedparser_config->{'refresh'},
+      severity_map => $self->get_severity_map(),
+      goback => $self->get_goback()
+    });
+
+    $self->{'event_normalizer'} = $event_normalizer;
     
     if($::debug){
         my $gb = DateTime->from_epoch(epoch => $self->get_goback());
@@ -166,9 +176,21 @@ sub init_feeds {
 
 sub pull_feed { 
     my $f = shift;
-    my $ret = threads->create('_pull_feed',$f)->join();
-    return(undef,'') unless($ret);
-    return($ret) if($ret =~ /^ERROR: /);
+    my $cv = AnyEvent->condvar;
+
+    async {
+      my $r;
+      try {
+        $r = _pull_feed($f);
+      } catch {
+        $cv->croak(shift);
+      };
+      $cv->send($r);
+    };
+    while (!($cv->ready())) {
+      Coro::AnyEvent::sleep 1;
+    }
+    my $ret = $cv->recv();
 
     # auto-decode the content if need be
     $ret = _decode($ret,$f);
@@ -189,7 +211,9 @@ sub pull_feed {
 # this gets around memory leak issues and TLS threading issues with Crypt::SSLeay, etc
 sub _pull_feed {
     my $f = shift;
-    return unless($f->{'feed'});
+    unless($f->{'feed'}) {
+      die("no feed config provided!");
+    }
     
     # MPR TODO : Fix up this key/val replacing stuff.
 #    foreach my $key (keys %$f){
@@ -201,15 +225,20 @@ sub _pull_feed {
 #    }
     my @pulls = __PACKAGE__->plugins();
     @pulls = sort grep(/::Pull::/,@pulls);
-    foreach(@pulls){
-        my ($err,$ret) = $_->pull($f);
-        return('ERROR: '.$err) if($err);
+    foreach my $p (@pulls){
+        my ($err,$ret) = $p->pull($f);
+        if($err) {
+          die("ERROR! $err");
+        }
         
         # we don't want to error out if there's just no content
-        next unless(defined($ret));
+        unless(defined($ret)) {
+          debug("No data!");
+          next;
+        }
         return($ret);
     }
-    return('ERROR: could not pull feed');
+    die('ERROR: could not pull feed');
 }
 
 
@@ -222,13 +251,13 @@ sub parse {
     if($self->get_proxy()){
         $f->{'proxy'} = $self->get_proxy();
     }
-    return 'feed does not exist' unless($f->{'feed'});
+    die 'feed does not exist' unless($f->{'feed'});
     debug('pulling feed: '.$f->{'feed'}) if($::debug);
     if($self->get_cif_config_filename()){
         $f->{'client_config'} = $self->get_cif_config_filename();
     }
     my ($err,$content) = pull_feed($f);
-    return($err) if($err);
+    die($err) if($err);
     
     my $parser_class;
     ## TODO -- this mess will be cleaned up and plugin-ized in v2
@@ -259,35 +288,11 @@ sub parse {
         }
     }
 
-    my $parser;
     if (!defined($parser_class)) {
-        return("Could not initialize a parser class!");
+        die("Could not initialize a parser class!");
     }
 
-    try {
-      $parser = $parser_class->new($f);
-    } catch {
-      $err = shift;
-    };
-
-    if($err){
-        my @errmsg;
-        if($err =~ /parser error/){
-            push(@errmsg,'it appears that the format of this feed is broken and might need fixing on the authors end');
-            if($::debug > 1){
-                push(@errmsg,"\n\n".$err);
-            } else {
-                push(@errmsg,'a debug level > 1 will print the error if you wish to investigate');
-            }
-        } else {
-            push(@errmsg,"\n\n".$err);
-        }
-        return(join("\n",@errmsg));
-    }
-    if (!defined($parser)) {
-        return("Could not initialize parser!");
-    }
-
+    my $parser = $parser_class->new($f);
     my $return = $parser->parse($content, $broker);
     return(undef);
 }
@@ -308,157 +313,47 @@ sub _decode {
     return $data;
 }
 
-sub _sort_timestamp {
-    my $recs    = shift;
-    my $rules   = shift;
-    
-    my $refresh = $rules->{'refresh'} || 0;
-
-    debug('setting up sort...');
-    my $x = 0;
-    my $now = DateTime->from_epoch(epoch => time());
-    ## TODO -- walk throught this again
-    foreach my $rec (@{$recs}){
-        my $dt = $rec->{'detecttime'} || $now;
-        my $rt = $rec->{'reporttime'} || $now;
-
-        $dt = normalize_timestamp($dt,$now);
-
-        if($refresh){
-            $rt = $now;
-            $rec->{'timestamp_epoch'} = $now->epoch();
-        } else {
-            $rt = normalize_timestamp($rt,$now);
-            $rec->{'timestamp_epoch'} = $dt->epoch();
-        }
-       
-        $rec->{'detecttime'}        = $dt->ymd().'T'.$dt->hms().'Z';
-        $rec->{'reporttime'}        = $rt->ymd().'T'.$rt->hms().'Z';
-    }
-    debug('sorting...');
-    if($refresh){
-        $recs = [ sort { $b->{'reporttime'} cmp $a->{'reporttime'} } @$recs ];
-    } else {
-        $recs = [ sort { $b->{'detecttime'} cmp $a->{'detecttime'} } @$recs ];
-    }
-    debug('done...');
-    return($recs);
-}
-
-sub preprocess_routine {
-    my $self = shift;
-    my $broker = CIF::Smrt::Broker->new();
-
-    debug('parsing...') if($::debug);
-    my ($err) = $self->parse($broker);
-    return($err) if($err);
-    my $recs = $broker->data();
-    
-    debug('parsed records: '."\n".Dumper($recs)) if($::debug > 9);
-    
-    return unless($#{$recs} > -1);
-    
-    if($self->get_goback()){
-        debug('sorting '.($#{$recs}+1).' recs...') if($::debug);
-        $recs = _sort_timestamp($recs,$self->get_feedparser_config());
-    }
-    
-    ## TODO -- move this to the threads?
-    ## test with alienvault scan's feed
-    debug('mapping...') if($::debug);
-    
-    my @array;
-    foreach my $r (@$recs){
-        $r = $self->handle_record($r);
-    
-        ## TODO -- if we do this, we need to degrade the count somehow...
-        if (defined($r)) {
-          push(@array,$r);
-        }
-    }
-
-    debug('done mapping...') if($::debug);
-    debug('records to be processed: '.($#array+1)) if($::debug);
-    if($#array == -1){
-        debug('your goback is too small, if you want records, increase the goback time') if($::debug);
-    }
-
-    return(undef,\@array);
-}
-
-sub handle_record {
-  my $self = shift;
-  my $r = shift;
-
-  if($r->{'timestamp_epoch'} < $self->get_goback()) { 
-    return(undef);
-  }
-
-  # MPR: Disabling value expansion, for now.
-#  foreach my $key (keys %$r){
-#    my $v = $r->{$key};
-#    next unless($v);
-#    if($v =~ /<(\S+)>/){
-#      my $value_to_expand = $1;
-#      my $x = $r->{$value_to_expand};
-#      if($x){
-#        $r->{$key} =~ s/<\S+>/$x/;
-#      }
-#    }
-#  }
-
-  unless($r->{'assessment'}){
-    debug('WARNING: config missing an assessment') if($::debug);
-    $r->{'assessment'} = 'unknown';
-  }
-
-  foreach my $p (@preprocessors){
-    $r = $p->process($self->get_feedparser_config(),$r);
-  }
-
-  # TODO -- work-around, make this more configurable
-  unless($r->{'severity'}){
-    $r->{'severity'} = (defined($self->get_severity_map->{$r->{'assessment'}})) ? $self->get_severity_map->{$r->{'assessment'}} : 'medium';
-  }
-  return $r;
-}
-
 sub process {
     my $self = shift;
     my $args = shift;
     
-    
-    debug('running preprocessor routine...') if($::debug);
-    my ($err,$array) = $self->preprocess_routine();
-    return($err) if($err);
-
-    return (undef,'no records') unless($#{$array} > -1);
-    return $self->submit($array);
-}
-
-sub submit {
-    my $self = shift;
-    my $data = shift;
-
     my $client = $self->get_client();
+    my $guid = $self->get_feedparser_config->{'guid'};
+    my $emit_cb = sub {
+      my $event = shift;
+      my ($err, $ret) = $client->submit($guid, $event);    
+      if ($err) {
+        die($err);
+      }
+    };
 
-    my ($err, $ret);
+    my $broker = CIF::Smrt::Broker->new($self->{event_normalizer}, $emit_cb);
     try {
-      foreach my $event (@$data) {
-        ($err, $ret) = $client->submit($self->get_feedparser_config->{'guid'}, $event);    
-        if ($err) {
-          die($err);
-        }
+      my ($err) = $self->parse($broker);
+      if ($err) {
+        die($err);
       }
     } catch {
-      my $error = shift;
-      return($error);
+      my $e = shift;
+      return($e);
     } finally {
       if ($client) {
         $client->shutdown();
       }
     };
-    return undef;
+
+    if($::debug) {
+      debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());
+    }
+
+    if($broker->count() == 0){
+      if ($broker->count_too_old() != 0) {
+        debug('your goback is too small, if you want records, increase the goback time') if($::debug);
+      }
+      return (undef, 'no records');
+    }
+
+    return(undef);
 }
 
 1;

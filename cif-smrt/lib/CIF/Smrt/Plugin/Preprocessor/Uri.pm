@@ -8,7 +8,6 @@ use Regexp::Common::net::CIDR;
 
 sub process {
     my $class = shift;
-    my $rules = shift;
     my $rec = shift;
     
     my $address = $rec->{'address'};    

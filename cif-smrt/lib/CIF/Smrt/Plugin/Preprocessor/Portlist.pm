@@ -5,7 +5,6 @@ use warnings;
 
 sub process {
     my $class = shift;
-    my $rules = shift;
     my $rec = shift;
 
     return $rec unless($rec->{'portlist'});
