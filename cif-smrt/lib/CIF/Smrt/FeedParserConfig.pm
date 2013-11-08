@@ -36,7 +36,8 @@ use constant FIELDS => {
 use constant REQUIRED_FIELDS => {
   guid => 1,
   feed => 1,
-  source => 1
+  source => 1,
+  parser => 1
 };
 
 sub new {
