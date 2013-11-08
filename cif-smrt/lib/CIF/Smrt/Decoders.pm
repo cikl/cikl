@@ -3,7 +3,7 @@ package CIF::Smrt::Decoders;
 use strict;
 use warnings;
 
-use Module::Pluggable search_path => "CIF::Smrt::Plugin::Decode", 
+use Module::Pluggable search_path => "CIF::Smrt::Decoders", 
       require => 1, sub_name => '_decoders';
 
 sub new {

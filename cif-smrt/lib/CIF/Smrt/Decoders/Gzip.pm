@@ -1,4 +1,4 @@
-package CIF::Smrt::Plugin::Decode::Gzip;
+package CIF::Smrt::Decoders::Gzip;
 use parent CIF::Smrt::Decoder;
 
 use strict;
