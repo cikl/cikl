@@ -44,3 +44,7 @@ requires 'XML::RSS::LibXML', '0.3102';
 requires 'File::Type', "0.22";
 requires 'Sys::MemInfo', "0.91";
 requires 'Getopt::Long';
+on develop => sub {
+    requires 'Memory::Usage';
+    requires 'Devel::Size';
+};
