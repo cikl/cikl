@@ -16,6 +16,7 @@ use constant DEFAULT_SEVERITY_MAP => {
 use CIF::Client;
 use CIF::Smrt::Parsers;
 use CIF::Smrt::Decoders;
+use CIF::Smrt::Fetchers;
 use Regexp::Common qw/net URI/;
 use Regexp::Common::net::CIDR;
 use Encode qw/encode_utf8/;
@@ -53,6 +54,7 @@ sub new {
 
     $self->{decoders} = CIF::Smrt::Decoders->new();
     $self->{parsers} = CIF::Smrt::Parsers->new();
+    $self->{fetchers} = CIF::Smrt::Fetchers->new();
       
     my ($err,$ret) = $self->init($args);
     return($err) if($err);
@@ -195,7 +197,7 @@ sub pull_feed {
 
     async {
       try {
-        $cv->send(_pull_feed($f));
+        $cv->send($self->_pull_feed($f));
       } catch {
         $cv->croak(shift);
       };
@@ -225,6 +227,7 @@ sub pull_feed {
 # we do this sep cause it's in a thread
 # this gets around memory leak issues and TLS threading issues with Crypt::SSLeay, etc
 sub _pull_feed {
+    my $self = shift;
     my $f = shift;
     unless($f->{'feed'}) {
       die("no feed config provided!");
@@ -238,9 +241,8 @@ sub _pull_feed {
 #            }
 #        }
 #    }
-    my @pulls = __PACKAGE__->plugins();
-    @pulls = sort grep(/::Pull::/,@pulls);
-    foreach my $p (@pulls){
+    foreach my $p ($self->{fetchers}->fetchers()){
+        debug("Trying to pull with $p") if($::debug);
         my ($err,$ret) = $p->pull($f);
         if($err) {
           die("ERROR! $err");
@@ -248,9 +250,9 @@ sub _pull_feed {
         
         # we don't want to error out if there's just no content
         unless(defined($ret)) {
-          debug("No data!");
           next;
         }
+        debug("Succesfully pulled data using $p") if($::debug);
         return(\$ret);
     }
     die('ERROR: could not pull feed');
