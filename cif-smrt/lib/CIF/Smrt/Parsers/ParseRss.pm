@@ -5,6 +5,9 @@ use strict;
 use warnings;
 use XML::RSS::LibXML;
 
+use constant NAME => 'rss';
+sub name { return NAME; }
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;

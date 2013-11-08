@@ -5,6 +5,9 @@ use strict;
 use warnings;
 require XML::LibXML;
 
+use constant NAME => 'xml';
+sub name { return NAME; }
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;

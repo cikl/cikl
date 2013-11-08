@@ -3,6 +3,9 @@ use base 'CIF::Smrt::Parser';
 
 use JSON;
 
+use constant NAME => 'json';
+sub name { return NAME; }
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;

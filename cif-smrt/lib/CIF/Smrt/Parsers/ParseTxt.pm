@@ -4,6 +4,9 @@ use base 'CIF::Smrt::Parser';
 use strict;
 use warnings;
 
+use constant NAME => 'txt';
+sub name { return NAME; }
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;

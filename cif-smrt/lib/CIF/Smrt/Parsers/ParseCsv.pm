@@ -5,6 +5,9 @@ use strict;
 use warnings;
 use Text::CSV;
 
+use constant NAME => 'csv';
+sub name { return NAME; }
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;
