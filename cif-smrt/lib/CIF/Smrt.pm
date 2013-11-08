@@ -126,17 +126,12 @@ sub lookup_decoder {
 
 sub lookup_parser {
   my $self = shift;
-  my $dataref = shift;
-  my $feedconfig = shift;
-  if (my $parser_name = $feedconfig->{parser}) {
-    my $parser_class = $self->{parsers}->get($parser_name);
-    if (!defined($parser_class)) {
-      die("Could not find a parser for parser=$parser_name. Valid parsers: " . $self->{parsers}->valid_parser_names_string);
-    }
-    return $parser_class;
+  my $parser_name = shift;
+  my $parser_class = $self->{parsers}->get($parser_name);
+  if (!defined($parser_class)) {
+    die("Could not find a parser for parser=$parser_name. Valid parsers: " . $self->{parsers}->valid_parser_names_string);
   }
-  warn "WARNING: No 'parser' specified in the feed configuration. Using legacy parser detection. Good luck! Valid parsers: " . $self->{parsers}->valid_parser_names_string;
-  return $self->{parsers}->lookup($dataref, $feedconfig);
+  return $parser_class;
 }
 
 sub init_config {
@@ -283,11 +278,7 @@ sub parse {
     my ($err,$content_ref) = $self->fetch_feed($f);
     die($err) if($err);
     
-    my $parser_class = $self->lookup_parser($content_ref, $f);
-
-    if (!defined($parser_class)) {
-        die("Could not initialize a parser class!");
-    }
+    my $parser_class = $self->lookup_parser($f->{parser});
 
     debug("Parser class: $parser_class");
 

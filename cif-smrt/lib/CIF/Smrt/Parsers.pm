@@ -66,41 +66,4 @@ sub get {
   return $self->{parser_map}->{$parser_name};
 }
 
-sub lookup {
-  my $self = shift;
-  my $dataref = shift;
-  my $feedconfig = shift;
-
-  my $parser_class;
-  ## TODO -- this mess will be cleaned up and plugin-ized in v2
-  if(my $d = $feedconfig->{'delimiter'}){
-    $parser_class = "CIF::Smrt::Parsers::ParseDelim";
-  } else {
-    # try to auto-detect the file
-    debug('testing...');
-    ## todo -- very hard to detect iodef-pb strings
-    # might have to rely on base64 encoding decode first?
-    ## TODO -- pull this out
-    if(($feedconfig->{'driver'} && $feedconfig->{'driver'} eq 'xml') || $$dataref =~ /^(<\?xml version=|<rss version=)/){
-      if($$dataref =~ /<rss version=/ && !$feedconfig->{'nodes'}){
-        $parser_class = "CIF::Smrt::Parsers::ParseRss";
-      } else {
-        $parser_class = "CIF::Smrt::Parsers::ParseXml";
-      }
-    } elsif($$dataref =~ /^\[?{/){
-      ## TODO -- remove, legacy
-      $parser_class = "CIF::Smrt::Parsers::ParseJson";
-    } elsif($$dataref =~ /^#?\s?"[^"]+","[^"]+"/ && !$feedconfig->{'regex'}){
-      # ParseCSV only works on strictly formated CSV files
-      # o/w you should be using ParseDelim and specifying the "delimiter" field
-      # in your config
-      $parser_class = "CIF::Smrt::Parsers::ParseCsv";
-    } else {
-      $parser_class = "CIF::Smrt::Parsers::ParseTxt";
-    }
-  }
-
-  return $parser_class;
-}
-
 1;
