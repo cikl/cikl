@@ -52,6 +52,7 @@ sub new {
     bless($self,$class);
 
     $self->{decoders} = CIF::Smrt::Decoders->new();
+    $self->{parsers} = CIF::Smrt::Parsers->new();
       
     my ($err,$ret) = $self->init($args);
     return($err) if($err);
@@ -119,6 +120,13 @@ sub lookup_decoder {
   my $self = shift;
   my $mime_type = shift;
   return $self->{decoders}->lookup($mime_type);
+}
+
+sub lookup_parser {
+  my $self = shift;
+  my $dataref = shift;
+  my $feedconfig = shift;
+  return $self->{parsers}->lookup($dataref, $feedconfig);
 }
 
 sub init_config {
@@ -249,7 +257,6 @@ sub _pull_feed {
 }
 
 
-## TODO -- turn this into plugins
 sub parse {
     my $self = shift;
     my $broker = shift;
@@ -266,34 +273,7 @@ sub parse {
     my ($err,$content_ref) = $self->pull_feed($f);
     die($err) if($err);
     
-    my $parser_class;
-    ## TODO -- this mess will be cleaned up and plugin-ized in v2
-    if(my $d = $f->{'delimiter'}){
-        $parser_class = "CIF::Smrt::Parsers::ParseDelim";
-    } else {
-        # try to auto-detect the file
-        debug('testing...');
-        ## todo -- very hard to detect iodef-pb strings
-        # might have to rely on base64 encoding decode first?
-        ## TODO -- pull this out
-        if(($f->{'driver'} && $f->{'driver'} eq 'xml') || $$content_ref =~ /^(<\?xml version=|<rss version=)/){
-            if($$content_ref =~ /<rss version=/ && !$f->{'nodes'}){
-                $parser_class = "CIF::Smrt::Parsers::ParseRss";
-            } else {
-                $parser_class = "CIF::Smrt::Parsers::ParseXml";
-            }
-        } elsif($$content_ref =~ /^\[?{/){
-            ## TODO -- remove, legacy
-            $parser_class = "CIF::Smrt::Parsers::ParseJson";
-        } elsif($$content_ref =~ /^#?\s?"[^"]+","[^"]+"/ && !$f->{'regex'}){
-            # ParseCSV only works on strictly formated CSV files
-            # o/w you should be using ParseDelim and specifying the "delimiter" field
-            # in your config
-            $parser_class = "CIF::Smrt::Parsers::ParseCsv";
-        } else {
-            $parser_class = "CIF::Smrt::Parsers::ParseTxt";
-        }
-    }
+    my $parser_class = $self->lookup_parser($content_ref, $f);
 
     if (!defined($parser_class)) {
         die("Could not initialize a parser class!");
