@@ -41,7 +41,7 @@ sub parse {
     }
    
     foreach my $node (@nodes){
-        my $h = $self->create_event();
+        my $h = {};
         my $found = 0;
         if(@elements_map){
             foreach my $e (0 ... $#elements_map){
@@ -78,7 +78,7 @@ sub parse {
                 }
             }
         }
-        $broker->emit($h) if ($found);
+        $broker->emit($self->create_event($h)) if ($found);
 
     }
     return(undef);

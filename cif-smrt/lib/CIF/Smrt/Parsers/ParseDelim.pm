@@ -35,11 +35,11 @@ sub parse {
     foreach(@lines){
         next if(/^(#|$|<)/);
         my @m = split($split,$_);
-        my $h = $self->create_event(); 
+        my $h = {};
         foreach (0 ... $#cols){
             $h->{$cols[$_]} = $m[$_];
         }
-        $broker->emit($h);
+        $broker->emit($self->create_event($h));
     }
     return(undef);
 }

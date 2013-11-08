@@ -12,14 +12,14 @@ sub parse {
     my @fields      = $self->config->fields;
     my @fields_map  = $self->config->fields_map;
     foreach my $a (@feed){
-        my $h = $self->create_event($h);
+        my $h = {};
         foreach (0 ... $#fields_map){
             my $v = $a->{$fields[$_]};
             if (defined($v)) {
               $h->{$fields_map[$_]} = lc($v);
             }
         }
-        $broker->emit($h);
+        $broker->emit($self->create_event($h));
     }
     return(undef);
 }

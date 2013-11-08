@@ -28,7 +28,7 @@ sub parse {
     $content = join("\n",@lines);
     $rss->parse($content);
     foreach my $item (@{$rss->{items}}){
-        my $h = $self->create_event();
+        my $h = {};
         foreach my $key (keys %$item){
             if(my $r = $self->config->keyed_regex($key)){
                 my @m = ($item->{$key} =~ /$r/);
@@ -38,7 +38,7 @@ sub parse {
                 }
             }
         }
-        $broker->emit($h);
+        $broker->emit($self->create_event($h));
     }
     return(undef);
 

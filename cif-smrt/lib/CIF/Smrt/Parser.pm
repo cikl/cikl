@@ -10,7 +10,8 @@ sub new {
   my $class = shift;
   my $config = shift;
   my $self = {
-    config => $config
+    config => $config,
+    default_event_data => $config->default_event_data()
   };
   bless($self,$class);
   return($self);
@@ -30,7 +31,13 @@ sub parse {
 
 sub create_event {
   my $self = shift;
-  my $ret = CIF::Models::Event->new($self->config->default_event_data());
+  my $hashref = shift;
+  if (!defined($hashref)) {
+    die("create_event requires a hashref of arguments!");
+  }
+  my $merged_hash = {%{$self->{default_event_data}}, %$hashref};
+
+  my $ret = CIF::Models::Event->new($merged_hash);
   return $ret;
 }
 

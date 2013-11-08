@@ -37,13 +37,13 @@ sub parse {
         next if(/^(#|<|$)/);
         my $row = $csv->parse($_);
         next unless($row);
-        my $h = $self->create_event();
+        my $h = {};
         my @m = $csv->fields();
         foreach (0 ... $#cols){
             next if($cols[$_] eq 'null');
             $h->{$cols[$_]} = $m[$_];
         }
-        $broker->emit($h);
+        $broker->emit($self->create_event($h));
     }
     return(undef);
 

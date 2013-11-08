@@ -16,7 +16,7 @@ sub parse {
         next if(/^(#|<|$)/);
         my @m = ($_ =~ /$re/);
         next unless(@m);
-        my $h = $self->create_event();
+        my $h = {};
         my @cols = $self->config->regex_values;
         foreach (0 ... $#cols){
             $m[$_] = '' unless($m[$_]);
@@ -31,7 +31,7 @@ sub parse {
         if($h->{'address_mask'}){
             $h->{'address'} .= '/'.$h->{'address_mask'};
         }
-        $broker->emit($h);
+        $broker->emit($self->create_event($h));
     }
     return(undef);
 

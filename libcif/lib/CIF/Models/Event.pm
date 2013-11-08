@@ -4,67 +4,83 @@ use warnings;
 use Scalar::Util qw(blessed);
 use CIF qw(generate_uuid_random);
 require JSON;
-#use Tie::Hash;
-#our @ISA = 'Tie::StdHash';
+use Moose;
+use Moose::Util::TypeConstraints;
+use MooseX::Aliases;
+use MooseX::SlurpyConstructor;
+use CIF::MooseTypes;
+use namespace::autoclean;
 
-use constant FIELDS => {
-  address => 1,
-  address_mask => 1,
-  alternativeid => 1,
-  alternativeid_restriction => 1,
-  assessment => 1,
-  carboncopy => 1,
-  confidence => 1,
-  contact => 1,
-  contact_email => 1,
-  description => 1,
-  detecttime => 1,
-  guid => 1,
-  hash => 1,
-  id => 1,
-  lang => 1,
-  malware_md5 => 1,
-  malware_sha1 => 1,
-  md5 => 1,
-  method => 1,
-  portlist => 1,
-  protocol => 1,
-  purpose => 1,
-  relatedid => 1,
-  reporttime => 1,
-  restriction => 1,
-  severity => 1,
-  sha1 => 1,
-  source => 1,
-  timezone => 1,
-  timestamp_epoch => 1
-};
+has 'guid' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  required => 1,
+  coerce => 1
+);
 
-sub new {
-  my $class = shift;
-  my $data = shift || {};
-  my $self = {};
-  #tie %{$self}, $class;
-  map { $self->{$_} = $data->{$_} } keys %{$data};
-  if (!defined($self->{guid})) {
-    die "Event requires a GUID!";
-  }
-  if (!defined($self->{id})) {
-    $self->{id} = generate_uuid_random();
-  }
-  bless $self, $class;
-  return $self;
-}
+has 'id' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  default => sub { generate_uuid_random() },
+  coerce => 1,
+  alias => 'uuid'
+);
 
-sub address { $_[0]->{address}}
-sub assessment { $_[0]->{assessment}}
-sub confidence { $_[0]->{confidence}}
-sub uuid { $_[0]->{id}}
-sub reporttime { $_[0]->{reporttime}}
-sub guid { $_[0]->{guid}}
-sub asn { $_[0]->{asn}}
-sub cc { $_[0]->{cc}}
-sub rir { $_[0]->{rir}}
+has 'assessment' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  coerce => 1
+);
+
+has 'description' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  default => sub { 'unknown' },
+  coerce => 1
+);
+
+has 'address' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  coerce => 1
+);
+
+has 'address_mask' => (is => 'rw');
+has 'alternativeid' => (is => 'rw');
+has 'alternativeid_restriction' => (is => 'rw');
+has 'carboncopy' => (is => 'rw');
+has 'confidence' => (is => 'rw');
+has 'contact' => (is => 'rw');
+has 'contact_email' => (is => 'rw');
+has 'detecttime' => (is => 'rw');
+has 'hash' => (is => 'rw');
+has 'lang' => (is => 'rw');
+
+has 'malware_md5' => (is => 'rw');
+has 'malware_sha1' => (is => 'rw');
+has 'md5' => (is => 'rw');
+has 'sha1' => (is => 'rw');
+
+has 'method' => (is => 'rw');
+has 'portlist' => (is => 'rw');
+has 'protocol' => (is => 'rw');
+has 'purpose' => (is => 'rw');
+has 'relatedid' => (is => 'rw');
+has 'reporttime' => (is => 'rw');
+has 'restriction' => (is => 'rw');
+has 'severity' => (is => 'rw');
+has 'source' => (is => 'rw');
+has 'timestamp' => (is => 'rw');
+
+has 'asn' => (is => 'rw');
+has 'cc' => (is => 'rw');
+has 'rir' => (is => 'rw');
+
+# This stores attributes that haven't been explicitly defined.
+has 'other_attributes' => (
+  is => 'rw',
+  slurpy => 1
+);
 
 sub to_hash {
   my $self = shift;
@@ -93,5 +109,6 @@ sub from_json {
   return($class->from_hash($data));
 }
 
+__PACKAGE__->meta->make_immutable;
 
 1;
