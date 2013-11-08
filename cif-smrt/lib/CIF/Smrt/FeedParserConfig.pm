@@ -10,6 +10,7 @@ use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug normalize_timest
 
 use constant FIELDS => {
   guid => 'everyone',
+  parser => undef,
   feed => undef,
   source => undef,
   feed_limit => undef,
@@ -116,6 +117,9 @@ sub default_event_data {
 
 sub values {
   my $self = shift;
+  if (!defined($self->{values})) {
+    return undef;
+  }
   return split(',',$self->{values});
 }
 

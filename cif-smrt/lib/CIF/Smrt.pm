@@ -128,6 +128,14 @@ sub lookup_parser {
   my $self = shift;
   my $dataref = shift;
   my $feedconfig = shift;
+  if (my $parser_name = $feedconfig->{parser}) {
+    my $parser_class = $self->{parsers}->get($parser_name);
+    if (!defined($parser_class)) {
+      die("Could not find a parser for parser=$parser_name. Valid parsers: " . $self->{parsers}->valid_parser_names_string);
+    }
+    return $parser_class;
+  }
+  warn "WARNING: No 'parser' specified in the feed configuration. Using legacy parser detection. Good luck! Valid parsers: " . $self->{parsers}->valid_parser_names_string;
   return $self->{parsers}->lookup($dataref, $feedconfig);
 }
 

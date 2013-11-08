@@ -5,6 +5,10 @@ use warnings;
 use Scalar::Util qw(blessed);
 use CIF::Models::Event;
 
+sub name {
+  my $class = shift;
+  die("$class has not implemented the name() method!");
+}
 
 sub new {
   my $class = shift;

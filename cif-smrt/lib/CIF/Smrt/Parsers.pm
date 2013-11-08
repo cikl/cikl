@@ -32,18 +32,38 @@ sub new {
   my $self = {};
 
   bless $self, $class;
-  $self->{parsers} = $self->_init_parsers();
+  $self->{parser_map} = $self->_init_parsers();
 
   return $self;
 }
 
 sub _init_parsers {
   my $self = shift;
-  my @ret;
+  my $ret = {};
   foreach my $parser (__PACKAGE__->_parsers()) {
-    push(@ret, $parser);
+    my $parser_name = $parser->name();
+    if (my $existing = $ret->{$parser_name}) {
+      die("Cannot associate $parser with $parser_name. Already registered with $existing.");
+    }
+    $ret->{$parser_name} = $parser;
   }
-  return \@ret;
+  return $ret;
+}
+
+sub valid_parser_names {
+  my $self = shift;
+  return(keys(%{$self->{parser_map}}));
+}
+
+sub valid_parser_names_string {
+  my $self = shift;
+  return(join(", ", $self->valid_parser_names()));
+}
+
+sub get {
+  my $self = shift;
+  my $parser_name = shift;
+  return $self->{parser_map}->{$parser_name};
 }
 
 sub lookup {
