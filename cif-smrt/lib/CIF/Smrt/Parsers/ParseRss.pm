@@ -32,16 +32,23 @@ sub parse {
     $rss->parse($content);
     foreach my $item (@{$rss->{items}}){
         my $h = {};
+        my $found = 1;
         foreach my $key (keys %$item){
-            if(my $r = $self->config->keyed_regex($key)){
+            if (my $r = $self->config->keyed_regex($key)){
                 my @m = ($item->{$key} =~ /$r/);
+                if ($#m == -1) {
+                  $found = 0;
+                  last
+                }
                 my @cols = $self->config->keyed_regex_values($key);
                 foreach (0 ... $#cols){
                     $h->{$cols[$_]} = $m[$_];
                 }
             }
         }
-        $broker->emit($self->create_event($h));
+        if ($found == 1) {
+          $broker->emit($self->create_event($h));
+        }
     }
     return(undef);
 
