@@ -15,13 +15,13 @@ use constant DEFAULT_SEVERITY_MAP => {
 
 use CIF::Client;
 use CIF::Smrt::Parsers;
+use CIF::Smrt::Decoders;
 use Regexp::Common qw/net URI/;
 use Regexp::Common::net::CIDR;
 use Encode qw/encode_utf8/;
 use Data::Dumper;
 use File::Type;
 use Module::Pluggable require => 1;
-use Module::Pluggable search_path => "CIF::Smrt::Plugin::Decode", require => 1, sub_name => 'decoders';
 use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
@@ -47,29 +47,14 @@ __PACKAGE__->mk_accessors(qw(
 my @preprocessors = __PACKAGE__->plugins();
 @preprocessors = grep(/Preprocessor::[0-9a-zA-Z_]+$/,@preprocessors);
 
-sub _init_decoders {
-  my $ret = {};
-  foreach my $decoder (__PACKAGE__->decoders()) {
-    foreach my $mime_type ($decoder->mime_types()) {
-      if (defined($ret->{$mime_type})) {
-        my $existing = $ret->{$mime_type};
-        die("Cannot associate $decoder with $mime_type. Already registered with $existing.");
-      }
-      $ret->{$mime_type} = $decoder;
-    }
-  }
-  return $ret;
-}
-
-our $decoder_map = _init_decoders();
-
-
 sub new {
     my $class = shift;
     my $args = shift;
     
     my $self = {};
     bless($self,$class);
+
+    $self->{decoders} = CIF::Smrt::Decoders->new();
       
     my ($err,$ret) = $self->init($args);
     return($err) if($err);
@@ -133,6 +118,12 @@ sub get_client {
   return($client);
 }
 
+sub lookup_decoder {
+  my $self = shift;
+  my $mime_type = shift;
+  return $self->{decoders}->lookup($mime_type);
+}
+
 sub init_config {
     my $self = shift;
     my $config_file = $self->get_cif_config_filename();
@@ -193,6 +184,7 @@ sub init_feeds {
 }
 
 sub pull_feed { 
+    my $self = shift;
     my $f = shift;
     my $cv = AnyEvent->condvar;
 
@@ -209,7 +201,7 @@ sub pull_feed {
     my $retref = $cv->recv();
 
     # auto-decode the content if need be
-    $retref = _decode($retref,$f);
+    $retref = $self->_decode($retref,$f);
 
     ## TODO MPR : This looks like a hack for the utf8 and CR stuff below.
     #return(undef,$ret) if($f->{'cif'} && $f->{'cif'} eq 'true');
@@ -274,7 +266,7 @@ sub parse {
     if($self->get_cif_config_filename()){
         $f->{'client_config'} = $self->get_cif_config_filename();
     }
-    my ($err,$content_ref) = pull_feed($f);
+    my ($err,$content_ref) = $self->pull_feed($f);
     die($err) if($err);
     
     my $parser_class;
@@ -316,14 +308,15 @@ sub parse {
     my $return = $parser->parse($content_ref, $broker);
     return(undef);
 }
-use MU;
+
 sub _decode {
+    my $self = shift;
     my $dataref = shift;
     my $f = shift;
 
     my $ft = File::Type->new();
     my $t = $ft->mime_type($$dataref);
-    my $decoder = $decoder_map->{$t};
+    my $decoder = $self->lookup_decoder($t);
     unless($decoder) {
       debug("Don't know how to decode $t");
       return $dataref;
