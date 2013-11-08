@@ -3,7 +3,8 @@ package CIF::Smrt::EventNormalizer;
 use strict;
 use warnings;
 use CIF qw/normalize_timestamp debug/;
-use Module::Pluggable search_path => ['CIF::Smrt::Plugin::Preprocessor'];
+use Module::Pluggable search_path => "CIF::Smrt::Plugin::Preprocessor", 
+      require => 1, sub_name => '_preprocessors';
 
 sub new {
   my $class = shift;
@@ -17,7 +18,18 @@ sub new {
   };
   bless $self, $class;
 
+  $self->{preprocessors} = $self->_init_preprocessors();
+
   return $self;
+}
+
+sub _init_preprocessors {
+  my $self = shift;
+  my @ret = ();
+  foreach my $preprocessor (__PACKAGE__->_preprocessors()) {
+    push(@ret, $preprocessor);
+  }
+  return \@ret;
 }
 
 sub normalize {
@@ -64,7 +76,7 @@ sub normalize {
     $r->{'assessment'} = 'unknown';
   }
 
-  foreach my $p (__PACKAGE__->plugins()){
+  foreach my $p (@{$self->{preprocessors}}){
     $r = $p->process($r);
   }
 
