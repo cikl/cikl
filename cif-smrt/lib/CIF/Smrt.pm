@@ -44,9 +44,6 @@ __PACKAGE__->mk_accessors(qw(
     severity_map proxy
 ));
 
-my @preprocessors = __PACKAGE__->plugins();
-@preprocessors = grep(/Preprocessor::[0-9a-zA-Z_]+$/,@preprocessors);
-
 sub new {
     my $class = shift;
     my $args = shift;
