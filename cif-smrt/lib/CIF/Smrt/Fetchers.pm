@@ -3,7 +3,7 @@ package CIF::Smrt::Fetchers;
 use strict;
 use warnings;
 
-use Module::Pluggable search_path => "CIF::Smrt::Plugin::Pull", 
+use Module::Pluggable search_path => "CIF::Smrt::Fetchers", 
       require => 1, sub_name => '_fetchers';
 
 sub new {

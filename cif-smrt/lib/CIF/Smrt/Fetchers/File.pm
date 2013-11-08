@@ -1,9 +1,9 @@
-package CIF::Smrt::Plugin::Pull::File;
+package CIF::Smrt::Fetchers::File;
 
 use strict;
 use warnings;
 
-sub pull {
+sub fetch {
     my $class = shift;
     my $f = shift;
     

@@ -1,11 +1,11 @@
-package CIF::Smrt::Plugin::Pull::Http;
+package CIF::Smrt::Fetchers::Http;
 
 use strict;
 use warnings;
 
 our $AGENT = 'cif-smrt/'.$CIF::VERSION.' (collectiveintel.org)';
 
-sub pull {
+sub fetch {
     my $class = shift;
     my $f = shift;
     return unless($f->{'feed'} =~ /^http/);

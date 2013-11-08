@@ -190,14 +190,14 @@ sub init_feeds {
     $self->set_feeds($feeds);
 }
 
-sub pull_feed { 
+sub fetch_feed { 
     my $self = shift;
     my $f = shift;
     my $cv = AnyEvent->condvar;
 
     async {
       try {
-        $cv->send($self->_pull_feed($f));
+        $cv->send($self->_fetch_feed($f));
       } catch {
         $cv->croak(shift);
       };
@@ -226,7 +226,7 @@ sub pull_feed {
 
 # we do this sep cause it's in a thread
 # this gets around memory leak issues and TLS threading issues with Crypt::SSLeay, etc
-sub _pull_feed {
+sub _fetch_feed {
     my $self = shift;
     my $f = shift;
     unless($f->{'feed'}) {
@@ -242,8 +242,8 @@ sub _pull_feed {
 #        }
 #    }
     foreach my $p ($self->{fetchers}->fetchers()){
-        debug("Trying to pull with $p") if($::debug);
-        my ($err,$ret) = $p->pull($f);
+        debug("Trying to fetch with $p") if($::debug);
+        my ($err,$ret) = $p->fetch($f);
         if($err) {
           die("ERROR! $err");
         }
@@ -252,10 +252,10 @@ sub _pull_feed {
         unless(defined($ret)) {
           next;
         }
-        debug("Succesfully pulled data using $p") if($::debug);
+        debug("Succesfully fetched data using $p") if($::debug);
         return(\$ret);
     }
-    die('ERROR: could not pull feed');
+    die('ERROR: could not fetch feed');
 }
 
 
@@ -268,11 +268,11 @@ sub parse {
         $f->{'proxy'} = $self->get_proxy();
     }
     die 'feed does not exist' unless($f->{'feed'});
-    debug('pulling feed: '.$f->{'feed'}) if($::debug);
+    debug('fetching feed: '.$f->{'feed'}) if($::debug);
     if($self->get_cif_config_filename()){
         $f->{'client_config'} = $self->get_cif_config_filename();
     }
-    my ($err,$content_ref) = $self->pull_feed($f);
+    my ($err,$content_ref) = $self->fetch_feed($f);
     die($err) if($err);
     
     my $parser_class = $self->lookup_parser($content_ref, $f);
