@@ -25,9 +25,16 @@ has 'uptime' => (
   required => 1
 );
 
+has 'service_type' => (
+  is => 'rw',
+  #isa => enum($_, qw[ client query submission ]),
+  isa => 'CIF::MooseTypes::LowerCaseStr',
+  required => 1
+);
+
 sub to_string {
   my $self = shift;
-  return "Hostname: " . $self->hostname() . ", PID: " . $self->process_id() . ", Uptime: " . $self->uptime();
+  return "Hostname: " . $self->hostname() . ", Service: " . $self->service_type() . ", PID: " . $self->process_id() . ", Uptime: " . $self->uptime();
 }
 
 sub to_hash {
@@ -51,6 +58,7 @@ sub generate {
   $args->{hostname} = $args->{hostname} || hostname();
   $args->{process_id} = $args->{process_id} || $$ ;
   $args->{uptime} = $args->{uptime} || 0;
+  $args->{service_type} = $args->{service_type} || 'client';
   $class->new($args);
 }
 

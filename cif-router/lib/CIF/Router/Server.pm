@@ -15,8 +15,7 @@ use CIF qw/debug init_logging/;
 
 use constant {
   SUBMISSION => 1,
-  QUERY => 2,
-  PING => 3
+  QUERY => 2
 };
 
 sub new {
@@ -28,6 +27,7 @@ sub new {
     bless($self,$class);
 
     $self->{starttime} = time();
+    $self->{type} = $type;
 
     $self->{config} = Config::Simple->new($config) || die("Could not load config file: '$config'");
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
@@ -64,23 +64,33 @@ sub new {
 
     $self->{driver} = $driver;
 
+    $self->_init_ping_service();
+    $self->_init_service($type);
+
+    return($self);
+}
+
+sub _init_ping_service {
+    my $self = shift;
+    my $cb = sub {$self->process_ping(@_);};
+    $self->{driver}->setup_ping_processor($cb);
+}
+
+sub _init_service {
+    my $self = shift;
+    my $type = shift;
+
     if ($type == SUBMISSION) {
       my $cb = sub {$self->process_submission(@_);};
-      $driver->setup_submission_processor($cb);
+      $self->{driver}->setup_submission_processor($cb);
 
     } elsif ($type == QUERY) {
       my $cb = sub {$self->process_query(@_);};
-      $driver->setup_query_processor($cb);
+      $self->{driver}->setup_query_processor($cb);
 
-    } elsif ($type == PING) {
-      my $cb = sub {$self->process_ping(@_);};
-      $driver->setup_ping_processor($cb);
     } else {
       die "Unknown type: $type";
     }
-
-
-    return($self);
 }
 
 sub uptime {
@@ -112,7 +122,10 @@ sub process_ping {
   try {
     $remote_hostinfo = $self->{encoder}->decode_hostinfo($payload);
     debug("Got ping: " . $remote_hostinfo->to_string());
-    $response = CIF::Models::HostInfo->generate({uptime => $self->uptime()});
+    my $type = $self->{type} == SUBMISSION ? 'submission' : 'query';
+    $response = CIF::Models::HostInfo->generate({uptime => $self->uptime(),
+        service_type => $type
+      });
     $encoded_response = $self->{encoder}->encode_hostinfo($response);
   } catch {
     my $err = shift;

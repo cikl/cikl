@@ -71,8 +71,6 @@ if ($mode eq 'submit') {
   $server_type = CIF::Router::Server->SUBMISSION;
 } elsif ($mode eq 'query') {
   $server_type = CIF::Router::Server->QUERY;
-} elsif ($mode eq 'ping') {
-  $server_type = CIF::Router::Server->PING;
 } else {
   warn "ERROR: Unknown mode: $mode";
   pod2usage(2);

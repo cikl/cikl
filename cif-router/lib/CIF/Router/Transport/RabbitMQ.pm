@@ -14,6 +14,7 @@ sub new {
     my $self = $class->SUPER::new(@_);
 
     $self->{exchange_name} = $self->config("exchange") || "cif";
+    $self->{fanout_exchange_name} = $self->{exchange_name} . "_fanout";
 
     my $rabbitmq_opts = {
       host => $self->config("host") || "localhost",
@@ -38,8 +39,10 @@ sub new {
     };
 
     my $ping_config = {
-      queue_name => ($self->config("ping_queue") || "cif-ping-queue"),
+      queue_name => '',
       routing_key => ($self->config("ping_key") || "ping"),
+      exchange_name => $self->{fanout_exchange_name},
+      exchange_type => 'fanout',
       durable => 0,
       auto_delete => 1
     };
@@ -62,8 +65,8 @@ sub _init_channel {
     $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
 
     $channel->declare_exchange(
-      exchange => $self->{exchange_name},
-      type => 'topic',
+      exchange => $config->{exchange_name} || $self->{exchange_name},
+      type => $config->{exchange_type} || 'topic',
       durable => 1
     );
 
@@ -125,7 +128,7 @@ sub _init_queue {
     );
 
     $channel->bind_queue(
-      exchange => $self->{exchange_name},
+      exchange => $config->{exchange_name} || $self->{exchange_name},
       queue => $config->{queue_name},
       routing_key => $config->{routing_key}
     );

@@ -26,6 +26,7 @@ sub new {
     my $channel = $amqp->open_channel();
 
     $self->{exchange_name} = "cif";
+    $self->{fanout_exchange_name} = $self->{exchange_name} . "_fanout";
     $self->{submit_key} = "submit";
     $self->{query_key} = "query";
     $self->{ping_key} = "ping";
@@ -117,18 +118,20 @@ sub ping {
 
     my $cv = AnyEvent->condvar;
 
+    my @responses;
+
     my $timer = AnyEvent->timer(after => 5, cb => sub {$cv->send(undef);});
 
     $self->{channel}->consume(
         no_ack => 1, 
         on_consume => sub {
           my $resp = shift;
-          $cv->send($resp);
+          push(@responses, $resp);
         }
     );
 
     $self->{channel}->publish(
-      exchange => $self->{exchange_name},
+      exchange => $self->{fanout_exchange_name},
       routing_key => $self->{ping_key},
       body => $body,
       header => {
@@ -136,19 +139,22 @@ sub ping {
       }
     );
 
-    my $response = $cv->recv;
-    undef($timer);
-    if (defined($response)) {
+    $cv->recv();
+
+    my @ret;
+
+    foreach my $response (@responses) {
       my $content_type = $response->{header}->{content_type};
       my $message_type = $response->{header}->{type};
       if ($message_type eq 'pong') {
-        return $self->decode_hostinfo($content_type, $response->{body}->{payload});
+        my $v = $self->decode_hostinfo($content_type, $response->{body}->{payload});
+        push(@ret, $v);
       } else {
-        die($response->{body}->{payload});
+        debug("Bad response: " . $response->{body}->{payload});
       }
-    } else {
-      die("Timed out while waiting for reply.");
     }
+
+    return \@ret;
 }
 
 sub submit {

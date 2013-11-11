@@ -202,7 +202,7 @@ sub submit {
 sub ping {
     my $self = shift;
 
-    my $hostinfo = CIF::Models::HostInfo->generate({uptime => 0});
+    my $hostinfo = CIF::Models::HostInfo->generate({uptime => 0, service_type => 'client'});
 
     return $self->get_driver()->ping($hostinfo);
 }    

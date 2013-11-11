@@ -64,8 +64,17 @@ if($err){
     print 'ERROR: '.$err."\n";
     exit(-1);
 }
-my $response = $cli->ping();
+
+print "Waiting for responses....\n";
+my $responses = $cli->ping();
 $cli->shutdown();
+print "\n";
 
+my $count = 0;
+foreach my $hostinfo (@$responses) {
+  $count += 1;
+  print "#$count " . $hostinfo->to_string() . "\n";
+}
+print "-------------\n";
+print "$count responses total\n";
 
-print "Got a response: " . $response->to_string() . "\n";
