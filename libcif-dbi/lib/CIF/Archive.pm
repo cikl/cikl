@@ -74,7 +74,7 @@ sub insert {
     return ('id must be a uuid') unless(is_uuid($data->{'uuid'}));
     
     #$data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
-    $data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
+    #$data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
    
     my ($err,$id);
     try {
@@ -294,7 +294,7 @@ __PACKAGE__->set_sql('lookup' => qq{
 
 __PACKAGE__->set_sql('insert_into_archive' => qq{
 INSERT INTO archive (uuid, guid, format, data, created, reporttime)
-VALUES (?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, to_timestamp(?), to_timestamp(?))
 });
 
 1;

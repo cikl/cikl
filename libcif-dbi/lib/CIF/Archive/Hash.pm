@@ -109,7 +109,7 @@ __PACKAGE__->set_sql('lookup' => qq{
 
 __PACKAGE__->set_sql('insert_hash' => qq{
   INSERT INTO hash (hash, uuid, guid, confidence, reporttime)
-  VALUES (?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, to_timestamp(?))
 });
 
 1;

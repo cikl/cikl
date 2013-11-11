@@ -9,6 +9,22 @@ restriction guid assessment description confidence detecttime reporttime
 address alternativeid_restriction alternativeid
 );
 
+sub _format_text {
+  my $text = shift;
+  return $text;
+}
+
+sub _format_timestamp {
+  my $unixtime = shift;
+  my $t = DateTime->from_epoch(epoch => $unixtime);
+  return($t->ymd().'T'.$t->hms().'Z');
+}
+
+use constant FIELD_MAP => {
+  detecttime => \&_format_timestamp,
+  reporttime => \&_format_timestamp,
+};
+
 sub new {
   my $class = shift;
   my $query_results = shift;
@@ -31,7 +47,12 @@ sub _generate_row {
   my $event = shift;
   my $ret = {};
   foreach my $key (HEADER_ROW) {
-    $ret->{$key} = $event->{$key};
+    my $val = $event->{$key};
+    # If we have a formatter, format it !
+    if (my $formatter = FIELD_MAP->{$key}) {
+      $val = $formatter->($val);
+    }
+    $ret->{$key} = $val;
   }
   return $ret;
 }

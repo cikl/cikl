@@ -18,7 +18,7 @@ sub init_sql {
   my $class = shift;
   my $table = $class->table();
   my $sql = qq[INSERT INTO $table (hash, uuid, guid, confidence, reporttime)
-VALUES (?, ?, ?, ?, ?)];
+VALUES (?, ?, ?, ?, to_timestamp(?))];
   $class->create_insert_feed($sql);
 }
 

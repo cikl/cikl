@@ -45,6 +45,16 @@ has 'address' => (
   coerce => 1
 );
 
+has 'detecttime' => (
+  is => 'rw',
+  isa => "Int"
+);
+
+has 'reporttime' => (
+  is => 'rw',
+  isa => "Int"
+);
+
 has 'address_mask' => (is => 'rw');
 has 'alternativeid' => (is => 'rw');
 has 'alternativeid_restriction' => (is => 'rw');
@@ -52,7 +62,6 @@ has 'carboncopy' => (is => 'rw');
 has 'confidence' => (is => 'rw');
 has 'contact' => (is => 'rw');
 has 'contact_email' => (is => 'rw');
-has 'detecttime' => (is => 'rw');
 has 'hash' => (is => 'rw');
 has 'lang' => (is => 'rw');
 
@@ -66,7 +75,6 @@ has 'portlist' => (is => 'rw');
 has 'protocol' => (is => 'rw');
 has 'purpose' => (is => 'rw');
 has 'relatedid' => (is => 'rw');
-has 'reporttime' => (is => 'rw');
 has 'restriction' => (is => 'rw');
 has 'severity' => (is => 'rw');
 has 'source' => (is => 'rw');

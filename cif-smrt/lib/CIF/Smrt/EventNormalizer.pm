@@ -51,8 +51,8 @@ sub normalize {
     $timestamp_epoch = $dt->epoch();
   }
 
-  $r->{'detecttime'}        = $dt->ymd().'T'.$dt->hms().'Z';
-  $r->{'reporttime'}        = $rt->ymd().'T'.$rt->hms().'Z';
+  $r->{'detecttime'}        = $dt->epoch();
+  $r->{'reporttime'}        = $rt->epoch();
 
   if($timestamp_epoch < $self->{goback}) { 
     return(undef);
