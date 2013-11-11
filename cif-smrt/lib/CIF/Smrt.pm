@@ -83,8 +83,10 @@ sub init {
    
     $self->set_goback(time() - ($self->get_goback() * 84600));
 
+    my $fpc = $self->get_feedparser_config();
+
     my $event_normalizer = CIF::Smrt::EventNormalizer->new({
-      refresh => $self->get_feedparser_config->{'refresh'},
+      refresh => $fpc->{'refresh'},
       severity_map => $self->get_severity_map(),
       goback => $self->get_goback()
     });
@@ -282,7 +284,7 @@ sub parse {
 
     debug("Parser class: $parser_class");
 
-    my $parser = $parser_class->new($f);
+    my $parser = $parser_class->new($f, $self->{event_normalizer});
     my $return = $parser->parse($content_ref, $broker);
     return(undef);
 }
@@ -317,7 +319,7 @@ sub process {
       }
     };
 
-    my $broker = CIF::Smrt::Broker->new($self->{event_normalizer}, $emit_cb);
+    my $broker = CIF::Smrt::Broker->new($emit_cb);
     try {
       my ($err) = $self->parse($broker);
       if ($err) {

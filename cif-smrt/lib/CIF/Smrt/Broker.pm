@@ -5,10 +5,8 @@ use warnings;
 
 sub new {
   my $class = shift;
-  my $event_normalizer = shift;
   my $emit_cb = shift;
   my $self = {
-    event_normalizer => $event_normalizer,
     emit_cb => $emit_cb
   };
 
@@ -22,7 +20,7 @@ sub new {
 sub emit {
   my $self = shift;
   my $event = shift;
-  if ($event = $self->{event_normalizer}->normalize($event)) {
+  if (defined($event)) {
     $self->{count} += 1;
     $self->{emit_cb}->($event);
   } else {
