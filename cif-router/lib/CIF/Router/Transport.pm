@@ -35,6 +35,12 @@ sub shutdown {
     return(blessed($self) . " has not implemented the shutdown() method!");
 }
 
+sub setup_ping_processor {
+    my $self = shift;
+    my $payload_callback = shift;
+    return(blessed($self) . " has not implemented the setup_ping_processor() method!");
+}
+
 sub setup_query_processor {
     my $self = shift;
     my $payload_callback = shift;

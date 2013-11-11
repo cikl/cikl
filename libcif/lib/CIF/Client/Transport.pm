@@ -43,6 +43,12 @@ sub running {
     return($self->{running});
 }
 
+sub encode_hostinfo {
+  my $self = shift;
+  my $hostinfo = shift;
+  return $self->{encoder}->encode_submission($hostinfo);
+}
+
 sub encode_submission {
   my $self = shift;
   my $submission = shift;
@@ -60,6 +66,13 @@ sub decode_query_results {
   my $content_type = shift;
   my $answer = shift;
   return $self->{encoder}->decode_query_results($answer);
+}
+
+sub decode_hostinfo {
+  my $self = shift;
+  my $content_type = shift;
+  my $answer = shift;
+  return $self->{encoder}->decode_hostinfo($answer);
 }
 
 # This gets called before shutdown.
@@ -85,6 +98,12 @@ sub submit {
     my $submission = shift;
 
     die(blessed($self) . " has not implemented the submit_event() method!");
+}
+
+sub ping {
+    my $self = shift;
+
+    die(blessed($self) . " has not implemented the ping() method!");
 }
 
 1;

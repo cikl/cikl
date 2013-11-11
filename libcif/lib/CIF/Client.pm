@@ -16,6 +16,7 @@ use Digest::MD5 qw/md5_hex/;
 use Encode qw(encode_utf8);
 use CIF::Models::Submission;
 use CIF::Models::Query;
+use CIF::Models::HostInfo;
 
 use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 
@@ -196,6 +197,14 @@ sub submit {
 
     my $submission = CIF::Models::Submission->new($self->get_apikey(), $guid, $event);
     return $self->get_driver()->submit($submission);
+}    
+
+sub ping {
+    my $self = shift;
+
+    my $hostinfo = CIF::Models::HostInfo->generate({uptime => 0});
+
+    return $self->get_driver()->ping($hostinfo);
 }    
 
 # confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)

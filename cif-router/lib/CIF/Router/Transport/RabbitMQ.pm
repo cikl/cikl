@@ -37,8 +37,16 @@ sub new {
       auto_delete => 1
     };
 
+    my $ping_config = {
+      queue_name => ($self->config("ping_queue") || "cif-ping-queue"),
+      routing_key => ($self->config("ping_key") || "ping"),
+      durable => 0,
+      auto_delete => 1
+    };
+
     $self->{submission_config} = $submission_config;
     $self->{query_config} = $query_config;
+    $self->{ping_config} = $ping_config;
 
     $self->{amqp} = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
     $self->{channels} = [];
@@ -130,6 +138,12 @@ sub _setup_processor {
     my $channel = $self->_init_channel($config, $payload_callback);
     push(@{$self->{channels}}, $channel); 
     return undef;
+}
+
+sub setup_ping_processor {
+    my $self = shift;
+    my $payload_callback = shift;
+    $self->_setup_processor($self->{ping_config}, $payload_callback);
 }
 
 sub setup_query_processor {

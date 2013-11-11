@@ -9,12 +9,14 @@ use Config::Simple;
 use CIF::Router;
 use Try::Tiny;
 use CIF::Encoder::JSON;
+use Sys::Hostname;
 
 use CIF qw/debug init_logging/;
 
 use constant {
   SUBMISSION => 1,
-  QUERY => 2
+  QUERY => 2,
+  PING => 3
 };
 
 sub new {
@@ -24,6 +26,8 @@ sub new {
 
     my $self = {};
     bless($self,$class);
+
+    $self->{starttime} = time();
 
     $self->{config} = Config::Simple->new($config) || die("Could not load config file: '$config'");
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
@@ -67,12 +71,21 @@ sub new {
     } elsif ($type == QUERY) {
       my $cb = sub {$self->process_query(@_);};
       $driver->setup_query_processor($cb);
+
+    } elsif ($type == PING) {
+      my $cb = sub {$self->process_ping(@_);};
+      $driver->setup_ping_processor($cb);
     } else {
       die "Unknown type: $type";
     }
 
 
     return($self);
+}
+
+sub uptime {
+  my $self = shift;
+  return time() - $self->{starttime};
 }
 
 sub process_query {
@@ -89,6 +102,24 @@ sub process_query {
     return($err, "submission_error", 'text/plain');
   };
   return($encoded_results, "query_response", $self->{encoder}->content_type());
+}
+
+sub process_ping {
+  my $self = shift;
+  my $payload = shift;
+  my $content_type = shift;
+  my ($remote_hostinfo, $response, $encoded_response);
+  try {
+    $remote_hostinfo = $self->{encoder}->decode_hostinfo($payload);
+    debug("Got ping: " . $remote_hostinfo->to_string());
+    $response = CIF::Models::HostInfo->generate({uptime => $self->uptime()});
+    $encoded_response = $self->{encoder}->encode_hostinfo($response);
+  } catch {
+    my $err = shift;
+    debug("Got an error: $err");
+    return($err, "ping_error", 'text/plain');
+  };
+  return($encoded_response, "pong", $self->{encoder}->content_type());
 }
 
 sub process_submission {

@@ -6,6 +6,7 @@ use CIF::Models::Submission;
 use CIF::Models::Event;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
+use CIF::Models::HostInfo;
 use Try::Tiny;
 require JSON;
 use Data::Dumper;
@@ -20,6 +21,19 @@ sub new {
 
 sub content_type {
   return "application/json";
+}
+
+sub encode_hostinfo {
+  my $self = shift;
+  my $hostinfo = shift;
+  return JSON::encode_json($hostinfo->to_hash());
+}
+
+sub decode_hostinfo {
+  my $self = shift;
+  my $json = shift;
+  my $data = JSON::decode_json($json);
+  return CIF::Models::HostInfo->from_hash($data);
 }
 
 sub encode_query {
