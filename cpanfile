@@ -1,4 +1,5 @@
 requires 'AnyEvent', '7.05';
+requires 'AnyEvent::RabbitMQ', '1.15';
 requires 'Class::Accessor', '0.34';
 requires 'Class::DBI', '3.0.17';
 requires 'Class::Trigger', '0.14';
