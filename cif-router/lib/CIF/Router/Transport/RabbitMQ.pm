@@ -15,7 +15,6 @@ sub new {
     my $self = $class->SUPER::new(@_);
 
     $self->{exchange_name} = "amq.topic";
-    $self->{fanout_exchange_name} = "amq.fanout";
 
     my $rabbitmq_opts = {
       host => $self->config("host") || "localhost",
@@ -28,6 +27,8 @@ sub new {
     my $service_name = $self->service->name();
 
     my $config = {
+      exchange_name => "amq.topic",
+      exchange_type => "topic",
       queue_name => "$service_name-queue",
       routing_key =>  $service_name,
       durable => $self->service->queue_is_durable(),
@@ -35,10 +36,10 @@ sub new {
     };
 
     my $ping_config = {
+      exchange_name => "ping",
+      exchange_type => 'fanout',
       queue_name => '',
       routing_key => "ping",
-      exchange_name => "amq.fanout",
-      exchange_type => 'fanout',
       durable => 0,
       auto_delete => 1
     };
@@ -62,9 +63,10 @@ sub _init_channel {
     $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
 
     $channel->declare_exchange(
-      exchange => $config->{exchange_name} || $self->{exchange_name},
-      type => $config->{exchange_type} || 'topic',
-      durable => 1
+      exchange => $config->{exchange_name},
+      type => $config->{exchange_type},
+      durable => 1,
+      auto_delete => 0
     );
 
     $self->_init_queue($channel, $config);
@@ -127,7 +129,7 @@ sub _init_queue {
     );
 
     $channel->bind_queue(
-      exchange => $config->{exchange_name} || $self->{exchange_name},
+      exchange => $config->{exchange_name},
       queue => $config->{queue_name},
       routing_key => $config->{routing_key}
     );

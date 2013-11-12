@@ -26,7 +26,6 @@ sub new {
     my $channel = $amqp->open_channel();
 
     $self->{exchange_name} = "amq.topic";
-    $self->{fanout_exchange_name} = "amq.fanout";
     $self->{submit_key} = "submit";
     $self->{query_key} = "query";
     $self->{ping_key} = "ping";
@@ -131,7 +130,7 @@ sub ping {
     );
 
     $self->{channel}->publish(
-      exchange => $self->{fanout_exchange_name},
+      exchange => 'ping',
       routing_key => $self->{ping_key},
       body => $body,
       header => {
