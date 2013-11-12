@@ -66,17 +66,7 @@ if ($#ARGV > 0) {
 
 my $mode = shift(@ARGV);
 
-my $server_type;
-if ($mode eq 'submit') {
-  $server_type = CIF::Router::Server->SUBMISSION;
-} elsif ($mode eq 'query') {
-  $server_type = CIF::Router::Server->QUERY;
-} else {
-  warn "ERROR: Unknown mode: $mode";
-  pod2usage(2);
-}
-
-my $server = CIF::Router::Server->new($server_type, $config);
+my $server = CIF::Router::Server->new($mode, $config);
 
 $SIG{INT} = sub {
   debug("Caught interrupt. Stopping server.");

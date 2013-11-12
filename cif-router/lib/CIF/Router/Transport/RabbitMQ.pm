@@ -8,6 +8,7 @@ use Net::RabbitFoot;
 use Coro;
 use Try::Tiny;
 use CIF qw/debug/;
+use CIF::Router::Constants;
 
 sub new {
     my $class = shift;
@@ -53,6 +54,8 @@ sub new {
 
     $self->{amqp} = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
     $self->{channels} = [];
+
+    $self->_init_service($self->service());
     return($self);
 }
 
@@ -60,7 +63,8 @@ sub _init_channel {
     my $self = shift;
     my $channel = $self->{amqp}->open_channel();
     my $config = shift;
-    my $payload_callback = shift;
+    my $service = shift;
+    my $service_method = shift;
 
     $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
 
@@ -71,7 +75,7 @@ sub _init_channel {
     );
 
     $self->_init_queue($channel, $config);
-    $self->_init_consume($channel, $payload_callback);
+    $self->_init_consume($channel, $service, $service_method);
 
     return $channel;
 }
@@ -79,12 +83,13 @@ sub _init_channel {
 sub _init_consume {
     my $self = shift;
     my $channel = shift;
-    my $payload_callback = shift;
+    my $service = shift;
+    my $service_method = shift;
     $channel->consume(
       no_ack => 0,
       on_consume => sub {
         my $msg = shift;
-        $self->_handle_msg($channel, $msg, $payload_callback);
+        $self->_handle_msg($channel, $msg, $service, $service_method);
       }
     );
 }
@@ -93,14 +98,15 @@ sub _handle_msg {
     my $self = shift;
     my $channel = shift;
     my $msg = shift;
-    my $payload_callback = shift;
+    my $service = shift;
+    my $service_method = shift;
 
     my $payload = $msg->{body}->payload;
     $channel->ack(delivery_tag => 
       $msg->{deliver}->method_frame->delivery_tag
     );
 
-    my ($reply, $type, $content_type) = $payload_callback->($payload);
+    my ($reply, $type, $content_type) = $service->$service_method($payload);
 
     if (my $reply_queue = $msg->{header}->{reply_to}) {
       $channel->publish(
@@ -137,9 +143,12 @@ sub _init_queue {
 sub _setup_processor {
     my $self = shift;
     my $config = shift;
-    my $payload_callback = shift;
-    my $channel = $self->_init_channel($config, $payload_callback);
+    my $service = shift;
+    my $channel = $self->_init_channel($config, $service, "process");
     push(@{$self->{channels}}, $channel); 
+
+    my $ping_channel = $self->_init_channel($self->{ping_config}, $service, "process_hostinfo_request");
+    push(@{$self->{channels}}, $ping_channel); 
     return undef;
 }
 
@@ -149,16 +158,28 @@ sub setup_ping_processor {
     $self->_setup_processor($self->{ping_config}, $payload_callback);
 }
 
+sub _init_service {
+    my $self = shift;
+    my $service = shift;
+    if ($service->service_type() == SVC_SUBMISSION) {
+      $self->setup_submission_processor($service);
+    } elsif ($service->service_type() == SVC_QUERY) {
+      $self->setup_query_processor($service);
+    } else {
+      die("Unknown service type: " . $service->name());
+    }
+}
+
 sub setup_query_processor {
     my $self = shift;
-    my $payload_callback = shift;
-    $self->_setup_processor($self->{query_config}, $payload_callback);
+    my $service = shift;
+    $self->_setup_processor($self->{query_config}, $service);
 }
 
 sub setup_submission_processor {
     my $self = shift;
-    my $payload_callback = shift;
-    $self->_setup_processor($self->{submission_config}, $payload_callback);
+    my $service = shift;
+    $self->_setup_processor($self->{submission_config}, $service);
 }
 
 sub start {

@@ -9,11 +9,13 @@ __PACKAGE__->plugins();
 sub new {
     my $class = shift;
     my $config = shift;
+    my $service = shift;
  
     my $self = { };
     bless($self,$class);
 
     $self->{config} = $config;
+    $self->{service} = $service;
 
     return($self);
 }
@@ -27,6 +29,11 @@ sub config {
     my $self = shift;
     my $opt = shift;
     return $self->{config}->{$opt};
+}
+
+sub service {
+    my $self = shift;
+    return $self->{service};
 }
 
 # This gets called before shutdown.
