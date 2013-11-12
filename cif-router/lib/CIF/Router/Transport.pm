@@ -10,12 +10,14 @@ sub new {
     my $class = shift;
     my $config = shift;
     my $service = shift;
+    my $control_service = shift;
  
     my $self = { };
     bless($self,$class);
 
     $self->{config} = $config;
     $self->{service} = $service;
+    $self->{control_service} = $control_service;
 
     return($self);
 }
@@ -34,6 +36,11 @@ sub config {
 sub service {
     my $self = shift;
     return $self->{service};
+}
+
+sub control_service {
+    my $self = shift;
+    return $self->{control_service};
 }
 
 # This gets called before shutdown.

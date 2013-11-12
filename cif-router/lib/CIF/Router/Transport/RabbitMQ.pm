@@ -35,21 +35,22 @@ sub new {
       auto_delete => $self->service->queue_should_autodelete()
     };
 
-    my $ping_config = {
-      exchange_name => "ping",
-      exchange_type => 'fanout',
-      queue_name => '',
-      routing_key => "ping",
-      durable => 0,
-      auto_delete => 1
-    };
+    my $control_name = $self->control_service->name();
 
-    $self->{ping_config} = $ping_config;
+    my $control_config = {
+      exchange_name => "control",
+      exchange_type => "fanout",
+      queue_name => "",
+      routing_key =>  $control_name,
+      durable => $self->control_service->queue_is_durable(),
+      auto_delete => $self->control_service->queue_should_autodelete()
+    };
 
     $self->{amqp} = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
     $self->{channels} = [];
 
     $self->_setup_processor($config, $self->service());
+    $self->_setup_processor($control_config, $self->control_service());
     return($self);
 }
 
@@ -58,7 +59,6 @@ sub _init_channel {
     my $channel = $self->{amqp}->open_channel();
     my $config = shift;
     my $service = shift;
-    my $service_method = shift;
 
     $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
 
@@ -70,7 +70,7 @@ sub _init_channel {
     );
 
     $self->_init_queue($channel, $config);
-    $self->_init_consume($channel, $service, $service_method);
+    $self->_init_consume($channel, $service);
 
     return $channel;
 }
@@ -79,12 +79,11 @@ sub _init_consume {
     my $self = shift;
     my $channel = shift;
     my $service = shift;
-    my $service_method = shift;
     $channel->consume(
       no_ack => 0,
       on_consume => sub {
         my $msg = shift;
-        $self->_handle_msg($channel, $msg, $service, $service_method);
+        $self->_handle_msg($channel, $msg, $service);
       }
     );
 }
@@ -94,13 +93,12 @@ sub _handle_msg {
     my $channel = shift;
     my $msg = shift;
     my $service = shift;
-    my $service_method = shift;
 
     my $payload = $msg->{body}->payload;
     my ($reply, $type, $content_type, $err);
 
     try {
-      ($reply, $type, $content_type) = $service->$service_method($payload);
+      ($reply, $type, $content_type) = $service->process($payload);
     } catch {
       $err = shift;
     };
@@ -158,8 +156,6 @@ sub _setup_processor {
     my $channel = $self->_init_channel($config, $service, "process");
     push(@{$self->{channels}}, $channel); 
 
-    my $ping_channel = $self->_init_channel($self->{ping_config}, $service, "process_hostinfo_request");
-    push(@{$self->{channels}}, $ping_channel); 
     return undef;
 }
 

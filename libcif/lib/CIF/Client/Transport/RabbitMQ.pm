@@ -28,7 +28,7 @@ sub new {
     $self->{exchange_name} = "amq.topic";
     $self->{submit_key} = "submit";
     $self->{query_key} = "query";
-    $self->{ping_key} = "ping";
+    $self->{control_key} = "control";
     $self->{amqp} = $amqp;
     $self->{channel} = $channel;
 
@@ -130,8 +130,8 @@ sub ping {
     );
 
     $self->{channel}->publish(
-      exchange => 'ping',
-      routing_key => $self->{ping_key},
+      exchange => 'control',
+      routing_key => $self->{control_key},
       body => $body,
       header => {
         reply_to => $queue_name

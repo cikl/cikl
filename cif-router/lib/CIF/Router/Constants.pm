@@ -6,7 +6,8 @@ our @ISA = qw(Exporter);
 
 use constant {
   SVC_SUBMISSION => 1,
-  SVC_QUERY => 2
+  SVC_QUERY => 2,
+  SVC_CONTROL => 3
 };
 
 use constant {
@@ -16,8 +17,9 @@ use constant {
   },
   SVCNAMES => {
     &SVC_SUBMISSION => 'submit',
-    &SVC_QUERY => 'query'
+    &SVC_QUERY => 'query',
+    &SVC_CONTROL => 'control'
   }
 };
 
-our @EXPORT = qw(SVC_SUBMISSION SVC_QUERY SVCMAP SVCNAMES);
+our @EXPORT = qw(SVC_SUBMISSION SVC_QUERY SVC_CONTROL SVCMAP SVCNAMES);

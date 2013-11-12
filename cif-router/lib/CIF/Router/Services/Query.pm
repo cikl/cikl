@@ -19,11 +19,6 @@ sub queue_is_durable {
   return 0;
 }
 
-# Should return 1 or 0
-sub service_requests_are_broadcast {
-  return 0;
-}
-
 sub process {
   my $self = shift;
   my $payload = shift;

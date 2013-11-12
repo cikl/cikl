@@ -60,9 +60,10 @@ sub new {
 
 
     $self->{service} = $service_class->new($self->{router}, $self->{encoder});
+    $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{encoder});
     my $driver;
     try {
-      $driver = $driver_class->new($driver_config, $self->{service});
+      $driver = $driver_class->new($driver_config, $self->{service}, $self->{control_service});
     } catch {
       $err = shift;
       die "Driver ($driver_class) failed to load: $err";

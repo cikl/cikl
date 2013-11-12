@@ -41,12 +41,6 @@ sub queue_is_durable {
   die("$class has not implemented queue_is_durable()");
 }
 
-# Should return 1 or 0
-sub service_requests_are_broadcast {
-  my $class = shift;
-  die("$class has not implemented service_requests_are_broadcast()");
-}
-
 sub name {
   my $class = shift;
   return SVCNAMES->{$class->service_type()};
@@ -63,25 +57,6 @@ sub encoder {
 sub uptime {
   my $self = shift;
   return time() - $self->{starttime};
-}
-
-sub process_hostinfo_request {
-  my $self = shift;
-  my $payload = shift;
-  my ($remote_hostinfo, $response, $encoded_response);
-  try {
-    $remote_hostinfo = $self->{encoder}->decode_hostinfo($payload);
-    debug("Got ping: " . $remote_hostinfo->to_string());
-    $response = CIF::Models::HostInfo->generate({uptime => $self->uptime(),
-        service_type => $self->name()
-      });
-    $encoded_response = $self->{encoder}->encode_hostinfo($response);
-  } catch {
-    my $err = shift;
-    debug("Got an error: $err");
-    return($err, "ping_error", 'text/plain');
-  };
-  return($encoded_response, "pong", $self->{encoder}->content_type());
 }
 
 1;
