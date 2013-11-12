@@ -14,48 +14,41 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
-    $self->{exchange_name} = $self->config("exchange") || "cif";
-    $self->{fanout_exchange_name} = $self->{exchange_name} . "_fanout";
+    $self->{exchange_name} = "amq.topic";
+    $self->{fanout_exchange_name} = "amq.fanout";
 
     my $rabbitmq_opts = {
       host => $self->config("host") || "localhost",
       port => $self->config("port") || 5672,
       user => $self->config("username") || "guest",
       pass => $self->config("password") || "guest",
-      vhost => $self->config("vhost") || "/",
+      vhost => $self->config("vhost") || "/cif",
     };
+    
+    my $service_name = $self->service->name();
 
-    my $submission_config = {
-      queue_name => ($self->config("submission_queue") || "cif-submit-queue"),
-      routing_key => ($self->config("submission_key") || "submit"),
-      durable => 1,
-      auto_delete => 0
-    };
-
-    my $query_config = {
-      queue_name => ($self->config("query_queue") || "cif-query-queue"),
-      routing_key => ($self->config("query_key") || "query"),
-      durable => 0,
-      auto_delete => 1
+    my $config = {
+      queue_name => "$service_name-queue",
+      routing_key =>  $service_name,
+      durable => $self->service->queue_is_durable(),
+      auto_delete => $self->service->queue_should_autodelete()
     };
 
     my $ping_config = {
       queue_name => '',
-      routing_key => ($self->config("ping_key") || "ping"),
-      exchange_name => $self->{fanout_exchange_name},
+      routing_key => "ping",
+      exchange_name => "amq.fanout",
       exchange_type => 'fanout',
       durable => 0,
       auto_delete => 1
     };
 
-    $self->{submission_config} = $submission_config;
-    $self->{query_config} = $query_config;
     $self->{ping_config} = $ping_config;
 
     $self->{amqp} = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
     $self->{channels} = [];
 
-    $self->_init_service($self->service());
+    $self->_setup_processor($config, $self->service());
     return($self);
 }
 
@@ -150,36 +143,6 @@ sub _setup_processor {
     my $ping_channel = $self->_init_channel($self->{ping_config}, $service, "process_hostinfo_request");
     push(@{$self->{channels}}, $ping_channel); 
     return undef;
-}
-
-sub setup_ping_processor {
-    my $self = shift;
-    my $payload_callback = shift;
-    $self->_setup_processor($self->{ping_config}, $payload_callback);
-}
-
-sub _init_service {
-    my $self = shift;
-    my $service = shift;
-    if ($service->service_type() == SVC_SUBMISSION) {
-      $self->setup_submission_processor($service);
-    } elsif ($service->service_type() == SVC_QUERY) {
-      $self->setup_query_processor($service);
-    } else {
-      die("Unknown service type: " . $service->name());
-    }
-}
-
-sub setup_query_processor {
-    my $self = shift;
-    my $service = shift;
-    $self->_setup_processor($self->{query_config}, $service);
-}
-
-sub setup_submission_processor {
-    my $self = shift;
-    my $service = shift;
-    $self->_setup_processor($self->{submission_config}, $service);
 }
 
 sub start {

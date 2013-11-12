@@ -9,6 +9,16 @@ use CIF qw/debug/;
 
 sub service_type { SVC_SUBMISSION }
 
+# Should return 1 or 0
+sub queue_should_autodelete {
+  return 0;
+}
+
+# Should return 1 or 0
+sub queue_is_durable {
+  return 1;
+}
+
 sub process {
   my $self = shift;
   my $payload = shift;

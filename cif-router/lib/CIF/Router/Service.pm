@@ -29,6 +29,24 @@ sub service_type {
   die("$class has not implemented name()");
 }
 
+# Should return 1 or 0
+sub queue_should_autodelete {
+  my $class = shift;
+  die("$class has not implemented queue_should_autodelete()");
+}
+
+# Should return 1 or 0
+sub queue_is_durable {
+  my $class = shift;
+  die("$class has not implemented queue_is_durable()");
+}
+
+# Should return 1 or 0
+sub service_requests_are_broadcast {
+  my $class = shift;
+  die("$class has not implemented service_requests_are_broadcast()");
+}
+
 sub name {
   my $class = shift;
   return SVCNAMES->{$class->service_type()};

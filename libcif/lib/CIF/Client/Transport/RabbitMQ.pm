@@ -21,12 +21,12 @@ sub new {
       port => $self->config("port") || 5672,
       user => $self->config("username") || "guest",
       pass => $self->config("password") || "guest",
-      vhost => $self->config("vhost") || "/",
+      vhost => $self->config("vhost") || "/cif",
     );
     my $channel = $amqp->open_channel();
 
-    $self->{exchange_name} = "cif";
-    $self->{fanout_exchange_name} = $self->{exchange_name} . "_fanout";
+    $self->{exchange_name} = "amq.topic";
+    $self->{fanout_exchange_name} = "amq.fanout";
     $self->{submit_key} = "submit";
     $self->{query_key} = "query";
     $self->{ping_key} = "ping";
