@@ -23,16 +23,25 @@ sub process {
   my $self = shift;
   my $payload = shift;
   my $content_type = shift;
-  my ($submission, $results);
+  my ($err, $submission, $results);
   try {
     $submission = $self->encoder->decode_submission($payload);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    die("Error while trying to decode submission: $err");
+  }
+
+  try {
     $results = $self->router->process_submission($submission);
   } catch {
-    my $err = shift;
-    debug($err);
-    return($err, "submission_error", 'text/plain');
+    $err = shift;
   };
-  return($results, "submission_response", $self->encoder->content_type());
+  if ($err) {
+    die("Error while trying to process submission: $err");
+  }
+  return($results, "submission_response", $self->encoder->content_type(), 0);
 }
 
 1;

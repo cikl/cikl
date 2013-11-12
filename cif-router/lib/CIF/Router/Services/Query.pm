@@ -28,17 +28,34 @@ sub process {
   my $self = shift;
   my $payload = shift;
   my $content_type = shift;
-  my ($query, $results, $encoded_results);
+  my ($query, $results, $encoded_results, $err);
   try {
     $query = $self->encoder->decode_query($payload);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    die("Error while trying to decode query: $err");
+  }
+
+  try {
     $results = $self->router->process_query($query);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    die("Error while trying to process query: $err");
+  }
+
+  try {
     $encoded_results = $self->encoder->encode_query_results($results);
   } catch {
-    my $err = shift;
-    debug($err);
-    return($err, "query_error", 'text/plain');
+    $err = shift;
   };
-  return($encoded_results, "query_response", $self->encoder->content_type());
+  if ($err) {
+    die("Error while trying to encode query results: $err");
+  }
+  return($encoded_results, "query_response", $self->encoder->content_type(), 0);
 }
 1;
 

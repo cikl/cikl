@@ -97,11 +97,27 @@ sub _handle_msg {
     my $service_method = shift;
 
     my $payload = $msg->{body}->payload;
-    $channel->ack(delivery_tag => 
-      $msg->{deliver}->method_frame->delivery_tag
-    );
+    my ($reply, $type, $content_type, $err);
 
-    my ($reply, $type, $content_type) = $service->$service_method($payload);
+    try {
+      ($reply, $type, $content_type) = $service->$service_method($payload);
+    } catch {
+      $err = shift;
+    };
+
+    if ($err) {
+      $reply = "Error while processing message: $err";
+      $type = "error";
+      $content_type = "text/plain";
+      debug($reply);
+      $channel->reject(delivery_tag => 
+        $msg->{deliver}->method_frame->delivery_tag
+      );
+    } else {
+      $channel->ack(delivery_tag => 
+        $msg->{deliver}->method_frame->delivery_tag
+      );
+    }
 
     if (my $reply_queue = $msg->{header}->{reply_to}) {
       $channel->publish(
