@@ -6,7 +6,8 @@ use warnings;
 
 use Try::Tiny;
 use Config::Simple;
-
+use AnyEvent;
+use Coro;
 require CIF::Archive;
 require CIF::APIKey;
 require CIF::APIKeyGroups;
@@ -350,6 +351,8 @@ sub process_submission {
 
 sub flush {
   my $self = shift;
+  undef $self->{flush_timer};
+  delete $self->{flush_timer};
   return if ($self->{inserts} == 0);
   my $num_inserts = $self->{inserts};
   $self->{inserts} = 0;
@@ -372,6 +375,11 @@ sub insert_event {
 
   if ($self->{inserts} >= $self->{commit_interval}) {
     $self->flush();
+  } elsif (!defined($self->{flush_timer})) {
+    # Create a timer that will flush two seconds after our first message 
+    # comes in.
+    my $cb = sub { $self->flush();};
+    $self->{flush_timer} = AnyEvent->timer(after => 2, cb => $cb);
   }
   return ($err, $ret);
 }

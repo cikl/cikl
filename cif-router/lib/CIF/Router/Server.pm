@@ -147,22 +147,7 @@ sub process_submission {
     my $err = shift;
     return($err, "submission_error", 'text/plain');
   };
-  $self->schedule_flush();
   return($results, "submission_response", $self->{encoder}->content_type());
-}
-
-sub schedule_flush {
-  my $self = shift;
-  if (!defined($self->{flush_timer})) {
-    # Create a timer that will flush two seconds after our first message 
-    # comes in.
-    my $cb = sub {
-      $self->{router}->flush();
-      $self->{flush_timer} = undef;
-    };
-    $self->{flush_timer} = AnyEvent->timer(after => $self->{commit_interval}, 
-      cb => $cb);
-  }
 }
 
 sub run {
