@@ -23,30 +23,25 @@ sudo apt-get install perl rabbitmq-server postgresql
 - Install carton
 sudo cpan Carton
 
-
 - Clone the repo and switch to v1_fork
 git clone  git@github.com:justfalter/cif-v1.git
 cd cif-v1
 git checkout v1_fork
 
-
-- "Build", this may be totally unnescessary:
-sh autogen.sh
-make
-
-- Drop the database if it exists, already.
-make -f libcif-dbi/Makefile dropdb
-
-- Initialize the DB:
-sudo make initdb
+# IMPORTANT: ANY TIME YOU EXECUTE PERL, PREFIX WITH "carton exec -- " 
 
 - Have carton install all of the dependencies.
 carton install
 
+- Configure the database
+cd libcif-dbi
+carton exec -- perl Makefile.PL
+make dropdb
+make initdb
+cd ..
+
 - Create your cif.conf:
 cp cif.conf.example cif.conf
-
-# IMPORTANT: ANY TIME YOU EXECUTE PERL, PREFIX WITH "carton exec -- " 
 
 - Create the API keys:
 carton exec -- libcif-dbi/bin/cif_apikeys -C cif.conf --add -u mike
