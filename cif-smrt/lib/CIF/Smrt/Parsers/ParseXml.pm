@@ -81,7 +81,7 @@ sub parse {
                 }
             }
         }
-        $broker->emit($self->create_event($h)) if ($found);
+        $broker->emit($h) if ($found);
 
     }
     return(undef);

@@ -6,8 +6,10 @@ use warnings;
 sub new {
   my $class = shift;
   my $emit_cb = shift;
+  my $builder = shift;
   my $self = {
-    emit_cb => $emit_cb
+    emit_cb => $emit_cb,
+    builder => $builder
   };
 
   bless $self, $class;
@@ -19,7 +21,8 @@ sub new {
 
 sub emit {
   my $self = shift;
-  my $event = shift;
+  my $event_hash = shift;
+  my $event = $self->{builder}->build_event($event_hash);
   if (defined($event)) {
     $self->{count} += 1;
     $self->{emit_cb}->($event);

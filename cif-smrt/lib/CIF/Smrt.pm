@@ -27,7 +27,8 @@ use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
 use CIF::Smrt::Broker;
-use CIF::Smrt::EventNormalizer;
+use CIF::EventNormalizer;
+use CIF::EventBuilder;
 use AnyEvent;
 use Coro;
 
@@ -85,13 +86,16 @@ sub init {
 
     my $fpc = $self->get_feedparser_config();
 
-    my $event_normalizer = CIF::Smrt::EventNormalizer->new({
+    my $event_normalizer = CIF::EventNormalizer->new({
       refresh => $fpc->{'refresh'},
       severity_map => $self->get_severity_map(),
       goback => $self->get_goback()
     });
-
     $self->{'event_normalizer'} = $event_normalizer;
+
+    my $event_builder = CIF::EventBuilder->new($event_normalizer, $fpc->default_event_data());
+    $self->{'event_builder'} = $event_builder;
+
     
     if($::debug){
         my $gb = DateTime->from_epoch(epoch => $self->get_goback());
@@ -319,7 +323,7 @@ sub process {
       }
     };
 
-    my $broker = CIF::Smrt::Broker->new($emit_cb);
+    my $broker = CIF::Smrt::Broker->new($emit_cb, $self->{event_builder});
     try {
       my ($err) = $self->parse($broker);
       if ($err) {

@@ -22,7 +22,7 @@ sub parse {
               $h->{$fields_map[$_]} = lc($v);
             }
         }
-        $broker->emit($self->create_event($h));
+        $broker->emit($h);
     }
     return(undef);
 }

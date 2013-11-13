@@ -1,9 +1,9 @@
-package CIF::Smrt::EventNormalizer;
+package CIF::EventNormalizer;
 
 use strict;
 use warnings;
 use CIF qw/normalize_timestamp debug/;
-use Module::Pluggable search_path => "CIF::Smrt::Plugin::Preprocessor", 
+use Module::Pluggable search_path => "CIF::EventNormalizers", 
       require => 1, sub_name => '_preprocessors';
 
 sub new {

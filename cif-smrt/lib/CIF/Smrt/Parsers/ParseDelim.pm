@@ -42,7 +42,7 @@ sub parse {
         foreach (0 ... $#cols){
             $h->{$cols[$_]} = $m[$_];
         }
-        $broker->emit($self->create_event($h));
+        $broker->emit($h);
     }
     return(undef);
 }

@@ -47,7 +47,7 @@ sub parse {
             }
         }
         if ($found == 1) {
-          $broker->emit($self->create_event($h));
+          $broker->emit($h);
         }
     }
     return(undef);

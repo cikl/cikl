@@ -34,7 +34,7 @@ sub parse {
         if($h->{'address_mask'}){
             $h->{'address'} .= '/'.$h->{'address_mask'};
         }
-        $broker->emit($self->create_event($h));
+        $broker->emit($h);
     }
     return(undef);
 

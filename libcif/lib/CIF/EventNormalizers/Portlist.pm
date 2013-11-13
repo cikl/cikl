@@ -1,4 +1,4 @@
-package CIF::Smrt::Plugin::Preprocessor::Portlist;
+package CIF::EventNormalizers::Portlist;
 
 use strict;
 use warnings;

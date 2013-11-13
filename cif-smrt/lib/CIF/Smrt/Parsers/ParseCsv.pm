@@ -46,7 +46,7 @@ sub parse {
             next if($cols[$_] eq 'null');
             $h->{$cols[$_]} = $m[$_];
         }
-        $broker->emit($self->create_event($h));
+        $broker->emit($h);
     }
     return(undef);
 
