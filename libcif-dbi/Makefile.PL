@@ -12,7 +12,7 @@ our $DEF_DBPORT = 5432;
 our $DEF_DBUSER = 'postgres';
 our $DEF_DBPASS = '';
 our $DEF_TABLESPACE = 'pg_default';
-our $DEF_ARCHIVE_TABLESPACE = undef ;
+our $DEF_ARCHIVE_TABLESPACE = '' ;
 
 
 ###########
