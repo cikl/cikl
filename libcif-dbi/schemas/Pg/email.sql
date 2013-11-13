@@ -1,8 +1,8 @@
-SET default_tablespace = 'index';
+set default_tablespace=:cif_default_tablespace;
 
 DROP TABLE IF EXISTS email CASCADE;
 CREATE TABLE email (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid NOT NULL,
     guid uuid,
     hash varchar(40),

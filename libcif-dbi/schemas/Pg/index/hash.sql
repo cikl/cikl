@@ -1,4 +1,4 @@
-SET default_tablespace = 'index';
+set default_tablespace=:cif_default_tablespace;
 
 DROP INDEX IF EXISTS idx_hash_1;
 CREATE INDEX idx_hash_1 ON hash (hash,confidence);

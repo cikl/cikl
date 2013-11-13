@@ -1,9 +1,10 @@
-SET default_tablespace = 'archive';
+set default_tablespace=:cif_default_tablespace;
+
 DROP TABLE IF EXISTS apikeys_groups;
 DROP TABLE IF EXISTS apikeys_restrictions;
 DROP TABLE IF EXISTS apikeys;
 CREATE TABLE apikeys (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid not null,
     uuid_alias text NOT NULL,
     description text,
@@ -17,7 +18,7 @@ CREATE TABLE apikeys (
 );
 
 CREATE TABLE apikeys_groups (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid references apikeys(uuid) on delete cascade not null,
     guid uuid not null,
     default_guid bool,
@@ -26,7 +27,7 @@ CREATE TABLE apikeys_groups (
 );
 
 CREATE TABLE apikeys_restrictions (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid references apikeys(uuid) on delete cascade not null,
     access varchar(40) not null,
     created timestamp with time zone DEFAULT NOW(),

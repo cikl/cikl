@@ -1,8 +1,9 @@
-SET default_tablespace = 'archive';
+set default_tablespace=:tablespace_archive;
+
 DROP TABLE IF EXISTS archive CASCADE;
 
 CREATE TABLE archive (
-    id BIGSERIAL NOT NULL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid NOT NULL,
     guid uuid,
     format text,
@@ -11,7 +12,5 @@ CREATE TABLE archive (
     data text not null
 );
 
-SET default_tablespace = 'index';
-ALTER TABLE archive ADD PRIMARY KEY (id);
 CREATE INDEX idx_archive_uuid ON archive (uuid);
 CREATE INDEX idx_archive_created ON archive (created);

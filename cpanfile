@@ -26,6 +26,8 @@ requires 'LWP::UserAgent', '6.02';
 requires 'LWPx::ParanoidAgent', '1.09';
 requires 'MIME::Base64', '3.13';
 requires 'MIME::Lite', '3.027';
+requires 'Module::Install', '1.06';
+requires 'Module::Install::CPANfile', '0.12';
 requires 'Module::Pluggable', '3.9';
 requires 'Moose', '2.1005';
 requires 'Moose::Util::TypeConstraints';

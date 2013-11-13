@@ -1,7 +1,8 @@
-SET default_tablespace = 'index';
+set default_tablespace=:cif_default_tablespace;
+
 DROP TABLE IF EXISTS hash CASCADE;
 CREATE TABLE hash (
-    id BIGSERIAL,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
     uuid uuid NOT NULL,
     guid uuid NOT NULL,
     hash text not null,
