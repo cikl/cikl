@@ -4,6 +4,7 @@ use warnings;
 use CIF::Models::Event;
 use Moose;
 use namespace::autoclean;
+use Try::Tiny;
 use CIF qw/normalize_timestamp debug/;
 use Module::Pluggable search_path => "CIF::EventNormalizers", 
       require => 1, sub_name => '__preprocessors';
@@ -80,12 +81,6 @@ sub normalize {
 #      }
 #    }
 #  }
-
-  unless($r->{'assessment'}){
-    debug('WARNING: config missing an assessment') if($::debug);
-    $r->{'assessment'} = 'unknown';
-  }
-
   foreach my $p (@{$self->_preprocessors}){
     $r = $p->process($r);
   }
@@ -105,8 +100,17 @@ sub build_event {
     return undef;
   }
 
-  my $ret = CIF::Models::Event->new($normalized);
-  return $ret;
+  my $event;
+  my $err;
+  try {
+    $event = CIF::Models::Event->new($normalized);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    die("Failed to build event. Likely missing a required field: $err");
+  }
+  return $event;
 }
 
 __PACKAGE__->meta->make_immutable;

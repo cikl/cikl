@@ -29,6 +29,7 @@ has 'id' => (
 has 'assessment' => (
   is => 'rw',
   isa => 'CIF::MooseTypes::LowerCaseStr',
+  required => 1,
   coerce => 1
 );
 
