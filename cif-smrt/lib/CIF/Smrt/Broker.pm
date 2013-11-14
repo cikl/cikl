@@ -1,50 +1,50 @@
 package CIF::Smrt::Broker;
 use strict;
 use warnings;
+use Moose;
+use namespace::autoclean;
 
+has 'emit_cb' => (
+  is => 'bare',
+  reader => '_emit_cb',
+  required => 1
+);
 
-sub new {
-  my $class = shift;
-  my $emit_cb = shift;
-  my $builder = shift;
-  my $self = {
-    emit_cb => $emit_cb,
-    builder => $builder
-  };
+has 'builder' => (
+  is => 'bare',
+  reader => '_builder',
+  required => 1
+);
 
-  bless $self, $class;
-  $self->{data} = [];
-  $self->{count} = 0;
-  $self->{count_too_old} = 0;
-  return($self);
-}
+has 'count' => (
+  is => 'ro',
+  writer => '_set_count',
+  required => 1,
+  default => 0,
+  init_arg => undef
+);
+
+has 'count_too_old' => (
+  is => 'ro',
+  writer => '_set_count_too_old',
+  required => 1,
+  default => 0,
+  init_arg => undef
+);
 
 sub emit {
   my $self = shift;
   my $event_hash = shift;
-  my $event = $self->{builder}->build_event($event_hash);
+  my $event = $self->_builder->build_event($event_hash);
   if (defined($event)) {
-    $self->{count} += 1;
-    $self->{emit_cb}->($event);
+    $self->_set_count($self->count() + 1);
+    $self->_emit_cb->($event);
   } else {
-    $self->{count_too_old} += 1;
+    $self->_set_count_too_old($self->count_too_old() + 1);
     # It was too old.
   }
 }
 
-sub count {
-  my $self = shift;
-  return $self->{count};
-}
-
-sub count_too_old {
-  my $self = shift;
-  return $self->{count_too_old};
-}
-
-sub data {
-  my $self = shift;
-  return($self->{data});
-}
+__PACKAGE__->meta->make_immutable;
 
 1;

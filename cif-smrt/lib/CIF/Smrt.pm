@@ -323,7 +323,10 @@ sub process {
       }
     };
 
-    my $broker = CIF::Smrt::Broker->new($emit_cb, $self->{event_builder});
+    my $broker = CIF::Smrt::Broker->new(
+      emit_cb => $emit_cb, 
+      builder => $self->{event_builder}
+    );
     try {
       my ($err) = $self->parse($broker);
       if ($err) {
