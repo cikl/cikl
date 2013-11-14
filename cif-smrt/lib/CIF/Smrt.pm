@@ -8,11 +8,6 @@ use warnings;
 our $VERSION = '0.99_03';
 $VERSION = eval $VERSION;  # see L<perlmodstyle>
 
-# default severity mapping
-use constant DEFAULT_SEVERITY_MAP => {
-    botnet      => 'high',
-};
-
 use CIF::Client;
 use CIF::Smrt::Parsers;
 use CIF::Smrt::Decoders;
@@ -42,7 +37,7 @@ __PACKAGE__->mk_accessors(qw(
     entries defaults feed feedparser_config load_full goback 
     wait_for_server name instance 
     batch_control cif_config_filename apikey
-    severity_map proxy
+    proxy
 ));
 
 sub new {
@@ -87,7 +82,6 @@ sub init {
 
     my $event_builder = CIF::EventBuilder->new(
       refresh => $fpc->{'refresh'},
-      severity_map => $self->get_severity_map(),
       goback => $self->get_goback(),
       default_event_data => $fpc->default_event_data()
     );
@@ -162,11 +156,6 @@ sub init_config {
 
     $self->set_smrt_config(          $config->param(-block => 'cif_smrt'));
     $self->set_feeds_config(    $config->param(-block => 'cif_feeds'));
-    
-    my $map = $config->param(-block => 'cif_smrt_severity');
-    $map = DEFAULT_SEVERITY_MAP() unless(keys %$map);
-    
-    $self->set_severity_map($map);
     
     return(undef,1);
 }

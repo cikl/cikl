@@ -21,12 +21,6 @@ has 'refresh' => (
   required => 1
 );
 
-has 'severity_map' => (
-  is => 'bare',
-  reader => '_severity_map',
-  required => 1
-);
-
 has 'goback' => (
   is => 'bare', 
   isa => 'Int',
@@ -96,15 +90,6 @@ sub normalize {
     $r = $p->process($r);
   }
 
-  # TODO -- work-around, make this more configurable
-  unless($r->{'severity'}){
-    my $sm = $self->_severity_map;
-    if (my $severity = $self->_severity_map->{$r->{'assessment'}}) {
-      $r->{'severity'} = $severity;
-    } else {
-      $r->{'severity'} = 'medium'; 
-    }
-  }
   return $r;
 }
 
