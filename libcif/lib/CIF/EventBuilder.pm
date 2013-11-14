@@ -20,7 +20,7 @@ sub build_event {
   my $self = shift;
   my $hashref = shift;
   if (!defined($hashref)) {
-    die("create_event requires a hashref of arguments!");
+    die("build_event requires a hashref of arguments!");
   }
   my $merged_hash = {%{$self->{default_event_data}}, %$hashref};
   my $normalized = $self->{normalizer}->normalize($merged_hash);
