@@ -2,19 +2,20 @@ package CIF::EventBuilder;
 use strict;
 use warnings;
 use CIF::Models::Event;
+use Moose;
+use namespace::autoclean;
 
-sub new {
-  my $class = shift;
-  my $normalizer = shift;
-  my $default_event_data = shift;
-  my $self = {
-    normalizer => $normalizer,
-    default_event_data => $default_event_data
-  };
+has 'normalizer' => (
+  is => 'bare',
+  required => 1,
+  reader => '_normalizer'
+);
 
-  bless $self, $class;
-  return $self;
-}
+has 'default_event_data' => (
+  is => 'bare',
+  required => 1,
+  reader => '_default_event_data'
+);
 
 sub build_event {
   my $self = shift;
@@ -22,8 +23,8 @@ sub build_event {
   if (!defined($hashref)) {
     die("build_event requires a hashref of arguments!");
   }
-  my $merged_hash = {%{$self->{default_event_data}}, %$hashref};
-  my $normalized = $self->{normalizer}->normalize($merged_hash);
+  my $merged_hash = {%{$self->_default_event_data}, %$hashref};
+  my $normalized = $self->_normalizer->normalize($merged_hash);
   if (!defined($normalized)) {
     return undef;
   }
@@ -31,6 +32,8 @@ sub build_event {
   my $ret = CIF::Models::Event->new($normalized);
   return $ret;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

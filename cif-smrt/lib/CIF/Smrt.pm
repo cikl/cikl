@@ -93,7 +93,10 @@ sub init {
     });
     $self->{'event_normalizer'} = $event_normalizer;
 
-    my $event_builder = CIF::EventBuilder->new($event_normalizer, $fpc->default_event_data());
+    my $event_builder = CIF::EventBuilder->new(
+      normalizer => $event_normalizer, 
+      default_event_data => $fpc->default_event_data()
+    );
     $self->{'event_builder'} = $event_builder;
 
     
