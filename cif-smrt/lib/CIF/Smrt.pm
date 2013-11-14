@@ -27,7 +27,6 @@ use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
 use CIF::Smrt::Broker;
-use CIF::EventNormalizer;
 use CIF::EventBuilder;
 use AnyEvent;
 use Coro;
@@ -86,15 +85,10 @@ sub init {
 
     my $fpc = $self->get_feedparser_config();
 
-    my $event_normalizer = CIF::EventNormalizer->new({
+    my $event_builder = CIF::EventBuilder->new(
       refresh => $fpc->{'refresh'},
       severity_map => $self->get_severity_map(),
-      goback => $self->get_goback()
-    });
-    $self->{'event_normalizer'} = $event_normalizer;
-
-    my $event_builder = CIF::EventBuilder->new(
-      normalizer => $event_normalizer, 
+      goback => $self->get_goback(),
       default_event_data => $fpc->default_event_data()
     );
     $self->{'event_builder'} = $event_builder;
@@ -291,7 +285,7 @@ sub parse {
 
     debug("Parser class: $parser_class");
 
-    my $parser = $parser_class->new($f, $self->{event_normalizer});
+    my $parser = $parser_class->new($f);
     my $return = $parser->parse($content_ref, $broker);
     return(undef);
 }

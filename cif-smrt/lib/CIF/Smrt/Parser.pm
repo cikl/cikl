@@ -13,11 +13,9 @@ sub name {
 sub new {
   my $class = shift;
   my $config = shift;
-  my $normalizer = shift;
   my $self = {
     config => $config,
     default_event_data => $config->default_event_data(),
-    normalizer => $normalizer
   };
   bless($self,$class);
   return($self);
