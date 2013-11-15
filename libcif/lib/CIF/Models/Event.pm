@@ -13,16 +13,14 @@ use namespace::autoclean;
 
 has 'guid' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
   required => 1,
-  coerce => 1
 );
 
 has 'id' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
   default => sub { generate_uuid_random() },
-  coerce => 1,
   alias => 'uuid'
 );
 
