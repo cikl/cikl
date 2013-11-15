@@ -73,8 +73,7 @@ sub match_event {
 
 sub insert {
   my $class = shift;
-  my $data = shift;
-  my $event = $data->{event};
+  my $event = shift;
 
   my $address = $event->address;
   my @ids;

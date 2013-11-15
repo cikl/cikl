@@ -29,8 +29,7 @@ sub match_event {
 
 sub insert {
     my $class = shift;
-    my $data = shift;
-    my $event = $data->{event};
+    my $event = shift;
 
     unless ($class->match_event($event)) {
       return(undef);

@@ -47,14 +47,19 @@ sub load_plugins {
     }
     
     my $class = shift;
-    my $datatypes = shift;
+    my $datatypes = shift || [];
+    my $feeds = shift || [];
     $archive_plugins = [];
     my @all_plugins = $class->__plugins();
 
     foreach my $plugin (@all_plugins) {
       if (any { $_ eq $plugin->datatype() } @$datatypes) {
         $plugin->init_sql();
-        push(@$archive_plugins, $plugin);
+        my $feed_enabled = 0;
+        if (any { $_ eq $plugin->datatype() } @$feeds) {
+          $feed_enabled = 1;
+        }
+        push(@$archive_plugins, {plugin => $plugin, feed_enabled => $feed_enabled});
       }
     }
     return 1;
@@ -63,28 +68,17 @@ sub load_plugins {
 
 sub insert {
     my $class       = shift;
-    my $data        = shift;
-    my $isUpdate    = shift;
-    my $event = $data->{'event'};
-        
-    $data->{'uuid'}         = $event->uuid;
-    $data->{'reporttime'}   = $event->reporttime;
-    $data->{'guid'}         = $event->guid || $data->{'guid'};
-   
-    return ('id must be a uuid') unless(is_uuid($data->{'uuid'}));
-    
-    #$data->{'guid'}     = generate_uuid_ns('root')                  unless($data->{'guid'});
-    #$data->{'created'}  = DateTime->from_epoch(epoch => time())     unless($data->{'created'});
+    my $event = shift;
    
     my ($err,$id);
     try {
         $id = $class->sql_insert_into_archive->execute(
-            $data->{'uuid'},
-            $data->{'guid'},
+            $event->id,
+            $event->guid,
             $CIF::VERSION,
             $dbencoder->encode_event($event),
-            $data->{'created'},
-            $data->{'reporttime'}
+            $event->detecttime, # Fairly sure this is supposed to be detecttime
+            $event->reporttime
         );
 
     }
@@ -94,25 +88,23 @@ sub insert {
     return ($err) if($err);
     
     my $ret;
-    ($err,$ret) = $class->insert_index($event, $data);
+    ($err,$ret) = $class->insert_index($event);
     return($err) if($err);
-    return(undef,$data->{'uuid'});
+    return(undef,$event->id);
 }
 
 sub insert_index {
     my $class   = shift;
     my $event = shift;
-    my $args    = shift;
-    my @plugins = @{$class->plugins};
-
-    my $err;
-    foreach my $p (@plugins){
+    my ($err, $p);
+    foreach my $x (@{$class->plugins}){
+        $p = $x->{plugin};
         if ($p->match_event($event) == 1) {
           #debug("Inserting into $p");
           my ($pid,$err);
           try {
-              ($err,$pid) = $p->insert($args);
-              if($p->test_feed($args)){
+              ($err,$pid) = $p->insert($event);
+              if($x->{feed_enabled}) {
                 $p->insert_into_feed($event);
               }
           } catch {

@@ -303,7 +303,7 @@ sub process {
     my $guid = $self->get_feedparser_config->{'guid'};
     my $emit_cb = sub {
       my $event = shift;
-      ($err, $ret) = $client->submit($guid, $event);    
+      ($err, $ret) = $client->submit($event);    
       if ($err) {
         die($err);
       }

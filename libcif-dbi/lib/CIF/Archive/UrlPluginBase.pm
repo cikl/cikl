@@ -40,8 +40,7 @@ sub match_event {
 
 sub insert {
     my $class   = shift;
-    my $data    = shift;
-    my $event = $data->{event};
+    my $event = shift;
     my $addr = lc($event->address());
     my $id = $class->insert_hash($event, $addr);
     return(undef,[$id]);

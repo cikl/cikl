@@ -56,24 +56,6 @@ sub sub_table {
     return $type.'_'.$subtype;
 }
 
-sub test_feed {
-    my $class = shift;
-    my $feeds = shift;
-
-    my $feedtype = $class->feedtype();
-    return unless(defined($feedtype));
-   
-    $feeds = $feeds->{'feeds'};
-    return unless($feeds);
-    $feeds = [$feeds] unless(ref($feeds) eq 'ARRAY');
-
-    return unless(@$feeds);
-    foreach my $f (@$feeds){
-        return 1 if($f eq $feedtype);
-    }
-    return undef;
-}
-
 sub generate_feed_insert_params {
   my $class = shift;
   my $event = shift;

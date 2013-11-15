@@ -192,10 +192,9 @@ sub send_json {
 
 sub submit {
     my $self = shift;
-    my $guid = shift;
     my $event = shift;
 
-    my $submission = CIF::Models::Submission->new($self->get_apikey(), $guid, $event);
+    my $submission = CIF::Models::Submission->new($self->get_apikey(), $event);
     return $self->get_driver()->submit($submission);
 }    
 

@@ -26,7 +26,7 @@ __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
     config db_config
     restriction_map 
-    group_map groups feeds feeds_map feeds_config 
+    group_map groups feeds_map feeds_config 
     archive_config datatypes 
 ));
 
@@ -92,24 +92,19 @@ sub init_db {
 sub init_feeds {
     my $self = shift;
 
-    my $feeds = $self->get_archive_config->{'feeds'};
-    $self->set_feeds($feeds);
-    
-    my $array;
-    foreach (@$feeds){
-        my $m = {
-            key     => generate_uuid_ns($_),
-            value   => $_,
-        };
-        push(@$array,$m);
+    my $feeds = $self->get_archive_config->{'feeds'} || [];
+    my %feeds_map;
+    foreach my $feed (@{$feeds}) {
+      $feeds_map{$feed} = 1;
     }
-    $self->set_feeds_map($array);
+    $self->set_feeds_map(\%feeds_map);
 }
 
 sub init_archive {
     my $self = shift;
     my $dt = $self->get_archive_config->{'datatypes'} || ['infrastructure','domain','url','email','malware','search'];
-    CIF::Archive->load_plugins($dt);
+    my $feeds = $self->get_archive_config->{'feeds'} || [];
+    CIF::Archive->load_plugins($dt, $feeds);
     $self->set_datatypes($dt);
 }
 
@@ -334,13 +329,13 @@ sub process_submission {
   my $apikey = $submission->apikey();
 
   my $auth = $self->authorized_write($submission->apikey());
-  my $default_guid = $auth->{'default_guid'} || 'everyone';
 
-  my $guid    = $submission->guid() || $default_guid;
-  $guid = generate_uuid_ns($guid) unless(is_uuid($guid));
+  unless ($auth) {
+    return("apikey '$apikey' is not authorized to write");
+  }
 
   debug('inserting...') if($debug > 4);
-  my ($err, $id) = $self->insert_event($guid, $submission->event());
+  my ($err, $id) = $self->insert_event($submission->event());
   if ($err) { 
     debug("ERR: " . $err);
     return $err;
@@ -363,15 +358,9 @@ sub flush {
 
 sub insert_event {
   my $self = shift;
-  my $guid = shift;
   my $event = shift;
   $self->{inserts} += 1;
-  my ($err, $ret) = (CIF::Archive->insert({
-      event       => $event,
-      guid        => $guid,
-      feeds       => $self->get_feeds(),
-      datatypes   => $self->get_datatypes(),
-    }));
+  my ($err, $ret) = CIF::Archive->insert($event);
 
   if ($self->{inserts} >= $self->{commit_interval}) {
     $self->flush();
