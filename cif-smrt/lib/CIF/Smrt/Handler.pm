@@ -2,23 +2,20 @@ package CIF::Smrt::Handler;
 
 use strict;
 use warnings;
+use CIF::EventBuilder;
+use CIF::Smrt::Broker;
 use Config::Simple;
 use Try::Tiny;
+use AnyEvent;
+use Coro;
 
 use CIF qw/debug/;
-use CIF::Smrt::Parsers;
-use CIF::Smrt::Decoders;
-use CIF::Smrt::Fetchers;
 
 sub new {
   my $class = shift;
   my $args = shift;
   my $self = {};
   bless $self, $class;
-
-  $self->{decoders} = CIF::Smrt::Decoders->new();
-  $self->{parsers} = CIF::Smrt::Parsers->new();
-  $self->{fetchers} = CIF::Smrt::Fetchers->new();
 
   # do this here, we'll do the setup within the sender_routine (thread)
   $self->{cif_config_filename} = $args->{'config'};
@@ -121,28 +118,116 @@ sub get_client {
   return($client);
 }
 
-sub lookup_decoder {
-  my $self = shift;
-  my $mime_type = shift;
-  return $self->{decoders}->lookup($mime_type);
+sub process {
+    my $self = shift;
+    my ($err, $ret);
+    
+    my $client = $self->get_client($self->apikey());
+    my $emit_cb = sub {
+      my $event = shift;
+      ($err, $ret) = $client->submit($event);    
+      if ($err) {
+        die($err);
+      }
+    };
+
+    my $broker = CIF::Smrt::Broker->new(
+      emit_cb => $emit_cb, 
+      builder => $self->event_builder()
+    );
+    try {
+      my ($err) = $self->parse($broker);
+      if ($err) {
+        die($err);
+      }
+    } catch {
+      $err = shift;
+    } finally {
+      if ($client) {
+        $client->shutdown();
+      }
+    };
+    if ($err) {
+      return($err);
+    }
+
+    if($::debug) {
+      debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());
+    }
+
+    if($broker->count() == 0){
+      if ($broker->count_too_old() != 0) {
+        debug('your goback is too small, if you want records, increase the goback time') if($::debug);
+      }
+      return (undef, 'no records');
+    }
+
+    return(undef);
 }
 
-sub lookup_parser {
-  my $self = shift;
-  my $parser_name = shift;
-  my $parser_class = $self->{parsers}->get($parser_name);
-  if (!defined($parser_class)) {
-    die("Could not find a parser for parser=$parser_name. Valid parsers: " . $self->{parsers}->valid_parser_names_string);
-  }
-  return $parser_class;
+sub fetch { 
+    my $self = shift;
+    my $cv = AnyEvent->condvar;
+    my $fetcher = $self->get_fetcher();
+
+    async {
+      try {
+        $cv->send($fetcher->fetch());
+      } catch {
+        $cv->croak(shift);
+      };
+    };
+    while (!($cv->ready())) {
+      Coro::AnyEvent::sleep(1);
+    }
+    my $retref = $cv->recv();
+
+    # auto-decode the content if need be
+    $retref = $self->decode($retref);
+
+    ## TODO MPR : This looks like a hack for the utf8 and CR stuff below.
+    #return(undef,$ret) if($feedparser_config->{'cif'} && $feedparser_config->{'cif'} eq 'true');
+
+    ## Commenting this out as I haven't run into any issues, yet.  
+    # encode to utf8
+    #$ret = encode_utf8($ret);
+    
+    # remove any CR's
+    #$ret =~ s/\r//g;
+    return($retref);
 }
 
-sub lookup_fetcher {
-  my $self = shift;
-  my $feedurl = shift;
-  return $self->{fetchers}->lookup($feedurl);
+
+sub parse {
+    my $self = shift;
+    my $broker = shift;
+
+    my $content_ref = $self->fetch();
+    
+    my $return = $self->get_parser()->parse($content_ref, $broker);
+    return(undef);
+}
+
+# Just pass things through. This can be overridden by subclasses.
+sub decode {
+    my $self = shift;
+    my $content_ref = shift;
+    return $content_ref;
 }
 
 
+# Stuff that needs to be implemented
+
+# Returns an instance of a fetcher. We will call fetcher->fetch()
+sub get_fetcher {
+    my $self = shift;
+    die("get_fetcher() not implemented!");
+}
+
+# Returns an instance of a parser. We will call parser->parse($content_ref, $broker)
+sub get_parser {
+    my $self = shift;
+    die("get_parser() not implemented!");
+}
 
 1;
