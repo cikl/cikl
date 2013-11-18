@@ -80,6 +80,11 @@ sub parsers {
   return $self->{parsers};
 }
 
+sub proxy {
+  my $self = shift;
+  return $self->{proxy};
+}
+
 sub apikey {
   my $self = shift;
   return $self->{apikey};

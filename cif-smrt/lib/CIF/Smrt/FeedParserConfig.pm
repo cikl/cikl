@@ -116,6 +116,11 @@ sub guid {
   return $self->{guid};
 }
 
+sub parser {
+  my $self = shift;
+  return $self->{parser};
+}
+
 sub default_event_data {
   my $self = shift;
   return (dclone($self->{event_fields}));

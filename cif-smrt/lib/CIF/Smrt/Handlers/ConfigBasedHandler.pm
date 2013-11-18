@@ -35,6 +35,13 @@ sub new {
     my $self = $class->SUPER::new($args);
 
     $self->{feedparser_config} = $args->{feedparser_config};
+    
+    if($self->proxy){
+        $self->{feedparser_config}->{'proxy'} = $self->proxy;
+    }
+
+    my $parser_class = $self->lookup_parser($self->{feedparser_config}->parser);
+    $self->{parser} = $parser_class->new($self->{feedparser_config});
 
     return $self;
 }
@@ -57,7 +64,6 @@ sub _event_builder {
 
 sub fetch_feed { 
     my $self = shift;
-    my $feedparser_config = shift;
     my $cv = AnyEvent->condvar;
 
     async {
@@ -92,7 +98,7 @@ sub fetch_feed {
 sub _fetch_feed {
     my $self = shift;
     my $feedparser_config = $self->{feedparser_config};
-    unless($feedparser_config->{'feed'}) {
+    unless($feedparser_config->feed) {
       die("no feed config provided!");
     }
     
@@ -118,29 +124,16 @@ sub _fetch_feed {
     return \$ret;
 }
 
-
 sub parse {
     my $self = shift;
     my $broker = shift;
     my $feedparser_config = $self->{feedparser_config};
-    
-    if($self->{proxy}){
-        $feedparser_config->{'proxy'} = $self->{proxy};
-    }
-    die 'feed does not exist' unless($feedparser_config->{'feed'});
-    debug('fetching feed: '.$feedparser_config->{'feed'}) if($::debug);
-    if($self->{cif_config_filename}){
-        $feedparser_config->{'client_config'} = $self->{cif_config_filename};
-    }
+
+    debug('fetching feed: '.$feedparser_config->feed) if($::debug);
     my ($err,$content_ref) = $self->fetch_feed();
     die($err) if($err);
     
-    my $parser_class = $self->lookup_parser($feedparser_config->{parser});
-
-    debug("Parser class: $parser_class");
-
-    my $parser = $parser_class->new($feedparser_config);
-    my $return = $parser->parse($content_ref, $broker);
+    my $return = $self->{parser}->parse($content_ref, $broker);
     return(undef);
 }
 
