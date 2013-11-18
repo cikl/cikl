@@ -13,6 +13,30 @@ require XML::LibXML;
 use constant NAME => 'xml';
 sub name { return NAME; }
 
+has 'node' => (
+  is => 'ro'
+);
+
+has 'subnode' => (
+  is => 'ro'
+);
+
+has 'elements' => (
+  is => 'ro'
+);
+
+has 'elements_map' => (
+  is => 'ro'
+);
+
+has 'attributes' => (
+  is => 'ro'
+);
+
+has 'attributes_map' => (
+  is => 'ro'
+);
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;

@@ -3,15 +3,22 @@ package CIF::Smrt::Parsers::ParseJson;
 use strict;
 use warnings;
 
+use JSON;
 use Moose;
 use CIF::Smrt::Parser;
 extends 'CIF::Smrt::Parser';
 use namespace::autoclean;
 
-use JSON;
-
 use constant NAME => 'json';
 sub name { return NAME; }
+
+has 'fields' => (
+  is => 'ro'
+);
+
+has 'fields_map' => (
+  is => 'ro'
+);
 
 sub parse {
     my $self = shift;
