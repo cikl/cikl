@@ -84,8 +84,6 @@ sub fetch_feed {
     
     # remove any CR's
     #$ret =~ s/\r//g;
-    delete($feedparser_config->{'feed'});
-    
     return(undef,$retref);
 }
 
