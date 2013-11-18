@@ -21,7 +21,7 @@ has 'timeout' => (
 
 has 'proxy' => (
   is => 'ro',
-  isa => 'Str',
+  #isa => 'Str',
   required => 0
 );
 
