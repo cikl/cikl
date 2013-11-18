@@ -39,6 +39,7 @@ use CIF qw/debug/;
 use CIF::Report::QueryResultsReport;
 use CIF::Report::CSVFormatter;
 use CIF::Report::TableFormatter;
+use Config::Simple;
 
 
 my %opts;
@@ -47,7 +48,7 @@ getopt('D:S:O:G:l:g:THL:p:f:q:c:s:r:C:zP:Fe:', \%opts);
 our $debug       = ($opts{'d'}) ? 1 : 0;
 
 # config opts
-my $config      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
+my $config_file      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
 my $outfile     = $opts{'O'};
 my $query       = $opts{'q'} || shift;
 
@@ -87,7 +88,7 @@ Usage: perl $0 -q xyz.com
 
 Standard Options:
     -h  --help:             this message
-    -C  --config:           specify cofiguration file, default: $config
+    -C  --config:           specify cofiguration file, default: $config_file
     
 Query Options:
     -q  --query:            query string
@@ -172,6 +173,7 @@ if($exclude_assessment && $exclude_assessment =~ /\,/){
     exit(0);
 }
 
+my $config = Config::Simple->new($config_file) or die($!);
 my ($err,$cli) = CIF::Client->new({
     config          => $config,
 });

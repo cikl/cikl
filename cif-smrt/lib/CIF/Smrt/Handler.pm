@@ -22,7 +22,7 @@ sub new {
   bless $self, $class;
 
   # do this here, we'll do the setup within the sender_routine (thread)
-  $self->{cif_config_filename} = $args->{'config'};
+  $self->{cif_config_filename} = $args->{cif_config_filename};
 
   $self->init_config();
   
@@ -75,6 +75,7 @@ sub init_config {
     die(join("\n",@errmsg));
   }
 
+  $self->{global_config} = $config;
   $self->{smrt_config} = $config->param(-block => 'cif_smrt');
 }
 
@@ -112,7 +113,7 @@ sub get_client {
   my $self = shift;
   my $apikey = shift;
   my ($err,$client) = CIF::Client->new({
-      config  => $self->{cif_config_filename},
+      config  => $self->{global_config},
       apikey  => $apikey,
     });
 

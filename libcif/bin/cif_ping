@@ -41,7 +41,7 @@ getopt('C:', \%opts);
 our $debug       = ($opts{'d'}) ? 1 : 0;
 
 # config opts
-my $config      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
+my $config_file      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
 
 die usage() if($opts{'h'});
 
@@ -51,11 +51,12 @@ Usage: perl $0
 
 Standard Options:
     -h  --help:             this message
-    -C  --config:           specify cofiguration file, default: $config
+    -C  --config:           specify cofiguration file, default: $config_file
     
 EOF
 }
 
+my $config = Config::Simple->new($config_file) or die($!);
 my ($err,$cli) = CIF::Client->new({
     config          => $config,
 });
