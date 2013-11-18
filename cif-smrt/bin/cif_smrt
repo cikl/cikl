@@ -41,6 +41,7 @@ use CIF qw/debug/;
 use Sys::MemInfo qw(totalmem);
 use CIF::Smrt::Handlers::ConfigBasedHandler;
 use CIF::Smrt::FeedParserConfig;
+use CIF::EventBuilder;
 use Try::Tiny;
 
 my %opts;
@@ -48,7 +49,7 @@ getopts('g:hNA:s:dC:f:r:v:p:',\%opts);
 our $debug = $opts{'d'} || 0;
 $debug = $opts{'v'} if($opts{'v'});
 
-my $config      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
+my $config_file      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
 my $rules       = $opts{'r'};
 my $feed        = $opts{'f'};
 
@@ -76,7 +77,7 @@ Usage: perl $0 -C /home/cif/.cif -r $rules_dir/misc.cfg -f malwaredomainlist
 
     -h  --help:     this message
     -f  --feed:     feed name (eg: section header in the configuration file)
-    -C  --config:   specify the cif config file (default: $config)
+    -C  --config:   specify the cif config file (default: $config_file)
     -r  --rules:    specify the rules file to work with (eg: etc/malwaredomains.cfg)
     -d  --debug:    debug 
     
@@ -103,14 +104,29 @@ my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
 my $ret;
 my $smrt;
 my $err;
+
+my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
+my $smrt_config = $config->param(-block => 'cif_smrt');
+
+$goback = $goback || $smrt_config->{'goback'} || 3;
+my $goback_date_epoch = (time() - ($goback * 84600));
+
+
+my $event_builder = CIF::EventBuilder->new(
+  refresh => $feedparser_config->{'refresh'},
+  goback => $goback_date_epoch,
+  default_event_data => $feedparser_config->default_event_data()
+);
+
 try {
-  $smrt = CIF::Smrt::Handlers::ConfigBasedHandler->new({
+  $smrt = CIF::Smrt::Handlers::ConfigBasedHandler->new(
+      apikey => $smrt_config->{'apikey'},
       feedparser_config => $feedparser_config,
-      config          => $config,
-      feed            => $feed,
-      rules           => $rules,
-      goback          => $goback,
-    });
+      global_config => $config,
+      smrt_config => $smrt_config,
+      event_builder => $event_builder,
+      proxy => $smrt_config->{proxy}
+);
 } catch {
   $err = shift;
 };

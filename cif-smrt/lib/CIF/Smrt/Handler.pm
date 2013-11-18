@@ -10,111 +10,41 @@ use Try::Tiny;
 use AnyEvent;
 use Coro;
 
+use Moose;
 use CIF qw/debug/;
-
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
 
-sub new {
-  my $class = shift;
-  my $args = shift;
-  my $self = {};
-  bless $self, $class;
+use namespace::autoclean;
 
-  # do this here, we'll do the setup within the sender_routine (thread)
-  $self->{cif_config_filename} = $args->{cif_config_filename};
+has 'apikey' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
 
-  $self->init_config();
-  
-  my $goback = $args->{'goback'} || $self->{smrt_config}->{'goback'} || 3;
-  $goback = (time() - ($goback * 84600));
-  $self->{goback} = $goback;
+has 'global_config' => (
+  is => 'ro',
+  isa => 'Config::Simple',
+  required => 1
+);
 
-  $self->{apikey} = $args->{'apikey'} || $self->{smrt_config}->{'apikey'} || die('missing apikey');
-  $self->{proxy} =  $args->{'proxy'}  || $self->{smrt_config}->{'proxy'};
+has 'event_builder' => (
+  is => 'ro',
+  isa => 'CIF::EventBuilder',
+  required => 1
+);
 
-  my $event_builder = CIF::EventBuilder->new(
-    refresh => $args->{'refresh'},
-    goback => $self->goback(),
-    default_event_data => $args->{'default_event_data'} || {}
-  );
-  $self->{'event_builder'} = $event_builder;
-
-  if($::debug){
-    my $gb = DateTime->from_epoch(epoch => $goback);
-    debug('goback: '.$gb);
-  }    
-    
-  return $self;
-}
-
-sub event_builder {
-    my $self = shift;
-    return $self->{event_builder};
-}
-
-sub init_config {
-  my $self = shift;
-  my $config_file = $self->{cif_config_filename};
-
-  my $config;
-  my $err;
-  try {
-    $config = Config::Simple->new($config_file);
-  } catch {
-    $err = shift;
-  };
-
-  unless($config){
-    die('unknown or missing config: '. $config_file);
-  }
-  if($err){
-    my @errmsg;
-    push(@errmsg,'something is broken in your local config: '.$config_file);
-    push(@errmsg,'this is usually a syntax error problem, double check '.$config_file.' and try again');
-    die(join("\n",@errmsg));
-  }
-
-  $self->{global_config} = $config;
-  $self->{smrt_config} = $config->param(-block => 'cif_smrt');
-}
-
-sub fetchers {
-  my $self = shift;
-  return $self->{fetchers}->fetchers();
-}
-
-sub decoders {
-  my $self = shift;
-  return $self->{decoders};
-}
-
-sub parsers {
-  my $self = shift;
-  return $self->{parsers};
-}
-
-sub proxy {
-  my $self = shift;
-  return $self->{proxy};
-}
-
-sub apikey {
-  my $self = shift;
-  return $self->{apikey};
-}
-
-sub goback {
-  my $self = shift;
-  return $self->{goback};
-}
+has 'proxy' => (
+  is => 'ro',
+  required => 0
+);
 
 sub get_client {
   my $self = shift;
-  my $apikey = shift;
   my ($err,$client) = CIF::Client->new({
-      config  => $self->{global_config},
-      apikey  => $apikey,
+      config  => $self->global_config,
+      apikey  => $self->apikey,
     });
 
   if ($err) {
@@ -127,7 +57,7 @@ sub process {
     my $self = shift;
     my ($err, $ret);
     
-    my $client = $self->get_client($self->apikey());
+    my $client = $self->get_client();
     my $emit_cb = sub {
       my $event = shift;
       ($err, $ret) = $client->submit($event);    
@@ -234,5 +164,7 @@ sub get_parser {
     my $self = shift;
     die("get_parser() not implemented!");
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
