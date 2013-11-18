@@ -11,17 +11,47 @@ use namespace::autoclean;
 use constant NAME => 'delimiter';
 sub name { return NAME; }
 
+has 'delimiter' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
+
+has 'feed_limit' => (
+  is => 'ro',
+);
+
+has 'values' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
+
+has 'skipfirst' => (
+  is => 'ro',
+  isa => 'Num',
+  default => 0
+);
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;
     my $broker = shift;
 
-    my $split = $self->config->delimiter;
+    use Data::Dumper;
+    print Dumper {
+      delimiter => $self->delimiter,
+      feed_limit => $self->feed_limit,
+      values => $self->values,
+      skipfirst => $self->skipfirst
+    };
+
+    my $split = $self->delimiter;
 
     my @lines = split(/[\r\n]/,$$content_ref);
-    my @cols = $self->config->values;
+    my @cols = split(/\s*,\s*/, $self->values);
     
-    if(my $l = $self->config->feed_limit){
+    if(my $l = $self->feed_limit){
         my ($start,$end);
         if(ref($l) eq 'ARRAY'){
             ($start,$end) = @{$l};
@@ -37,7 +67,7 @@ sub parse {
         }
     }
 
-    shift @lines if($self->config->skipfirst);
+    shift @lines if($self->skipfirst);
 
     foreach(@lines){
         next if(/^(#|$|<)/);

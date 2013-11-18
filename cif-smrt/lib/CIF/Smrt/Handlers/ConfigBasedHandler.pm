@@ -60,7 +60,9 @@ sub get_fetcher {
 sub get_parser {
     my $self = shift;
     my $parser_class = $self->lookup_parser($self->feedparser_config->parser);
-    return $parser_class->new(config => $self->feedparser_config);
+    my %args = (%{$self->feedparser_config}, config => $self->feedparser_config);
+    
+    return $parser_class->new(%args);
 }
 
 sub decode {
