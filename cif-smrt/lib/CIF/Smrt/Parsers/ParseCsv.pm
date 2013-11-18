@@ -2,59 +2,18 @@ package CIF::Smrt::Parsers::ParseCsv;
 
 use strict;
 use warnings;
-use Text::CSV;
 
 use Moose;
-use CIF::Smrt::Parser;
-extends 'CIF::Smrt::Parser';
+use CIF::Smrt::Parsers::ParseDelim;
+extends 'CIF::Smrt::Parsers::ParseDelim';
 use namespace::autoclean;
 
 use constant NAME => 'csv';
 sub name { return NAME; }
 
-sub parse {
-    my $self = shift;
-    my $content_ref = shift;
-    my $broker = shift;
-    
-    my @lines = split(/[\r\n]/,$$content_ref);
-    
-    if(my $l = $self->config->feed_limit){
-        my ($start,$end);
-        if(ref($l) eq 'ARRAY'){
-            ($start,$end) = @{$l};
-        } else {
-            ($start,$end) = (0,$l-1);
-        }
-        @lines = @lines[$start..$end];
-        
-        # A feed limit may have already been applied to
-        # this data.  If so, don't apply it again.
-        if ($#lines > ($end - $start)){
-            @lines = @lines[$start..$end];
-        }
-    }
-    
-    my $csv = Text::CSV->new({binary => 1});
-    my @cols = $self->config->values;
-
-    shift @lines if($self->config->skipfirst);
-    
-    foreach(@lines){
-        next if(/^(#|<|$)/);
-        my $row = $csv->parse($_);
-        next unless($row);
-        my $h = {};
-        my @m = $csv->fields();
-        foreach (0 ... $#cols){
-            next if($cols[$_] eq 'null');
-            $h->{$cols[$_]} = $m[$_];
-        }
-        $broker->emit($h);
-    }
-    return(undef);
-
-}
+has '+delimiter' => (
+  default => ','
+);
 
 __PACKAGE__->meta->make_immutable;
 
