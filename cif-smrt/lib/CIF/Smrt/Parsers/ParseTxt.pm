@@ -11,20 +11,34 @@ use namespace::autoclean;
 use constant NAME => 'txt';
 sub name { return NAME; }
 
+has 'regex' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
+
+has 'regex_values' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
+
 sub parse {
     my $self = shift;
     my $content_ref = shift;
     my $broker = shift;
-    my $re = $self->config->regex;
-    return unless($re);
+    my $re = $self->regex;
+    $re = qr/$re/;
     
-    my @lines = split(/[\r\n]/,$$content_ref);
-    foreach(@lines){
-        next if(/^(#|<|$)/);
-        my @m = ($_ =~ /$re/);
+    my @cols = split(/\s*,\s*/, $self->regex_values);
+
+    # This is more memory efficient.
+    while(${$content_ref} =~ /([^\r\n]+)[\r\n]*/g) {
+        my $line = $1;
+        next if($line =~ /^(#|<|$)/);
+        my @m = ($line =~ $re);
         next unless(@m);
         my $h = {};
-        my @cols = $self->config->regex_values;
         foreach (0 ... $#cols){
             $m[$_] = '' unless($m[$_]);
             for($m[$_]){
