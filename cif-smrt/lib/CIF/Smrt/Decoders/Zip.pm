@@ -1,9 +1,17 @@
 package CIF::Smrt::Decoders::Zip;
-use parent CIF::Smrt::Decoder;
 
 use strict;
 use warnings;
+use CIF::Smrt::Decoder;
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
+use Moose;
+extends 'CIF::Smrt::Decoder';
+
+has 'zip_filename' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 0
+);
 
 use constant MIME_TYPES => (
   'application/x-zip',
@@ -12,14 +20,13 @@ use constant MIME_TYPES => (
 sub mime_types { return MIME_TYPES; }
 
 sub decode {
-    my $class = shift;
+    my $self = shift;
     my $dataref = shift;
-    my $args = shift;
 
     my $file;
-    if($args->{'zip_filename'}){
-        $file = $args->{'zip_filename'};
-    } elsif ($args->{'feed'} && $args->{'feed'} =~ m/\/([a-zA-Z0-9_]+).zip$/){
+    if($self->zip_filename){
+        $file = $self->zip_filename;
+    } elsif ($self->feedurl =~ m/\/([a-zA-Z0-9_]+).zip$/){
         $file = $1;
     }
 

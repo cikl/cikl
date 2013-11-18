@@ -44,15 +44,16 @@ sub lookup {
 sub autodecode {
   my $self = shift;
   my $content_ref = shift;
-  my $feedparser_config = shift;
+  my $args = shift;
   my $ft = File::Type->new();
   my $type = $ft->mime_type($$content_ref);
-  my $decoder = $self->lookup($type);
-  unless($decoder) {
+  my $decoder_class = $self->lookup($type);
+  unless($decoder_class) {
     debug("Don't know how to decode $type");
     return $content_ref;
   }
-  return $decoder->decode($content_ref, $feedparser_config);
+  my $decoder = $decoder_class->new(%$args);
+  return $decoder->decode($content_ref);
 }
 
 1;

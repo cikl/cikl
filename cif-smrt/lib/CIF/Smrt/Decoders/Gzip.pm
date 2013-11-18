@@ -1,9 +1,13 @@
 package CIF::Smrt::Decoders::Gzip;
-use parent CIF::Smrt::Decoder;
 
 use strict;
 use warnings;
+use CIF::Smrt::Decoder;
+use Moose;
+extends 'CIF::Smrt::Decoder';
+
 use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
+
 use constant MIME_TYPES => (
   'application/x-gzip'
 );

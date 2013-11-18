@@ -57,10 +57,10 @@ sub get_parser {
 sub decode {
     my $self = shift;
     my $dataref = shift;
-    return $self->{decoders}->autodecode($dataref, {
-        zip_filename => $self->{feedparser_config}->{zip_filename},
-        feed => $self->{feedparser_config}->feed()
-      });
+    my $feedparser_config = $self->{feedparser_config};
+    my $feedurl = URI->new($feedparser_config->feed());
+    my %args = (%$feedparser_config, feedurl => $feedurl);
+    return $self->{decoders}->autodecode($dataref, \%args);
 }
 
 sub lookup_parser {
