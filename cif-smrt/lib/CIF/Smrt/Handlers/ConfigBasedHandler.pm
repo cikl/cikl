@@ -32,12 +32,16 @@ use CIF qw/debug/;
 sub new {
     my $class = shift;
     my $args = shift;
+    my $feedparser_config = $args->{feedparser_config};
+    $args->{refresh} = $feedparser_config->{refresh};
+    $args->{default_event_data} = $feedparser_config->default_event_data();
+
     my $self = $class->SUPER::new($args);
 
-    $self->{feedparser_config} = $args->{feedparser_config};
+    $self->{feedparser_config} = $feedparser_config;
     
     if($self->proxy){
-        $self->{feedparser_config}->{'proxy'} = $self->proxy;
+        $feedparser_config->{'proxy'} = $self->proxy;
     }
 
     my $parser_class = $self->lookup_parser($self->{feedparser_config}->parser);
@@ -46,21 +50,6 @@ sub new {
     return $self;
 }
 
-sub _event_builder {
-    my $self = shift;
-    if ($self->{event_builder}) {
-      return $self->{event_builder};
-    }
-
-    my $feedparser_config = $self->{feedparser_config};
-
-    my $event_builder = CIF::EventBuilder->new(
-      refresh => $feedparser_config->{'refresh'},
-      goback => $self->goback(),
-      default_event_data => $feedparser_config->default_event_data()
-    );
-    $self->{'event_builder'} = $event_builder;
-}
 
 sub fetch_feed { 
     my $self = shift;
@@ -90,7 +79,7 @@ sub fetch_feed {
     
     # remove any CR's
     #$ret =~ s/\r//g;
-    return(undef,$retref);
+    return($retref);
 }
 
 # we do this sep cause it's in a thread
@@ -127,11 +116,8 @@ sub _fetch_feed {
 sub parse {
     my $self = shift;
     my $broker = shift;
-    my $feedparser_config = $self->{feedparser_config};
 
-    debug('fetching feed: '.$feedparser_config->feed) if($::debug);
-    my ($err,$content_ref) = $self->fetch_feed();
-    die($err) if($err);
+    my $content_ref = $self->fetch_feed();
     
     my $return = $self->{parser}->parse($content_ref, $broker);
     return(undef);
@@ -167,7 +153,7 @@ sub process {
 
     my $broker = CIF::Smrt::Broker->new(
       emit_cb => $emit_cb, 
-      builder => $self->_event_builder()
+      builder => $self->event_builder()
     );
     try {
       my ($err) = $self->parse($broker);

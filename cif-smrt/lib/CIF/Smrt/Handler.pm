@@ -32,12 +32,24 @@ sub new {
   $self->{apikey} = $args->{'apikey'} || $self->{smrt_config}->{'apikey'} || die('missing apikey');
   $self->{proxy} =  $args->{'proxy'}  || $self->{smrt_config}->{'proxy'};
 
+  my $event_builder = CIF::EventBuilder->new(
+    refresh => $args->{'refresh'},
+    goback => $self->goback(),
+    default_event_data => $args->{'default_event_data'} || {}
+  );
+  $self->{'event_builder'} = $event_builder;
+
   if($::debug){
     my $gb = DateTime->from_epoch(epoch => $goback);
     debug('goback: '.$gb);
   }    
     
   return $self;
+}
+
+sub event_builder {
+    my $self = shift;
+    return $self->{event_builder};
 }
 
 sub init_config {
