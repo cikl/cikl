@@ -10,8 +10,9 @@ use constant SCHEMES => qw/http https/;
 
 sub new {
   my $class = shift;
+  my $feedurl = shift;
   my $args = shift;
-  my $self = $class->SUPER::new($args);
+  my $self = $class->SUPER::new($feedurl, $args);
 
   $self->{timeout} = $args->{timeout} || 300;
   $self->{proxy} = $args->{proxy};
@@ -29,8 +30,11 @@ sub schemes {
 
 sub fetch {
     my $self = shift;
-    my $feedurl = shift;
-    return unless($feedurl->scheme =~ /^http/);
+    my $feedurl = $self->feedurl();
+    
+    unless($feedurl->scheme =~ /^http/) {
+      die("Incorrect scheme: " . $feedurl->scheme());
+    }
     
     # If a proxy server is set in the configuration use LWP::UserAgent
     # since LWPx::ParanoidAgent does not allow the use of proxies
@@ -74,7 +78,7 @@ sub fetch {
        $req->authorization_basic($self->{'feed_user'},$self->{'feed_password'});
        my $ress = $ua->request($req);
        unless($ress->is_success()){
-            return('request failed: '.$ress->status_line());
+            die('request failed: '.$ress->status_line());
        }
        $content = $ress->decoded_content();
     } else {
@@ -82,27 +86,27 @@ sub fetch {
         if($self->{'mirror'}){
             $feedurl->path() =~ m/\/([a-zA-Z0-9._-]+)$/;
             my $file = $self->{'mirror'}.'/'.$1;
-            return($file.' isn\'t writeable by our user') if(-e $file && !-w $file);
+            die($file.' isn\'t writeable by our user') if(-e $file && !-w $file);
             my $ret = $ua->mirror($feedurl->as_string(),$file);
             # unless it's a 200 or a 304 (which means cached, not modified)
             unless($ret->is_success() || $ret->status_line() =~ /^304 /){
-                return $ret->decoded_content();   
+                die $ret->decoded_content();   
             }
-            open(F,$file) || return($!.': '.$file);
+            open(F,$file) || die ($!.': '.$file);
             $content = join('',<F>);
             close(F);
-            return('no content') unless($content && $content ne '');
+            die ('no content') unless($content && $content ne '');
         } else {
             $r = $ua->get($feedurl->as_string());
             if($r->is_success()){
                 $content = $r->decoded_content();
             } else {
-                return('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
+                die('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
             }
             $ua = undef;
         }
     }
-    return(undef,$content);
+    return(\$content);
 }
 
 sub env_proxy {

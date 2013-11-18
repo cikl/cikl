@@ -44,20 +44,18 @@ sub new {
         $feedparser_config->{'proxy'} = $self->proxy;
     }
 
-    my $parser_class = $self->lookup_parser($self->{feedparser_config}->parser);
-    $self->{parser} = $parser_class->new($self->{feedparser_config});
-
     return $self;
 }
 
 
-sub fetch_feed { 
+sub fetch { 
     my $self = shift;
     my $cv = AnyEvent->condvar;
+    my $fetcher = $self->get_fetcher();
 
     async {
       try {
-        $cv->send($self->_fetch_feed());
+        $cv->send($fetcher->fetch());
       } catch {
         $cv->croak(shift);
       };
@@ -82,44 +80,31 @@ sub fetch_feed {
     return($retref);
 }
 
-# we do this sep cause it's in a thread
-# this gets around memory leak issues and TLS threading issues with Crypt::SSLeay, etc
-sub _fetch_feed {
+sub get_fetcher {
     my $self = shift;
     my $feedparser_config = $self->{feedparser_config};
-    unless($feedparser_config->feed) {
-      die("no feed config provided!");
-    }
-    
-    # MPR TODO : Fix up this key/val replacing stuff.
-#    foreach my $key (keys %$feedparser_config){
-#        foreach my $key2 (keys %$feedparser_config){
-#            if($feedparser_config->{$key} =~ /<$key2>/){
-#                $feedparser_config->{$key} =~ s/<$key2>/$feedparser_config->{$key2}/g;
-#            }
-#        }
-#    }
     my $feedurl = URI->new($feedparser_config->feed());
     my $fetcher_class = $self->lookup_fetcher($feedurl);
     if (!defined($fetcher_class)) {
       die("Could not determine fetcher");
     }
 
-    my $fetcher = $fetcher_class->new($feedparser_config);
-    my ($err, $ret) = $fetcher->fetch($feedurl);
-    if ($err) {
-      die($err);
-    }
-    return \$ret;
+    return $fetcher_class->new($feedurl, $feedparser_config);
+}
+
+sub get_parser {
+    my $self = shift;
+    my $parser_class = $self->lookup_parser($self->{feedparser_config}->parser);
+    return $parser_class->new($self->{feedparser_config});
 }
 
 sub parse {
     my $self = shift;
     my $broker = shift;
 
-    my $content_ref = $self->fetch_feed();
+    my $content_ref = $self->fetch();
     
-    my $return = $self->{parser}->parse($content_ref, $broker);
+    my $return = $self->get_parser()->parse($content_ref, $broker);
     return(undef);
 }
 

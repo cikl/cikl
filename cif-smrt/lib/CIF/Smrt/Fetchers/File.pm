@@ -16,7 +16,7 @@ sub schemes {
 
 sub fetch {
     my $self = shift;
-    my $feedurl = shift;
+    my $feedurl = $self->feedurl();
 
     if (!defined($feedurl->scheme())) {
       # it's going to be a relative URL.
@@ -29,11 +29,11 @@ sub fetch {
     
     my $orig_sep = $/;
     local $/ = undef;
-    open(F,$feedurl->path) || return($!.': '.$feedurl->path);
+    open(F,$feedurl->path) || die($!.': '.$feedurl->path);
     my $content = <F>;
     close(F);
     $/ = $orig_sep;
-    return(undef,$content);
+    return(\$content);
 }
 
 1;
