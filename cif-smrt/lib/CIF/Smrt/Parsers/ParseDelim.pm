@@ -38,14 +38,6 @@ sub parse {
     my $content_ref = shift;
     my $broker = shift;
 
-    use Data::Dumper;
-    print Dumper {
-      delimiter => $self->delimiter,
-      feed_limit => $self->feed_limit,
-      values => $self->values,
-      skipfirst => $self->skipfirst
-    };
-
     my $split = $self->delimiter;
 
     my @lines = split(/[\r\n]/,$$content_ref);
