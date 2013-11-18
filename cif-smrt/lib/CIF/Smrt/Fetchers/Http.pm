@@ -30,9 +30,7 @@ sub schemes {
 sub fetch {
     my $self = shift;
     my $feedurl = shift;
-    my $f = shift;
     return unless($feedurl->scheme =~ /^http/);
-    return if($f->{'cif'});
     
     # If a proxy server is set in the configuration use LWP::UserAgent
     # since LWPx::ParanoidAgent does not allow the use of proxies

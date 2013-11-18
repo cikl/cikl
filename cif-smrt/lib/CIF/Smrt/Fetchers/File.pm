@@ -17,7 +17,6 @@ sub schemes {
 sub fetch {
     my $self = shift;
     my $feedurl = shift;
-    my $f = shift;
 
     if (!defined($feedurl->scheme())) {
       # it's going to be a relative URL.

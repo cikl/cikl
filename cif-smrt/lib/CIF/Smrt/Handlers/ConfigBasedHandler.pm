@@ -111,7 +111,7 @@ sub _fetch_feed {
     }
 
     my $fetcher = $fetcher_class->new($feedparser_config);
-    my ($err, $ret) = $fetcher->fetch($feedurl, $feedparser_config);
+    my ($err, $ret) = $fetcher->fetch($feedurl);
     if ($err) {
       die($err);
     }
