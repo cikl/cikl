@@ -2,6 +2,8 @@ package CIF::Smrt::Decoders;
 
 use strict;
 use warnings;
+use File::Type;
+use CIF qw/debug/;
 
 use Module::Pluggable search_path => "CIF::Smrt::Decoders", 
       require => 1, sub_name => '_decoders';
@@ -37,6 +39,20 @@ sub lookup {
   my $self = shift;
   my $mime_type = shift;
   return($self->{decoder_map}->{$mime_type});
+}
+
+sub autodecode {
+  my $self = shift;
+  my $content_ref = shift;
+  my $feedparser_config = shift;
+  my $ft = File::Type->new();
+  my $type = $ft->mime_type($$content_ref);
+  my $decoder = $self->lookup($type);
+  unless($decoder) {
+    debug("Don't know how to decode $type");
+    return $content_ref;
+  }
+  return $decoder->decode($content_ref, $feedparser_config);
 }
 
 1;

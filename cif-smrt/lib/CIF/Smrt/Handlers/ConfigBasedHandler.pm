@@ -12,7 +12,6 @@ use CIF::Client;
 use Regexp::Common qw/net URI/;
 use Regexp::Common::net::CIDR;
 use Encode qw/encode_utf8/;
-use File::Type;
 use URI::Escape;
 use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
@@ -70,16 +69,10 @@ sub get_parser {
 sub decode {
     my $self = shift;
     my $dataref = shift;
-    my $feedparser_config = $self->{feedparser_config};
-
-    my $ft = File::Type->new();
-    my $t = $ft->mime_type($$dataref);
-    my $decoder = $self->{decoders}->lookup($t);
-    unless($decoder) {
-      debug("Don't know how to decode $t");
-      return $dataref;
-    }
-    return $decoder->decode($dataref, $feedparser_config);
+    return $self->{decoders}->autodecode($dataref, {
+        zip_filename => $self->{feedparser_config}->{zip_filename},
+        feed => $self->{feedparser_config}->feed()
+      });
 }
 
 sub lookup_parser {
