@@ -39,6 +39,9 @@ use Data::Dumper;
 use MIME::Lite;
 use CIF qw/debug/;
 use Sys::MemInfo qw(totalmem);
+use CIF::Smrt::Handlers::ConfigBasedHandler;
+use CIF::Smrt::FeedParserConfig;
+use Try::Tiny;
 
 my %opts;
 getopts('g:hNA:s:dC:f:r:v:p:',\%opts);
@@ -95,13 +98,22 @@ Examples:
 EOF
 }
 
+my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
+
 my $ret;
-my ($err,$smrt) = CIF::Smrt->new({
-    config          => $config,
-    feed            => $feed,
-    rules           => $rules,
-    goback          => $goback,
-});
+my $smrt;
+my $err;
+try {
+  $smrt = CIF::Smrt::Handlers::ConfigBasedHandler->new({
+      feedparser_config => $feedparser_config,
+      config          => $config,
+      feed            => $feed,
+      rules           => $rules,
+      goback          => $goback,
+    });
+} catch {
+  $err = shift;
+};
 
 if($err){
     print(usage()."\n\n");

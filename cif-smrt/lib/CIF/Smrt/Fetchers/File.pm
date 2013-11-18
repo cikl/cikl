@@ -1,28 +1,36 @@
 package CIF::Smrt::Fetchers::File;
+use parent CIF::Smrt::Fetcher;
 
 use strict;
 use warnings;
+use URI::file;
+
+use constant SCHEMES => (
+      'file', 
+      '__undef__'# this tells us that it's a relative path.
+    ); 
+
+sub schemes { 
+  return SCHEMES;
+}
 
 sub fetch {
-    my $class = shift;
+    my $self = shift;
+    my $feedurl = shift;
     my $f = shift;
-    
-    return unless($f->{'feed'} =~ /^(\/\S+|[a-zA-Z]+\/\S+)/);
-    my $file = $1;
-    if($file =~ /^([a-zA-Z]+)/){
-        ## TODO -- work-around, path should be passed to me by the higher level lib
-        # || /opt/cif/bin is in case we run $ cif_crontool as is with no preceeding path
-        my $bin_path = $FindBin::Bin || '/opt/cif/bin';
-        # see if we're working out of a -dev directory
-        if(-e './rules'){
-            $file = $bin_path.'/../rules/'.$file;
-        } else {
-            $file = $bin_path.'/../'.$file;
-        }
+
+    if (!defined($feedurl->scheme())) {
+      # it's going to be a relative URL.
+      $feedurl = URI::file->new_abs($feedurl->as_string());
     }
+
+    unless ($feedurl->scheme() eq 'file') {
+      die("Unsupported URI scheme: " . $feedurl->scheme);
+    }
+    
     my $orig_sep = $/;
     local $/ = undef;
-    open(F,$file) || return($!.': '.$file);
+    open(F,$feedurl->path) || return($!.': '.$feedurl->path);
     my $content = <F>;
     close(F);
     $/ = $orig_sep;

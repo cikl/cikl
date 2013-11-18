@@ -106,6 +106,11 @@ sub new {
   return $self;
 }
 
+sub feed {
+  my $self = shift;
+  return $self->{feed};
+}
+
 sub guid {
   my $self = shift;
   return $self->{guid};

@@ -1,24 +1,45 @@
 package CIF::Smrt::Fetchers::Http;
+use parent CIF::Smrt::Fetcher;
 
 use strict;
 use warnings;
 
 our $AGENT = 'cif-smrt/'.$CIF::VERSION.' (collectiveintel.org)';
 
+use constant SCHEMES => qw/http https/;
+
+sub new {
+  my $class = shift;
+  my $args = shift;
+  my $self = $class->SUPER::new($args);
+
+  $self->{timeout} = $args->{timeout} || 300;
+  $self->{proxy} = $args->{proxy};
+  $self->{verify_tls} = $args->{verify_tls} // 1;
+  $self->{feed_user} = $args->{feed_user};
+  $self->{feed_password} = $args->{feed_password};
+  $self->{mirror} = $args->{mirror};
+
+  return $self;
+}
+
+sub schemes { 
+  return SCHEMES;
+}
+
 sub fetch {
-    my $class = shift;
+    my $self = shift;
+    my $feedurl = shift;
     my $f = shift;
-    return unless($f->{'feed'} =~ /^http/);
+    return unless($feedurl->scheme =~ /^http/);
     return if($f->{'cif'});
     
-    my $timeout = $f->{'timeout'} || 300;
-
     # If a proxy server is set in the configuration use LWP::UserAgent
     # since LWPx::ParanoidAgent does not allow the use of proxies
     # We'll assume that the proxy is sane and handles timeouts and redirects and such appropriately.
     # LWPx::ParanoidAgent doesn't work well with Net-HTTP/TLS timeouts just yet
     my $ua;
-    if (env_proxy() || $f->{'proxy'} || $f->{'feed'} =~ /^https/) {
+    if (env_proxy() || $self->{'proxy'} || $feedurl->scheme() eq 'https') {
         # setup the initial agent
         require LWP::UserAgent;
         $ua = LWP::UserAgent->new(agent => $AGENT);
@@ -27,7 +48,7 @@ sub fetch {
         $ua->env_proxy();
         
         # if we override, specify
-        $ua->proxy(['http','https','ftp'], $f->{'proxy'}) if($f->{'proxy'});
+        $ua->proxy(['http','https','ftp'], $self->{'proxy'}) if($self->{'proxy'});
     } else {
         # we use this instead of ::UserAgent, it does better
         # overall timeout checking
@@ -35,12 +56,12 @@ sub fetch {
         $ua = LWPx::ParanoidAgent->new(agent => $AGENT);
     }
     
-    $ua->timeout($timeout);
+    $ua->timeout($self->{timeout});
     
     # work-around for what appears to be a threading / race condition
-    $ua->max_redirect(0) if($f->{'feed'} =~ /^https/);
+    $ua->max_redirect(0) if($feedurl->scheme() eq 'https');
 
-    if(defined($f->{'verify_tls'}) && $f->{'verify_tls'} == 0){
+    if(defined($self->{'verify_tls'} == 0)) {
         $ua->ssl_opts(SSL_verify_mode => 'SSL_VERIFY_NONE');
     } else {
         $ua->ssl_opts(SSL_verify_mode => 'SSL_VERIFY_PEER');
@@ -50,9 +71,9 @@ sub fetch {
     delete($ua->{'ssl_opts'}->{'verify_hostname'});
 
     my $content;
-    if($f->{'feed_user'}){
-       my $req = HTTP::Request->new(GET => $f->{'feed'});
-       $req->authorization_basic($f->{'feed_user'},$f->{'feed_password'});
+    if($self->{'feed_user'}){
+       my $req = HTTP::Request->new(GET => $feedurl->as_string());
+       $req->authorization_basic($self->{'feed_user'},$self->{'feed_password'});
        my $ress = $ua->request($req);
        unless($ress->is_success()){
             return('request failed: '.$ress->status_line());
@@ -60,11 +81,11 @@ sub fetch {
        $content = $ress->decoded_content();
     } else {
         my $r;
-        if($f->{'mirror'}){
-            $f->{'feed'} =~ m/\/([a-zA-Z0-9._-]+)$/;
-            my $file = $f->{'mirror'}.'/'.$1;
+        if($self->{'mirror'}){
+            $feedurl->path() =~ m/\/([a-zA-Z0-9._-]+)$/;
+            my $file = $self->{'mirror'}.'/'.$1;
             return($file.' isn\'t writeable by our user') if(-e $file && !-w $file);
-            my $ret = $ua->mirror($f->{'feed'},$file);
+            my $ret = $ua->mirror($feedurl->as_string(),$file);
             # unless it's a 200 or a 304 (which means cached, not modified)
             unless($ret->is_success() || $ret->status_line() =~ /^304 /){
                 return $ret->decoded_content();   
@@ -74,11 +95,11 @@ sub fetch {
             close(F);
             return('no content') unless($content && $content ne '');
         } else {
-            $r = $ua->get($f->{'feed'});
+            $r = $ua->get($feedurl->as_string());
             if($r->is_success()){
                 $content = $r->decoded_content();
             } else {
-                return('failed to get feed: '.$f->{'feed'}."\n".$r->status_line());
+                return('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
             }
             $ua = undef;
         }

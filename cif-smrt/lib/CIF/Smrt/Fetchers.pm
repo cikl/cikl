@@ -2,6 +2,8 @@ package CIF::Smrt::Fetchers;
 
 use strict;
 use warnings;
+use URI;
+use Data::Dumper;
 
 use Module::Pluggable search_path => "CIF::Smrt::Fetchers", 
       require => 1, sub_name => '_fetchers';
@@ -20,11 +22,21 @@ sub new {
 
 sub _init_fetchers {
   my $self = shift;
-  my @ret = ();
+  my $ret = {};
+  my @fetchers;
   foreach my $fetcher (__PACKAGE__->_fetchers()) {
-    push(@ret, $fetcher);
+    foreach my $scheme ($fetcher->schemes()) {
+      my $scheme = lc($scheme) if (defined($scheme));
+      if (my $existing = $ret->{$scheme}) {
+        $scheme = 'undef' if (!defined($scheme)); # just make it printable
+        die("Cannot associate parser '$fetcher' with the scheme '$scheme'. Already registered with $existing.");
+      }
+      $ret->{$scheme} = $fetcher;
+    }
+    push(@fetchers, $fetcher);
   }
-  return \@ret;
+  return $ret;
+  #return \@fetchers;
 }
 
 sub fetchers {
@@ -34,6 +46,13 @@ sub fetchers {
 
 sub lookup {
   my $self = shift;
+  my $feedurl = shift;
+  my $scheme = $feedurl->scheme;
+  if (!defined($scheme)) {
+    $scheme = '__undef__';
+  }
+  $scheme = lc($scheme);
+  return $self->{fetchers}->{$scheme};
 }
 
 1;
