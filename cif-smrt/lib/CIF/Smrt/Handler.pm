@@ -2,6 +2,7 @@ package CIF::Smrt::Handler;
 
 use strict;
 use warnings;
+use CIF::Client;
 use CIF::EventBuilder;
 use CIF::Smrt::Broker;
 use Config::Simple;
@@ -10,6 +11,9 @@ use AnyEvent;
 use Coro;
 
 use CIF qw/debug/;
+
+use Net::SSLeay;
+Net::SSLeay::SSLeay_add_ssl_algorithms();
 
 sub new {
   my $class = shift;

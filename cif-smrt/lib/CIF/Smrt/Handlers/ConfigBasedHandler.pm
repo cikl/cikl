@@ -1,29 +1,15 @@
 package CIF::Smrt::Handlers::ConfigBasedHandler;
 use base 'CIF::Smrt::Handler';
 
-use 5.008008;
 use strict;
 use warnings;
 
-our $VERSION = '0.99_03';
-$VERSION = eval $VERSION;  # see L<perlmodstyle>
-
-use CIF::Client;
-use Regexp::Common qw/net URI/;
-use Regexp::Common::net::CIDR;
 use Encode qw/encode_utf8/;
-use URI::Escape;
-use Try::Tiny;
 use CIF::Smrt::FeedParserConfig;
 use CIF::Smrt::Parsers;
 use CIF::Smrt::Decoders;
 use CIF::Smrt::Fetchers;
 use URI;
-
-use Net::SSLeay;
-Net::SSLeay::SSLeay_add_ssl_algorithms();
-
-use CIF qw/debug/;
 
 sub new {
     my $class = shift;
