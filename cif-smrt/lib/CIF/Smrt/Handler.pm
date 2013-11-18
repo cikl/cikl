@@ -3,6 +3,7 @@ package CIF::Smrt::Handler;
 use strict;
 use warnings;
 use CIF::Client;
+use CIF::Smrt::ClientBroker;
 use CIF::EventBuilder;
 use CIF::Smrt::Broker;
 use Config::Simple;
@@ -58,16 +59,9 @@ sub process {
     my ($err, $ret);
     
     my $client = $self->get_client();
-    my $emit_cb = sub {
-      my $event = shift;
-      ($err, $ret) = $client->submit($event);    
-      if ($err) {
-        die($err);
-      }
-    };
 
-    my $broker = CIF::Smrt::Broker->new(
-      emit_cb => $emit_cb, 
+    my $broker = CIF::Smrt::ClientBroker->new(
+      client => $client,
       builder => $self->event_builder()
     );
     try {

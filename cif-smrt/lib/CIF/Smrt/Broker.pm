@@ -4,13 +4,6 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
-has 'emit_cb' => (
-  is => 'bare',
-  isa => 'CodeRef',
-  reader => '_emit_cb',
-  required => 1
-);
-
 has 'builder' => (
   is => 'bare',
   isa => 'CIF::EventBuilder',
@@ -42,11 +35,16 @@ sub emit {
   my $event = $self->_builder->build_event($event_hash);
   if (defined($event)) {
     $self->_set_count($self->count() + 1);
-    $self->_emit_cb->($event);
+    $self->_emit($event);
   } else {
     $self->_set_count_too_old($self->count_too_old() + 1);
     # It was too old.
   }
+}
+
+sub _emit {
+  my $self = shift;
+  die("_emit not implemented!");
 }
 
 __PACKAGE__->meta->make_immutable;
