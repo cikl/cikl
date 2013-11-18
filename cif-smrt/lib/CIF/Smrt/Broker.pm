@@ -6,18 +6,21 @@ use namespace::autoclean;
 
 has 'emit_cb' => (
   is => 'bare',
+  isa => 'CodeRef',
   reader => '_emit_cb',
   required => 1
 );
 
 has 'builder' => (
   is => 'bare',
+  isa => 'CIF::EventBuilder',
   reader => '_builder',
   required => 1
 );
 
 has 'count' => (
   is => 'ro',
+  isa => 'Num',
   writer => '_set_count',
   required => 1,
   default => 0,
@@ -26,6 +29,7 @@ has 'count' => (
 
 has 'count_too_old' => (
   is => 'ro',
+  isa => 'Num',
   writer => '_set_count_too_old',
   required => 1,
   default => 0,

@@ -6,7 +6,7 @@ use Moose;
 
 has 'feedurl' => (
   is => 'ro',
-  # isa => 'URI',
+  isa => 'URI',
   required => 1
 );
 
