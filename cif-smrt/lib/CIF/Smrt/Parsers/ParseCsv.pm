@@ -1,9 +1,13 @@
 package CIF::Smrt::Parsers::ParseCsv;
-use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
 use Text::CSV;
+
+use Moose;
+use CIF::Smrt::Parser;
+extends 'CIF::Smrt::Parser';
+use namespace::autoclean;
 
 use constant NAME => 'csv';
 sub name { return NAME; }
@@ -51,5 +55,7 @@ sub parse {
     return(undef);
 
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

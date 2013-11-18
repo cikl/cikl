@@ -1,5 +1,12 @@
 package CIF::Smrt::Parsers::ParseJson;
-use base 'CIF::Smrt::Parser';
+
+use strict;
+use warnings;
+
+use Moose;
+use CIF::Smrt::Parser;
+extends 'CIF::Smrt::Parser';
+use namespace::autoclean;
 
 use JSON;
 
@@ -26,5 +33,7 @@ sub parse {
     }
     return(undef);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

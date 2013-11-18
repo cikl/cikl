@@ -1,8 +1,12 @@
 package CIF::Smrt::Parsers::ParseDelim;
-use base 'CIF::Smrt::Parser';
 
 use strict;
 use warnings;
+
+use Moose;
+use CIF::Smrt::Parser;
+extends 'CIF::Smrt::Parser';
+use namespace::autoclean;
 
 use constant NAME => 'delimiter';
 sub name { return NAME; }
@@ -46,5 +50,7 @@ sub parse {
     }
     return(undef);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
