@@ -173,7 +173,7 @@ if($exclude_assessment && $exclude_assessment =~ /\,/){
     exit(0);
 }
 
-my $config = Config::Simple->new($config_file) or die($!);
+my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
 my ($err,$cli) = CIF::Client->new({
     config          => $config,
 });
