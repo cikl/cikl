@@ -4,9 +4,11 @@ use strict;
 use warnings;
 use URI;
 use Data::Dumper;
+#use CIF::Smrt::Fetcher;
 
 use Module::Pluggable search_path => "CIF::Smrt::Fetchers", 
-      require => 1, sub_name => '_fetchers';
+      inner => 0, require => 1, sub_name => '_fetchers'
+      ;
 
 sub new {
   my $class = shift;

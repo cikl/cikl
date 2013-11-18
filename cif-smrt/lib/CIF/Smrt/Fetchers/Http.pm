@@ -1,28 +1,54 @@
 package CIF::Smrt::Fetchers::Http;
-use parent CIF::Smrt::Fetcher;
 
 use strict;
 use warnings;
+use Moose;
+use CIF::Smrt::Fetcher;
+extends 'CIF::Smrt::Fetcher';
+
+use namespace::autoclean;
 
 our $AGENT = 'cif-smrt/'.$CIF::VERSION.' (collectiveintel.org)';
 
 use constant SCHEMES => qw/http https/;
 
-sub new {
-  my $class = shift;
-  my $feedurl = shift;
-  my $args = shift;
-  my $self = $class->SUPER::new($feedurl, $args);
+has 'timeout' => (
+  is => 'ro',
+  isa => 'Num',
+  default => 300,
+  required => 1
+);
 
-  $self->{timeout} = $args->{timeout} || 300;
-  $self->{proxy} = $args->{proxy};
-  $self->{verify_tls} = $args->{verify_tls} // 1;
-  $self->{feed_user} = $args->{feed_user};
-  $self->{feed_password} = $args->{feed_password};
-  $self->{mirror} = $args->{mirror};
+has 'proxy' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 0
+);
 
-  return $self;
-}
+has 'verify_tls' => (
+  is => 'ro', 
+  isa => 'Num',
+  default => 1,
+  required => 0
+);
+
+has 'feed_user' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 0
+);
+
+has 'feed_password' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 0
+);
+
+has 'mirror' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 0
+);
 
 sub schemes { 
   return SCHEMES;
@@ -41,7 +67,7 @@ sub fetch {
     # We'll assume that the proxy is sane and handles timeouts and redirects and such appropriately.
     # LWPx::ParanoidAgent doesn't work well with Net-HTTP/TLS timeouts just yet
     my $ua;
-    if (env_proxy() || $self->{'proxy'} || $feedurl->scheme() eq 'https') {
+    if (env_proxy() || $self->proxy() || $feedurl->scheme() eq 'https') {
         # setup the initial agent
         require LWP::UserAgent;
         $ua = LWP::UserAgent->new(agent => $AGENT);
@@ -50,7 +76,8 @@ sub fetch {
         $ua->env_proxy();
         
         # if we override, specify
-        $ua->proxy(['http','https','ftp'], $self->{'proxy'}) if($self->{'proxy'});
+        my $proxy = $self->proxy();
+        $ua->proxy(['http','https','ftp'], $proxy) if($proxy);
     } else {
         # we use this instead of ::UserAgent, it does better
         # overall timeout checking
@@ -58,12 +85,12 @@ sub fetch {
         $ua = LWPx::ParanoidAgent->new(agent => $AGENT);
     }
     
-    $ua->timeout($self->{timeout});
+    $ua->timeout($self->timeout());
     
     # work-around for what appears to be a threading / race condition
     $ua->max_redirect(0) if($feedurl->scheme() eq 'https');
 
-    if(defined($self->{'verify_tls'} == 0)) {
+    if(defined($self->verify_tls == 0)) {
         $ua->ssl_opts(SSL_verify_mode => 'SSL_VERIFY_NONE');
     } else {
         $ua->ssl_opts(SSL_verify_mode => 'SSL_VERIFY_PEER');
@@ -73,9 +100,9 @@ sub fetch {
     delete($ua->{'ssl_opts'}->{'verify_hostname'});
 
     my $content;
-    if($self->{'feed_user'}){
+    if($self->feed_user){
        my $req = HTTP::Request->new(GET => $feedurl->as_string());
-       $req->authorization_basic($self->{'feed_user'},$self->{'feed_password'});
+       $req->authorization_basic($self->feed_user,$self->feed_password);
        my $ress = $ua->request($req);
        unless($ress->is_success()){
             die('request failed: '.$ress->status_line());
@@ -83,9 +110,9 @@ sub fetch {
        $content = $ress->decoded_content();
     } else {
         my $r;
-        if($self->{'mirror'}){
+        if(my $mirror = $self->mirror){
             $feedurl->path() =~ m/\/([a-zA-Z0-9._-]+)$/;
-            my $file = $self->{'mirror'}.'/'.$1;
+            my $file = $mirror.'/'.$1;
             die($file.' isn\'t writeable by our user') if(-e $file && !-w $file);
             my $ret = $ua->mirror($feedurl->as_string(),$file);
             # unless it's a 200 or a 304 (which means cached, not modified)
@@ -135,4 +162,7 @@ sub env_proxy {
     }
     return $found;
 }
+
+__PACKAGE__->meta->make_immutable;
+
 1;

@@ -2,27 +2,17 @@ package CIF::Smrt::Fetcher;
 
 use strict;
 use warnings;
+use Moose;
 
-sub new {
-  my $class = shift;
-  my $feedurl = shift;
-  my $args = shift;
-
-  my $self = {
-    feedurl => $feedurl
-  };
-  bless $self, $class;
-  return $self;
-}
+has 'feedurl' => (
+  is => 'ro',
+  # isa => 'URI',
+  required => 1
+);
 
 sub schemes { 
   my $class = shift;
   die("$class has not implemented the schemes() method!");
-}
-
-sub feedurl {
-  my $self = shift;
-  return $self->{feedurl};
 }
 
 sub fetch {

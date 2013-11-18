@@ -43,7 +43,9 @@ sub get_fetcher {
       die("Could not determine fetcher");
     }
 
-    return $fetcher_class->new($feedurl, $feedparser_config);
+    my %args = (%$feedparser_config, feedurl => $feedurl);
+
+    return $fetcher_class->new(%args);
 }
 
 sub get_parser {
