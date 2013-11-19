@@ -8,6 +8,7 @@ use CIF::Smrt::Parser;
 extends 'CIF::Smrt::Parser';
 use namespace::autoclean;
 use CIF::Smrt::ParserHelpers::XPathMapping;
+use CIF::Smrt::ParserHelpers::XPathRegexMapping;
 
 use XML::LibXML::Reader;
 
@@ -20,9 +21,15 @@ has 'node_xpath' => (
   required => 1
 );
 
-has 'xml_xpath_map' => (
+has 'xpath_map' => (
   is => 'ro',
   isa => 'ArrayRef[CIF::Smrt::ParserHelpers::XPathMapping]',
+  required => 0
+);
+
+has 'xpathregex_map' => (
+  is => 'ro',
+  isa => 'ArrayRef[CIF::Smrt::ParserHelpers::XPathRegexMapping]',
   required => 0
 );
 
@@ -31,24 +38,37 @@ around BUILDARGS => sub {
   my $class = shift;
   my %args = @_;
 
-  # Don't do anything if it xml_xpath_map already exists.
-  if (exists($args{xml_xpath_map})) {
-    return $class->$orig_method(%args);
-  }
-
-  my @xpath_map;
-  foreach my $key (keys %args) {
-    if ($key =~ /^xpath_(.*)$/) {
-      my $event_field= $1;
-      my $xpath = $args{$key};
-      my $m = CIF::Smrt::ParserHelpers::XPathMapping->new(
-        event_field => $event_field,
-        xpath => $xpath
-      );
-      push(@xpath_map, $m);
+  if (!exists($args{xpath_map})) {
+    my @xpath_map;
+    foreach my $key (keys %args) {
+      if ($key =~ /^xpath\d+$/) {
+        my ($xpath, $event_field) = @{$args{$key}};
+        my $m = CIF::Smrt::ParserHelpers::XPathMapping->new(
+          event_field => $event_field,
+          xpath => $xpath
+        );
+        push(@xpath_map, $m);
+      }
     }
+
+    $args{xpath_map} = \@xpath_map;
   }
-  $args{xml_xpath_map} = \@xpath_map;
+  
+  if (!exists($args{xpathregex_map})) {
+    my @xpathregex_map;
+    foreach my $key (keys %args) {
+      if ($key =~ /^xpathregex\d+$/) {
+        my ($xpath, $regex, @event_fields) = @{$args{$key}};
+        my $m = CIF::Smrt::ParserHelpers::XPathRegexMapping->new(
+          xpath => $xpath,
+          regex => qr/$regex/,
+          event_fields => \@event_fields,
+        );
+        push(@xpathregex_map, $m);
+      }
+    }
+    $args{xpathregex_map} = \@xpathregex_map;
+  }
 
   return $class->$orig_method(%args);
 };
@@ -56,8 +76,8 @@ around BUILDARGS => sub {
 sub BUILD {
   my $self = shift;
 
-  if ( $#{$self->xml_xpath_map} == -1 ) {
-    die 'xml_xpath_map: at least one XPathMapping required!';
+  if ( $#{$self->xpath_map} == -1 &&  $#{$self->xpathregex_map} == -1) {
+    die 'at least one XPathMapping or XPathRegexMapping is required!';
   }
 }
 
@@ -76,14 +96,25 @@ sub parse {
         my $node = $reader->copyCurrentNode(1);
     
         my $h = {};
-        foreach my $x (@{$self->xml_xpath_map}) {
-          if (my $value = $node->findvalue($x->xpath)) {
-            $h->{$x->event_field} = $value;
-          } else {
-            # Didn't find it!
-            print "couldn't find " . $x->event_field . "\n";
-            goto SKIPIT;
+        foreach my $x (@{$self->xpath_map}) {
+          my $value = $node->findvalue($x->xpath);
+          goto SKIPIT if (!defined($value));
+          $h->{$x->event_field} = $value;
+        }
+
+        foreach my $x (@{$self->xpathregex_map}) {
+          my $value = $node->findvalue($x->xpath);
+          goto SKIPIT if (!defined($value));
+
+          my @matches = ($value =~ $x->regex);
+          goto SKIPIT if ($#matches == -1);
+
+          my $i = 0;
+          foreach my $field_name (@{$x->event_fields}) {
+            $h->{$field_name} = $matches[$i];
+            $i++;
           }
+          
         }
         $broker->emit($h);
 SKIPIT:

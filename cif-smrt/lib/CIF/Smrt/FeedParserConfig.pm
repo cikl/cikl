@@ -74,7 +74,7 @@ sub new {
 
   # Catch any dynamically named fields.
   foreach my $name (keys(%$config_data)) {
-    if ($name =~ /^(regex|xpath)_/) {
+    if ($name =~ /^(regex_|xpath)/) {
       push(@feed_config_fields, $name);
     }
   }
