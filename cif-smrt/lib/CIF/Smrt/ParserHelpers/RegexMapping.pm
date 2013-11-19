@@ -42,9 +42,4 @@ sub parse {
 
 __PACKAGE__->meta->make_immutable;
 
-subtype 'RegexMappingsRequired',
-  as 'ArrayRef[CIF::Smrt::ParserHelpers::RegexMapping]',
-  where { $#{$_[0]} > -1 },
-  message { "'ERROR: at least one RegexMapping is required'" };
-
 1;

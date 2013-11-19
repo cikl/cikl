@@ -14,6 +14,13 @@ extends 'CIF::Smrt::Parser';
 use constant NAME => 'rss';
 sub name { return NAME; }
 
+has 'rss_regex_map' => (
+  traits => ['Array'],
+  is => 'ro',
+  isa => 'ArrayRef[CIF::Smrt::ParserHelpers::RegexMapping]',
+  required => 1
+);
+
 around BUILDARGS => sub {
   my $orig_method = shift;
   my $class = shift;
@@ -48,12 +55,13 @@ around BUILDARGS => sub {
   return $class->$orig_method(%args);
 };
 
-has 'rss_regex_map' => (
-  traits => ['Array'],
-  is => 'ro',
-  isa => 'RegexMappingsRequired',
-  required => 1
-);
+sub BUILD {
+  my $self = shift;
+
+  if ( $#{$self->rss_regex_map} == -1 ) {
+    die 'rss_regex_map: at least one RegexMapping required!';
+  }
+}
 
 sub parse {
     my $self = shift;
