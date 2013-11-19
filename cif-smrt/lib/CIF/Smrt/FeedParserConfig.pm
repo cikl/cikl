@@ -24,6 +24,7 @@ use constant FIELDS => {
   regex => undef,
   regex_values => undef,
   node => undef,
+  node_xpath => undef,
   subnode => undef,
   period => undef,
   disabled => undef,
@@ -73,7 +74,7 @@ sub new {
 
   # Catch any dynamically named fields.
   foreach my $name (keys(%$config_data)) {
-    if ($name =~ /^regex_/) {
+    if ($name =~ /^(regex|xpath)_/) {
       push(@feed_config_fields, $name);
     }
   }
