@@ -17,10 +17,6 @@ has 'node' => (
   is => 'ro'
 );
 
-has 'subnode' => (
-  is => 'ro'
-);
-
 has 'elements' => (
   is => 'ro'
 );
@@ -45,7 +41,6 @@ sub parse {
     my $parser      = XML::LibXML->new();
     my $doc         = $parser->load_xml(string => $$content_ref);
     my @nodes       = $doc->findnodes('//'.$self->config->node);
-    my @subnodes    = $doc->findnodes('//'.$self->config->subnode) if($self->config->subnode);
     
     return unless(@nodes);
     
