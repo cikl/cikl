@@ -14,6 +14,7 @@ use CIF::Router::Services::Query;
 use CIF::Router::Services::Submission;
 use CIF::Router::Constants;
 use CIF::Router::Services;
+use CIF::Router::AnyEventFlusher;
 
 use CIF qw/debug init_logging/;
 
@@ -37,13 +38,29 @@ sub new {
     $self->{config} = Config::Simple->new($config) || die("Could not load config file: '$config'");
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
 
+    $self->{dbi_commit_interval} = $self->{server_config}->{dbi_commit_interval} || 2;
+    $self->{dbi_commit_size} = $self->{server_config}->{'dbi_commit_size'} || 1000;
+
     $self->{encoder} = CIF::Encoder::JSON->new();
+
+    my $flusher = CIF::Router::AnyEventFlusher->new(
+      commit_callback => sub { 
+        my $count = shift;
+        debug("Committing $count");
+        CIF::Archive->dbi_commit(); 
+      },
+      commit_interval => $self->{dbi_commit_interval},
+      commit_size => $self->{dbi_commit_size}
+    );
+
+    $self->{flusher} = $flusher;
 
     init_logging($self->{server_config}->{'debug'} || 0);
 
     # Initialize the router.
     my ($err,$router) = CIF::Router->new({
         config  => $self->{config},
+        flusher => $flusher
       });
     if($err){
       ## TODO -- set debugging variable
@@ -104,6 +121,11 @@ sub shutdown {
     if ($self->{driver}) {
       $self->{driver}->shutdown();
       $self->{driver} = undef;
+    }
+
+    if ($self->{flusher}) {
+      $self->{flusher}->flush();
+      $self->{flusher} = undef;
     }
 }
 
