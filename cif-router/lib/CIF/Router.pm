@@ -47,7 +47,9 @@ sub new {
     $self->set_archive_config(  $args->{'config'}->param(-block => 'cif_archive'));
    
     $self->{auth_write_cache} = {};
-    $self->{commit_interval} = $self->get_config->{'dbi_commit_size'} || 10000;
+
+    $self->{dbi_commit_interval} = $self->get_config->{dbi_commit_interval} || 0.5;
+    $self->{dbi_commit_size} = $self->get_config->{'dbi_commit_size'} || 500;
     $self->{auth_cache_ageoff} = $self->get_config->{'auth_cache_ageoff'} || 60;
     $self->{inserts} = 0;
     my $ret = $self->init($args);
@@ -362,13 +364,13 @@ sub insert_event {
   $self->{inserts} += 1;
   my ($err, $ret) = CIF::Archive->insert($event);
 
-  if ($self->{inserts} >= $self->{commit_interval}) {
+  if ($self->{inserts} >= $self->{dbi_commit_size}) {
     $self->flush();
   } elsif (!defined($self->{flush_timer})) {
     # Create a timer that will flush two seconds after our first message 
     # comes in.
     my $cb = sub { $self->flush();};
-    $self->{flush_timer} = AnyEvent->timer(after => 2, cb => $cb);
+    $self->{flush_timer} = AnyEvent->timer(after => $self->{dbi_commit_interval}, cb => $cb);
   }
   return ($err, $ret);
 }

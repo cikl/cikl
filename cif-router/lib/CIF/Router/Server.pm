@@ -56,9 +56,6 @@ sub new {
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
 
-    $self->{commit_interval} = $self->{server_config}->{commit_interval} || 2;
-
-
     $self->{service} = $service_class->new($self->{router}, $self->{encoder});
     $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{encoder});
     my $driver;
