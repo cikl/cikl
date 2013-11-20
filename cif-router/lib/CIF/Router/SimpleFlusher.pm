@@ -1,4 +1,4 @@
-package CIF::Router::AnyEventFlusher;
+package CIF::Router::SimpleFlusher;
 
 use strict;
 use warnings;
@@ -9,25 +9,27 @@ use CIF::Router::Flusher;
 extends 'CIF::Router::Flusher';
 use namespace::autoclean;
 
-has '_flush_timer' => (
+has '_next_flush' => (
   is => 'rw',
   init_arg => undef,
   default => undef
-
 );
 
 sub flush {
   my $self = shift;
-  $self->_flush_timer(undef);
+  $self->_next_flush(undef);
   return $self->SUPER::flush();
 }
 
 sub defer_flush {
   my $self = shift;
-  return if (defined($self->_flush_timer));
-  my $cb = sub { $self->flush();};
-  $self->_flush_timer(AnyEvent->timer(after => $self->commit_interval, cb => $cb));
+  if (!defined($self->_next_flush())) {
+    $self->_next_flush(time() + $self->commit_interval);
+  } elsif (time() >= $self->_next_flush) {
+    $self->flush();
+  }
 }
 
 __PACKAGE__->meta->make_immutable;
 1;
+

@@ -5,6 +5,7 @@ use warnings;
 use AnyEvent;
 use Coro;
 use Moose;
+use namespace::autoclean;
 
 has 'commit_callback' => (
   is => 'ro',
@@ -55,5 +56,7 @@ sub defer_flush {
   my $self = shift;
   die("defer_flush not implemented!");
 }
+
+__PACKAGE__->meta->make_immutable;
 1;
 
