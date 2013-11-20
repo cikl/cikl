@@ -112,12 +112,13 @@ sub match_event {
   my $class = shift;
   my $event = shift;
   if (my $re = $class->assessment_regex()) {
-    unless (defined($event->assessment())) {
+    my $assessment = $event->assessment;
+    unless (defined($assessment)) {
       # No assessment on the event? no match.
       return 0;
     }
     # If the event's assessment doesn't match the regex, no match.
-    if ($event->assessment() !~ $re) {
+    if ($assessment !~ $re) {
       return 0;
     }
   }
