@@ -61,7 +61,7 @@ sub new {
   my $config_data = $config->param(-block => 'default');
   my $feed_rules = $config->param(-block => $feed_name);
 
-  if (!defined($feed_rules)) {
+  if (!%$feed_rules) {
     die "Unknown section '$feed_name' for $config_file";
   }
 
