@@ -9,6 +9,8 @@ BEGIN {
         "lib",
         "local/lib",
         "../libcif/lib", # in case we're in -dev mode
+        "../libcif-dbi/lib", # in case we're in -dev mode
+        "../cif-router/lib", # in case we're in -dev mode
         "../../../lwpx-paranoidagent/lib",
         "../../../iodef-pb-simple-perl/lib",
     );
