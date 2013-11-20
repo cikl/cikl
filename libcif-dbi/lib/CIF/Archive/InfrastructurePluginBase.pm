@@ -17,6 +17,9 @@ __PACKAGE__->columns(Primary => 'id');
 __PACKAGE__->columns(All => qw/id uuid guid hash address confidence reporttime created/);
 __PACKAGE__->sequence('infrastructure_id_seq');
 
+use constant RE_IPV4 => qr/^$RE{'net'}{'IPv4'}$/;
+use constant RE_CIDR => qr/^$RE{'net'}{'CIDR'}{'IPv4'}$/;
+
 sub match_event {
   my $class = shift;
   my $event = shift;
@@ -30,7 +33,7 @@ sub match_event {
     return 0;
   }
 
-  unless($address =~ /^$RE{'net'}{'IPv4'}$/ || $address =~ /^$RE{'net'}{'CIDR'}{'IPv4'}$/) {
+  unless($address =~ RE_IPV4 || $address =~ RE_CIDR) {
     return 0;
   }
 
