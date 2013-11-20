@@ -50,7 +50,6 @@ requires 'Try::Tiny', '0.11';
 requires 'URI::Escape', '3.31';
 requires 'UUID::Tiny', '1.04';
 requires 'XML::LibXML', '1.89';
-requires 'XML::RSS::LibXML', '0.3102';
 on develop => sub {
     requires 'Memory::Usage';
     requires 'Devel::Size';
