@@ -2,14 +2,18 @@ package CIF::Smrt::Decoders::Zip;
 
 use strict;
 use warnings;
-use CIF::Smrt::Decoder;
+use CIF::Smrt::DecoderRole;
+use CIF::Smrt::AutoDecodableRole;
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
 use Moose;
-extends 'CIF::Smrt::Decoder';
+use namespace::autoclean;
+use CIF qw/debug/;
+with 'CIF::Smrt::DecoderRole';
+with 'CIF::Smrt::AutoDecodableRole';
 
 has 'zip_filename' => (
   is => 'ro',
-  isa => 'Str',
+  isa => 'Maybe[Str]',
   required => 0
 );
 
@@ -24,19 +28,15 @@ sub decode {
     my $dataref = shift;
 
     my $file;
-    if($self->zip_filename){
-        $file = $self->zip_filename;
-    } elsif ($self->feedurl =~ m/\/([a-zA-Z0-9_]+).zip$/){
-        $file = $1;
-    }
-
-    unless($file) {
-      die("Don't know what file to extract! Must specify 'zip_filename' in feed config.");
+    if(!defined($self->zip_filename)){
+      debug("WARNING: No zip_filename provided. We'll be extracting the FIRST file that appears within the zip, whatever that may be!");
     }
 
     my $unzipped;
-    unzip($dataref => \$unzipped, Name => $file) || die('unzip failed: '.$UnzipError);
+    unzip($dataref => \$unzipped, Name => $self->zip_filename) || die('unzip failed: '.$UnzipError);
     return \$unzipped;
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;

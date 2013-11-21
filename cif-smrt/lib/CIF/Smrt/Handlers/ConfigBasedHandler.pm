@@ -6,7 +6,7 @@ use warnings;
 use Encode qw/encode_utf8/;
 use CIF::Smrt::FeedParserConfig;
 use CIF::Smrt::Parsers;
-use CIF::Smrt::Decoders;
+use CIF::Smrt::Decoders::AutoDecoder;
 use CIF::Smrt::Fetchers;
 use CIF::Smrt::HandlerRole;
 use URI;
@@ -65,16 +65,16 @@ sub _parser {
     return $parser_class->new(%args);
 }
 
-sub decode {
+sub _decoder {
     my $self = shift;
-    my $dataref = shift;
-    my $decoders = CIF::Smrt::Decoders->new();
     my $feedparser_config = $self->feedparser_config;
     my $feedurl = URI->new($feedparser_config->feed());
-    my %args = (%$feedparser_config, feedurl => $feedurl);
-    return $decoders->autodecode($dataref, \%args);
+    my %decoder_args = (%$feedparser_config);
+    return CIF::Smrt::Decoders::AutoDecoder->new(
+      feedurl => $feedurl,
+      decoder_args => \%decoder_args
+    );
 }
-
 
 __PACKAGE__->meta->make_immutable;
 

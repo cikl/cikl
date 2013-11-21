@@ -41,6 +41,7 @@ use Data::Dumper;
 use MIME::Lite;
 use CIF qw/debug/;
 use CIF::Smrt::Handlers::ConfigBasedHandler;
+use CIF::Smrt::Handlers::Alexa;
 use CIF::Smrt::FeedParserConfig;
 use Try::Tiny;
 
@@ -113,8 +114,8 @@ my %handler_args = (
       not_before => $not_before
     );
 
-my $handler_class = "CIF::Smrt::Handlers::ConfigBasedHandler";
-
+#my $handler_class = "CIF::Smrt::Handlers::ConfigBasedHandler";
+my $handler_class = "CIF::Smrt::Handlers::Alexa";
 if ($handler_class eq "CIF::Smrt::Handlers::ConfigBasedHandler") {
   my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
   $handler_args{feedparser_config} = $feedparser_config;

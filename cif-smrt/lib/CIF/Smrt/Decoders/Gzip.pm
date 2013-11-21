@@ -2,9 +2,12 @@ package CIF::Smrt::Decoders::Gzip;
 
 use strict;
 use warnings;
-use CIF::Smrt::Decoder;
+use CIF::Smrt::DecoderRole;
+use CIF::Smrt::AutoDecodableRole;
+use namespace::autoclean;
 use Moose;
-extends 'CIF::Smrt::Decoder';
+with 'CIF::Smrt::DecoderRole';
+with 'CIF::Smrt::AutoDecodableRole';
 
 use IO::Uncompress::Gunzip qw/gunzip $GunzipError/;
 
@@ -20,6 +23,8 @@ sub decode {
     gunzip($dataref => \$uncompressed) or die($GunzipError);
     return \$uncompressed;
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 

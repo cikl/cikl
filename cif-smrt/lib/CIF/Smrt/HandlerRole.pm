@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use CIF::Client;
 use CIF::Smrt::ClientBroker;
+use CIF::Smrt::Decoders::Null;
 use CIF::EventBuilder;
 use CIF::Smrt::Broker;
 use Config::Simple;
@@ -78,6 +79,13 @@ has 'parser' => (
   isa => 'CIF::Smrt::Parser',
   lazy => 1,
   builder => "_parser"
+);
+
+has 'decoder' => (
+  is => 'ro',
+  isa => 'CIF::Smrt::DecoderRole',
+  lazy => 1,
+  builder => "_decoder"
 );
 
 sub _event_builder {
@@ -192,7 +200,12 @@ sub parse {
 sub decode {
     my $self = shift;
     my $content_ref = shift;
-    return $content_ref;
+    return $self->decoder->decode($content_ref);
+}
+
+sub _decoder {
+    # Use a default decoder of 'Null', just because we're nice.
+    return CIF::Smrt::Decoders::Null->new();
 }
 
 
