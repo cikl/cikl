@@ -40,7 +40,6 @@ use Config::Simple;
 use Data::Dumper;
 use MIME::Lite;
 use CIF qw/debug/;
-use Sys::MemInfo qw(totalmem);
 use CIF::Smrt::Handlers::ConfigBasedHandler;
 use CIF::Smrt::FeedParserConfig;
 use Try::Tiny;
@@ -61,14 +60,6 @@ my $disable_p   = $opts{'z'};
 my $goback      = $opts{'g'} || 3;
 
 debug('fail closed: '.$fail_closed) if($debug);
-
-if((&totalmem / (1024*1024*1024)) < 1){
-    #print "total memory: ".(&totalmem / (1024*1024*1024))."\n";
-    print '*** WARNING ***'."\n";
-    print "$0 should be run on a system with at-least 2-4GB of memory\n";
-    print "performance may suffer, or segfaults may occur frequently as a result\n";
-    print '*** WARNING ***'."\n";
-}
 
 die usage() if($opts{'h'} || !$rules);
 
