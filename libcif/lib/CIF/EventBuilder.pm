@@ -5,35 +5,31 @@ use CIF::Models::Event;
 use Moose;
 use namespace::autoclean;
 use Try::Tiny;
+use DateTime;
 use CIF qw/normalize_timestamp debug/;
 use Module::Pluggable search_path => "CIF::EventNormalizers", 
       require => 1, sub_name => '__preprocessors';
 
 has 'default_event_data' => (
-  is => 'bare',
+  is => 'rw',
   isa => 'HashRef',
   required => 1,
-  reader => '_default_event_data',
   default => sub { return {}; }
 );
 
 has 'refresh' => (
-  is => 'bare',
+  is => 'rw',
   isa => 'Bool',
-  reader => '_refresh',
   default => 0,
   required => 1
 );
 
-# This is a epoch timestamp
-has 'goback' => (
-  is => 'bare', 
-  isa => 'Int',
-  reader => '_goback',
+has 'not_before' => (
+  is => 'rw', 
+  isa => 'DateTime',
   required => 1,
   default => sub {
-    # 3 days ago
-    return (time() - (60 * 60 * 24 * 3));
+    return DateTime->now()->subtract(days => 3);
   }
 );
 
@@ -58,24 +54,17 @@ sub normalize {
   my $now  = $self->_now;
   my $dt = $r->{'detecttime'} || $now;
   my $rt = $r->{'reporttime'} || $now;
-
+  $rt = $now if($self->refresh);
+    
   $dt = normalize_timestamp($dt,$now);
-  my $timestamp_epoch;
+  $rt = normalize_timestamp($rt,$now);
 
-  if($self->_refresh){
-    $rt = $now;
-    $timestamp_epoch = $now->epoch();
-  } else {
-    $rt = normalize_timestamp($rt,$now);
-    $timestamp_epoch = $dt->epoch();
+  if(DateTime->compare($dt, $self->not_before) == -1) {
+    return(undef);
   }
 
   $r->{'detecttime'}        = $dt->epoch();
   $r->{'reporttime'}        = $rt->epoch();
-
-  if($timestamp_epoch < $self->_goback) { 
-    return(undef);
-  }
 
   # MPR: Disabling value expansion, for now.
 #  foreach my $key (keys %$r){
@@ -102,7 +91,7 @@ sub build_event {
   if (!defined($hashref)) {
     die("build_event requires a hashref of arguments!");
   }
-  my $merged_hash = {%{$self->_default_event_data}, %$hashref};
+  my $merged_hash = {%{$self->default_event_data}, %$hashref};
   my $normalized = $self->normalize($merged_hash);
   if (!defined($normalized)) {
     return undef;

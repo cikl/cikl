@@ -104,30 +104,36 @@ EOF
 my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
 
 my $ret;
-my $smrt;
+my $handler;
 my $err;
 
-my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
+my $config = Config::Simple->new($config_file) 
+    or die("Failed to open config file $config_file: " . $!);
 my $smrt_config = $config->param(-block => 'cif_smrt');
 
 $goback = $goback || $smrt_config->{'goback'} || 3;
-my $goback_date_epoch = (time() - ($goback * 84600));
-
+my $not_before = DateTime->now()->subtract(days => $goback);
+if ($debug) {
+  debug("Ignoring events prior to " . $not_before->datetime());
+}
 
 my $event_builder = CIF::EventBuilder->new(
   refresh => $feedparser_config->{'refresh'},
-  goback => $goback_date_epoch,
+  not_before => $not_before,
   default_event_data => $feedparser_config->default_event_data()
 );
 
-try {
-  $smrt = CIF::Smrt::Handlers::ConfigBasedHandler->new(
+my %handler_args = (
       apikey => $smrt_config->{'apikey'},
-      feedparser_config => $feedparser_config,
       global_config => $config,
       event_builder => $event_builder,
       proxy => $smrt_config->{proxy}
-);
+    );
+
+$handler_args{feedparser_config} = $feedparser_config;
+
+try {
+  $handler = CIF::Smrt::Handlers::ConfigBasedHandler->new(%handler_args);
 } catch {
   $err = shift;
 };
@@ -139,7 +145,7 @@ if($err){
     exit(-1);
 }
 
-($err,$ret) = $smrt->process();
+($err,$ret) = $handler->process();
 unless($err){
     debug('done...') if($debug);
     exit(0);
