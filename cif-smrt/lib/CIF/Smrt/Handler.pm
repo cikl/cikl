@@ -10,6 +10,7 @@ use Config::Simple;
 use Try::Tiny;
 use AnyEvent;
 use Coro;
+use DateTime;
 
 use Moose;
 use CIF qw/debug/;
@@ -33,13 +34,39 @@ has 'global_config' => (
 has 'event_builder' => (
   is => 'ro',
   isa => 'CIF::EventBuilder',
-  required => 1
+  init_arg => undef,
+  lazy => 1,
+  builder => "_event_builder"
+);
+
+has 'not_before' => (
+  is => 'ro', 
+  isa => 'DateTime',
+  required => 1,
+  default => sub {return DateTime->now()->subtract(days => 3);}
 );
 
 has 'proxy' => (
   is => 'ro',
   required => 0
 );
+
+sub _event_builder {
+  my $self = shift;
+  return CIF::EventBuilder->new(
+    not_before => $self->not_before(),
+    default_event_data => $self->default_event_data(),
+    refresh => $self->refresh()
+  ) 
+}
+
+sub default_event_data {
+  return {};
+}
+
+sub refresh {
+  return 0;
+}
 
 sub get_client {
   my $self = shift;

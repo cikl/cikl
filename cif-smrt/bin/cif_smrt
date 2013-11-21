@@ -43,7 +43,6 @@ use CIF qw/debug/;
 use Sys::MemInfo qw(totalmem);
 use CIF::Smrt::Handlers::ConfigBasedHandler;
 use CIF::Smrt::FeedParserConfig;
-use CIF::EventBuilder;
 use Try::Tiny;
 
 my %opts;
@@ -101,7 +100,6 @@ Examples:
 EOF
 }
 
-my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
 
 my $ret;
 my $handler;
@@ -117,21 +115,22 @@ if ($debug) {
   debug("Ignoring events prior to " . $not_before->datetime());
 }
 
-my $event_builder = CIF::EventBuilder->new(
-  not_before => $not_before,
-);
-
 my %handler_args = (
       apikey => $smrt_config->{'apikey'},
       global_config => $config,
-      event_builder => $event_builder,
-      proxy => $smrt_config->{proxy}
+      proxy => $smrt_config->{proxy},
+      not_before => $not_before
     );
 
-$handler_args{feedparser_config} = $feedparser_config;
+my $handler_class = "CIF::Smrt::Handlers::ConfigBasedHandler";
+
+if ($handler_class eq "CIF::Smrt::Handlers::ConfigBasedHandler") {
+  my $feedparser_config = CIF::Smrt::FeedParserConfig->new($rules, $feed);
+  $handler_args{feedparser_config} = $feedparser_config;
+}
 
 try {
-  $handler = CIF::Smrt::Handlers::ConfigBasedHandler->new(%handler_args);
+  $handler = $handler_class->new(%handler_args);
 } catch {
   $err = shift;
 };

@@ -10,6 +10,7 @@ use CIF::Smrt::Decoders;
 use CIF::Smrt::Fetchers;
 use URI;
 use CIF::Smrt::Handler;
+use CIF qw/debug/;
 
 use Moose;
 extends 'CIF::Smrt::Handler';
@@ -43,15 +44,18 @@ has 'parsers' => (
   default => sub { CIF::Smrt::Parsers->new() }
 );
 
-sub BUILD {
+sub refresh {
   my $self = shift;
-  # Merge our default event data into the event builder.
-  $self->event_builder->merge_default_event_data(
-      $self->feedparser_config->default_event_data);
-
   if (defined($self->feedparser_config->{refresh})) {
-    $self->event_builder->refresh($self->feedparser_config->{refresh});
+    return $self->feedparser_config->{refresh};
   }
+  return $self->SUPER::refresh();
+}
+
+sub default_event_data {
+  my $self = shift;
+  my $defaults = $self->SUPER::default_event_data();
+  return {%$defaults, %{$self->feedparser_config->default_event_data}};
 }
 
 sub get_fetcher {
