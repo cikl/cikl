@@ -1,4 +1,4 @@
-package CIF::Smrt::Handler;
+package CIF::Smrt::HandlerRole;
 
 use strict;
 use warnings;
@@ -12,12 +12,14 @@ use AnyEvent;
 use Coro;
 use DateTime;
 
-use Moose;
-use CIF qw/debug/;
+use Moose::Role;
+use CIF qw/debug generate_uuid_ns/;
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
 
 use namespace::autoclean;
+
+requires 'name';
 
 has 'apikey' => (
   is => 'ro',
@@ -34,9 +36,22 @@ has 'global_config' => (
 has 'event_builder' => (
   is => 'ro',
   isa => 'CIF::EventBuilder',
-  init_arg => undef,
   lazy => 1,
   builder => "_event_builder"
+);
+
+has 'default_event_data' => (
+  is => 'ro',
+  isa => 'HashRef',
+  lazy => 1,
+  builder => "_default_event_data"
+);
+
+has 'refresh' => (
+  is => 'ro',
+  isa => 'Bool',
+  lazy => 1,
+  builder => "_refresh"
 );
 
 has 'not_before' => (
@@ -51,6 +66,20 @@ has 'proxy' => (
   required => 0
 );
 
+has 'fetcher' => (
+  is => 'ro',
+  isa => 'CIF::Smrt::Fetcher',
+  lazy => 1,
+  builder => "_fetcher"
+);
+
+has 'parser' => (
+  is => 'ro',
+  isa => 'CIF::Smrt::Parser',
+  lazy => 1,
+  builder => "_parser"
+);
+
 sub _event_builder {
   my $self = shift;
   return CIF::EventBuilder->new(
@@ -60,11 +89,7 @@ sub _event_builder {
   ) 
 }
 
-sub default_event_data {
-  return {};
-}
-
-sub refresh {
+sub _refresh {
   return 0;
 }
 
@@ -124,7 +149,7 @@ sub process {
 sub fetch { 
     my $self = shift;
     my $cv = AnyEvent->condvar;
-    my $fetcher = $self->get_fetcher();
+    my $fetcher = $self->fetcher();
 
     async {
       try {
@@ -153,14 +178,13 @@ sub fetch {
     return($retref);
 }
 
-
 sub parse {
     my $self = shift;
     my $broker = shift;
 
     my $content_ref = $self->fetch();
     
-    my $return = $self->get_parser()->parse($content_ref, $broker);
+    my $return = $self->parser()->parse($content_ref, $broker);
     return(undef);
 }
 
@@ -171,21 +195,5 @@ sub decode {
     return $content_ref;
 }
 
-
-# Stuff that needs to be implemented
-
-# Returns an instance of a fetcher. We will call fetcher->fetch()
-sub get_fetcher {
-    my $self = shift;
-    die("get_fetcher() not implemented!");
-}
-
-# Returns an instance of a parser. We will call parser->parse($content_ref, $broker)
-sub get_parser {
-    my $self = shift;
-    die("get_parser() not implemented!");
-}
-
-__PACKAGE__->meta->make_immutable;
 
 1;
