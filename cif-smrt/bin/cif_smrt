@@ -125,7 +125,6 @@ try {
       apikey => $smrt_config->{'apikey'},
       feedparser_config => $feedparser_config,
       global_config => $config,
-      smrt_config => $smrt_config,
       event_builder => $event_builder,
       proxy => $smrt_config->{proxy}
 );
