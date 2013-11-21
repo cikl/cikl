@@ -172,7 +172,7 @@ sub fetch {
     my $retref = $cv->recv();
 
     # auto-decode the content if need be
-    $retref = $self->decode($retref);
+    return $self->decode($retref);
 
     ## TODO MPR : This looks like a hack for the utf8 and CR stuff below.
     #return(undef,$ret) if($feedparser_config->{'cif'} && $feedparser_config->{'cif'} eq 'true');
@@ -183,16 +183,18 @@ sub fetch {
     
     # remove any CR's
     #$ret =~ s/\r//g;
-    return($retref);
 }
 
 sub parse {
     my $self = shift;
     my $broker = shift;
 
-    my $content_ref = $self->fetch();
+    my $fh = $self->fetch();
+    local $/;
+    my $content = <$fh>;
+    close($fh);
     
-    my $return = $self->parser()->parse($content_ref, $broker);
+    my $return = $self->parser()->parse(\$content, $broker);
     return(undef);
 }
 

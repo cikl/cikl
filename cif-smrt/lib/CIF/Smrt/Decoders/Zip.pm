@@ -27,14 +27,31 @@ sub decode {
     my $self = shift;
     my $dataref = shift;
 
-    my $file;
-    if(!defined($self->zip_filename)){
+    my $file = $self->zip_filename;
+    if(!defined($file)){
       debug("WARNING: No zip_filename provided. We'll be extracting the FIRST file that appears within the zip, whatever that may be!");
     }
 
-    my $unzipped;
-    unzip($dataref => \$unzipped, Name => $self->zip_filename) || die('unzip failed: '.$UnzipError);
-    return \$unzipped;
+    my $foundit = 0;
+    my $zipfh = IO::Uncompress::Unzip->new($dataref);
+    my $status;
+    for ($status = 1; $status > 0; $status = $zipfh->nextStream()) {
+      if (defined($file)) {
+        if ($zipfh->getHeaderInfo()->{Name} eq $file) {
+          # Found the file.
+          $foundit = 1;
+          last;
+        }
+      } else {
+        $foundit = 1;
+        last;
+      }
+    }
+
+    if (!$foundit) {
+      die("Failed to find file named $file");
+    }
+    return $zipfh;
 }
 
 __PACKAGE__->meta->make_immutable();

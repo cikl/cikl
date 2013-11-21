@@ -3,6 +3,7 @@ package CIF::Smrt::Decoders::AutoDecoder;
 use strict;
 use warnings;
 use CIF::Smrt::DecoderRole;
+use CIF qw/debug/;
 use File::Type;
 use Module::Pluggable search_path => "CIF::Smrt::Decoders", 
       require => 1, sub_name => '_decoders';
@@ -49,8 +50,7 @@ sub decode {
     my $type = $ft->mime_type($$content_ref);
     my $decoder_class = $self->decoder_map->{$type};
     unless($decoder_class) {
-      debug("Don't know how to decode $type");
-      return $content_ref;
+      die("Don't know how to decode $type");
     }
 
     my $decoder = $decoder_class->new(%{$self->decoder_args});

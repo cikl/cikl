@@ -19,9 +19,7 @@ sub mime_types { return MIME_TYPES; }
 sub decode {
     my $class = shift;
     my $dataref = shift;
-    my $uncompressed;
-    gunzip($dataref => \$uncompressed) or die($GunzipError);
-    return \$uncompressed;
+    return IO::Uncompress::Gunzip->new($dataref);
 }
 
 __PACKAGE__->meta->make_immutable();
