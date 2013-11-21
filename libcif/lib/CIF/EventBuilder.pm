@@ -11,22 +11,30 @@ use Module::Pluggable search_path => "CIF::EventNormalizers",
 
 has 'default_event_data' => (
   is => 'bare',
+  isa => 'HashRef',
   required => 1,
-  reader => '_default_event_data'
+  reader => '_default_event_data',
+  default => sub { return {}; }
 );
 
 has 'refresh' => (
   is => 'bare',
+  isa => 'Bool',
   reader => '_refresh',
   default => 0,
   required => 1
 );
 
+# This is a epoch timestamp
 has 'goback' => (
   is => 'bare', 
   isa => 'Int',
   reader => '_goback',
-  required => 1
+  required => 1,
+  default => sub {
+    # 3 days ago
+    return (time() - (60 * 60 * 24 * 3));
+  }
 );
 
 has '_now' => (
