@@ -43,6 +43,17 @@ has 'parsers' => (
   default => sub { CIF::Smrt::Parsers->new() }
 );
 
+sub BUILD {
+  my $self = shift;
+  # Merge our default event data into the event builder.
+  $self->event_builder->merge_default_event_data(
+      $self->feedparser_config->default_event_data);
+
+  if (defined($self->feedparser_config->{refresh})) {
+    $self->event_builder->refresh($self->feedparser_config->{refresh});
+  }
+}
+
 sub get_fetcher {
     my $self = shift;
     my $feedparser_config = $self->feedparser_config;

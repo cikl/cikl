@@ -47,6 +47,13 @@ has '_preprocessors' => (
   init_arg => undef
 );
 
+sub merge_default_event_data {
+  my $self = shift;
+  my $data_to_merge = shift;
+  my $merged_data = {%{$self->default_event_data}, %$data_to_merge};
+  $self->default_event_data($merged_data);
+}
+
 sub normalize {
   my $self = shift;
   my $r = shift;

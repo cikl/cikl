@@ -118,9 +118,7 @@ if ($debug) {
 }
 
 my $event_builder = CIF::EventBuilder->new(
-  refresh => $feedparser_config->{'refresh'},
   not_before => $not_before,
-  default_event_data => $feedparser_config->default_event_data()
 );
 
 my %handler_args = (
