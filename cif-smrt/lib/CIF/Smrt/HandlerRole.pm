@@ -190,11 +190,12 @@ sub parse {
     my $broker = shift;
 
     my $fh = $self->fetch();
-    local $/;
-    my $content = <$fh>;
-    close($fh);
     
-    my $return = $self->parser()->parse(\$content, $broker);
+    my $return = $self->parser()->parse($fh, $broker);
+
+    $fh->close() or die($!);
+    undef $fh;
+
     return(undef);
 }
 

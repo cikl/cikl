@@ -25,7 +25,7 @@ has 'regex_values' => (
 
 sub parse {
     my $self = shift;
-    my $content_ref = shift;
+    my $fh = shift;
     my $broker = shift;
     my $re = $self->regex;
     $re = qr/$re/;
@@ -33,9 +33,12 @@ sub parse {
     my @cols = split(/\s*,\s*/, $self->regex_values);
 
     # This is more memory efficient.
-    while(${$content_ref} =~ /([^\r\n]+)[\r\n]*/g) {
-        my $line = $1;
+    while(!$fh->eof()) {
+        my $line = $fh->getline();
         next if($line =~ /^(#|<|$)/);
+        # Strip \n\r off the end of the line.
+        $line =~ s/[\r\n]+$//;
+
         my @m = ($line =~ $re);
         next unless(@m);
         my $h = {};

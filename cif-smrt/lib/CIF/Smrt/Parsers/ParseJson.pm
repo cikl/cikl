@@ -26,7 +26,7 @@ has 'fields_map' => (
 
 sub parse {
     my $self = shift;
-    my $content_ref = shift;
+    my $fh = shift;
     my $broker = shift;
 
     my @fields      = split(/\s*,\s*/,$self->fields);
@@ -43,7 +43,7 @@ sub parse {
       $broker->emit($h);
     };
 
-    $self->_parse_json_as_stream($content_ref, $cb);
+    $self->_parse_json_as_stream($fh, $cb);
     return(undef);
 }
 
@@ -65,12 +65,8 @@ sub parse {
 #
 sub _parse_json_as_stream { 
   my $self = shift;
-  my $content_ref = shift;
+  my $fh = shift;
   my $cb = shift;
-
-  # We treat the scalar reference as a file handle, allowing us to 
-  # incrementally read over it. 
-  open(my $fh, '<', $content_ref) or die($!);
 
   my $buf;
   my $json = JSON->new();
@@ -107,7 +103,7 @@ sub _parse_json_as_stream {
     }
   }
 
-  close($fh) or die($!);
+  return undef;
 }
 
 __PACKAGE__->meta->make_immutable;

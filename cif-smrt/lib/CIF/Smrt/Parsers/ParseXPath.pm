@@ -83,10 +83,9 @@ sub BUILD {
 
 sub parse {
     my $self = shift;
-    my $content_ref = shift;
+    my $fh = shift;
     my $broker = shift;
     
-    open(my $fh, '<', $content_ref) or die($!);
     my $reader      = XML::LibXML::Reader->new(IO => $fh);
     my $pattern     = XML::LibXML::Pattern->new($self->node_xpath);
     while ($reader->read()) {
@@ -119,7 +118,6 @@ sub parse {
         $broker->emit($h);
 SKIPIT:
     }
-    close($fh) or die($!);
     return(undef);
 }
 

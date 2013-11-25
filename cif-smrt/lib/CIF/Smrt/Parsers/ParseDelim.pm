@@ -35,41 +35,39 @@ has 'skipfirst' => (
 
 sub parse {
     my $self = shift;
-    my $content_ref = shift;
+    my $fh = shift;
     my $broker = shift;
 
     my $split = $self->delimiter;
 
-    my @lines = split(/[\r\n]/,$$content_ref);
     my @cols = split(/\s*,\s*/, $self->values);
     
+    my $start = 0;
+    my $end = undef;
     if(my $l = $self->feed_limit){
-        my ($start,$end);
         if(ref($l) eq 'ARRAY'){
             ($start,$end) = @{$l};
         } else {
             ($start,$end) = (0,$l-1);
         }
-        @lines = @lines[$start..$end];
-        
-        # A feed limit may have already been applied to
-        # this data.  If so, don't apply it again.
-        if ($#lines > ($end - $start)){
-            @lines = @lines[$start..$end];
-        }
+    }
+    $start += 1 if($self->skipfirst);
+
+    # Find our way to the first line we need to read.
+    for (my $lineno = 0; $lineno <= $end; $lineno++) {
+      last if ($fh->eof());
+      my $line = $fh->getline();
+      next if $lineno < $start;
+
+      next if($line =~ /^(#|$|<)/);
+      my @m = split($split,$line);
+      my $h = {};
+      foreach (0 ... $#cols){
+        $h->{$cols[$_]} = $m[$_];
+      }
+      $broker->emit($h);
     }
 
-    shift @lines if($self->skipfirst);
-
-    foreach(@lines){
-        next if(/^(#|$|<)/);
-        my @m = split($split,$_);
-        my $h = {};
-        foreach (0 ... $#cols){
-            $h->{$cols[$_]} = $m[$_];
-        }
-        $broker->emit($h);
-    }
     return(undef);
 }
 
