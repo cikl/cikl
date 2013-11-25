@@ -6,6 +6,9 @@ use Moose;
 use CIF::Smrt::Fetcher;
 use IO::Scalar;
 use IO::File;
+use LWP::Authen::Basic;
+use File::Temp qw/tmpnam/;
+use CIF qw/debug/;
 extends 'CIF::Smrt::Fetcher';
 
 use namespace::autoclean;
@@ -97,41 +100,42 @@ sub fetch {
     } else {
         $ua->ssl_opts(SSL_verify_mode => 'SSL_VERIFY_PEER');
     }
+
+    if(defined($self->feed_user)){
+      my $auth = LWP::Authen::Basic->auth_header($self->feed_user, $self->feed_password);
+      $ua->default_header("Authentication" => $auth);
+    }
     
     # work-around for a bug in LWP::UserAgent
     delete($ua->{'ssl_opts'}->{'verify_hostname'});
 
-    my $fh;
-    if($self->feed_user){
-       my $req = HTTP::Request->new(GET => $feedurl->as_string());
-       $req->authorization_basic($self->feed_user,$self->feed_password);
-       my $ress = $ua->request($req);
-       unless($ress->is_success()){
-            die('request failed: '.$ress->status_line());
-       }
-       $fh = IO::Scalar->new($ress->decoded_content());
+    my $filename;
+
+    my $is_tempfile = 0;
+    if(my $mirror = $self->mirror){
+      $feedurl->path() =~ m/\/([a-zA-Z0-9._-]+)$/;
+      $filename = $mirror.'/'.$1;
     } else {
-        my $r;
-        if(my $mirror = $self->mirror){
-            $feedurl->path() =~ m/\/([a-zA-Z0-9._-]+)$/;
-            my $file = $mirror.'/'.$1;
-            die($file.' isn\'t writeable by our user') if(-e $file && !-w $file);
-            my $ret = $ua->mirror($feedurl->as_string(),$file);
-            # unless it's a 200 or a 304 (which means cached, not modified)
-            unless($ret->is_success() || $ret->status_line() =~ /^304 /){
-                die $ret->decoded_content();   
-            }
-            $fh = IO::File->new("< $file") || die ($!.': '.$file);
-        } else {
-            $r = $ua->get($feedurl->as_string());
-            if($r->is_success()){
-                my $data = $r->decoded_content();
-                $fh = IO::Scalar->new(\$data);
-            } else {
-                die('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
-            }
-            $ua = undef;
-        }
+      $filename = tmpnam();
+      $is_tempfile = 1;
+    }
+
+    #debug("Saving response to $filename");
+
+    die($filename.' isn\'t writeable by our user') if(-e $filename && !-w $filename);
+
+    my $response = $ua->mirror($feedurl->as_string(), $filename);
+
+    if(! $response->is_success()){
+      unlink($filename);
+      die('failed to get feed: '.$feedurl->as_string()."\n".$response->status_line());
+    }
+    $ua = undef;
+    my $fh = IO::File->new($filename, 'r') or die($!);
+    if ($is_tempfile == 1) {
+      # This looks strange, but since we still have the filehandle open, it 
+      # won't really disappear until the handle is closed.
+      unlink($filename);
     }
     return($fh);
 }
