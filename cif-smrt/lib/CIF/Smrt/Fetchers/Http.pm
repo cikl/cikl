@@ -125,7 +125,8 @@ sub fetch {
         } else {
             $r = $ua->get($feedurl->as_string());
             if($r->is_success()){
-                $fh = IO::Scalar->new($r->decoded_content());
+                my $data = $r->decoded_content();
+                $fh = IO::Scalar->new(\$data);
             } else {
                 die('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
             }
