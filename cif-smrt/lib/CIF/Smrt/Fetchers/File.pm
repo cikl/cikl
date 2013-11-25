@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use URI::file;
 use Moose;
+use IO::File;
 use CIF::Smrt::Fetcher;
 extends 'CIF::Smrt::Fetcher';
 
@@ -30,14 +31,10 @@ sub fetch {
     unless ($feedurl->scheme() eq 'file') {
       die("Unsupported URI scheme: " . $feedurl->scheme);
     }
+
+    my $fh = IO::File->new("< " . $feedurl->path) || die($!.': '.$feedurl->path);
     
-    my $orig_sep = $/;
-    local $/ = undef;
-    open(F,$feedurl->path) || die($!.': '.$feedurl->path);
-    my $content = <F>;
-    close(F);
-    $/ = $orig_sep;
-    return(\$content);
+    return $fh;
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -44,17 +44,21 @@ sub _init_decoders {
 
 sub decode {
     my $self = shift;
-    my $content_ref = shift;
+    my $fh = shift;
+    my $orig_pos = $fh->tell();
+    my $buffer;
+    $fh->read($buffer, 2048) or die($!);
+    $fh->seek($orig_pos, 0) or die($!);
 
     my $ft = File::Type->new();
-    my $type = $ft->mime_type($$content_ref);
+    my $type = $ft->mime_type($buffer);
     my $decoder_class = $self->decoder_map->{$type};
     unless($decoder_class) {
       die("Don't know how to decode $type");
     }
 
     my $decoder = $decoder_class->new(%{$self->decoder_args});
-    return $decoder->decode($content_ref);
+    return $decoder->decode($fh);
 }
 
 __PACKAGE__->meta->make_immutable();

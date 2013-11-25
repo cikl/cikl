@@ -18,8 +18,9 @@ sub mime_types { return MIME_TYPES; }
 
 sub decode {
     my $class = shift;
-    my $dataref = shift;
-    return IO::Uncompress::Gunzip->new($dataref);
+    my $fh = shift;
+    my $gzfh = IO::Uncompress::Gunzip->new($fh, AutoClose => 1) or die($!);
+    return $gzfh;
 }
 
 __PACKAGE__->meta->make_immutable();

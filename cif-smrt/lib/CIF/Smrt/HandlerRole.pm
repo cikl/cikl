@@ -169,10 +169,10 @@ sub fetch {
     while (!($cv->ready())) {
       Coro::AnyEvent::sleep(1);
     }
-    my $retref = $cv->recv();
+    my $fh = $cv->recv();
 
     # auto-decode the content if need be
-    return $self->decode($retref);
+    return $self->decode($fh);
 
     ## TODO MPR : This looks like a hack for the utf8 and CR stuff below.
     #return(undef,$ret) if($feedparser_config->{'cif'} && $feedparser_config->{'cif'} eq 'true');

@@ -25,7 +25,7 @@ sub mime_types { return MIME_TYPES; }
 
 sub decode {
     my $self = shift;
-    my $dataref = shift;
+    my $fh = shift;
 
     my $file = $self->zip_filename;
     if(!defined($file)){
@@ -33,7 +33,7 @@ sub decode {
     }
 
     my $foundit = 0;
-    my $zipfh = IO::Uncompress::Unzip->new($dataref);
+    my $zipfh = IO::Uncompress::Unzip->new($fh, AutoClose => 1) or die($!);
     my $status;
     for ($status = 1; $status > 0; $status = $zipfh->nextStream()) {
       if (defined($file)) {

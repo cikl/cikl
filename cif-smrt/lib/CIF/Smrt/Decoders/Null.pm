@@ -14,8 +14,7 @@ sub mime_types { return MIME_TYPES; }
 
 sub decode {
     my $class = shift;
-    my $dataref = shift;
-    open(my $fh, '<', $dataref);
+    my $fh = shift;
     return $fh;
 }
 

@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Moose;
 use CIF::Smrt::Fetcher;
+use IO::Scalar;
+use IO::File;
 extends 'CIF::Smrt::Fetcher';
 
 use namespace::autoclean;
@@ -99,7 +101,7 @@ sub fetch {
     # work-around for a bug in LWP::UserAgent
     delete($ua->{'ssl_opts'}->{'verify_hostname'});
 
-    my $content;
+    my $fh;
     if($self->feed_user){
        my $req = HTTP::Request->new(GET => $feedurl->as_string());
        $req->authorization_basic($self->feed_user,$self->feed_password);
@@ -107,7 +109,7 @@ sub fetch {
        unless($ress->is_success()){
             die('request failed: '.$ress->status_line());
        }
-       $content = $ress->decoded_content();
+       $fh = IO::Scalar->new($ress->decoded_content());
     } else {
         my $r;
         if(my $mirror = $self->mirror){
@@ -119,21 +121,18 @@ sub fetch {
             unless($ret->is_success() || $ret->status_line() =~ /^304 /){
                 die $ret->decoded_content();   
             }
-            open(F,$file) || die ($!.': '.$file);
-            $content = join('',<F>);
-            close(F);
-            die ('no content') unless($content && $content ne '');
+            $fh = IO::File->new("< $file") || die ($!.': '.$file);
         } else {
             $r = $ua->get($feedurl->as_string());
             if($r->is_success()){
-                $content = $r->decoded_content();
+                $fh = IO::Scalar->new($r->decoded_content());
             } else {
                 die('failed to get feed: '.$feedurl->as_string()."\n".$r->status_line());
             }
             $ua = undef;
         }
     }
-    return(\$content);
+    return($fh);
 }
 
 sub env_proxy {
