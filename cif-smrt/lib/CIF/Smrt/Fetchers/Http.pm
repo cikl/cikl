@@ -12,6 +12,11 @@ use CIF qw/debug/;
 extends 'CIF::Smrt::Fetcher';
 
 use namespace::autoclean;
+my @__tempfiles;
+END {
+  unlink($_) for(@__tempfiles);
+  @__tempfiles = ();
+}
 
 our $AGENT = 'cif-smrt/'.$CIF::VERSION.' (collectiveintel.org)';
 
@@ -117,17 +122,18 @@ sub fetch {
       $filename = $mirror.'/'.$1;
     } else {
       $filename = tmpnam();
+      # Try to ensure that it gets unlinked when the process exits.
+      push(@__tempfiles, $filename);
       $is_tempfile = 1;
     }
 
-    #debug("Saving response to $filename");
+    debug("Saving response to $filename");
 
     die($filename.' isn\'t writeable by our user') if(-e $filename && !-w $filename);
 
     my $response = $ua->mirror($feedurl->as_string(), $filename);
 
     if(! $response->is_success()){
-      unlink($filename);
       die('failed to get feed: '.$feedurl->as_string()."\n".$response->status_line());
     }
     $ua = undef;
