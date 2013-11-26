@@ -54,8 +54,11 @@ sub parse {
     $start += 1 if($self->skipfirst);
 
     # Find our way to the first line we need to read.
-    for (my $lineno = 0; $lineno <= $end; $lineno++) {
-      last if ($fh->eof());
+    my $lineno = -1;
+    while (!$fh->eof()) {
+      $lineno++;
+      last if (defined($end) && $lineno > $end);
+
       my $line = $fh->getline();
 
       next if $lineno < $start;
