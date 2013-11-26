@@ -9,6 +9,7 @@ use Moose::Util::TypeConstraints;
 use MooseX::Aliases;
 use MooseX::SlurpyConstructor;
 use CIF::MooseTypes;
+use CIF::Models::Address;
 use namespace::autoclean;
 
 has 'guid' => (
@@ -36,6 +37,11 @@ has 'description' => (
   isa => 'CIF::MooseTypes::LowerCaseStr',
   default => sub { 'unknown' },
   coerce => 1
+);
+
+has 'addresses' => (
+  is => 'rw',
+  isa => 'ArrayRef[CIF::Models::Address]',
 );
 
 has 'address' => (
@@ -84,7 +90,6 @@ has 'severity' => (is => 'rw');
 has 'source' => (is => 'rw');
 has 'timestamp' => (is => 'rw');
 
-has 'asn' => (is => 'rw');
 has 'cc' => (is => 'rw');
 has 'rir' => (is => 'rw');
 
@@ -98,7 +103,13 @@ sub to_hash {
   my $self = shift;
   my $data = {};
   foreach my $key (keys %$self) {
-    $data->{$key} = $self->{$key};
+    my $val = $self->{$key};
+    if ($key eq 'addresses') {
+      my @addresses = map {$_->to_hash()} @$val;
+      $data->{$key} = \@addresses;
+    } else {
+      $data->{$key} = $val;
+    }
   }
   return $data;
 }
@@ -106,6 +117,8 @@ sub to_hash {
 sub from_hash {
   my $class = shift;
   my $data = shift;
+  my @addresses = map {CIF::Models::Address->new($_);} @{$data->{addresses} || []};
+  $data->{addresses} = \@addresses;
   return $class->new($data);
 }
 

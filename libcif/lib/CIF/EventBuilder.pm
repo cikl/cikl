@@ -73,6 +73,31 @@ sub normalize {
   $r->{'detecttime'}        = $dt->epoch();
   $r->{'reporttime'}        = $rt->epoch();
 
+  $r->{addresses} ||= [];
+
+  my $addresses = $r->{addresses};
+  
+  if (my $fqdn = delete($r->{fqdn})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'fqdn', value => $fqdn));
+    $r->{address} = $r->{address} // $fqdn;
+  };
+  if (my $ipv4 = delete($r->{ipv4})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'ipv4', value => $ipv4));
+    $r->{address} = $r->{address} // $ipv4;
+  }
+  if (my $url = delete($r->{url})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'url', value => $url));
+    $r->{address} = $r->{address} // $url;
+  }
+  if (my $email = delete($r->{email})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'email', value => $email));
+    $r->{address} = $r->{address} // $email;
+  }
+  if (my $asn = delete($r->{asn})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'asn', value => $asn));
+    $r->{address} = $r->{address} // $asn;
+  }
+
   # MPR: Disabling value expansion, for now.
 #  foreach my $key (keys %$r){
 #    my $v = $r->{$key};
