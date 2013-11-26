@@ -70,7 +70,12 @@ has 'md5' => (is => 'rw');
 has 'sha1' => (is => 'rw');
 
 has 'method' => (is => 'rw');
-has 'portlist' => (is => 'rw');
+
+has 'portlist' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::PortList'
+);
+
 has 'protocol' => (is => 'rw');
 has 'purpose' => (is => 'rw');
 has 'relatedid' => (is => 'rw');
