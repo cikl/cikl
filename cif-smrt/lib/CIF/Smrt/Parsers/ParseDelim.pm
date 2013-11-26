@@ -57,9 +57,12 @@ sub parse {
     for (my $lineno = 0; $lineno <= $end; $lineno++) {
       last if ($fh->eof());
       my $line = $fh->getline();
-      next if $lineno < $start;
 
-      next if($line =~ /^(#|$|<)/);
+      next if $lineno < $start;
+      next if ($line =~ /^(#|$|<)/);
+
+      $line =~ s/[\r\n]+$//;
+
       my @m = split($split,$line);
       my $h = {};
       foreach (0 ... $#cols){
