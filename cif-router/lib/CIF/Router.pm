@@ -301,7 +301,7 @@ sub process_query {
       die($err2);
     }
     if (!defined($query->guid())) {
-      $query->set_guid($apikey_info->{'default_guid'});
+      $query->guid($apikey_info->{'default_guid'});
     }
 
     my ($err, $events) = CIF::Archive->search($query);
