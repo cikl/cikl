@@ -141,17 +141,17 @@ sub search {
     
     my $query_model;
     try {
-      $query_model = CIF::Models::Query->new(
-        {
-          apikey      => $args->{'apikey'},
-          guid        => $args->{'guid'},
-          query       => $orig_query,
-          nolog       => $nolog,
-          limit       => $args->{'limit'},
-          confidence  => $args->{'confidence'},
-          description => $args->{'description'},
-        }
-      );
+      my $params = {
+        apikey => $args->{'apikey'},
+        query => $query
+      };
+      $params->{guid} = $args->{guid} if (defined($args->{guid}));
+      $params->{nolog} = $nolog if (defined($nolog));
+      $params->{limit} = $args->{limit} if (defined($args->{limit}));
+      $params->{confidence} = $args->{confidence} if (defined($args->{confidence}));
+      $params->{description} = $args->{description} if (defined($args->{description}));
+
+      $query_model = CIF::Models::Query->new(%$params);
     } catch {
       $err = $_;
     };

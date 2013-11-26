@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Digest::SHA qw/sha1_hex/;
-
-use constant MANDATORY_FIELDS => qw/apikey query/;
+use Moose;
+use CIF::MooseTypes;
+use namespace::autoclean;
 
 # this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
 # most people just want a quick answer, if they override this (via the client), they'll expect the
@@ -12,31 +13,49 @@ use constant MANDATORY_FIELDS => qw/apikey query/;
 # later on we'll do some partitioning to clean this up a bit
 use constant QUERY_DEFAULT_LIMIT => 50;
 
-sub new {
-  my $class = shift;
-  my $args = shift;
-  my $self = {};
+has 'apikey' => (
+  is => 'rw',
+  isa => 'Str',
+  required => 1
+);
 
-  for(MANDATORY_FIELDS) {
-    die "Missing $_ parameter\n" unless exists($args->{$_});
-  }
+has 'query' => (
+  is => 'rw',
+  isa => 'Str',
+  required => 1
+);
 
-  $self->{apikey} = $args->{apikey};
-  $self->{guid} = $args->{guid};
-  $self->{query} = $args->{query};
-  $self->{nolog} = $args->{nolog} || 0;
-  $self->{limit} = $args->{limit} || QUERY_DEFAULT_LIMIT;
-  $self->{confidence} = $args->{confidence} || 0;
-  $self->{description} = $args->{'description'} || 'search ' . $self->{query};
+has 'guid' => (
+  is => 'rw',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
+  required => 0,
+);
 
-  bless $self, $class;
-  return $self;
-}
+has 'nolog' => (
+  is => 'rw',
+  isa => 'Bool',
+  default => 0
+);
 
-sub apikey { $_[0]->{apikey} };
-sub guid { $_[0]->{guid} };
-sub set_guid { $_[0]->{guid} = $_[1]; };
-sub query { $_[0]->{query} };
+has 'limit' => (
+  is => 'rw',
+  isa => 'Int',
+  default => QUERY_DEFAULT_LIMIT
+);
+
+has 'confidence' => (
+  is => 'rw',
+  isa => 'Int',
+  default => 0
+);
+
+has 'description' => (
+  is => 'rw',
+  isa => 'Str',
+  lazy => 1,
+  default => sub { my $self = shift; return('search ' . $self->query); }
+);
+
 sub split_query { 
   my $self = shift;
   my $q = $self->query;
@@ -44,12 +63,6 @@ sub split_query {
   my @ret = split(/,/ , $q);
   return \@ret;
 };
-
-sub nolog { $_[0]->{nolog} };
-sub limit { $_[0]->{limit} };
-
-sub confidence { $_[0]->{confidence} };
-sub description { $_[0]->{description} };
 
 sub hashed_query { lc(sha1_hex(lc($_[0]->query))); }
 
@@ -96,6 +109,8 @@ sub from_existing {
     description => $data->{description} // $existing->description
   });
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 
