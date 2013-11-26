@@ -3,18 +3,20 @@ use strict;
 use warnings;
 use Scalar::Util qw(blessed);
 use CIF::Models::Event;
+use Moose;
+use namespace::autoclean;
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  $self->{apikey} = shift;
-  $self->{event} = shift;
-  bless $self, $class;
-  return $self;
-}
+has 'apikey' => (
+  is => 'rw',
+  isa => 'Str',
+  required => 1
+);
 
-sub apikey { $_[0]->{apikey} };
-sub event { $_[0]->{event} };
+has 'event' => (
+  is => 'rw',
+  isa => 'CIF::Models::Event',
+  required => 1
+);
 
 sub to_hash {
   my $self = shift;
@@ -30,10 +32,11 @@ sub from_hash {
   my $data = shift;
   my $event = CIF::Models::Event->from_hash($data->{event});
   return $class->new(
-    $data->{apikey},
-    $event
+    apikey => $data->{apikey},
+    event => $event
   );
 }
 
+__PACKAGE__->meta->make_immutable();
 1;
 

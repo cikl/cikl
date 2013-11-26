@@ -192,7 +192,10 @@ sub submit {
     my $self = shift;
     my $event = shift;
 
-    my $submission = CIF::Models::Submission->new($self->get_apikey(), $event);
+    my $submission = CIF::Models::Submission->new(
+      apikey => $self->get_apikey(), 
+      event => $event
+    );
     return $self->get_driver()->submit($submission);
 }    
 
