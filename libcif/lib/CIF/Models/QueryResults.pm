@@ -3,40 +3,57 @@ use strict;
 use warnings;
 use CIF::Models::Event;
 use CIF::Models::Query;
+use CIF::MooseTypes;
+use Moose;
+use namespace::autoclean;
 
 use constant MANDATORY_FIELDS => qw/query events/;
 use CIF qw/generate_uuid_random/;
 
-sub new {
-  my $class = shift;
-  my $args = shift;
-  my $self = {};
+has 'query' => (
+  is => 'ro',
+  isa => 'CIF::Models::Query',
+  required => 1
+);
 
-  for(MANDATORY_FIELDS) {
-    die "Missing $_ parameter\n" unless exists($args->{$_});
-  }
+has 'events' => (
+  is => 'ro',
+  isa => 'ArrayRef[CIF::Models::Event]',
+  required => 1
+);
 
-  $self->{query} = $args->{query};
-  $self->{events} = $args->{events};
-  $self->{reporttime} = $args->{reporttime} || time();
-  $self->{group_map} = $args->{group_map};
-  $self->{restriction_map} = $args->{restriction_map};
-  $self->{guid} = $args->{guid} || $self->{query}->guid();
-  $self->{uuid} = $args->{uuid} || generate_uuid_random();
+has 'reporttime' => (
+  is => 'ro', 
+  isa => 'Int',
+  default => sub { time() }
+);
 
-  bless $self, $class;
-  return $self;
-}
+has 'group_map' => (
+  is => 'ro',
+  isa => 'ArrayRef',
+  required => 1
+);
 
-sub query { $_[0]->{query}; };
-sub events { $_[0]->{events}; };
-sub event_count { $#{$_[0]->{events}}; };
-sub reporttime { $_[0]->{reporttime}; };
-sub group_map { $_[0]->{group_map}; };
-sub restriction_map { $_[0]->{restriction_map}; };
-sub guid { $_[0]->{guid}; };
-sub uuid { $_[0]->{uuid}; };
-sub query_limit { $_[0]->{query}->limit(); };
+has 'restriction_map' => (
+  is => 'ro',
+  #isa => 'HashRef'
+);
+
+has 'guid' => (
+  is => 'ro',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
+  lazy => 1,
+  default => sub { my $self = shift; $self->query->guid() }
+);
+
+has 'uuid' => (
+  is => 'ro',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
+  default => sub { generate_uuid_random() }
+);
+
+sub event_count { $#{$_[0]->events}; };
+sub query_limit { $_[0]->query->limit(); };
 
 sub get_pretty_group_name {
   my $self = shift;
@@ -53,15 +70,18 @@ sub to_hash {
   my $self = shift;
   my @events = map { $_->to_hash() } @{$self->events};
   my @group_map = map { {value => $_->{value}, key => $_->{key}} } @{$self->group_map};
-  return({
+  my $ret = {
     query => $self->query()->to_hash(),
     events => \@events,
     reporttime => $self->reporttime,
     group_map => \@group_map,
-    restriction_map => $self->restriction_map,
     guid => $self->guid,
     uuid => $self->uuid
-  });
+  };
+
+  $ret->{restriction_map} =  $self->restriction_map if (defined($self->restriction_map));
+
+  return $ret;
 }
 
 sub from_hash {
@@ -73,5 +93,7 @@ sub from_hash {
   $data->{events} = \@events;
   return $class->new($data);
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
