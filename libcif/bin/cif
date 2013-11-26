@@ -10,6 +10,10 @@ BEGIN {
         "lib", 
         "local/lib",
         "../libcif/lib", # in case we're in -dev mode
+        "../libcif-dbi/lib", # in case we're in -dev mode
+        "../cif-router/lib", # in case we're in -dev mode
+        "../cif-smrt/lib", # in case we're in -dev mode
+
     );
     my $bin_path;
 
