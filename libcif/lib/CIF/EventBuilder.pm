@@ -85,6 +85,10 @@ sub normalize {
     push(@$addresses, CIF::Models::Address->new(type => 'ipv4', value => $ipv4));
     $r->{address} = $r->{address} // $ipv4;
   }
+  if (my $ipv4_cidr = delete($r->{ipv4_cidr})) {
+    push(@$addresses, CIF::Models::Address->new(type => 'ipv4_cidr', value => $ipv4_cidr));
+    $r->{address} = $r->{address} // $ipv4_cidr;
+  }
   if (my $url = delete($r->{url})) {
     push(@$addresses, CIF::Models::Address->new(type => 'url', value => $url));
     $r->{address} = $r->{address} // $url;

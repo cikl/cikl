@@ -16,7 +16,7 @@ has 'type' => (
   required => 1,
   ## From https://github.com/csirtgadgets/sligo-protocol#address-class
   #isa => enum([qw[asn ipv4 ipv6 fqdn url email mac]])
-  isa => enum([qw[asn ipv4 fqdn url email]])
+  isa => enum([qw[asn ipv4 ipv4_cidr fqdn url email]])
 );
 
 sub to_hash {
