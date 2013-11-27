@@ -24,6 +24,7 @@ requires 'Log::Dispatch', '2.32';
 requires 'LWP::Protocol::https', '6.03';
 requires 'LWP::UserAgent', '6.02';
 requires 'LWPx::ParanoidAgent', '1.09';
+requires 'Mail::RFC822::Address', '0.3';
 requires 'MIME::Base64', '3.13';
 requires 'MIME::Lite', '3.027';
 requires 'Module::Install', '1.06';
