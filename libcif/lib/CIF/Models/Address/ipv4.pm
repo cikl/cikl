@@ -3,10 +3,15 @@ use strict;
 use warnings;
 use Moose;
 use CIF::Models::AddressRole;
+use CIF::MooseTypes;
 use namespace::autoclean;
 with 'CIF::Models::AddressRole';
 
 sub type { 'ipv4' }
+
+has '+value' => (
+  isa => 'CIF::MooseTypes::Ipv4'
+);
 
 __PACKAGE__->meta->make_immutable;
 1;
