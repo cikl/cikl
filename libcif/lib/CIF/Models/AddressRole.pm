@@ -12,4 +12,9 @@ has 'value' => (
   required => 1
 );
 
+sub as_string {
+  my $self = shift;
+  return $self->value;
+}
+
 1;

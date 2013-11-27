@@ -109,7 +109,7 @@ sub to_hash {
     my $val = $self->{$key};
     if ($key eq 'addresses') {
       my @addresses = map {
-        {type => $_->type, value => $_->value}
+        {type => $_->type, value => $_->as_string()}
       } @$val;
       $data->{$key} = \@addresses;
     } else {
