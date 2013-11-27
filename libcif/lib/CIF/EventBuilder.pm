@@ -2,6 +2,7 @@ package CIF::EventBuilder;
 use strict;
 use warnings;
 use CIF::Models::Event;
+use CIF::AddressBuilder qw/create_addresses/;
 use Moose;
 use namespace::autoclean;
 use Try::Tiny;
@@ -73,34 +74,10 @@ sub normalize {
   $r->{'detecttime'}        = $dt->epoch();
   $r->{'reporttime'}        = $rt->epoch();
 
-  $r->{addresses} ||= [];
-
-  my $addresses = $r->{addresses};
+  my $addresses = $r->{addresses} || [];
+  @$addresses = (@$addresses, @{create_addresses($r)});
+  $r->{addresses} = $addresses;
   
-  if (my $fqdn = delete($r->{fqdn})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'fqdn', value => $fqdn));
-    $r->{address} = $r->{address} // $fqdn;
-  };
-  if (my $ipv4 = delete($r->{ipv4})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'ipv4', value => $ipv4));
-    $r->{address} = $r->{address} // $ipv4;
-  }
-  if (my $ipv4_cidr = delete($r->{ipv4_cidr})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'ipv4_cidr', value => $ipv4_cidr));
-    $r->{address} = $r->{address} // $ipv4_cidr;
-  }
-  if (my $url = delete($r->{url})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'url', value => $url));
-    $r->{address} = $r->{address} // $url;
-  }
-  if (my $email = delete($r->{email})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'email', value => $email));
-    $r->{address} = $r->{address} // $email;
-  }
-  if (my $asn = delete($r->{asn})) {
-    push(@$addresses, CIF::Models::Address->new(type => 'asn', value => $asn));
-    $r->{address} = $r->{address} // $asn;
-  }
 
   # MPR: Disabling value expansion, for now.
 #  foreach my $key (keys %$r){

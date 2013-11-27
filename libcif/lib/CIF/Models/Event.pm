@@ -9,7 +9,8 @@ use Moose::Util::TypeConstraints;
 use MooseX::Aliases;
 use MooseX::SlurpyConstructor;
 use CIF::MooseTypes;
-use CIF::Models::Address;
+use CIF::Models::AddressRole;
+use CIF::AddressBuilder qw/create_address/;
 use namespace::autoclean;
 
 has 'guid' => (
@@ -41,13 +42,7 @@ has 'description' => (
 
 has 'addresses' => (
   is => 'rw',
-  isa => 'ArrayRef[CIF::Models::Address]',
-);
-
-has 'address' => (
-  is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
-  coerce => 1
+  isa => 'ArrayRef[CIF::Models::AddressRole]',
 );
 
 has 'detecttime' => (
@@ -99,13 +94,23 @@ has 'other_attributes' => (
   slurpy => 1
 );
 
+sub address {
+  my $self = shift;
+  if (my $address = $self->addresses->[0]) {
+    return $address->value;
+  }
+  return undef;
+}
+
 sub to_hash {
   my $self = shift;
   my $data = {};
   foreach my $key (keys %$self) {
     my $val = $self->{$key};
     if ($key eq 'addresses') {
-      my @addresses = map {$_->to_hash()} @$val;
+      my @addresses = map {
+        {type => $_->type, value => $_->value}
+      } @$val;
       $data->{$key} = \@addresses;
     } else {
       $data->{$key} = $val;
@@ -117,7 +122,7 @@ sub to_hash {
 sub from_hash {
   my $class = shift;
   my $data = shift;
-  my @addresses = map {CIF::Models::Address->new($_);} @{$data->{addresses} || []};
+  my @addresses = map {create_address($_->{type}, $_->{value});} @{$data->{addresses} || []};
   $data->{addresses} = \@addresses;
   return $class->new($data);
 }
