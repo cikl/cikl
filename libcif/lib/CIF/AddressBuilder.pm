@@ -1,14 +1,9 @@
 package CIF::AddressBuilder;
 use strict;
 use warnings;
-use Carp qw/croak/;
+use Carp;
 use Module::Pluggable search_path => "CIF::Models::Address", require => 1,
-  sub_name => "_plugins", on_require_error => sub { 
-    my $plugin = shift;
-    my $err = shift;
-    warn "Failed to require $plugin\n";
-    croak($err);
-  }; 
+  sub_name => "_plugins", on_require_error => \&croak;
 
 use namespace::autoclean;
 require Exporter;
