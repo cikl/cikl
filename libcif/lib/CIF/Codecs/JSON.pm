@@ -7,17 +7,12 @@ use CIF::Models::Event;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
 use CIF::Models::HostInfo;
-use Try::Tiny;
 require JSON;
-use Data::Dumper;
-use CIF qw/debug/;
+use Moose;
+use CIF::Codecs::CodecRole;
+use namespace::autoclean;
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless($self,$class);
-  return $self;
-}
+with 'CIF::Codecs::CodecRole';
 
 sub content_type {
   return "application/json";
@@ -95,5 +90,6 @@ sub decode_submission {
   return CIF::Models::Submission->from_hash($data);
 }
 
+__PACKAGE__->meta->make_immutable;
 
 1;
