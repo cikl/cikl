@@ -47,7 +47,7 @@ sub _generate_row {
   my $event = shift;
   my $ret = {};
   foreach my $key (HEADER_ROW) {
-    my $val = $event->{$key};
+    my $val = $event->$key;
     # If we have a formatter, format it !
     if (my $formatter = FIELD_MAP->{$key}) {
       $val = $formatter->($val);
