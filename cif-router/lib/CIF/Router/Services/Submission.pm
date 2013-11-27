@@ -25,7 +25,7 @@ sub process {
   my $content_type = shift;
   my ($err, $submission, $results);
   try {
-    $submission = $self->encoder->decode_submission($payload);
+    $submission = $self->codec->decode_submission($payload);
   } catch {
     $err = shift;
   };
@@ -41,7 +41,7 @@ sub process {
   if ($err) {
     die("Error while trying to process submission: $err");
   }
-  return($results, "submission_response", $self->encoder->content_type(), 0);
+  return($results, "submission_response", $self->codec->content_type(), 0);
 }
 
 1;

@@ -11,11 +11,11 @@ use CIF::Router::Constants;
 sub new {
   my $class = shift;
   my $router = shift;
-  my $encoder = shift;
+  my $codec = shift;
 
   my $self = {
     starttime => time(),
-    encoder => $encoder,
+    codec => $codec,
     router => $router
   };
 
@@ -50,8 +50,8 @@ sub router {
   return $_[0]->{router};
 }
 
-sub encoder {
-  return $_[0]->{encoder};
+sub codec {
+  return $_[0]->{codec};
 }
 
 sub uptime {

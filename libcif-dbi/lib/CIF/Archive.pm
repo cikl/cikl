@@ -13,7 +13,7 @@ use Data::Dumper;
 use POSIX ();
 use CIF::Client::Query;
 use CIF::APIKeyRestrictions;
-use CIF::Encoder::JSON;
+use CIF::Codecs::JSON;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
 use List::MoreUtils qw/any/;
@@ -27,7 +27,7 @@ __PACKAGE__->columns(All => qw/id uuid guid data format reporttime created/);
 __PACKAGE__->columns(Essential => qw/id uuid guid data created/);
 __PACKAGE__->sequence('archive_id_seq');
 
-my $dbencoder = CIF::Encoder::JSON->new();
+my $db_codec = CIF::Codecs::JSON->new();
 
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
@@ -76,7 +76,7 @@ sub insert {
             $event->id,
             $event->guid,
             $CIF::VERSION,
-            $dbencoder->encode_event($event),
+            $db_codec->encode_event($event),
             $event->detecttime, # Fairly sure this is supposed to be detecttime
             $event->reporttime
         );
@@ -211,7 +211,7 @@ sub search2 {
     foreach (@recs){
         # protect against orphans
         next unless($_->{'data'});
-        my $e = $dbencoder->decode_event($_->{'data'});
+        my $e = $db_codec->decode_event($_->{'data'});
 
         push(@rr,$e);
     }

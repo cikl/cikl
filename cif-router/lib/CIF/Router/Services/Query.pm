@@ -25,7 +25,7 @@ sub process {
   my $content_type = shift;
   my ($query, $results, $encoded_results, $err);
   try {
-    $query = $self->encoder->decode_query($payload);
+    $query = $self->codec->decode_query($payload);
   } catch {
     $err = shift;
   };
@@ -43,14 +43,14 @@ sub process {
   }
 
   try {
-    $encoded_results = $self->encoder->encode_query_results($results);
+    $encoded_results = $self->codec->encode_query_results($results);
   } catch {
     $err = shift;
   };
   if ($err) {
     die("Error while trying to encode query results: $err");
   }
-  return($encoded_results, "query_response", $self->encoder->content_type(), 0);
+  return($encoded_results, "query_response", $self->codec->content_type(), 0);
 }
 1;
 

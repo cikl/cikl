@@ -1,4 +1,4 @@
-package CIF::Encoder::JSON;
+package CIF::Codecs::JSON;
 
 use strict;
 use warnings;

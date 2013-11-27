@@ -8,7 +8,7 @@ use CIF::Router::Transport;
 use Config::Simple;
 use CIF::Router;
 use Try::Tiny;
-use CIF::Encoder::JSON;
+use CIF::Codecs::JSON;
 use Sys::Hostname;
 use CIF::Router::Services::Query;
 use CIF::Router::Services::Submission;
@@ -41,7 +41,7 @@ sub new {
     $self->{dbi_commit_interval} = $self->{server_config}->{dbi_commit_interval} || 2;
     $self->{dbi_commit_size} = $self->{server_config}->{'dbi_commit_size'} || 1000;
 
-    $self->{encoder} = CIF::Encoder::JSON->new();
+    $self->{codec} = CIF::Codecs::JSON->new();
 
     my $flusher = CIF::Router::AnyEventFlusher->new(
       commit_callback => sub { 
@@ -73,8 +73,8 @@ sub new {
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
 
-    $self->{service} = $service_class->new($self->{router}, $self->{encoder});
-    $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{encoder});
+    $self->{service} = $service_class->new($self->{router}, $self->{codec});
+    $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{codec});
     my $driver;
     try {
       $driver = $driver_class->new($driver_config, $self->{service}, $self->{control_service});

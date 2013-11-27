@@ -33,7 +33,7 @@ sub process {
   my $err;
   my ($remote_hostinfo, $response, $encoded_response);
   try {
-    $remote_hostinfo = $self->{encoder}->decode_hostinfo($payload);
+    $remote_hostinfo = $self->codec->decode_hostinfo($payload);
   } catch {
     $err = shift;
   };
@@ -58,7 +58,7 @@ sub process {
   }
 
   try {
-    $encoded_response = $self->{encoder}->encode_hostinfo($response);
+    $encoded_response = $self->codec->encode_hostinfo($response);
   } catch {
     $err = shift;
   };
@@ -66,7 +66,7 @@ sub process {
   if ($err) {
     die("Error encoding hostinfo: $err");
   }
-  return($encoded_response, "pong", $self->{encoder}->content_type());
+  return($encoded_response, "pong", $self->codec->content_type());
 }
 
 1;
