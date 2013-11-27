@@ -97,7 +97,7 @@ has 'other_attributes' => (
 sub address {
   my $self = shift;
   if (my $address = $self->addresses->[0]) {
-    return $address->value;
+    return $address->as_string();
   }
   return undef;
 }
