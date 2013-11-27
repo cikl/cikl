@@ -6,7 +6,9 @@ use strict;
 use warnings;
 
 use CIF qw/generate_uuid_ns generate_uuid_random is_uuid debug/;
-use Module::Pluggable require => 1, except => qr/CIF::Feed::Plugin::\S+::/;
+use Carp;
+use Module::Pluggable require => 1, except => qr/CIF::Feed::Plugin::\S+::/,
+  on_require_error => \&croak;
 use Data::Dumper;
 use MIME::Base64;
 require Compress::Snappy;

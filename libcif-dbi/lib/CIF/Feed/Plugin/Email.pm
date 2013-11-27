@@ -4,7 +4,9 @@ use base 'CIF::Feed::Plugin';
 use warnings;
 use strict;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
+use Carp;
+use Module::Pluggable require => 1, search_path => [__PACKAGE__], 
+  on_require_error => \&croak;
 use CIF qw/debug/;
 
 __PACKAGE__->table('email');

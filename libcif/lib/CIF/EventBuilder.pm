@@ -8,8 +8,9 @@ use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
 use CIF qw/normalize_timestamp debug/;
+use Carp;
 use Module::Pluggable search_path => "CIF::EventNormalizers", 
-      require => 1, sub_name => '__preprocessors';
+      require => 1, sub_name => '__preprocessors', on_require_error => \&croak;
 
 has 'default_event_data' => (
   is => 'rw',

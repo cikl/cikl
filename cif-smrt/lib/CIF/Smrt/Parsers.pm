@@ -4,8 +4,9 @@ use strict;
 use warnings;
 use CIF qw/debug/;
 
+use Carp;
 use Module::Pluggable search_path => "CIF::Smrt::Parsers", 
-      require => 1, sub_name => '_parsers';
+      require => 1, sub_name => '_parsers', on_require_error => \&croak;
 
 
 ## time perl  cif-smrt/bin/cif_smrt -C cif.conf  -r cif-smrt/rules/etc/00_alexa_whitelist.cfg -f top100 -v2

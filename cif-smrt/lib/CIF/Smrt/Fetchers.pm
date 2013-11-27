@@ -6,8 +6,10 @@ use URI;
 use Data::Dumper;
 #use CIF::Smrt::Fetcher;
 
+use Carp;
 use Module::Pluggable search_path => "CIF::Smrt::Fetchers", 
-      inner => 0, require => 1, sub_name => '_fetchers'
+      inner => 0, require => 1, sub_name => '_fetchers', 
+      on_require_error => \&croak
       ;
 
 sub new {

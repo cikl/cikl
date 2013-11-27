@@ -5,8 +5,9 @@ use warnings;
 use CIF::Smrt::DecoderRole;
 use CIF qw/debug/;
 use File::Type;
+use Carp;
 use Module::Pluggable search_path => "CIF::Smrt::Decoders", 
-      require => 1, sub_name => '_decoders';
+      require => 1, sub_name => '_decoders', on_require_error => \&croak;
 
 use namespace::autoclean;
 use Moose;

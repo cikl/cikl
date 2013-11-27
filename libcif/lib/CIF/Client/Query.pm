@@ -4,7 +4,9 @@ use base 'Class::Accessor';
 use strict;
 use warnings;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
+use Carp;
+use Module::Pluggable require => 1, search_path => [__PACKAGE__], 
+  on_require_error => \&croak;
 use Digest::SHA qw/sha1_hex/;
 use CIF qw(is_uuid);
 

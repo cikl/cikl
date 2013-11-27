@@ -17,8 +17,9 @@ use CIF::Codecs::JSON;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
 use List::MoreUtils qw/any/;
-
-use Module::Pluggable require => 1, sub_name => '__plugins';
+use Carp;
+use Module::Pluggable require => 1, sub_name => '__plugins', 
+  on_require_error => \&croak;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
 __PACKAGE__->table('archive');

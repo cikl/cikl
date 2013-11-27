@@ -5,7 +5,9 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-use Module::Pluggable require => 1, search_path => [__PACKAGE__];
+use Carp;
+use Module::Pluggable require => 1, search_path => [__PACKAGE__], 
+  on_require_error => \&croak;
 use Try::Tiny;
 use Config::Simple;
 use Regexp::Common qw/net/;

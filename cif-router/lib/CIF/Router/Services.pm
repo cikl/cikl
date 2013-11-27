@@ -3,8 +3,9 @@ package CIF::Router::Services;
 use strict;
 use warnings;
 
+use Carp;
 use Module::Pluggable search_path => "CIF::Router::Services",
-      require => 1, sub_name => '_services';
+      require => 1, sub_name => '_services', on_require_error => \&croak;
 
 sub new {
   my $class = shift;
