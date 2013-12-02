@@ -38,7 +38,7 @@ sub test_known_invalid_urls: Test(4) {
   ok(! $self->safe_generate("rtsp://foobar.com/"), "reject rtsp scheme");
 }
 
-sub test_new_normalized : Test(5) {
+sub test_new_normalized : Test(6) {
   my $self = shift;
   is($self->generate_normalized("foo.com/bar.txt")->value(), 
       'http://foo.com/bar.txt', "add http scheme, if missing");
@@ -54,6 +54,9 @@ sub test_new_normalized : Test(5) {
 
   is($self->generate_normalized("http://bar.com/   ")->value(), 
       'http://bar.com/', "remove trailing spaces");
+
+  is($self->generate_normalized("http://bar.com")->value(), 
+      'http://bar.com/', "add path slash if there isn't one");
 }
 
 Test::Class->runtests;
