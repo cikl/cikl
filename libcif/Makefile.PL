@@ -8,6 +8,6 @@ name 'libcif';
 version '1.5';
 license 'lgpl';
 
-tests 't/*.t t/*/*.t';
+tests_recursive 't';
 
 WriteAll;
