@@ -17,4 +17,17 @@ sub as_string {
   return $self->value;
 }
 
+sub normalize_value {
+  my $class = shift;
+  return shift;
+}
+
+sub new_normalized {
+  my $class = shift;
+  my %args = @_;
+  $args{value} = $class->normalize_value($args{value});
+  $class->new(%args);
+}
+
+
 1;

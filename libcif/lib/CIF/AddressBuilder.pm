@@ -34,7 +34,7 @@ sub create_address {
   unless($type_class) {
     die("Unknown type: $type");
   }
-  return $type_class->new(value => $value);
+  return $type_class->new_normalized(value => $value);
 }
 
 sub create_addresses {

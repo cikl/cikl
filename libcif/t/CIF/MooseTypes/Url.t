@@ -23,28 +23,28 @@ use constant BAD_SCHEMES => qw(
   rtsp://foobar.com/
 );
 
-sub required_to_be_uri : Test(2) {
+sub required_to_be_string : Test(2) {
   my $self = shift;
   my $type = $self->get_constraint();
   my $url_text = "http://foobar.com/";
   my $url = URI->new($url_text);
-  ok($type->check($url), "Must be a URI object");
-  ok(! $type->check($url_text), "Cannot be a string");
+  ok(! $type->check($url), "reject a URI object");
+  ok($type->check($url_text), "accept a string");
 }
 
 sub required_to_have_scheme : Test(2) {
   my $self = shift;
   my $type = $self->get_constraint();
-  my $url = URI->new("foo.com/bar");
+  my $url = "foo.com/bar";
   ok(! $type->check($url), "fail to validate without scheme");
-  $url->scheme('http');
+  $url = 'http://' . $url;
   ok($type->check($url), "validates with a scheme");
 }
 
 sub required_to_have_a_host : Test(1) {
   my $self = shift;
   my $type = $self->get_constraint();
-  my $url = URI->new("file://foo/bar.txt");
+  my $url = "file://foo/bar.txt";
   ok(! $type->check($url), "fail to validate without a host");
 }
 
@@ -53,7 +53,7 @@ sub test_good_urls : Tests {
   my $type = $self->get_constraint();
 
   foreach my $url (GOOD_URLS) {
-    ok($type->check(URI->new($url)), "'$url' is a valid URL");
+    ok($type->check($url), "'$url' is a valid URL");
   }
 }
 
@@ -62,7 +62,7 @@ sub test_bad_schemes : Tests {
   my $type = $self->get_constraint();
 
   foreach my $url (BAD_SCHEMES) {
-    ok(! $type->check(URI->new($url)), "reject invalid/missing scheme '$url'");
+    ok(! $type->check($url), "reject invalid/missing scheme '$url'");
   }
 }
 1;
