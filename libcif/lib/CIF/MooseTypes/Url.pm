@@ -13,9 +13,12 @@ subtype 'CIF::MooseTypes::Url',
   where { 
     my $url = shift;
     return (
-      $url->isa('URI') &&
-      defined($url->scheme) &&
-      $url->can('host')
+      $url->isa('URI') # must be a URI
+
+      && defined($url->scheme) # must have a scheme
+      && $url->can('host') # must have a host component 
+      && $url->can('port') # must respond to port
+      && $url->can('default_port') # must respond to default_port
     );
   },
   message { "Invalid URL '$_'"} ;
