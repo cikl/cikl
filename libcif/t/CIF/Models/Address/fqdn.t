@@ -23,16 +23,16 @@ sub test_known_invalid_urls: Test(3) {
   ok(! $self->safe_generate("not an fqdn"), "reject string with whitespace");
 }
 
-sub test_new_normalized : Test(1) {
+sub test_new_normalized : Test(3) {
   my $self = shift;
   is($self->generate_normalized("FOO.COM")->value(), 
       'foo.com', "downcase fqdn");
 
-#  is($self->generate_normalized("   bar.com")->value(), 
-#      'bar.com', "remove leading spaces");
-#
-#  is($self->generate_normalized("bar.com   ")->value(), 
-#      'bar.com', "remove trailing spaces");
+  is($self->generate_normalized("   bar.com")->value(), 
+      'bar.com', "remove leading spaces");
+
+  is($self->generate_normalized("bar.com   ")->value(), 
+      'bar.com', "remove trailing spaces");
 
 }
 

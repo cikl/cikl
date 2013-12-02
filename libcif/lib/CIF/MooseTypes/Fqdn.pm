@@ -10,12 +10,11 @@ use constant FQDN_RE => qr/^$RE{net}{domain}{-rfc1101}{-nospace}$/ ;
 
 subtype 'CIF::MooseTypes::Fqdn',
   as 'CIF::MooseTypes::LowerCaseStr',
-  where { $_ =~ FQDN_RE },
+  where { 
+    $_ !~ /\s/  # No whitespace
+    && $_ =~ FQDN_RE # proper fqdn
+  },
   message { "Invalid fqdn '$_'"} ;
-
-coerce 'CIF::MooseTypes::Fqdn',
-  from 'Str',
-  via { lc };
 
 1;
 

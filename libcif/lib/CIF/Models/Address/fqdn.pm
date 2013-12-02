@@ -10,9 +10,17 @@ with 'CIF::Models::AddressRole';
 sub type { 'fqdn' }
 
 has '+value' => (
-  isa => 'CIF::MooseTypes::Fqdn',
-  coerce => 1
+  isa => 'CIF::MooseTypes::Fqdn'
 );
+
+sub normalize_value {
+  my $class = shift;
+  my $value = shift;
+  return $value unless ($value && ref($value) eq '');
+  $value =~ s/^\s+//;
+  $value =~ s/\s+$//;
+  return lc($value);
+}
 
 __PACKAGE__->meta->make_immutable;
 1;
