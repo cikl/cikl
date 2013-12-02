@@ -20,12 +20,12 @@ sub normalize_value {
   my $class = shift;
   my $url = shift;
   return unless ($url && ref($url) eq '');
+  $url =~ s/^\s+//;
+  $url =~ s/\s+$//;
   if ($url !~ RE_URL_SCHEME) {
     # Default to 'http' if a scheme has not been specified. 
     $url= "http://$url";
   }
-  $url =~ s/^\s+//;
-  $url =~ s/\s+$//;
   my $uri_obj = URI->new($url)->canonical();
   $url = $uri_obj->as_string();
   return $url;

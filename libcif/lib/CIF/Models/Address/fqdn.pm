@@ -14,5 +14,8 @@ has '+value' => (
   coerce => 1
 );
 
+sub new_normalized {
+}
+
 __PACKAGE__->meta->make_immutable;
 1;

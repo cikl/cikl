@@ -38,7 +38,7 @@ sub test_known_invalid_urls: Test(4) {
   ok(! $self->safe_generate("rtsp://foobar.com/"), "reject rtsp scheme");
 }
 
-sub test_new_normalized : Test(3) {
+sub test_new_normalized : Test(5) {
   my $self = shift;
   is($self->generate_normalized("foo.com/bar.txt")->value(), 
       'http://foo.com/bar.txt', "add http scheme, if missing");
@@ -48,6 +48,12 @@ sub test_new_normalized : Test(3) {
 
   is($self->generate_normalized("https://bar.com:443/")->value(), 
       'https://bar.com/', "remove redundant default port number");
+
+  is($self->generate_normalized("   http://bar.com/")->value(), 
+      'http://bar.com/', "remove leading spaces");
+
+  is($self->generate_normalized("http://bar.com/   ")->value(), 
+      'http://bar.com/', "remove trailing spaces");
 }
 
 Test::Class->runtests;
