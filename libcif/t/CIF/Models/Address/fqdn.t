@@ -16,7 +16,7 @@ sub test_known_good_fqdns : Test(2) {
   ok($self->generate("www.foo.com"),  "accept www.foo.com");
 }
 
-sub test_known_invalid_urls: Test(3) { 
+sub test_known_invalid_fqdns : Test(3) { 
   my $self = shift;
   ok(! $self->safe_generate("asdf/qwer"), "reject / char");
   ok(! $self->safe_generate(""), "reject empty string");
