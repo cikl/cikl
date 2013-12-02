@@ -14,13 +14,13 @@ use constant GOOD_URLS => qw(
   http://www.foo.com/
   https://www.foo.com/
   ftp://foo.com/asdf
-  rtsp://foobla.com/asdf
 );
 
 use constant BAD_SCHEMES => qw(
   file:/asdf/laksdjf/asdlkfj.txt
   asdf/laksdjf/asdlkfj.txt
   data:1234
+  rtsp://foobar.com/
 );
 
 sub required_to_be_uri : Test(2) {
