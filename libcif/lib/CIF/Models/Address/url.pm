@@ -19,7 +19,7 @@ has '+value' => (
 sub normalize_value {
   my $class = shift;
   my $url = shift;
-  return unless ($url && ref($url) eq '');
+  return $url unless ($url && ref($url) eq '');
   $url =~ s/^\s+//;
   $url =~ s/\s+$//;
   if ($url !~ RE_URL_SCHEME) {

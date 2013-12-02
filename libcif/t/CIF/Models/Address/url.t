@@ -30,12 +30,14 @@ sub test_known_good_urls: Test(3) {
   ok($self->generate("ftp://foo.com/"),  "accept ftp url");
 }
 
-sub test_known_invalid_urls: Test(4) { 
+sub test_known_invalid_urls: Test(6) { 
   my $self = shift;
   ok(! $self->safe_generate("file://foo/bar"), "reject file:// scheme");
   ok(! $self->safe_generate("foo/bar.txt"), "reject relative path");
   ok(! $self->safe_generate("data:1234"), "reject data scheme");
   ok(! $self->safe_generate("rtsp://foobar.com/"), "reject rtsp scheme");
+  ok(! $self->safe_generate(undef), "reject undefined object");
+  ok(! $self->safe_generate({}), "reject hashref object");
 }
 
 sub test_new_normalized : Test(6) {
