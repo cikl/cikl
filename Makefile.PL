@@ -1,7 +1,7 @@
 use inc::Module::Install;
 name 'CIF';
 version '1.5';
-DIR => ['libcif-dbi'];
+DIR => ['libcif-dbi', 'libcif'];
 cpanfile;
 
 postamble <<EOS
