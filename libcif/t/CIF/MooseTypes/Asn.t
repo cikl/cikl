@@ -1,27 +1,17 @@
 package TestsFor::CIF::MooseTypes::Asn;
-use base qw(Test::Class);
+use lib 'testlib';
+use base qw(CIF::MooseTypes::TestClass);
 use strict;
 use warnings;
 use Test::More;
-use Moose::Util::TypeConstraints;
 
 use CIF::MooseTypes::Asn;
 
-sub get_type : Test(setup) {
-  my $self = shift;
-  $self->{type} = find_type_constraint('CIF::MooseTypes::Asn');
-}
-
-sub test_constraint_obj : Test(2) {
-  my $self = shift;
-  isa_ok($self->{type}, 'Moose::Meta::TypeConstraint');
-  is($self->{type}->name, 'CIF::MooseTypes::Asn', 'The typeconstraint should be named CIF::MooseTypes::Asn');
-}
+sub testing_class { "CIF::MooseTypes::Asn"; }
 
 sub test_validation : Test(7) {
   my $self = shift;
-  my $type = $self->{type};
-  use Data::Dumper;
+  my $type = $self->get_constraint();
   ok(! $type->check(-1), "-1 is not a valid ASN");
   ok($type->check(0), "0 is a valid ASN");
   ok($type->check(1), "1 is a valid ASN");
@@ -29,6 +19,5 @@ sub test_validation : Test(7) {
   ok($type->check((2**32) - 1), "2^32 - 1 is a valid ASN");
   ok(! $type->check(2**32), "2^32 is not a valid ASN");
 }
-
 
 Test::Class->runtests;
