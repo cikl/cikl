@@ -1,10 +1,15 @@
 *.swp
 *.swo
-Makefile
 local/
 cif.conf
+
+# Build related
+Makefile
+Makefile.old
+blib/
+inc/
+pm_to_blib
 META.json
 META.yml
 MYMETA.json
 MYMETA.yml
-inc/
