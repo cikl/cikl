@@ -9,19 +9,6 @@ use CIF::Models::Address::url;
 
 sub testing_class { "CIF::Models::Address::url"; }
 
-use constant GOOD_URLS => qw(
-  http://www.foo.com/
-  https://www.foo.com/
-  ftp://foo.com/asdf
-);
-
-use constant BAD_SCHEMES => qw(
-  file:/asdf/laksdjf/asdlkfj.txt
-  asdf/laksdjf/asdlkfj.txt
-  data:1234
-  rtsp://foobar.com/
-);
-
 sub test_known_good_urls: Test(3) { 
   my $self = shift;
 
