@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::email;
 
@@ -23,15 +24,15 @@ sub test_invalid_characters : Test(12) {
     ',', ';', ':', '\\', '"', 
     '[', ']' );
   foreach my $char (@invalid_chars) {
-    ok(! $self->safe_generate('asdf' . $char . 'qwer@bar.com'), 'reject ' . $char . ' char');
+    dies_ok { $self->generate('asdf' . $char . 'qwer@bar.com') } 'reject ' . $char . ' char';
   }
 }
 sub test_whitespace : Test(4) { 
   my $self = shift;
-  ok(! $self->safe_generate(''), 'reject empty string');
-  ok(! $self->safe_generate('bad address@foo.com'), 'reject string with whitespace');
-  ok(! $self->safe_generate('   address@foo.com'), 'reject leading whitespace');
-  ok(! $self->safe_generate('address@foo.com   '), 'reject trailing whitespace');
+  dies_ok { $self->generate('') } 'reject empty string';
+  dies_ok { $self->generate('bad address@foo.com') } 'reject string with whitespace';
+  dies_ok { $self->generate('   address@foo.com') } 'reject leading whitespace';
+  dies_ok { $self->generate('address@foo.com   ') } 'reject trailing whitespace';
 }
 #
 sub test_new_normalized : Test(3) {

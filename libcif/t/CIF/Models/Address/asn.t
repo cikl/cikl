@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::asn;
 
@@ -21,11 +22,11 @@ sub test_known_good_asns : Test(4) {
 sub test_known_invalid_asns : Test(5) { 
   my $self = shift;
 
-  ok(! $self->safe_generate(-1),  'reject -1');
-  ok(! $self->safe_generate(2**32),  'reject 2^32');
-  ok(! $self->safe_generate("asdf"),  'reject asdf');
-  ok(! $self->safe_generate("   1234"),  'reject leading whitespace');
-  ok(! $self->safe_generate("1234   "),  'reject trailing whitespace');
+  dies_ok { $self->generate(-1) }  'reject -1';
+  dies_ok { $self->generate(2**32) }  'reject 2^32';
+  dies_ok { $self->generate("asdf") }  'reject asdf';
+  dies_ok { $self->generate("   1234") }  'reject leading whitespace';
+  dies_ok { $self->generate("1234   ") }  'reject trailing whitespace';
 }
 
 sub test_new_normalized : Test(2) {

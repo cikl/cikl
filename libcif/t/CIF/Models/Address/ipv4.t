@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::ipv4;
 
@@ -18,15 +19,15 @@ sub test_known_valid_ipv4 : Test(2) {
 
 sub test_known_invalid_ipv4 : Test(4) { 
   my $self = shift;
-  ok(! $self->safe_generate("256.1.1.1"),  "reject 256.1.1.1");
-  ok(! $self->safe_generate("1.256.1.1"),  "reject 1.256.1.1");
-  ok(! $self->safe_generate("1.1.256.1"),  "reject 1.1.256.1");
-  ok(! $self->safe_generate("1.1.1.256"),  "reject 1.1.1.256");
+  dies_ok { $self->generate("256.1.1.1") }  "reject 256.1.1.1";
+  dies_ok { $self->generate("1.256.1.1") }  "reject 1.256.1.1";
+  dies_ok { $self->generate("1.1.256.1") }  "reject 1.1.256.1";
+  dies_ok { $self->generate("1.1.1.256") }  "reject 1.1.1.256";
 }
 
 sub test_cidrs : Test(1) { 
   my $self = shift;
-  ok(! $self->safe_generate("10.0.0.0/24"),  "reject cidr");
+  dies_ok { $self->generate("10.0.0.0/24") }  "reject cidr";
 }
 
 sub test_new_normalized : Test(2) {

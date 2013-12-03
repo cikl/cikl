@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::fqdn;
 
@@ -18,9 +19,9 @@ sub test_known_good_fqdns : Test(2) {
 
 sub test_known_invalid_fqdns : Test(3) { 
   my $self = shift;
-  ok(! $self->safe_generate("asdf/qwer"), "reject / char");
-  ok(! $self->safe_generate(""), "reject empty string");
-  ok(! $self->safe_generate("not an fqdn"), "reject string with whitespace");
+  dies_ok { $self->generate("asdf/qwer") } "reject / char";
+  dies_ok { $self->generate("") } "reject empty string";
+  dies_ok { $self->generate("not an fqdn") } "reject string with whitespace";
 }
 
 sub test_new_normalized : Test(3) {
