@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::ipv4_cidr;
 
@@ -18,23 +19,23 @@ sub test_known_valid_ipv4_cidr : Test(2) {
 
 sub test_bad_ip_in_cidr : Test(4) { 
   my $self = shift;
-  ok(! $self->safe_generate("256.1.1.1/24"),  "reject 256.1.1.1/24");
-  ok(! $self->safe_generate("1.256.1.1/24"),  "reject 1.256.1.1/24");
-  ok(! $self->safe_generate("1.1.256.1/24"),  "reject 1.1.256.1/24");
-  ok(! $self->safe_generate("1.1.1.256/24"),  "reject 1.1.1.256/24");
+  dies_ok { $self->generate("256.1.1.1/24") }  "reject 256.1.1.1/24";
+  dies_ok { $self->generate("1.256.1.1/24") }  "reject 1.256.1.1/24";
+  dies_ok { $self->generate("1.1.256.1/24") }  "reject 1.1.256.1/24";
+  dies_ok { $self->generate("1.1.1.256/24") }  "reject 1.1.1.256/24";
 }
 
 sub test_invalid_cidr_mask : Test(2) { 
   my $self = shift;
-  ok(! $self->safe_generate("8.8.8.8/33"),  "reject 8.8.8.8/33");
-  ok(! $self->safe_generate("8.8.8.8/-1"),  "reject 8.8.8.8/-1");
+  dies_ok { $self->generate("8.8.8.8/33") }  "reject 8.8.8.8/33";
+  dies_ok { $self->generate("8.8.8.8/-1") }  "reject 8.8.8.8/-1";
 }
 
 sub test_invalid : Test(3) { 
   my $self = shift;
-  ok(! $self->safe_generate("  8.8.8.8/24"),  "reject leading whitespace");
-  ok(! $self->safe_generate("8.8.8.8/24   "),  "reject trailing whitespace");
-  ok(! $self->safe_generate("8.8.8.8"),  "reject bare ipv4");
+  dies_ok { $self->generate("  8.8.8.8/24") }  "reject leading whitespace";
+  dies_ok { $self->generate("8.8.8.8/24   ") }  "reject trailing whitespace";
+  dies_ok { $self->generate("8.8.8.8") }  "reject bare ipv4";
 }
 
 sub test_new_normalized : Test(2) {

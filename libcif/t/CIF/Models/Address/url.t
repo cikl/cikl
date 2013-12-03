@@ -4,6 +4,7 @@ use base qw(CIF::Models::Address::TestClass);
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 use CIF::Models::Address::url;
 
@@ -19,12 +20,12 @@ sub test_known_good_urls: Test(3) {
 
 sub test_known_invalid_urls: Test(6) { 
   my $self = shift;
-  ok(! $self->safe_generate("file://foo/bar"), "reject file:// scheme");
-  ok(! $self->safe_generate("foo/bar.txt"), "reject relative path");
-  ok(! $self->safe_generate("data:1234"), "reject data scheme");
-  ok(! $self->safe_generate("rtsp://foobar.com/"), "reject rtsp scheme");
-  ok(! $self->safe_generate(undef), "reject undefined object");
-  ok(! $self->safe_generate({}), "reject hashref object");
+  dies_ok { $self->generate("file://foo/bar") } "reject file:// scheme";
+  dies_ok { $self->generate("foo/bar.txt") } "reject relative path";
+  dies_ok { $self->generate("data:1234") } "reject data scheme";
+  dies_ok { $self->generate("rtsp://foobar.com/") } "reject rtsp scheme";
+  dies_ok { $self->generate(undef) } "reject undefined object";
+  dies_ok { $self->generate({}) } "reject hashref object";
 }
 
 sub test_new_normalized : Test(6) {
