@@ -29,5 +29,14 @@ sub test_cidrs : Test(1) {
   ok(! $self->safe_generate("10.0.0.0/24"),  "reject cidr");
 }
 
+sub test_new_normalized : Test(2) {
+  my $self = shift;
+  is($self->generate_normalized("   1.2.3.4")->value(), 
+      '1.2.3.4', "remove leading spaces");
+
+  is($self->generate_normalized("1.2.3.4   ")->value(), 
+      '1.2.3.4', "remove trailing spaces");
+}
+
 Test::Class->runtests;
 
