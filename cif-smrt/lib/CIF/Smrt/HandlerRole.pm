@@ -143,6 +143,9 @@ sub process {
     if($::debug) {
       debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());
     }
+    if ($broker->count_failed() > 0) {
+      debug('failed to create events: '. $broker->count_failed());
+    }
 
     if($broker->count() == 0){
       if ($broker->count_too_old() != 0) {

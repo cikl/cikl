@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Moose;
 use namespace::autoclean;
+use Try::Tiny;
 
 has 'builder' => (
   is => 'bare',
@@ -20,6 +21,15 @@ has 'count' => (
   init_arg => undef
 );
 
+has 'count_failed' => (
+  is => 'ro',
+  isa => 'Num',
+  writer => '_set_count_failed',
+  required => 1,
+  default => 0,
+  init_arg => undef
+);
+
 has 'count_too_old' => (
   is => 'ro',
   isa => 'Num',
@@ -32,10 +42,20 @@ has 'count_too_old' => (
 sub emit {
   my $self = shift;
   my $event_hash = shift;
-  my $event = $self->_builder->build_event($event_hash);
+  my $err;
+  my $event;
+  try {
+    $event = $self->_builder->build_event($event_hash);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    $self->_set_count_failed($self->count_failed() + 1);
+    return;
+  }
   if (defined($event)) {
-    $self->_set_count($self->count() + 1);
     $self->_emit($event);
+    $self->_set_count($self->count() + 1);
   } else {
     $self->_set_count_too_old($self->count_too_old() + 1);
     # It was too old.
