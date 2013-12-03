@@ -9,15 +9,6 @@ subtype 'CIF::MooseTypes::Email',
   as 'CIF::MooseTypes::LowerCaseStr',
   where { valid($_) && $_ !~ /^\s+|\s+$/ },
   message { "Invalid E-Mail address: $_"} ;
-
-coerce 'CIF::MooseTypes::Email',
-  from 'Str',
-  via { 
-    my $str = lc(shift); 
-    $str =~ s/^\s+//;
-    $str =~ s/\s+$//;
-    $str
-  };
 1;
 
 
