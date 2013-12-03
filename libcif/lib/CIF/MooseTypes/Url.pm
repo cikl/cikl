@@ -28,7 +28,7 @@ subtype 'CIF::MooseTypes::Url',
       && $url->can('port') # must respond to port
     );
   },
-  message { "Invalid URL '$_'"} ;
+  message { "Invalid URL '" . ($_ || '(undef)') . "'"} ;
 
 1;
 
