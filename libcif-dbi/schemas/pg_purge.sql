@@ -1,4 +1,5 @@
 TRUNCATE  archive,
+          archive_lookup,
           archive_guid_map,
           hash,
           domain,
@@ -7,10 +8,4 @@ TRUNCATE  archive,
           email,
           malware,
           search,
-          feed,
-          archive_asn,
-          archive_cidr,
-          archive_email,
-          archive_fqdn,
-          archive_ip,
-          archive_url;
+          feed;

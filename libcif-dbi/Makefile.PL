@@ -53,21 +53,6 @@ postamble <<EOS
 create_tables:
 \t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/00_archive.sql
 \t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/apikeys.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/domains.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/email.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/feed.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/hash.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/index/hash.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/infrastructure.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/malware.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/search.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/url.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_asn.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_cidr.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_email.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_fqdn.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_ip.sql
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_url.sql
 
 create_db:
 \t\$(PSQLX) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -c 'CREATE DATABASE \$(DB_NAME)'

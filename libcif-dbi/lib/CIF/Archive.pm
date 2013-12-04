@@ -16,6 +16,7 @@ use CIF::APIKeyRestrictions;
 use CIF::Codecs::JSON;
 use CIF::Models::Query;
 use CIF::Models::QueryResults;
+use CIF::Archive::LookupKeys;
 use List::MoreUtils qw/any/;
 use Carp;
 use Module::Pluggable require => 1, sub_name => '__plugins', 
@@ -131,57 +132,36 @@ sub insert_index {
     my $class   = shift;
     my $event = shift;
     my $archive_id = shift;
+#    my $lookup_keys = CIF::Archive::LookupKeys->new();
     my ($err, $p);
     foreach my $address (@{$event->addresses()}) {
       my $cr;
       my $value = $address->value;
       if ($address->type eq 'asn') {
         $cr = $class->sql_insert_into_archive_asn;
-      } elsif ($address->type eq 'cidr') {
-        $cr = $class->sql_insert_into_archive_cidr;
       } elsif ($address->type eq 'email') {
         $cr = $class->sql_insert_into_archive_email;
       } elsif ($address->type eq 'fqdn') {
         $cr = $class->sql_insert_into_archive_fqdn;
-      } elsif ($address->type eq 'ip') {
-        $cr = $class->sql_insert_into_archive_ip;
+      } elsif ($address->type eq 'ipv4') {
+        $cr = $class->sql_insert_into_archive_cidr;
+        $value .= "/32";
+      } elsif ($address->type eq 'ipv4_cidr') {
+        $cr = $class->sql_insert_into_archive_cidr;
       } elsif ($address->type eq 'url') {
         $cr = $class->sql_insert_into_archive_url;
       }
 
       if ($cr) {
         $cr->execute(
-          $value,
           $archive_id,
-          $event->detecttime,
-          $event->reporttime
+          $value
         );
       } else {
         debug("Unknown address type: " . $address->type);
       }
-    }
 
-#    foreach my $x (@{$class->plugins}){
-#        $p = $x->{plugin};
-#        if ($p->match_event($event) == 1) {
-#          #debug("Inserting into $p");
-#          my ($pid,$err);
-#          try {
-#              ($err,$pid) = $p->insert($event);
-#              if($x->{feed_enabled}) {
-#                $p->insert_into_feed($event);
-#              }
-#          } catch {
-#              $err = shift;
-#          };
-#          if($err){
-#              warn $err;
-#              $class->dbi_rollback() unless($class->db_Main->{'AutoCommit'});
-#              return $err;
-#          }
-#        }
-#
-#    }
+    }
     return(undef,1);
 }
 
@@ -218,18 +198,30 @@ sub search {
     my $class = shift;
     my $query = shift;
 
-    my ($err, $normalized_queries) = $class->normalize_query($query);
+    my $queries = $query->splitup();
 
     my @res;
-    foreach my $m (@$normalized_queries){
-        my $hashed_query = $m->hashed_query();
-        my ($err2,$s) = CIF::Archive->search2($m);
-        if($err){
-          return('query failed, contact system administrator');
-        }
-        next unless($s);
-        @res = (@res, @$s);
-    }
+#    foreach my $m (@$queries) {
+#      my $cr = $class->sql_search_archive_fqdn;
+#      $cr->execute($m->query, $m->limit) or die($!);
+#      while (my $arrayref = $cr->fetchrow_arrayref()) {
+#        push(@res, $db_codec->decode_event($arrayref->[0]));
+#      }
+#      
+#    }
+
+#    my ($err, $normalized_queries) = $class->normalize_query($query);
+#
+#    my @res;
+#    foreach my $m (@$normalized_queries){
+#        my $hashed_query = $m->hashed_query();
+#        my ($err2,$s) = CIF::Archive->search2($m);
+#        if($err){
+#          return('query failed, contact system administrator');
+#        }
+#        next unless($s);
+#        @res = (@res, @$s);
+#    }
 
     return(undef, \@res);
 }
@@ -355,9 +347,15 @@ __PACKAGE__->set_sql('lookup' => qq{
 __PACKAGE__->set_sql('get_guid_id' => qq{
   SELECT id FROM archive_guid_map WHERE guid = ?
   });
+
 __PACKAGE__->set_sql('insert_guid' => qq{
 INSERT INTO archive_guid_map (guid)
 VALUES (?) RETURNING id
+});
+
+__PACKAGE__->set_sql('insert_into_archive_lookup' => qq{
+INSERT INTO archive_lookup (id, asn,cidr,email,fqdn,url)
+VALUES (?,?,?,?,?,?)
 });
 
 __PACKAGE__->set_sql('insert_into_archive' => qq{
@@ -366,33 +364,28 @@ VALUES (?, ?, to_timestamp(?), to_timestamp(?)) RETURNING id
 });
 
 __PACKAGE__->set_sql('insert_into_archive_asn' => qq{
-INSERT INTO archive_asn (asn, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+INSERT INTO archive_lookup (id, asn)
+VALUES (?, ?)
 });
 
 __PACKAGE__->set_sql('insert_into_archive_cidr' => qq{
-INSERT INTO archive_cidr (cidr, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+INSERT INTO archive_lookup (id, cidr)
+VALUES (?, ?)
 });
 
 __PACKAGE__->set_sql('insert_into_archive_email' => qq{
-INSERT INTO archive_email (email, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+INSERT INTO archive_lookup (id, email)
+VALUES (?, ?)
 });
 
 __PACKAGE__->set_sql('insert_into_archive_fqdn' => qq{
-INSERT INTO archive_fqdn (fqdn, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
-});
-
-__PACKAGE__->set_sql('insert_into_archive_ip' => qq{
-INSERT INTO archive_ip (ip, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+INSERT INTO archive_lookup (id, fqdn)
+VALUES (?, ?)
 });
 
 __PACKAGE__->set_sql('insert_into_archive_url' => qq{
-INSERT INTO archive_url (url, archive_id, created, reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+INSERT INTO archive_lookup (id, url)
+VALUES (?, ?)
 });
 
 
