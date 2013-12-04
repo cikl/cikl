@@ -33,6 +33,34 @@ my $db_codec = CIF::Codecs::JSON->new();
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
 our $archive_plugins        = undef; # Not loaded, yet.
+our %guid_id_cache;
+
+sub get_guid_id {
+    my $class = shift;
+    my $guid = lc(shift);
+    if (my $existing = $guid_id_cache{$guid}) {
+      return $existing;
+    }
+    # otherwise query it.
+    my $cr = $class->sql_get_guid_id;
+    if (!$cr->execute($guid)) {
+      die($!);
+    }
+    if (my $data = $cr->fetchrow_hashref()) {
+      $cr->finish();
+      my $id = $data->{id};
+      $guid_id_cache{$guid} = $id;
+      return $id;
+    }
+    $cr->finish();
+    # Didn't get anything, insert it, and return the id.
+    $cr = $class->sql_insert_guid;
+    $cr->execute($guid) or die("Failed to insert into archive_guid_map");
+    my $id = $cr->fetchrow_hashref->{'id'};
+    $cr->finish();
+    $guid_id_cache{$guid} = $id;
+    return $id;
+}
 
 sub plugins {
     my $class = shift;
@@ -72,16 +100,21 @@ sub insert {
     my $event = shift;
    
     my ($err,$id);
+    my $guid_id = $class->get_guid_id($event->guid);
+    $id = 1;
     try {
-        $id = $class->sql_insert_into_archive->execute(
-            $event->id,
-            $event->guid,
-            $CIF::VERSION,
+        my $cr = $class->sql_insert_into_archive;
+        $cr->execute(
+#            $event->id,
+#            $event->guid,
+#            $CIF::VERSION,
             $db_codec->encode_event($event),
+            $guid_id,
             $event->detecttime, # Fairly sure this is supposed to be detecttime
             $event->reporttime
-        );
-
+        ) or die("Failed to insert into archive");
+        $id = $cr->fetchrow_hashref->{'id'};
+        $cr->finish();
     }
     catch {
         $err = shift;
@@ -89,7 +122,7 @@ sub insert {
     return ($err) if($err);
     
     my $ret;
-    ($err,$ret) = $class->insert_index($event);
+    ($err,$ret) = $class->insert_index($event, $id);
     return($err) if($err);
     return(undef,$event->id);
 }
@@ -97,28 +130,58 @@ sub insert {
 sub insert_index {
     my $class   = shift;
     my $event = shift;
+    my $archive_id = shift;
     my ($err, $p);
-    foreach my $x (@{$class->plugins}){
-        $p = $x->{plugin};
-        if ($p->match_event($event) == 1) {
-          #debug("Inserting into $p");
-          my ($pid,$err);
-          try {
-              ($err,$pid) = $p->insert($event);
-              if($x->{feed_enabled}) {
-                $p->insert_into_feed($event);
-              }
-          } catch {
-              $err = shift;
-          };
-          if($err){
-              warn $err;
-              $class->dbi_rollback() unless($class->db_Main->{'AutoCommit'});
-              return $err;
-          }
-        }
+    foreach my $address (@{$event->addresses()}) {
+      my $cr;
+      my $value = $address->value;
+      if ($address->type eq 'asn') {
+        $cr = $class->sql_insert_into_archive_asn;
+      } elsif ($address->type eq 'cidr') {
+        $cr = $class->sql_insert_into_archive_cidr;
+      } elsif ($address->type eq 'email') {
+        $cr = $class->sql_insert_into_archive_email;
+      } elsif ($address->type eq 'fqdn') {
+        $cr = $class->sql_insert_into_archive_fqdn;
+      } elsif ($address->type eq 'ip') {
+        $cr = $class->sql_insert_into_archive_ip;
+      } elsif ($address->type eq 'url') {
+        $cr = $class->sql_insert_into_archive_url;
+      }
 
+      if ($cr) {
+        $cr->execute(
+          $value,
+          $archive_id,
+          $event->detecttime,
+          $event->reporttime
+        );
+      } else {
+        debug("Unknown address type: " . $address->type);
+      }
     }
+
+#    foreach my $x (@{$class->plugins}){
+#        $p = $x->{plugin};
+#        if ($p->match_event($event) == 1) {
+#          #debug("Inserting into $p");
+#          my ($pid,$err);
+#          try {
+#              ($err,$pid) = $p->insert($event);
+#              if($x->{feed_enabled}) {
+#                $p->insert_into_feed($event);
+#              }
+#          } catch {
+#              $err = shift;
+#          };
+#          if($err){
+#              warn $err;
+#              $class->dbi_rollback() unless($class->db_Main->{'AutoCommit'});
+#              return $err;
+#          }
+#        }
+#
+#    }
     return(undef,1);
 }
 
@@ -285,9 +348,52 @@ __PACKAGE__->set_sql('lookup' => qq{
 });
 
 
-__PACKAGE__->set_sql('insert_into_archive' => qq{
-INSERT INTO archive (uuid, guid, format, data, created, reporttime)
-VALUES (?, ?, ?, ?, to_timestamp(?), to_timestamp(?))
+#__PACKAGE__->set_sql('insert_into_archive' => qq{
+#INSERT INTO archive (uuid, guid, format, data, created, reporttime)
+#VALUES (?, ?, ?, ?, to_timestamp(?), to_timestamp(?)) RETURNING id
+#});
+__PACKAGE__->set_sql('get_guid_id' => qq{
+  SELECT id FROM archive_guid_map WHERE guid = ?
+  });
+__PACKAGE__->set_sql('insert_guid' => qq{
+INSERT INTO archive_guid_map (guid)
+VALUES (?) RETURNING id
 });
+
+__PACKAGE__->set_sql('insert_into_archive' => qq{
+INSERT INTO archive (data,guid_id,created,reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?)) RETURNING id
+});
+
+__PACKAGE__->set_sql('insert_into_archive_asn' => qq{
+INSERT INTO archive_asn (asn, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
+__PACKAGE__->set_sql('insert_into_archive_cidr' => qq{
+INSERT INTO archive_cidr (cidr, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
+__PACKAGE__->set_sql('insert_into_archive_email' => qq{
+INSERT INTO archive_email (email, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
+__PACKAGE__->set_sql('insert_into_archive_fqdn' => qq{
+INSERT INTO archive_fqdn (fqdn, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
+__PACKAGE__->set_sql('insert_into_archive_ip' => qq{
+INSERT INTO archive_ip (ip, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
+__PACKAGE__->set_sql('insert_into_archive_url' => qq{
+INSERT INTO archive_url (url, archive_id, created, reporttime)
+VALUES (?, ?, to_timestamp(?), to_timestamp(?))
+});
+
 
 1;

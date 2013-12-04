@@ -62,6 +62,12 @@ create_tables:
 \t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/malware.sql
 \t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/search.sql
 \t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/url.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_asn.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_cidr.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_email.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_fqdn.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_ip.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/archive_url.sql
 
 create_db:
 \t\$(PSQLX) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -c 'CREATE DATABASE \$(DB_NAME)'
