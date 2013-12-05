@@ -93,16 +93,6 @@ sub flush {
   CIF::Archive->dbi_commit();
 }
 
-sub can_read {
-  my $self = shift;
-  my $apikey = shift;
-}
-
-sub can_write {
-  my $self = shift;
-  my $apikey = shift;
-}
-
 sub key_retrieve {
   my $self = shift;
   my $apikey = shift;
@@ -202,8 +192,6 @@ sub authorized_read {
         next unless($rec->inGroup($g->{key}));
         push(@array,$g);
     }
-
-    #debug('groups: '.join(',',map { $_->get_key() } @array)) if($debug > 3);
 
     $ret->{'group_map'} = \@array;
     
