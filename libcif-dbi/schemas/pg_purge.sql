@@ -1,11 +1,3 @@
 TRUNCATE  archive,
           archive_lookup,
-          archive_guid_map,
-          hash,
-          domain,
-          infrastructure,
-          url,
-          email,
-          malware,
-          search,
-          feed;
+          archive_guid_map;
