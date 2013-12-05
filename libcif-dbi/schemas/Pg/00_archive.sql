@@ -1,5 +1,7 @@
 set default_tablespace=:tablespace_archive;
 
+-- CREATE EXTENSION btree_gin;
+
 DROP INDEX IF EXISTS idx_archive_guid_map_guid;
 DROP TABLE IF EXISTS archive_guid_map CASCADE;
 
@@ -38,15 +40,15 @@ DROP TABLE IF EXISTS archive_lookup CASCADE;
 
 CREATE TABLE archive_lookup (
     id BIGINT REFERENCES archive(id) NOT NULL,
-    asn BIGINT[],
-    cidr CIDR[],
-    email VARCHAR(320)[],
-    fqdn VARCHAR(255)[],
-    url VARCHAR(2048)[]
+    asn BIGINT,
+    cidr CIDR,
+    email VARCHAR(320),
+    fqdn VARCHAR(255),
+    url VARCHAR(2048)
 );
 
-CREATE INDEX idx_archive_lookup_asn ON archive_lookup USING GIN (asn);
-CREATE INDEX idx_archive_lookup_cidr ON archive_lookup USING GIN (cidr);
-CREATE INDEX idx_archive_lookup_email ON archive_lookup USING GIN (email);
-CREATE INDEX idx_archive_lookup_fqdn ON archive_lookup USING GIN (fqdn);
-CREATE INDEX idx_archive_lookup_url ON archive_lookup USING GIN (url);
+CREATE INDEX idx_archive_lookup_asn ON archive_lookup (asn);
+CREATE INDEX idx_archive_lookup_cidr ON archive_lookup (cidr);
+CREATE INDEX idx_archive_lookup_email ON archive_lookup (email);
+CREATE INDEX idx_archive_lookup_fqdn ON archive_lookup (fqdn);
+CREATE INDEX idx_archive_lookup_url ON archive_lookup (url);
