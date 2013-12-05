@@ -139,23 +139,13 @@ sub authorized_read {
     my $self = shift;
     my $key = shift;
     
-    # test1
-    die('invaild apikey') unless(is_uuid($key));
-    
     my $rec = $self->key_retrieve($key);
     if (!defined($rec) || ! $rec->can_write()) {
       die('invaild/expired apikey') unless($rec);
     }
 
     my $ret;
-    my $args;
-    my $guid = $args->{'guid'};
-    if($guid){
-        $guid = lc($guid);
-        $ret->{'guid'} = generate_uuid_ns($guid) unless(is_uuid($guid));
-    } else {
-        $ret->{'default_guid'} = $rec->default_guid();
-    }
+    $ret->{'default_guid'} = $rec->default_guid();
     
     ## TODO -- datatype access control?
     
