@@ -28,6 +28,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw//;
 
+use constant UUID_RE => qr/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 use vars qw($Logger);
 
 =head1 NAME
@@ -63,8 +65,7 @@ CIF::Utils - Perl extension for misc 'helper' CIF like functions
 =cut
 
 sub is_uuid {
-    my $arg = shift;
-    return undef unless($arg && $arg =~ /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    return undef unless($_[0] && $_[0] =~ UUID_RE);
     return(1);
 }
 
