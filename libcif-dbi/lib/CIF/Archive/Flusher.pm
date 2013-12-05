@@ -1,4 +1,4 @@
-package CIF::Router::Flusher;
+package CIF::Archive::Flusher;
 
 use strict;
 use warnings;

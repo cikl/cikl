@@ -4,7 +4,7 @@ use base 'CIF::Client::Transport';
 use strict;
 use warnings;
 use CIF::Router;
-use CIF::Router::SimpleFlusher;
+use CIF::Archive::SimpleFlusher;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 

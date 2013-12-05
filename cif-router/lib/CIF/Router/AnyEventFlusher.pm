@@ -5,8 +5,8 @@ use warnings;
 use AnyEvent;
 use Coro;
 use Moose;
-use CIF::Router::Flusher;
-extends 'CIF::Router::Flusher';
+use CIF::Archive::Flusher;
+extends 'CIF::Archive::Flusher';
 use namespace::autoclean;
 
 has '_flush_timer' => (

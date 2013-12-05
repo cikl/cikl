@@ -1,12 +1,12 @@
-package CIF::Router::SimpleFlusher;
+package CIF::Archive::SimpleFlusher;
 
 use strict;
 use warnings;
 use AnyEvent;
 use Coro;
 use Moose;
-use CIF::Router::Flusher;
-extends 'CIF::Router::Flusher';
+use CIF::Archive::Flusher;
+extends 'CIF::Archive::Flusher';
 use namespace::autoclean;
 
 has '_next_flush' => (
