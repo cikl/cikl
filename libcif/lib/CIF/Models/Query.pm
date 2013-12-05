@@ -15,7 +15,7 @@ use constant QUERY_DEFAULT_LIMIT => 50;
 
 has 'apikey' => (
   is => 'rw',
-  isa => 'Str',
+  isa => 'CIF::MooseTypes::LowercaseUUID',
   required => 1
 );
 
