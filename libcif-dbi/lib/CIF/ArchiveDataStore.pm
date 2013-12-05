@@ -62,6 +62,13 @@ has '_auth_write_cache' => (
   default => sub { {} }
 );
 
+has '_auth_cache' => (
+  is => 'ro',
+  isa => 'HashRef',
+  init_arg => undef,
+  default => sub { {} }
+);
+
 
 sub BUILD {
   my $self = shift;
@@ -96,65 +103,35 @@ sub flush {
 sub key_retrieve {
   my $self = shift;
   my $apikey = shift;
-  my ($rec,$err);
+  if (my $cache_info = $self->_auth_cache->{lc($apikey)}) {
+    if ($cache_info->{expire} > time()) {
+      return $cache_info->{apikey_info};
+    }
+    undef $self->_auth_cache->{lc($apikey)};
+  }
+
+  my ($keyinfo,$err);
   try {
-    $rec = CIF::APIKey->retrieve(uuid => $apikey);
+    my $rec = CIF::APIKey->retrieve(uuid => $apikey);
+    $keyinfo = CIF::ArchiveDataStore::ApikeyInfo->from_apikey($rec);
+    $self->_auth_cache->{lc($apikey)} = {
+      expire => time() + 60,
+      apikey_info => $keyinfo
+    };
   } catch {
     $err = shift;
   };
   return(0) if($err);
-  return($rec);
-}
-
-sub authorized_write_cache_store {
-    my $self = shift;
-    my $key = shift;
-    my $retval = shift;
-    $self->_auth_write_cache->{$key} = {
-      'time' => time(),
-      'retval' => $retval
-    };
-    return $retval;
-}
-
-sub authorized_write_cache_get {
-    my $self = shift;
-    my $key = shift;
-
-    if (my $cached_auth = $self->_auth_write_cache->{$key}) {
-      if (time() - $cached_auth->{time} <= 60) {
-        return $cached_auth->{retval};
-      }
-    }
-    return undef;
+  return($keyinfo);
 }
 
 sub authorized_write {
-    my $self = shift;
-    my $apikey = shift;
+  my $self = shift;
+  my $apikey = shift;
+  my $guid = shift;
 
-    my $retval = $self->authorized_write_cache_get($apikey);
-
-    if (defined($retval)) {
-      return($retval);
-    }
-    
-    my $rec = $self->key_retrieve($apikey);
-
-    my $ret;
-    if (!defined($rec) || 
-        !($rec->write()) ||
-        $rec->revoked() || 
-        $rec->restricted_access() ||
-        $rec->expired() ) {
-      $ret = 0;
-    } else {
-      $ret = {
-        default_guid    => $rec->default_guid(),
-      };
-    }
-    $self->authorized_write_cache_store($apikey, $ret);
-    return($ret);
+  my $rec = $self->key_retrieve($apikey);
+  return (defined($rec) && $rec->can_write() && $rec->in_group($guid));
 }
 
 
@@ -166,10 +143,9 @@ sub authorized_read {
     die('invaild apikey') unless(is_uuid($key));
     
     my $rec = $self->key_retrieve($key);
-    
-    die('invaild apikey') unless($rec);
-    die('apikey revokved') if($rec->revoked()); # revoked keys
-    die('key expired') if($rec->expired());
+    if (!defined($rec) || ! $rec->can_write()) {
+      die('invaild/expired apikey') unless($rec);
+    }
 
     my $ret;
     my $args;
@@ -189,7 +165,7 @@ sub authorized_read {
     #debug('groups: '.join(',',map { $_->get_key() } @groups));
     
     foreach my $g (@groups){
-        next unless($rec->inGroup($g->{key}));
+        next unless($rec->in_group($g->{key}));
         push(@array,$g);
     }
 
@@ -256,6 +232,106 @@ sub shutdown {
   }
   $self->flush();
 }
+
+package CIF::ArchiveDataStore::ApikeyInfo;
+use strict;
+use warnings;
+use Moose;
+use namespace::autoclean;
+
+has 'uuid' => (
+  is => 'ro',
+  required => 1
+);
+
+has 'default_guid' => (
+  is => 'ro',
+  isa => 'Str',
+  required => 1
+);
+
+has 'revoked' => (
+  is => 'ro',
+  isa => 'Bool',
+  default => 0
+);
+
+has 'write' => (
+  is => 'ro',
+  isa => 'Bool',
+  default => 0
+);
+
+has 'restricted_access' => (
+  is => 'ro',
+  isa => 'Bool',
+  default => 0
+);
+
+has 'expires' => (
+  is => 'ro',
+  isa => 'Maybe[Int]'  # Epoch
+);
+
+has 'groups' => (
+  is => 'ro',
+  isa => 'HashRef',
+  default => sub { {} }
+);
+
+sub in_group {
+  return $_[0]->groups->{$_[1]};
+}
+
+sub is_expired {
+  return (defined($_[0]->expires) && $_[0]->expires > time());
+}
+
+sub in_good_standing {
+  return (
+    ! $_[0]->restricted_access()
+    && ! $_[0]->revoked()
+    && ! $_[0]->is_expired()
+  );
+}
+
+sub can_write {
+  return ($_[0]->write && $_[0]->in_good_standing());
+}
+
+sub can_read {
+  my $self = shift;
+  return ($_[0]->in_good_standing());
+}
+
+sub from_apikey {
+  my $class = shift;
+  my $apikey_obj = shift;
+
+  my $args = {
+    uuid => $apikey_obj->uuid,
+    revoked => $apikey_obj->revoked || 0,
+    write => $apikey_obj->write || 0,
+    restricted_access => $apikey_obj->restricted_access || 0,
+    groups => {}
+  };
+
+  if ($apikey_obj->expires()) {
+    $args->{expires} = DateTime::Format::DateParse->parse_datetime($apikey_obj->expires())->epoch();
+  }
+
+  foreach my $group ($apikey_obj->groups) {
+    if ($group->default_guid()) {
+      $args->{default_guid} = $group->guid();
+    }
+    $args->{groups}->{$group->guid()} = 1;
+  }
+
+  return $class->new(%$args);
+
+}
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 

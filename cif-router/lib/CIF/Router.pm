@@ -58,10 +58,12 @@ sub process_submission {
   my $submission = shift;
   my $apikey = $submission->apikey();
 
-  my $auth = $self->{datastore}->authorized_write($submission->apikey());
+  my $guid = $submission->event->guid();
+  my $auth = $self->{datastore}->authorized_write($submission->apikey(), 
+    $guid);
 
-  unless ($auth) {
-    return("apikey '$apikey' is not authorized to write");
+  if (!$auth) {
+    return("apikey '$apikey' is not authorized to write for guid '$guid'");
   }
 
   debug('inserting...') if($debug > 4);
