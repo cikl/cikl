@@ -1,324 +1,59 @@
 package CIF::Router;
-use base 'Class::Accessor';
-
 use strict;
 use warnings;
 
 use Try::Tiny;
 use Config::Simple;
-require CIF::Archive;
-require CIF::APIKey;
-require CIF::APIKeyGroups;
-require CIF::APIKeyRestrictions;
-use CIF qw/is_uuid generate_uuid_ns generate_uuid_random debug/;
-use Data::Dumper;
-use CIF::Models::Event;
-
-# this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
-# most people just want a quick answer, if they override this (via the client), they'll expect the
-# potentially longer query as the database grows
-# later on we'll do some partitioning to clean this up a bit
-use constant QUERY_DEFAULT_LIMIT => 50;
-
-__PACKAGE__->follow_best_practice();
-__PACKAGE__->mk_accessors(qw(
-    config db_config
-    restriction_map 
-    group_map groups feeds_map feeds_config 
-    archive_config datatypes 
-));
+use CIF qw/debug/;
+use CIF::Models::QueryResults;
 
 our $debug = 0;
 
 sub new {
-    my $class = shift;
-    my $args = shift;
-      
-    return('missing config file') unless($args->{'config'});
-    my $flusher = $args->{'flusher'} or die("Missing flusher!");
-    
-    my $self = {};
-    bless($self,$class);
-    $self->set_config($args->{'config'}->param(-block => 'router'));
-    
-    $self->set_db_config(       $args->{'config'}->param(-block => 'db'));
-    $self->set_restriction_map( $args->{'config'}->param(-block => 'restriction_map'));
-    $self->set_archive_config(  $args->{'config'}->param(-block => 'cif_archive'));
-   
-    $self->{auth_write_cache} = {};
-    $self->{auth_cache_ageoff} = $self->get_config->{'auth_cache_ageoff'} || 60;
-    $self->{flusher} = $flusher;
-    my $ret = $self->init($args);
-    return unless($ret);
-     
-    return(undef,$self);
-}
+  my $class = shift;
+  my $args = shift;
 
-sub init {
-    my $self = shift;
-    my $args = shift;
-    
-    my $ret = $self->init_db($args);
-    
-    $self->init_restriction_map();
-    $self->init_group_map();
-    $self->init_feeds();
-    $self->init_archive();
-    
-    $debug = $self->get_config->{'debug'} || 0;
-    
-    return ($ret);
-}
+  return('missing config file') unless($args->{'config'});
+  my $datastore = $args->{'datastore'} or die("Missing datastore!");
 
-sub init_db {
-    my $self = shift;
-    my $args = shift;
-    
-    my $config = $self->get_db_config();
-    
-    my $db          = $config->{'database'} || 'cif';
-    my $user        = $config->{'user'}     || 'postgres';
-    my $password    = $config->{'password'} || '';
-    my $host        = $config->{'host'}     || '127.0.0.1';
-    
-    my $dbi = 'DBI:Pg:database='.$db.';host='.$host;
-    my $ret = CIF::DBI->connection($dbi,$user,$password,{ AutoCommit => 0});
-    debug("ret: " . $ret);
-    return $ret;
-}
+  my $self = {};
+  $self->{datastore} = $datastore;
+  $self->{config} = $args->{'config'}->param(-block => 'router');
+  $debug = $self->{config}->{'debug'} || 0;
 
-sub init_feeds {
-    my $self = shift;
-
-    my $feeds = $self->get_archive_config->{'feeds'} || [];
-    my %feeds_map;
-    foreach my $feed (@{$feeds}) {
-      $feeds_map{$feed} = 1;
-    }
-    $self->set_feeds_map(\%feeds_map);
-}
-
-sub init_archive {
-    my $self = shift;
-    my $dt = $self->get_archive_config->{'datatypes'} || ['infrastructure','domain','url','email','malware','search'];
-    my $feeds = $self->get_archive_config->{'feeds'} || [];
-    CIF::Archive->load_plugins($dt, $feeds);
-    $self->set_datatypes($dt);
-}
-
-sub init_restriction_map {
-    my $self = shift;
-    
-    return unless($self->get_restriction_map());
-    my $array;
-    foreach (keys %{$self->get_restriction_map()}){
-        ## TODO map to the correct Protobuf RestrictionType
-        my $m = {
-            key => $_,
-            value   => $self->get_restriction_map->{$_},
-        };
-        push(@$array,$m);
-    }
-    $self->set_restriction_map($array);
-}
-
-sub init_group_map {
-    my $self = shift;
-    my $g = $self->get_archive_config->{'groups'};
-    
-    # system wide groups
-    push(@$g, qw(everyone root));
-    my $array;
-    foreach (@$g){
-        my $m = {
-            key     => generate_uuid_ns($_),
-            value   => $_,
-        };
-        push(@$array,$m);
-    }
-    $self->set_group_map($array);
-}  
-
-# we abstract this out for the try/catch 
-# in case the db restarts on us
-sub key_retrieve {
-    my $self = shift;
-    my $key = shift;
-    
-    return unless($key);
-    $key = lc($key);
-    
-    my ($rec,$err);
-    
-    try {
-        $rec = CIF::APIKey->retrieve(uuid => $key);
-    } catch {
-        $err = shift;
-    };
-    if($err && $err =~ /connect/){
-        my $ret = $self->connect_retry();
-        $err = undef;
-        if($ret){
-            try {
-               $rec = CIF::APIKey->retrieve(uuid => $key);
-            } catch {
-                $err = shift;
-            };
-            debug($err) if($err);
-        }
-    }
-    
-    return(0) if($err);
-    return($rec);
-}
-
-sub authorized_read {
-    my $self = shift;
-    my $key = shift;
-    
-    # test1
-    return('invaild apikey',0) unless(is_uuid($key));
-    
-    my $rec = $self->key_retrieve($key);
-    
-    return('invaild apikey',0) unless($rec);
-    return('apikey revokved',0) if($rec->revoked()); # revoked keys
-    return('key expired',0) if($rec->expired());
-
-    my $ret;
-    my $args;
-    my $guid = $args->{'guid'};
-    if($guid){
-        $guid = lc($guid);
-        $ret->{'guid'} = generate_uuid_ns($guid) unless(is_uuid($guid));
-    } else {
-        $ret->{'default_guid'} = $rec->default_guid();
-    }
-    
-    ## TODO -- datatype access control?
-    
-    my @groups = ($self->get_group_map()) ? @{$self->get_group_map()} : undef;
-   
-    my @array;
-    #debug('groups: '.join(',',map { $_->get_key() } @groups));
-    
-    foreach my $g (@groups){
-        next unless($rec->inGroup($g->{key}));
-        push(@array,$g);
-    }
-
-    #debug('groups: '.join(',',map { $_->get_key() } @array)) if($debug > 3);
-
-    $ret->{'group_map'} = \@array;
-    
-    if(my $m = $self->get_restriction_map()){
-        $ret->{'restriction_map'} = $m;
-    }
-
-    return(undef,$ret); # all good
-}
-
-sub authorized_write_cache_store {
-    my $self = shift;
-    my $key = shift;
-    my $retval = shift;
-    $self->{auth_write_cache}->{$key} = {
-      'time' => time(),
-      'retval' => $retval
-    };
-
-    return $retval;
-}
-
-sub authorized_write_cache_get {
-    my $self = shift;
-    my $key = shift;
-
-    if (my $cached_auth = $self->{auth_write_cache}->{$key}) {
-      if (time() - $cached_auth->{time} <= 60) {
-        return $cached_auth->{retval};
-      }
-    }
-    return undef;
-}
-
-sub authorized_write {
-    my $self = shift;
-    my $key = shift;
-
-    my $retval = $self->authorized_write_cache_get($key);
-
-    if (defined($retval)) {
-      return($retval);
-    }
-    
-    my $rec = $self->key_retrieve($key);
-
-    my $ret;
-    if (!defined($rec) || 
-        !($rec->write()) ||
-        $rec->revoked() || 
-        $rec->restricted_access() ||
-        $rec->expired() ) {
-      $ret = 0;
-    } else {
-      $ret = {
-        default_guid    => $rec->default_guid(),
-      };
-    }
-    $self->authorized_write_cache_store($key, $ret);
-    return($ret);
-}
-
-sub connect_retry {
-    my $self = shift;
-    
-    my ($x,$state) = (0,0);
-    do {
-        debug('retrying connection...');
-        $state = $self->init_db();
-        unless($state){   
-            debug('retry failed... waiting...');
-            sleep(3);
-        } else {
-            debug('success: '.$state);
-        }
-    } while($x < 3 && !$state);
-    return 1 if($state);
-    return 0;
+  bless($self,$class);
+  return(undef,$self);
 }
 
 sub process_query {
-    my $self = shift;
-    my $query = shift;
-    #my $msg = shift;
+  my $self = shift;
+  my $query = shift;
+  #my $msg = shift;
 
-    my $results = [];
+  my $results = [];
 
-    my $restriction_map = $self->get_restriction_map();
-    my ($err2, $apikey_info) = $self->authorized_read($query->apikey);
-    if(!defined($apikey_info) or defined($err2)){
-      die($err2);
-    }
-    if (!defined($query->guid())) {
-      $query->guid($apikey_info->{'default_guid'});
-    }
+  my ($err2, $apikey_info) = $self->{datastore}->authorized_read($query->apikey);
+  if(!defined($apikey_info) or defined($err2)){
+    die($err2);
+  }
+  if (!defined($query->guid())) {
+    $query->guid($apikey_info->{'default_guid'});
+  }
 
-    my ($err, $events) = CIF::Archive->search($query);
-    if (defined($err)) {
-      die($err);
-    }
+  my ($err, $events) = $self->{datastore}->search($query);
+  if (defined($err)) {
+    die($err);
+  }
 
-
-    my $query_results = CIF::Models::QueryResults->new({
-        query => $query,
-        events => $events,
-        reporttime => time(),
-        group_map => $apikey_info->{'group_map'},
-        restriction_map => $restriction_map,
-        guid => $apikey_info->{'default_guid'}
-      });
-    return $query_results;
+  my $query_results = CIF::Models::QueryResults->new({
+      query => $query,
+      events => $events,
+      reporttime => time(),
+      group_map => $apikey_info->{'group_map'},
+      restriction_map => $apikey_info->{'restriction_map'},
+      guid => $apikey_info->{'default_guid'}
+    });
+  return $query_results;
 }
 
 sub process_submission {
@@ -326,14 +61,14 @@ sub process_submission {
   my $submission = shift;
   my $apikey = $submission->apikey();
 
-  my $auth = $self->authorized_write($submission->apikey());
+  my $auth = $self->{datastore}->authorized_write($submission->apikey());
 
   unless ($auth) {
     return("apikey '$apikey' is not authorized to write");
   }
 
   debug('inserting...') if($debug > 4);
-  my ($err, $id) = $self->insert_event($submission->event());
+  my ($err, $id) = $self->{datastore}->insert_event($submission->event());
   if ($err) { 
     debug("ERR: " . $err);
     return $err;
@@ -342,15 +77,12 @@ sub process_submission {
   return undef;
 }
 
-sub insert_event {
+sub shutdown {
   my $self = shift;
-  my $event = shift;
-  my ($err, $ret) = CIF::Archive->insert($event);
-  $self->{flusher}->tick();
-
-  return ($err, $ret);
+  if ($self->{datastore}) {
+    $self->{datastore}->shutdown();
+    undef $self->{datastore};
+  }
 }
-
-sub send {}
 
 1;

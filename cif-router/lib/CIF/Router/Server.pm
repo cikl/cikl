@@ -15,8 +15,9 @@ use CIF::Router::Services::Submission;
 use CIF::Router::Constants;
 use CIF::Router::Services;
 use CIF::Router::AnyEventFlusher;
+use CIF::ArchiveDataStore;
 
-use CIF qw/debug init_logging/;
+use CIF qw/debug init_logging generate_uuid_ns/;
 
 sub new {
     my $class = shift;
@@ -43,24 +44,26 @@ sub new {
 
     $self->{codec} = CIF::Codecs::JSON->new();
 
+    init_logging($self->{server_config}->{'debug'} || 0);
+
+    my $datastore = CIF::ArchiveDataStore->new_from_config($self->{config});
     my $flusher = CIF::Router::AnyEventFlusher->new(
       commit_callback => sub { 
         my $count = shift;
         debug("Committing $count");
-        CIF::Archive->dbi_commit(); 
+        $datastore->flush();
       },
       commit_interval => $self->{dbi_commit_interval},
       commit_size => $self->{dbi_commit_size}
     );
 
-    $self->{flusher} = $flusher;
+    $datastore->flusher($flusher);
 
-    init_logging($self->{server_config}->{'debug'} || 0);
 
     # Initialize the router.
     my ($err,$router) = CIF::Router->new({
         config  => $self->{config},
-        flusher => $flusher
+        datastore => $datastore
       });
     if($err){
       ## TODO -- set debugging variable
@@ -123,9 +126,9 @@ sub shutdown {
       $self->{driver} = undef;
     }
 
-    if ($self->{flusher}) {
-      $self->{flusher}->flush();
-      $self->{flusher} = undef;
+    if ($self->{router}) {
+      $self->{router}->shutdown();
+      $self->{router} = undef;
     }
 }
 

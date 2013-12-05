@@ -19,8 +19,6 @@ use CIF::Models::QueryResults;
 use CIF::Archive::LookupKeys;
 use List::MoreUtils qw/any/;
 use Carp;
-use Module::Pluggable require => 1, sub_name => '__plugins', 
-  on_require_error => \&croak;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid generate_uuid_ns debug/;
 
 __PACKAGE__->table('archive');
@@ -33,7 +31,6 @@ my $db_codec = CIF::Codecs::JSON->new();
 
 our $root_uuid      = generate_uuid_ns('root');
 our $everyone_uuid  = generate_uuid_ns('everyone');
-our $archive_plugins        = undef; # Not loaded, yet.
 our %guid_id_cache;
 
 sub get_guid_id {
@@ -62,35 +59,7 @@ sub get_guid_id {
     die("Failed to get guid mapping!");
 }
 
-sub plugins {
-    my $class = shift;
-    if (!defined($archive_plugins)) {
-      die("$class->load_plugins has not been called, yet!");
-    }
-    return $archive_plugins;
-}
-
 sub load_plugins {
-    if (defined($archive_plugins)) {
-      return 1;
-    }
-    
-    my $class = shift;
-    my $datatypes = shift || [];
-    my $feeds = shift || [];
-    $archive_plugins = [];
-    my @all_plugins = $class->__plugins();
-
-    foreach my $plugin (@all_plugins) {
-      if (any { $_ eq $plugin->datatype() } @$datatypes) {
-        $plugin->init_sql();
-        my $feed_enabled = 0;
-        if (any { $_ eq $plugin->datatype() } @$feeds) {
-          $feed_enabled = 1;
-        }
-        push(@$archive_plugins, {plugin => $plugin, feed_enabled => $feed_enabled});
-      }
-    }
     return 1;
 }
 
@@ -199,14 +168,14 @@ sub search {
     my $queries = $query->splitup();
 
     my @res;
-#    foreach my $m (@$queries) {
-#      my $cr = $class->sql_search_archive_fqdn;
-#      $cr->execute($m->query, $m->limit) or die($!);
-#      while (my $arrayref = $cr->fetchrow_arrayref()) {
-#        push(@res, $db_codec->decode_event($arrayref->[0]));
-#      }
-#      
-#    }
+    foreach my $m (@$queries) {
+      my $cr = $class->sql_search_fqdn;
+      $cr->execute($m->query, $m->limit) or die("Query died: " . $!);
+      while (my $arrayref = $cr->fetchrow_arrayref()) {
+        push(@res, $db_codec->decode_event($arrayref->[0]));
+      }
+      
+    }
 
 #    my ($err, $normalized_queries) = $class->normalize_query($query);
 #
@@ -380,6 +349,12 @@ VALUES (?, ?)
 __PACKAGE__->set_sql('insert_into_archive_fqdn' => qq{
 INSERT INTO archive_lookup (id, fqdn)
 VALUES (?, ?)
+});
+
+__PACKAGE__->set_sql('search_fqdn' => qq{
+  SELECT data FROM archive WHERE id IN (
+    SELECT DISTINCT(id) FROM archive_lookup WHERE fqdn = ?
+  ) ORDER BY reporttime DESC LIMIT ?;
 });
 
 __PACKAGE__->set_sql('insert_into_archive_url' => qq{

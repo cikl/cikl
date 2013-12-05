@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use CIF::Router;
 use CIF::Archive::SimpleFlusher;
+use CIF::ArchiveDataStore;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -14,14 +15,15 @@ sub new {
     $args->{driver_name} = "direct";
     my $self = $class->SUPER::new($args);
 
-    my $flusher = CIF::Router::SimpleFlusher->new(
+    my $datastore = CIF::ArchiveDataStore->new_from_config($self->get_global_config);
+    my $flusher = CIF::Archive::SimpleFlusher->new(
       commit_interval => 2,
       commit_size => 10000,
       commit_callback => sub { 
         my $count = shift;
         return if ($count == 0);
         my $start = [gettimeofday()];
-        CIF::Archive->dbi_commit(); 
+        $datastore->flush();
         my $delta = tv_interval($start);
         debug("Commit of $count events took $delta seconds.");
       },
@@ -30,7 +32,7 @@ sub new {
     $self->{flusher} = $flusher;
     $self->{router} = CIF::Router->new({
       config => $self->get_global_config(),
-      flusher => $flusher
+      datastore => $datastore
     });
 
     return $self;
@@ -43,11 +45,10 @@ sub shutdown {
       return 0;
     }
 
-    if ($self->{flusher}) {
-      $self->{flusher}->flush();
-      $self->{flusher} = undef;
+    if ($self->{router}) {
+      $self->{router}->shutdown();
+      $self->{router} = undef;
     }
-
     return 1;
 }
 
