@@ -32,10 +32,7 @@ sub process_query {
 
   my $results = [];
 
-  my ($err2, $apikey_info) = $self->{datastore}->authorized_read($query->apikey);
-  if(!defined($apikey_info) or defined($err2)){
-    die($err2);
-  }
+  my $apikey_info = $self->{datastore}->authorized_read($query->apikey);
   if (!defined($query->guid())) {
     $query->guid($apikey_info->{'default_guid'});
   }

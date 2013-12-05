@@ -163,13 +163,13 @@ sub authorized_read {
     my $key = shift;
     
     # test1
-    return('invaild apikey',0) unless(is_uuid($key));
+    die('invaild apikey') unless(is_uuid($key));
     
     my $rec = $self->key_retrieve($key);
     
-    return('invaild apikey',0) unless($rec);
-    return('apikey revokved',0) if($rec->revoked()); # revoked keys
-    return('key expired',0) if($rec->expired());
+    die('invaild apikey') unless($rec);
+    die('apikey revokved') if($rec->revoked()); # revoked keys
+    die('key expired') if($rec->expired());
 
     my $ret;
     my $args;
@@ -199,7 +199,7 @@ sub authorized_read {
         $ret->{'restriction_map'} = $m;
     }
 
-    return(undef,$ret); # all good
+    return $ret; # all good
 }
 
 __PACKAGE__->meta->make_immutable();
