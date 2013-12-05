@@ -43,9 +43,14 @@ sub get_guid_id {
       return $existing;
     }
     # otherwise query it.
+    $class->dbi_commit();
+    if (!$class->sql_create_guid_map_if_not_exists->execute($guid)) {
+      die("Failed to create guid mapping!: " . $!);
+    }
+    $class->dbi_commit();
     my $cr = $class->sql_get_guid_id;
     if (!$cr->execute($guid)) {
-      die($!);
+      die("Failed to get guid mapping!: " . $!);
     }
     if (my $data = $cr->fetchrow_hashref()) {
       $cr->finish();
@@ -54,13 +59,7 @@ sub get_guid_id {
       return $id;
     }
     $cr->finish();
-    # Didn't get anything, insert it, and return the id.
-    $cr = $class->sql_insert_guid;
-    $cr->execute($guid) or die("Failed to insert into archive_guid_map");
-    my $id = $cr->fetchrow_hashref->{'id'};
-    $cr->finish();
-    $guid_id_cache{$guid} = $id;
-    return $id;
+    die("Failed to get guid mapping!");
 }
 
 sub plugins {
@@ -145,7 +144,6 @@ sub insert_index {
         $cr = $class->sql_insert_into_archive_fqdn;
       } elsif ($address->type eq 'ipv4') {
         $cr = $class->sql_insert_into_archive_cidr;
-        $value .= "/32";
       } elsif ($address->type eq 'ipv4_cidr') {
         $cr = $class->sql_insert_into_archive_cidr;
       } elsif ($address->type eq 'url') {
@@ -344,14 +342,15 @@ __PACKAGE__->set_sql('lookup' => qq{
 #INSERT INTO archive (uuid, guid, format, data, created, reporttime)
 #VALUES (?, ?, ?, ?, to_timestamp(?), to_timestamp(?)) RETURNING id
 #});
-__PACKAGE__->set_sql('get_guid_id' => qq{
-  SELECT id FROM archive_guid_map WHERE guid = ?
+__PACKAGE__->set_sql('create_guid_map_if_not_exists' => q{
+  LOCK TABLE archive_guid_map IN ACCESS EXCLUSIVE MODE;
+  INSERT INTO archive_guid_map (guid) 
+    SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM archive_guid_map WHERE guid = $1);
   });
 
-__PACKAGE__->set_sql('insert_guid' => qq{
-INSERT INTO archive_guid_map (guid)
-VALUES (?) RETURNING id
-});
+__PACKAGE__->set_sql('get_guid_id' => q{
+    SELECT id FROM archive_guid_map WHERE  guid = ? LIMIT 1;
+  });
 
 __PACKAGE__->set_sql('insert_into_archive_lookup' => qq{
 INSERT INTO archive_lookup (id, asn,cidr,email,fqdn,url)
