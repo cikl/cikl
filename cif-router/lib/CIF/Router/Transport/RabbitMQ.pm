@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Net::RabbitFoot;
+use AnyEvent;
 use Coro;
 use Try::Tiny;
 use CIF qw/debug/;
@@ -13,7 +14,6 @@ use CIF::Router::Constants;
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
-
     $self->{exchange_name} = "amq.topic";
 
     my $rabbitmq_opts = {
@@ -68,9 +68,15 @@ sub _init_channel {
       durable => 1,
       auto_delete => 0
     );
+    $channel->qos(prefetch_count => 100);
+    my $acker = CIF::Router::Transport::RabbitMQ::DeferredAcker->new(
+      channel => $channel,
+      max_outstanding => 100,
+      timeout => 1
+    );
 
     $self->_init_queue($channel, $config);
-    $self->_init_consume($channel, $service);
+    $self->_init_consume($channel, $service, $acker);
 
     return $channel;
 }
@@ -79,11 +85,11 @@ sub _init_consume {
     my $self = shift;
     my $channel = shift;
     my $service = shift;
+    my $acker = shift;
     $channel->consume(
       no_ack => 0,
       on_consume => sub {
-        my $msg = shift;
-        $self->_handle_msg($channel, $msg, $service);
+        $self->_handle_msg($channel, $_[0], $service, $acker);
       }
     );
 }
@@ -93,6 +99,7 @@ sub _handle_msg {
     my $channel = shift;
     my $msg = shift;
     my $service = shift;
+    my $acker = shift;
 
     my $payload = $msg->{body}->payload;
     my ($reply, $type, $content_type, $err);
@@ -108,13 +115,9 @@ sub _handle_msg {
       $type = "error";
       $content_type = "text/plain";
       debug($reply);
-      $channel->reject(delivery_tag => 
-        $msg->{deliver}->method_frame->delivery_tag
-      );
+      $acker->reject($msg->{deliver}->method_frame->delivery_tag);
     } else {
-      $channel->ack(delivery_tag => 
-        $msg->{deliver}->method_frame->delivery_tag
-      );
+      $acker->ack($msg->{deliver}->method_frame->delivery_tag);
     }
 
     if (my $reply_queue = $msg->{header}->{reply_to}) {
@@ -191,6 +194,90 @@ sub shutdown {
     $self->{amqp}->close();
     $self->{amqp} = undef;
 }
+
+package CIF::Router::Transport::RabbitMQ::DeferredAcker;
+use strict;
+use warnings;
+
+use Moose;
+use namespace::autoclean;
+use CIF qw/debug/;
+
+has 'channel' => (
+  is => 'ro',
+  #isa => ???,
+  required => 1
+);
+
+has 'max_outstanding' => (
+  is => 'ro',
+  isa => 'Int',
+  required => 1
+);
+
+has 'timeout' => (
+  is => 'ro',
+  isa => 'Num',
+  required => 1
+);
+
+has '_counter' => (
+  traits  => ['Counter'],
+  is => 'rw',
+  isa => 'Int',
+  init_arg => undef,
+  default => 0,
+  handles => {
+    inc_counter   => 'inc',
+    reset_counter => 'reset',
+  }
+);
+
+has '_last_tag' => (
+  is => 'rw',
+  init_arg => undef
+);
+
+has '_timer' => (
+  is => 'rw',
+  init_arg => undef
+
+);
+
+sub ack {
+  my $self = shift;
+  $self->_last_tag(shift);
+  $self->inc_counter();
+  if ($self->_counter >= $self->max_outstanding()) {
+    # Flush after X messages.
+    $self->flush();
+  } elsif (!defined($self->_timer)) {
+    # Create timer that will flush for us.
+    $self->_timer(AnyEvent->timer(
+      after => $self->timeout, 
+      cb => sub {$self->flush();}
+    ));
+  }
+};
+
+sub reject {
+  my $self = shift;
+  my $tag = shift;
+  $self->flush();
+  $self->channel->reject(delivery_tag => $tag);
+}
+
+sub flush {
+  my $self = shift;
+  $self->_timer(undef);
+  $self->reset_counter();
+  my $last_tag = $self->_last_tag;
+  return if (!defined($last_tag));
+  $self->channel->ack(delivery_tag => $last_tag, multiple => 1);
+  $self->_last_tag(undef);
+}
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 
