@@ -1,16 +1,16 @@
-package CIF::ArchiveDataStore;
+package CIF::PostgresDataStore;
 use strict;
 use warnings;
 use Moose;
-use namespace::autoclean;
 use CIF::DataStore;
 use Try::Tiny;
-require CIF::APIKey;
-require CIF::APIKeyGroups;
-require CIF::APIKeyRestrictions;
-use CIF::Archive;
+use CIF::Codecs::JSON;
+use DBI;
+use CIF::PostgresDataStore::SQL;
 use CIF::Archive::Flusher;
 use CIF qw/debug is_uuid generate_uuid_ns/;
+use namespace::autoclean;
+
 with "CIF::DataStore";
 
 has 'database' => (
@@ -55,74 +55,68 @@ has 'flusher' => (
   required => 0
 );
 
-has '_auth_write_cache' => (
-  is => 'ro',
-  isa => 'HashRef',
+has '_db_codec' => (
+  is => 'ro', 
   init_arg => undef,
-  default => sub { {} }
+  default => sub {CIF::Codecs::JSON->new()}
 );
 
-has '_auth_cache' => (
+has 'sql' => (
   is => 'ro',
-  isa => 'HashRef',
+  isa => 'CIF::PostgresDataStore::SQL',
   init_arg => undef,
-  default => sub { {} }
+  lazy => 1,
+  builder => '_build_sql'
 );
 
-
-sub BUILD {
+sub _build_sql {
   my $self = shift;
-  $self->_init_dbi();
-}
-
-sub _init_dbi {
-  my $self = shift;
-  my $dbi = 'DBI:Pg:database='.$self->database.';host='.$self->host;
-  my $ret = CIF::DBI->connection($dbi,$self->user,$self->password,{ AutoCommit => 0});
-  debug("ret: " . $ret);
+  my $connect_str = 'DBI:Pg:database='. $self->database.';host='.$self->host;
+  my $dbh = DBI->connect($connect_str,$self->user,$self->password, {AutoCommit => 0});
+  if (!$dbh) {
+    die($!);
+  }
+  my $ret = CIF::PostgresDataStore::SQL->new(dbh => $dbh);
+  return $ret;
 }
 
 sub insert_event {
   my $self = shift;
   my $event = shift;
+  my ($err, $ret);
+  my $guid_id = $self->sql->get_guid_id($event->guid);
+  my $id;
+  try {
+    $id = $self->sql->insert_event(
+      $self->_db_codec->encode_event($event), 
+      $guid_id, $event->detecttime, $event->reporttime);
+  }
+  catch {
+    $err = shift;
+  };
+  die($err) if ($err);
+  if (!$id) {
+    die("Failed to get guid ID!");
+  }
+  foreach my $address (@{$event->addresses()}) {
+    if (!$self->sql->index_address($id, $address)) {
+      debug("Unknown address type: " . $address->type);
+    }
+  }
   $self->flusher->tick() if ($self->flusher);
-  CIF::Archive->insert($event);
+  return ($err) if($err);
+  return (undef, $ret);
 }
 
 sub search {
   my $self = shift;
   my $query = shift;
-  CIF::Archive->search($query);
+  #TODO
 }
 
 sub flush {
   my $self = shift;
-  CIF::Archive->dbi_commit();
-}
-
-sub key_retrieve {
-  my $self = shift;
-  my $apikey = shift;
-  if (my $cache_info = $self->_auth_cache->{lc($apikey)}) {
-    if ($cache_info->{expire} > time()) {
-      return $cache_info->{apikey_info};
-    }
-    undef $self->_auth_cache->{lc($apikey)};
-  }
-
-  my ($keyinfo,$err);
-  try {
-    my $rec = CIF::APIKey->retrieve(uuid => $apikey);
-    $keyinfo = CIF::ArchiveDataStore::ApikeyInfo->from_apikey($rec);
-    $self->_auth_cache->{lc($apikey)} = {
-      expire => time() + 60,
-      apikey_info => $keyinfo
-    };
-  } catch {
-    $err = shift;
-  };
-  return(0) if($err);
-  return($keyinfo);
+  $self->sql->flush();
 }
 
 sub authorized_write {
@@ -130,17 +124,16 @@ sub authorized_write {
   my $apikey = shift;
   my $guid = shift;
 
-  my $rec = $self->key_retrieve($apikey);
+  my $rec = $self->sql->key_retrieve($apikey);
   return (defined($rec) && $rec->can_write() && $rec->in_group($guid));
 }
-
 
 sub authorized_read {
     my $self = shift;
     my $key = shift;
     my $guid = shift;
     
-    my $rec = $self->key_retrieve($key);
+    my $rec = $self->sql->key_retrieve($key);
     die('invaild/expired apikey') unless($rec);
     if (!defined($guid)) {
       $guid = $rec->default_guid;
@@ -153,7 +146,7 @@ sub authorized_read {
     my $ret = {
       default_guid => $rec->default_guid()
     };
-    
+
     ## TODO -- datatype access control?
     
     my @groups = ($self->group_map) ? @{$self->group_map()} : undef;
@@ -174,9 +167,6 @@ sub authorized_read {
 
     return $ret; # all good
 }
-
-__PACKAGE__->meta->make_immutable();
-
 
 sub new_from_config {
   my $class = shift;
@@ -208,7 +198,7 @@ sub new_from_config {
     push(@$restriction_map,$m);
   }
 
-  my $datastore = CIF::ArchiveDataStore->new(
+  my $datastore = CIF::PostgresDataStore->new(
     database => $db_config->{database} || 'cif',
     user => $db_config->{user} || 'cif',
     password => $db_config->{password} || '',
@@ -227,109 +217,10 @@ sub shutdown {
     $self->flusher()->flush();
     $self->flusher(undef);
   }
-  $self->flush();
-}
-
-package CIF::ArchiveDataStore::ApikeyInfo;
-use strict;
-use warnings;
-use Moose;
-use namespace::autoclean;
-
-has 'uuid' => (
-  is => 'ro',
-  required => 1
-);
-
-has 'default_guid' => (
-  is => 'ro',
-  isa => 'Str',
-  required => 1
-);
-
-has 'revoked' => (
-  is => 'ro',
-  isa => 'Bool',
-  default => 0
-);
-
-has 'write' => (
-  is => 'ro',
-  isa => 'Bool',
-  default => 0
-);
-
-has 'restricted_access' => (
-  is => 'ro',
-  isa => 'Bool',
-  default => 0
-);
-
-has 'expires' => (
-  is => 'ro',
-  isa => 'Maybe[Int]'  # Epoch
-);
-
-has 'groups' => (
-  is => 'ro',
-  isa => 'HashRef',
-  default => sub { {} }
-);
-
-sub in_group {
-  return $_[0]->groups->{$_[1]};
-}
-
-sub is_expired {
-  return (defined($_[0]->expires) && $_[0]->expires > time());
-}
-
-sub in_good_standing {
-  return (
-    ! $_[0]->restricted_access()
-    && ! $_[0]->revoked()
-    && ! $_[0]->is_expired()
-  );
-}
-
-sub can_write {
-  return ($_[0]->write && $_[0]->in_good_standing());
-}
-
-sub can_read {
-  my $self = shift;
-  return ($_[0]->in_good_standing());
-}
-
-sub from_apikey {
-  my $class = shift;
-  my $apikey_obj = shift;
-
-  my $args = {
-    uuid => $apikey_obj->uuid,
-    revoked => $apikey_obj->revoked || 0,
-    write => $apikey_obj->write || 0,
-    restricted_access => $apikey_obj->restricted_access || 0,
-    groups => {}
-  };
-
-  if ($apikey_obj->expires()) {
-    $args->{expires} = DateTime::Format::DateParse->parse_datetime($apikey_obj->expires())->epoch();
-  }
-
-  foreach my $group ($apikey_obj->groups) {
-    if ($group->default_guid()) {
-      $args->{default_guid} = $group->guid();
-    }
-    $args->{groups}->{$group->guid()} = 1;
-  }
-
-  return $class->new(%$args);
-
+  $self->sql->shutdown();
 }
 
 __PACKAGE__->meta->make_immutable();
 
+
 1;
-
-

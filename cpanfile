@@ -43,6 +43,7 @@ requires 'Net::SSLeay', '1.43';
 requires 'Regexp::Common', '2.122';
 requires 'Regexp::Common::net::CIDR', '0.02';
 requires 'Storable', '2.27';
+requires 'SQL::Abstract', '1.74';
 requires 'Test::Class', '0.41';
 requires 'Test::Exception', '0.32';
 requires 'Text::CSV', '1.18';
