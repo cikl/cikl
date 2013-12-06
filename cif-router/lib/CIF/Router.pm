@@ -32,7 +32,7 @@ sub process_query {
 
   my $results = [];
 
-  my $apikey_info = $self->{datastore}->authorized_read($query->apikey);
+  my $apikey_info = $self->{datastore}->authorized_read($query->apikey, $query->guid());
   if (!defined($query->guid())) {
     $query->guid($apikey_info->{'default_guid'});
   }
@@ -66,7 +66,7 @@ sub process_submission {
     return("apikey '$apikey' is not authorized to write for guid '$guid'");
   }
 
-  debug('inserting...') if($debug > 4);
+  #debug('inserting...') if($debug > 4);
   my ($err, $id) = $self->{datastore}->insert_event($submission->event());
   if ($err) { 
     debug("ERR: " . $err);
