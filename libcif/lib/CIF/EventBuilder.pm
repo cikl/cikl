@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use CIF::Models::Event;
 use CIF::AddressBuilder qw/create_addresses/;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
@@ -42,7 +42,6 @@ has '_now' => (
 );
 
 has '_preprocessors' => (
-  traits => ['Array'],
   is => 'ro', 
   isa => 'ArrayRef[Str]',
   default => sub { [__preprocessors()]; },
