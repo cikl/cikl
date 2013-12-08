@@ -34,6 +34,7 @@ requires 'Moose', '2.1005';
 requires 'Moose::Util::TypeConstraints';
 requires 'MooseX::Aliases', "0.11";
 requires 'MooseX::SlurpyConstructor', "1.2";
+requires 'Mouse', "2.0.0";
 requires 'Net::Abuse::Utils', '0.13';
 requires 'Net::Abuse::Utils::Spamhaus', '0.04';
 requires 'Net::DNS::Match', '0.04';
