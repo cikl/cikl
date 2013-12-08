@@ -8,7 +8,7 @@ use CIF::Models::Query;
 use CIF::Models::QueryResults;
 use CIF::Models::HostInfo;
 require JSON;
-use Moose;
+use Mouse;
 use CIF::Codecs::CodecRole;
 use namespace::autoclean;
 
