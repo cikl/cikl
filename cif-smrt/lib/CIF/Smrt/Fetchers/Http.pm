@@ -2,7 +2,7 @@ package CIF::Smrt::Fetchers::Http;
 
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use CIF::Smrt::Fetcher;
 use IO::Scalar;
 use IO::File;

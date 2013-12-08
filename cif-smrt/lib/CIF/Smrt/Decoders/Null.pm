@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use CIF::Smrt::DecoderRole;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 with 'CIF::Smrt::DecoderRole';
 with 'CIF::Smrt::AutoDecodableRole';
 use constant MIME_TYPES => (

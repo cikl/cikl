@@ -1,7 +1,7 @@
 package CIF::Archive::LookupKeys;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use Data::Dumper;
 

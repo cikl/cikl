@@ -199,7 +199,7 @@ package CIF::Router::Transport::RabbitMQ::DeferredAcker;
 use strict;
 use warnings;
 
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use CIF qw/debug/;
 

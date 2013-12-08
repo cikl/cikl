@@ -1,7 +1,7 @@
 package CIF::PostgresDataStore;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use CIF::DataStore;
 use Try::Tiny;
 use CIF::Codecs::JSON;

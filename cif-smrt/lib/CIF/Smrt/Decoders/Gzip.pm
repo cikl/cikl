@@ -5,7 +5,7 @@ use warnings;
 use CIF::Smrt::DecoderRole;
 use CIF::Smrt::AutoDecodableRole;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 with 'CIF::Smrt::DecoderRole';
 with 'CIF::Smrt::AutoDecodableRole';
 

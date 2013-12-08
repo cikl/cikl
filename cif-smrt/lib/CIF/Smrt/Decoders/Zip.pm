@@ -5,7 +5,7 @@ use warnings;
 use CIF::Smrt::DecoderRole;
 use CIF::Smrt::AutoDecodableRole;
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use CIF qw/debug/;
 with 'CIF::Smrt::DecoderRole';

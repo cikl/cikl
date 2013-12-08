@@ -13,7 +13,7 @@ use AnyEvent;
 use Coro;
 use DateTime;
 
-use Moose::Role;
+use Mouse::Role;
 use CIF qw/debug generate_uuid_ns/;
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();

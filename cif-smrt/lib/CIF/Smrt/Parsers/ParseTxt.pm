@@ -3,7 +3,7 @@ package CIF::Smrt::Parsers::ParseTxt;
 use strict;
 use warnings;
 
-use Moose;
+use Mouse;
 use CIF::Smrt::Parser;
 extends 'CIF::Smrt::Parser';
 use namespace::autoclean;

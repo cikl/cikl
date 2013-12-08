@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use AnyEvent;
 use Coro;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 
 has 'commit_callback' => (

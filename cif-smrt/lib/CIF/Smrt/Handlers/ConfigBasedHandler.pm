@@ -12,7 +12,7 @@ use CIF::Smrt::HandlerRole;
 use URI;
 use CIF qw/debug/;
 
-use Moose;
+use Mouse;
 with 'CIF::Smrt::HandlerRole';
 
 sub name {

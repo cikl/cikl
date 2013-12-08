@@ -2,7 +2,7 @@ package CIF::Smrt::AutoDecodableRole;
 
 use strict;
 use warnings;
-use Moose::Role;
+use Mouse::Role;
 use namespace::autoclean;
 
 requires 'mime_types';

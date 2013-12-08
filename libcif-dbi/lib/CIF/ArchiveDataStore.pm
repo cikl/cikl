@@ -1,7 +1,7 @@
 package CIF::ArchiveDataStore;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use CIF::DataStore;
 use Try::Tiny;
@@ -233,7 +233,7 @@ sub shutdown {
 package CIF::ArchiveDataStore::ApikeyInfo;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 
 has 'uuid' => (

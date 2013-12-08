@@ -3,7 +3,7 @@ package CIF::Smrt::Fetchers::File;
 use strict;
 use warnings;
 use URI::file;
-use Moose;
+use Mouse;
 use IO::File;
 use CIF::Smrt::Fetcher;
 extends 'CIF::Smrt::Fetcher';

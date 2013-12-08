@@ -10,7 +10,7 @@ use Module::Pluggable search_path => "CIF::Smrt::Decoders",
       require => 1, sub_name => '_decoders', on_require_error => \&croak;
 
 use namespace::autoclean;
-use Moose;
+use Mouse;
 with 'CIF::Smrt::DecoderRole';
 
 has 'decoder_map' => (

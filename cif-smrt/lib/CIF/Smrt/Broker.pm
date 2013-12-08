@@ -1,7 +1,7 @@
 package CIF::Smrt::Broker;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 use Try::Tiny;
 

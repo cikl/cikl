@@ -2,7 +2,7 @@ package CIF::Smrt::Fetcher;
 
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 
 has 'feedurl' => (
   is => 'ro',

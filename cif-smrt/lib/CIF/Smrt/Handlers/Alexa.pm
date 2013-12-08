@@ -9,7 +9,7 @@ use CIF::Smrt::HandlerRole;
 use CIF qw/generate_uuid_ns/;
 use namespace::autoclean;
 use URI;
-use Moose;
+use Mouse;
 with 'CIF::Smrt::HandlerRole';
 
 # This file is initially a demonstration of a custom feed handler.

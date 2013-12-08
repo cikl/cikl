@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use AnyEvent;
 use Coro;
-use Moose;
+use Mouse;
 use CIF::Archive::Flusher;
 extends 'CIF::Archive::Flusher';
 use namespace::autoclean;

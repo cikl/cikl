@@ -1,7 +1,7 @@
 package CIF::PostgresDataStore::ApikeyInfo;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 
 has 'uuid' => (

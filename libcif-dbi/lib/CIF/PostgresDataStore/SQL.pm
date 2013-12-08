@@ -2,7 +2,7 @@ package CIF::PostgresDataStore::SQL;
 use strict;
 use warnings;
 use Try::Tiny;
-use Moose;
+use Mouse;
 use CIF qw/debug is_uuid generate_uuid_ns/;
 use CIF::PostgresDataStore::ApikeyInfo;
 use SQL::Abstract;

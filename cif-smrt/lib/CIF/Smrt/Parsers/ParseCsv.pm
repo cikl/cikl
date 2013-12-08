@@ -3,7 +3,7 @@ package CIF::Smrt::Parsers::ParseCsv;
 use strict;
 use warnings;
 
-use Moose;
+use Mouse;
 use CIF::Smrt::Parsers::ParseDelim;
 extends 'CIF::Smrt::Parsers::ParseDelim';
 use namespace::autoclean;

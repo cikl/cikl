@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use JSON;
-use Moose;
+use Mouse;
 use CIF::Smrt::Parser;
 extends 'CIF::Smrt::Parser';
 use namespace::autoclean;

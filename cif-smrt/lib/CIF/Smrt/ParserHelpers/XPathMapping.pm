@@ -2,8 +2,8 @@ package CIF::Smrt::ParserHelpers::XPathMapping;
 
 use strict;
 use warnings;
-use Moose;
-use Moose::Util::TypeConstraints;
+use Mouse;
+use Mouse::Util::TypeConstraints;
 
 
 has 'event_field' => (
