@@ -83,6 +83,15 @@ sub _build_sql {
 sub insert_event {
   my $self = shift;
   my $event = shift;
+  my $guid_id = $self->sql->get_guid_id($event->guid);
+  $self->sql->queue_event($guid_id, $event, $self->_db_codec->encode_event($event));
+  $self->flusher->tick() if ($self->flusher);
+  return (undef, 1);
+}
+
+sub insert_event_old {
+  my $self = shift;
+  my $event = shift;
   my ($err, $ret);
   my $guid_id = $self->sql->get_guid_id($event->guid);
   my $id;
@@ -98,11 +107,11 @@ sub insert_event {
   if (!$id) {
     die("Failed to get guid ID!");
   }
-  foreach my $address (@{$event->addresses()}) {
-    if (!$self->sql->index_address($id, $address)) {
-      debug("Unknown address type: " . $address->type);
-    }
-  }
+#  foreach my $address (@{$event->addresses()}) {
+#    if (!$self->sql->index_address($id, $address)) {
+#      debug("Unknown address type: " . $address->type);
+#    }
+#  }
   $self->flusher->tick() if ($self->flusher);
   return ($err) if($err);
   return (undef, $ret);

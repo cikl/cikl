@@ -6,6 +6,8 @@ use Moose;
 use CIF qw/debug is_uuid generate_uuid_ns/;
 use CIF::PostgresDataStore::ApikeyInfo;
 use SQL::Abstract;
+use CIF::Codecs::JSON;
+use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 
 use constant SQL_GET_GUID_ID_MAPPING => q{
@@ -31,12 +33,18 @@ use constant SQL_GET_APIKEY_GROUPS => q{
 SELECT * from apikeys_groups WHERE uuid = ?;
 };
 
-
 has 'dbh' => (
   is => 'ro',
   isa => 'DBI::db',
   required => 1
 );
+
+has '_db_codec' => (
+  is => 'ro', 
+  init_arg => undef,
+  default => sub {CIF::Codecs::JSON->new()}
+);
+
 
 has 'insert_event_sth' => (
   is => 'ro',
@@ -45,6 +53,69 @@ has 'insert_event_sth' => (
   lazy => 1,
   default => sub { $_[0]->dbh->prepare(SQL_INSERT_EVENT) }
 );
+
+sub build_insert_event_sql {
+  my $count = shift;
+  my @values;
+  for (my $i = 0; $i < $count; $i++) {
+    push(@values, "(?,?,to_timestamp(?),to_timestamp(?))");
+  }
+  return "INSERT INTO archive (data,guid_id,created,reporttime) VALUES " . 
+    join(", ", @values) .
+    " RETURNING id;";
+}
+
+has 'insert_event_100_sth' => (
+  is => 'ro',
+  #isa => ,
+  init_arg => undef,
+  lazy => 1,
+  default => sub { 
+    $_[0]->dbh->prepare(build_insert_event_sql(100)) ;
+  }
+);
+
+has 'insert_event_1000_sth' => (
+  is => 'ro',
+  #isa => ,
+  init_arg => undef,
+  lazy => 1,
+  default => sub { 
+    $_[0]->dbh->prepare(build_insert_event_sql(1000)) ;
+  }
+);
+
+has 'insert_event_2000_sth' => (
+  is => 'ro',
+  #isa => ,
+  init_arg => undef,
+  lazy => 1,
+  default => sub { 
+    $_[0]->dbh->prepare(build_insert_event_sql(2000)) ;
+  }
+);
+
+has "queued_events" => (
+  traits => ['Array'],
+  is => 'ro',
+  isa => 'ArrayRef',
+  default => sub {[]},
+  handles => {
+    _push_event_data => 'push',
+    num_queued_events => 'count',
+    clear_queued_events => 'clear',
+    each_slice => 'natatime'
+  }
+);
+
+sub queue_event {
+  my $self = shift;
+  my $guid_id = shift;
+  my $event = shift;
+  $self->_push_event_data([
+      $guid_id, $event
+    ]);
+}
 
 has 'get_guid_id_sth' => (
   is => 'ro',
@@ -126,7 +197,7 @@ sub _build_indexer_map {
   $ret;
 }
 
-sub insert_event {
+sub insert_event_old {
   my $self = shift;
   my ($data, $guid_id, $created, $reporttime) = @_;
   my $sth = $self->insert_event_sth;
@@ -135,7 +206,6 @@ sub insert_event {
   $sth->finish();
   return $id;
 }
-
 
 sub get_guid_id {
   my $self = shift;
@@ -167,16 +237,89 @@ sub get_guid_id {
   die("Failed to get guid mapping!");
 }
 
-
 sub shutdown {
   my $self = shift;
   $self->flush();
   $self->dbh->disconnect();
 }
 
+sub insert_event_100 {
+  my $self = shift;
+  my $events = shift;
+  my @values;
+  my $sth = $self->insert_event_100_sth;
+  foreach my $value_ref (@$events) {
+    #my ($data, $guid_id, $created, $reporttime) = @_;
+    my ($guid_id, $event) = @$value_ref;
+    push(@values, $self->_db_codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
+  }
+  $sth->execute(@values) or die($self->dbh->errstr);
+  my $ids = $sth->fetchall_arrayref();
+  $sth->finish(); # TODO read the return;
+  return $ids;
+}
+
+sub do_insert_events {
+  my $self = shift;
+  my $sth = shift;
+  my $events = shift;
+  my $codec = $self->_db_codec();
+  my @values;
+  foreach my $value_ref (@$events) {
+    #my ($data, $guid_id, $created, $reporttime) = @_;
+    my ($guid_id, $event) = @$value_ref;
+    push(@values, $codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
+  }
+  $sth->execute(@values) or die($self->dbh->errstr);
+  my $ids = $sth->fetchall_arrayref();
+  $sth->finish(); # TODO read the return;
+  return $ids;
+}
+
+sub _insert_events {
+  my $self = shift;
+  my $events = shift;
+  my $sth;
+  my $chunk_size;
+  my $it;
+  my $num_events = scalar(@$events);
+  my $remaining_events = [];
+
+  while ($num_events > 0) {
+    if ($num_events >= 1000) {
+      $chunk_size = 1000;
+      $sth = $self->insert_event_1000_sth;
+    } elsif ($num_events >= 100) {
+      $chunk_size = 100;
+      $sth = $self->insert_event_100_sth;
+    } else {
+      $chunk_size = 1;
+      $sth = $self->insert_event_sth;
+    }
+    $it = natatime($chunk_size, @$events);
+    CHUNKER: while (my @chunk = $it->()) {
+      my $x = scalar(@chunk);
+      if ($x == $chunk_size) {
+        my $ids = $self->do_insert_events($sth, \@chunk);
+      } else {
+        $remaining_events = \@chunk;
+        last CHUNKER;
+      }
+    }
+    $events = $remaining_events;
+    $remaining_events = [];
+    $num_events = scalar(@$events);
+  }
+  debug("done");
+}
+
 sub flush {
   my $self = shift;
+  #DB::enable_profile();
+  $self->_insert_events($self->queued_events());
+  $self->clear_queued_events();
   $self->dbh->commit();
+  #DB::disable_profile();
 }
 
 
