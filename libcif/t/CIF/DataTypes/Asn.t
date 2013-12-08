@@ -1,13 +1,13 @@
-package TestsFor::CIF::MooseTypes::Asn;
+package TestsFor::CIF::DataTypes::Asn;
 use lib 'testlib';
-use base qw(CIF::MooseTypes::TestClass);
+use base qw(CIF::DataTypes::TestClass);
 use strict;
 use warnings;
 use Test::More;
 
-use CIF::MooseTypes::Asn;
+use CIF::DataTypes::Asn;
 
-sub testing_class { "CIF::MooseTypes::Asn"; }
+sub testing_class { "CIF::DataTypes::Asn"; }
 
 sub test_validation : Test(7) {
   my $self = shift;

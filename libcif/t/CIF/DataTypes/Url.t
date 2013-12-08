@@ -1,14 +1,14 @@
-package TestsFor::CIF::MooseTypes::Url;
+package TestsFor::CIF::DataTypes::Url;
 use lib 'testlib';
-use base qw(CIF::MooseTypes::TestClass);
+use base qw(CIF::DataTypes::TestClass);
 use strict;
 use warnings;
 use Test::More;
 use URI;
 
-use CIF::MooseTypes::Url;
+use CIF::DataTypes::Url;
 
-sub testing_class { "CIF::MooseTypes::Url"; }
+sub testing_class { "CIF::DataTypes::Url"; }
 
 use constant GOOD_URLS => qw(
   http://www.foo.com/

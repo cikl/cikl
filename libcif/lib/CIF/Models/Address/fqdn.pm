@@ -3,14 +3,14 @@ use strict;
 use warnings;
 use Moose;
 use CIF::Models::AddressRole;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 with 'CIF::Models::AddressRole';
 
 sub type { 'fqdn' }
 
 has '+value' => (
-  isa => 'CIF::MooseTypes::Fqdn'
+  isa => 'CIF::DataTypes::Fqdn'
 );
 
 sub normalize_value {

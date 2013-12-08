@@ -4,7 +4,7 @@ use warnings;
 use Data::Dumper;
 use Digest::SHA qw/sha1_hex/;
 use Moose;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 
 # this is artificially low, ipv4/ipv6 queries can grow the result set rather large (exponentially)
@@ -15,7 +15,7 @@ use constant QUERY_DEFAULT_LIMIT => 50;
 
 has 'apikey' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   required => 1
 );
 
@@ -27,7 +27,7 @@ has 'query' => (
 
 has 'guid' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   required => 0,
 );
 

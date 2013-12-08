@@ -1,4 +1,4 @@
-package CIF::MooseTypes::Ipv4Cidr;
+package CIF::DataTypes::Ipv4Cidr;
 use strict;
 use warnings;
 use namespace::autoclean;
@@ -8,7 +8,7 @@ use Regexp::Common::net::CIDR;
 
 use constant RE_IPV4_CIDR => qr/^$RE{'net'}{'CIDR'}{'IPv4'}$/;
 
-subtype 'CIF::MooseTypes::Ipv4Cidr',
+subtype 'CIF::DataTypes::Ipv4Cidr',
   as 'Str',
   where { $_ =~ RE_IPV4_CIDR },
   message { "Invalid Ipv4 CIDR '$_'"} ;

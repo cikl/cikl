@@ -1,4 +1,4 @@
-package CIF::MooseTypes::TestClass;
+package CIF::DataTypes::TestClass;
 use base qw(Test::Class);
 use strict;
 use warnings;
@@ -24,6 +24,6 @@ sub check_name : Test {
 }
 
 # Make sure we don't run this test helper directly.
-CIF::MooseTypes::TestClass->SKIP_CLASS(1);
+CIF::DataTypes::TestClass->SKIP_CLASS(1);
 
 1;

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use CIF::Models::Event;
 use CIF::Models::Query;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use Moose;
 use namespace::autoclean;
 
@@ -41,14 +41,14 @@ has 'restriction_map' => (
 
 has 'guid' => (
   is => 'ro',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   lazy => 1,
   default => sub { my $self = shift; $self->query->guid() }
 );
 
 has 'uuid' => (
   is => 'ro',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   default => sub { generate_uuid_random() }
 );
 

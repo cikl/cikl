@@ -3,13 +3,13 @@ use strict;
 use warnings;
 require JSON;
 use Moose;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 use Sys::Hostname;
 
 has 'hostname' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   required => 1
 );
 
@@ -28,7 +28,7 @@ has 'uptime' => (
 has 'service_type' => (
   is => 'rw',
   #isa => enum($_, qw[ client query submission ]),
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   required => 1
 );
 

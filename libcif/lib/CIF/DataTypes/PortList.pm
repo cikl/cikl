@@ -1,10 +1,10 @@
-package CIF::MooseTypes::PortList;
+package CIF::DataTypes::PortList;
 use strict;
 use warnings;
 use namespace::autoclean;
 use Moose::Util::TypeConstraints;
 
-subtype "CIF::MooseTypes::PortList", 
+subtype "CIF::DataTypes::PortList", 
   as 'Str',
   where {
     my $portlist = shift;

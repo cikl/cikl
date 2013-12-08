@@ -4,12 +4,12 @@ use warnings;
 use Scalar::Util qw(blessed);
 use CIF::Models::Event;
 use Moose;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 
 has 'apikey' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   required => 1
 );
 

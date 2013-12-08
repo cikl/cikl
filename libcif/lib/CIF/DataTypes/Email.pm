@@ -1,12 +1,12 @@
-package CIF::MooseTypes::Email;
+package CIF::DataTypes::Email;
 use strict;
 use warnings;
 use namespace::autoclean;
 use Moose::Util::TypeConstraints;
 use Mail::RFC822::Address qw/valid/;
 
-subtype 'CIF::MooseTypes::Email',
-  as 'CIF::MooseTypes::LowerCaseStr',
+subtype 'CIF::DataTypes::Email',
+  as 'CIF::DataTypes::LowerCaseStr',
   where { valid($_) && $_ !~ /^\s+|\s+$/ },
   message { "Invalid E-Mail address: $_"} ;
 1;

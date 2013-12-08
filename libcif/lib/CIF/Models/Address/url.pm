@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Moose;
 use CIF::Models::AddressRole;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 with 'CIF::Models::AddressRole';
 
@@ -12,7 +12,7 @@ use constant RE_URL_SCHEME => qr/^[-+.a-zA-Z0-9]+:\/\//;
 sub type { 'url' }
 
 has '+value' => (
-  isa => 'CIF::MooseTypes::Url',
+  isa => 'CIF::DataTypes::Url',
 );
 
 

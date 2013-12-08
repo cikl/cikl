@@ -1,15 +1,15 @@
-package CIF::MooseTypes::LowerCaseStr;
+package CIF::DataTypes::LowerCaseStr;
 use strict;
 use warnings;
 use namespace::autoclean;
 use Moose::Util::TypeConstraints;
 
-subtype "CIF::MooseTypes::LowerCaseStr", 
+subtype "CIF::DataTypes::LowerCaseStr", 
   as 'Str',
   where { !/\p{Upper}/ms },
   message { "Must be lowercase." };
 
-coerce 'CIF::MooseTypes::LowerCaseStr',
+coerce 'CIF::DataTypes::LowerCaseStr',
   from 'Str',
   via { lc };
 

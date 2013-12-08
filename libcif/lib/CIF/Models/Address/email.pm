@@ -4,13 +4,13 @@ use warnings;
 use Moose;
 use CIF::Models::AddressRole;
 use namespace::autoclean;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 with 'CIF::Models::AddressRole';
 
 sub type { 'email' }
 
 has '+value' => (
-  isa => 'CIF::MooseTypes::Email',
+  isa => 'CIF::DataTypes::Email',
 );
 
 sub normalize_value {

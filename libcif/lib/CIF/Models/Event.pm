@@ -8,34 +8,34 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Aliases;
 use MooseX::SlurpyConstructor;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use CIF::Models::AddressRole;
 use CIF::AddressBuilder qw/create_address/;
 use namespace::autoclean;
 
 has 'guid' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   required => 1,
 );
 
 has 'id' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowercaseUUID',
   default => sub { generate_uuid_random() },
   alias => 'uuid'
 );
 
 has 'assessment' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   required => 1,
   coerce => 1
 );
 
 has 'description' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::LowerCaseStr',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   default => sub { 'unknown' },
   coerce => 1
 );
@@ -74,7 +74,7 @@ has 'method' => (is => 'rw');
 
 has 'portlist' => (
   is => 'rw',
-  isa => 'CIF::MooseTypes::PortList'
+  isa => 'CIF::DataTypes::PortList'
 );
 
 has 'protocol' => (is => 'rw');

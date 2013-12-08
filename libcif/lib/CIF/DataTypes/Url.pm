@@ -1,4 +1,4 @@
-package CIF::MooseTypes::Url;
+package CIF::DataTypes::Url;
 use strict;
 use warnings;
 use namespace::autoclean;
@@ -16,7 +16,7 @@ our $RESTR_ALLOWED_SCHEMES = join('|', @ALLOWED_SCHEMES);
 our $RE_ALLOWED_SCHEMES = qr/^($RESTR_ALLOWED_SCHEMES)$/;
 
 # We want an absolute URL
-subtype 'CIF::MooseTypes::Url',
+subtype 'CIF::DataTypes::Url',
   as 'Str',
   where { 
     my $url_text = shift;

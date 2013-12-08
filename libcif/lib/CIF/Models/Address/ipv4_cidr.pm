@@ -3,14 +3,14 @@ use strict;
 use warnings;
 use Moose;
 use CIF::Models::AddressRole;
-use CIF::MooseTypes;
+use CIF::DataTypes;
 use namespace::autoclean;
 with 'CIF::Models::AddressRole';
 
 sub type { 'ipv4_cidr' }
 
 has '+value' => (
-  isa => 'CIF::MooseTypes::Ipv4Cidr'
+  isa => 'CIF::DataTypes::Ipv4Cidr'
 );
 
 sub normalize_value {
