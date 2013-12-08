@@ -3,7 +3,7 @@ use base qw(Test::Class);
 use strict;
 use warnings;
 use Test::More;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 
 sub testing_class { die("testing_class not implemented!") }
 

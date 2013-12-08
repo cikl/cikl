@@ -2,7 +2,7 @@ package CIF::DataTypes::Url;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 use URI;
 
 use constant RE_URL_SCHEME => qr/^[-+.a-zA-Z0-9]+:\/\//;

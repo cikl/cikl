@@ -1,7 +1,7 @@
 package CIF::Models::Address::url;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use CIF::Models::AddressRole;
 use CIF::DataTypes;
 use namespace::autoclean;

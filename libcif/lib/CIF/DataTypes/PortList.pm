@@ -2,7 +2,7 @@ package CIF::DataTypes::PortList;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 
 subtype "CIF::DataTypes::PortList", 
   as 'Str',

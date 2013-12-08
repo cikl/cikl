@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Digest::SHA qw/sha1_hex/;
-use Moose;
+use Mouse;
 use CIF::DataTypes;
 use namespace::autoclean;
 

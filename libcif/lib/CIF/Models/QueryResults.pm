@@ -4,7 +4,7 @@ use warnings;
 use CIF::Models::Event;
 use CIF::Models::Query;
 use CIF::DataTypes;
-use Moose;
+use Mouse;
 use namespace::autoclean;
 
 use constant MANDATORY_FIELDS => qw/query events/;

@@ -2,7 +2,7 @@ package CIF::DataTypes::Email;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 use Mail::RFC822::Address qw/valid/;
 
 subtype 'CIF::DataTypes::Email',

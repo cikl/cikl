@@ -4,10 +4,8 @@ use warnings;
 use Scalar::Util qw(blessed);
 use CIF qw(generate_uuid_random);
 require JSON;
-use Moose;
-use Moose::Util::TypeConstraints;
-use MooseX::Aliases;
-use MooseX::SlurpyConstructor;
+use Mouse;
+use Mouse::Util::TypeConstraints;
 use CIF::DataTypes;
 use CIF::Models::AddressRole;
 use CIF::AddressBuilder qw/create_address/;
@@ -23,8 +21,10 @@ has 'id' => (
   is => 'rw',
   isa => 'CIF::DataTypes::LowercaseUUID',
   default => sub { generate_uuid_random() },
-  alias => 'uuid'
 );
+sub uuid {
+  return id(@_);
+}
 
 has 'assessment' => (
   is => 'rw',
@@ -87,12 +87,6 @@ has 'timestamp' => (is => 'rw');
 
 has 'cc' => (is => 'rw');
 has 'rir' => (is => 'rw');
-
-# This stores attributes that haven't been explicitly defined.
-has 'other_attributes' => (
-  is => 'rw',
-  slurpy => 1
-);
 
 sub address {
   my $self = shift;

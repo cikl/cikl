@@ -2,7 +2,7 @@ package CIF::DataTypes::Ipv4Cidr;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 use Regexp::Common;
 use Regexp::Common::net::CIDR;
 

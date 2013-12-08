@@ -2,7 +2,7 @@ package CIF::DataTypes::Ipv4;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 use Regexp::Common qw/net/;
 
 use constant RE_IPV4 => qr/^$RE{'net'}{'IPv4'}$/;

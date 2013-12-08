@@ -1,7 +1,7 @@
 package CIF::Models::AddressRole;
 use strict;
 use warnings;
-use Moose::Role;
+use Mouse::Role;
 use namespace::autoclean;
 
 requires 'type';

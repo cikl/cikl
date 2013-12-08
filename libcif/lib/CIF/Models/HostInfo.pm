@@ -2,7 +2,7 @@ package CIF::Models::HostInfo;
 use strict;
 use warnings;
 require JSON;
-use Moose;
+use Mouse;
 use CIF::DataTypes;
 use namespace::autoclean;
 use Sys::Hostname;

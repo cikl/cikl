@@ -1,7 +1,7 @@
 package CIF::Models::Address::asn;
 use strict;
 use warnings;
-use Moose;
+use Mouse;
 use CIF::Models::AddressRole;
 use CIF::DataTypes;
 use namespace::autoclean;

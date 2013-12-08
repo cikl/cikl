@@ -2,7 +2,7 @@ package CIF::DataTypes::LowerCaseStr;
 use strict;
 use warnings;
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 
 subtype "CIF::DataTypes::LowerCaseStr", 
   as 'Str',

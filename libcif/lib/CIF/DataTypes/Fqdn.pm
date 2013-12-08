@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use namespace::autoclean;
 use CIF::DataTypes::LowerCaseStr;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 use Regexp::Common qw/net/;
 
 use constant FQDN_RE => qr/^$RE{net}{domain}{-rfc1101}{-nospace}$/ ;

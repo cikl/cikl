@@ -3,7 +3,7 @@ use base qw(Test::Class);
 use strict;
 use warnings;
 use Test::More;
-use Moose::Util::TypeConstraints;
+use Mouse::Util::TypeConstraints;
 
 sub testing_class { die("testing_class not implemented!") }
 sub get_constraint { 
@@ -13,7 +13,7 @@ sub get_constraint {
 
 sub check_type : Test {
   my $self = shift;
-  isa_ok($self->get_constraint(), 'Moose::Meta::TypeConstraint');
+  isa_ok($self->get_constraint(), 'Mouse::Meta::TypeConstraint');
 }
 
 sub check_name : Test {
