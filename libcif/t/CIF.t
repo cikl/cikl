@@ -1,0 +1,116 @@
+package TestsFor::CIF;
+use base qw(Test::Class);
+use strict;
+use warnings;
+use Test::More;
+use Test::Deep;
+use CIF qw/normalize_timestamp/;
+
+sub normalizes_properly {
+  my $name = shift;
+  my $val = shift;
+  my $expected = shift;
+  subtest $name => sub {
+    my $ret = normalize_timestamp($val);
+    isa_ok($ret, 'DateTime');
+    is($ret, $expected, "is the expected DateTime value");
+  };
+}
+
+use constant FAKE_NOW => DateTime->new(
+  year       => 2012,
+  month      => 11,
+  day        => 7,
+  hour       => 14,
+  minute     => 06,
+  second     => 07,
+  time_zone  => 'UTC',
+);
+
+sub returns_now {
+  my $name = shift;
+  my $val = shift;
+  subtest $name => sub {
+    my $ret = normalize_timestamp($val, FAKE_NOW);
+    isa_ok($ret, 'DateTime');
+    is($ret, FAKE_NOW, "fails to parse and returns default value (now)");
+  };
+}
+
+sub test_normalize_timestamp : Test(14) {
+  my $self = shift;
+  my $dt = DateTime->new(
+      year       => 2013,
+      month      => 12,
+      day        => 9,
+      hour       => 12,
+      minute     => 53,
+      second     => 27,
+      time_zone  => 'UTC',
+  );
+  my $epoch = $dt->epoch();
+
+  normalizes_properly("a DateTime object", $dt, $dt);
+  normalizes_properly("an epoch", $epoch, $dt);
+  normalizes_properly("an epoch", $epoch, $dt);
+
+  normalizes_properly("an iso8601 string with Z (yyyy-mm-ddThh:mm:ssZ)", 
+    $dt->iso8601() . "Z", $dt);
+
+  normalizes_properly("an iso8601 string (yyyy-mm-ddThh:mm:ss)", 
+    "2013-12-09T12:53:27", $dt);
+
+  normalizes_properly("a date time string with no separators plus timezone (yyyymmddhhmmssZZZ)", 
+    $dt->ymd("") . $dt->hms('') . "UTC", $dt);
+
+  normalizes_properly("an 8 digit date time string of format (yyyymmdd)", 
+    "20131209", 
+    DateTime->new(
+      year       => 2013,
+      month      => 12,
+      day        => 9,
+      hour       => 0,
+      minute     => 0,
+      second     => 0,
+      time_zone  => 'UTC',
+  ));
+
+  returns_now("an 8 digit date time with an invalid month", 
+    "20131309");
+
+  returns_now("an 8 digit date time with an invalid day", 
+    "20131232");
+
+  returns_now("a nine-digit number", "123456789");
+
+  returns_now("a seven-digit number", "1234567");
+
+  normalizes_properly("Mon, 21 Nov 94 13:55:19 UTC", 
+    "Mon, 21 Nov 94 13:55:19 UTC", 
+    DateTime->new(
+      year       => 1994,
+      month      => 11,
+      day        => 21,
+      hour       => 13,
+      minute     => 55,
+      second     => 19,
+      time_zone  => 'UTC',
+  ));
+
+  normalizes_properly("Mon, 21 Nov 94 13:55:19 UTC", 
+    "Mon,_21_Nov_94_13:55:19_UTC",
+    DateTime->new(
+      year       => 1994,
+      month      => 11,
+      day        => 21,
+      hour       => 13,
+      minute     => 55,
+      second     => 19,
+      time_zone  => 'UTC',
+  ));
+
+  is(normalize_timestamp("asdfasdf"), undef, "returns undef for things it can't parse");
+}
+
+Test::Class->runtests;
+
