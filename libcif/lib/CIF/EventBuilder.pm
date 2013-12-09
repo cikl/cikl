@@ -8,9 +8,6 @@ use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
 use CIF qw/normalize_timestamp debug/;
-use Carp;
-use Module::Pluggable search_path => "CIF::EventNormalizers", 
-      require => 1, sub_name => '__preprocessors', on_require_error => \&croak;
 
 has 'default_event_data' => (
   is => 'rw',
@@ -41,13 +38,6 @@ has '_now' => (
   init_arg => undef
 );
 
-has '_preprocessors' => (
-  is => 'ro', 
-  isa => 'ArrayRef[Str]',
-  default => sub { [__preprocessors()]; },
-  init_arg => undef
-);
-
 sub merge_default_event_data {
   my $self = shift;
   my $data_to_merge = shift;
@@ -60,28 +50,19 @@ sub normalize {
   my $r = shift;
 
   my $now  = $self->_now;
-  my $dt = $r->{'detecttime'} || $now;
-  my $rt = $r->{'reporttime'} || $now;
-
-  if ($self->refresh) {
-    $rt = $now;
-  } else {
-    $rt = normalize_timestamp($rt,$now);
-  }
-    
-  $dt = normalize_timestamp($dt,$now);
-
+  my $dt = normalize_timestamp($r->{detecttime}, $now);
   if($dt < $self->not_before) {
     return(undef);
   }
+  $r->{detecttime} = $dt;
 
-  $r->{'detecttime'}        = $dt;
-  $r->{'reporttime'}        = $rt;
+  $r->{reporttime} = $self->refresh ? $now : 
+      normalize_timestamp($r->{reporttime}, $now);
 
-  my $addresses = $r->{addresses} || [];
-  @$addresses = (@$addresses, @{create_addresses($r)});
-  $r->{addresses} = $addresses;
-  
+  $r->{addresses} = [
+    @{$r->{addresses} || []}, 
+    @{create_addresses($r)}
+  ];
 
   # MPR: Disabling value expansion, for now.
 #  foreach my $key (keys %$r){
@@ -95,10 +76,6 @@ sub normalize {
 #      }
 #    }
 #  }
-  foreach my $p (@{$self->_preprocessors}){
-    $r = $p->process($r);
-  }
-
   return $r;
 }
 
