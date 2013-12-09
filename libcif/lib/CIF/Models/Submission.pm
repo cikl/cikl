@@ -6,6 +6,9 @@ use CIF::Models::Event;
 use Mouse;
 use CIF::DataTypes;
 use namespace::autoclean;
+use JSON;
+
+our $JSON = JSON->new()->utf8(1);
 
 has 'apikey' => (
   is => 'rw',
@@ -16,26 +19,47 @@ has 'apikey' => (
 has 'event' => (
   is => 'rw',
   isa => 'CIF::Models::Event',
-  required => 1
+  required => 0,
+  lazy => 1,
+  builder => '_build_event'
 );
 
+has 'event_json' => (
+  is => 'rw',
+  isa => 'Str',
+  required => 0,
+  lazy => 1,
+  builder => '_build_event_json'
+);
+
+sub _build_event {
+  CIF::Models::Event->from_hash($JSON->decode($_[0]->event_json));
+}
+
+sub _build_event_json {
+  $JSON->encode($_[0]->event()->to_hash);
+}
+
+sub BUILD {
+  if (!exists($_[0]->{event}) && !exists($_[0]->{event_json})) {
+    die("at least event OR event_json must be provided");
+  }
+}
+
 sub to_hash {
-  my $self = shift;
-  my $data = {
-    apikey => $self->apikey,
-    event => $self->event->to_hash()
+  return {
+    apikey => $_[0]->apikey,
+    event_json => $_[0]->event_json()
   };
-  return $data;
 }
 
 sub from_hash {
   my $class = shift;
   my $data = shift;
-  my $event = CIF::Models::Event->from_hash($data->{event});
-  return $class->new(
-    apikey => $data->{apikey},
-    event => $event
-  );
+  if ($data->{event}) {
+    $data->{event} = CIF::Models::Event->from_hash($data->{event});
+  }
+  return $class->new($data);
 }
 
 __PACKAGE__->meta->make_immutable();

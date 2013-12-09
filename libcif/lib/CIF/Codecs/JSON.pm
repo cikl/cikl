@@ -12,6 +12,8 @@ use Mouse;
 use CIF::Codecs::CodecRole;
 use namespace::autoclean;
 
+our $JSON = JSON->new()->utf8(1);
+
 with 'CIF::Codecs::CodecRole';
 
 sub content_type {
@@ -21,13 +23,13 @@ sub content_type {
 sub encode_hostinfo {
   my $self = shift;
   my $hostinfo = shift;
-  return JSON::encode_json($hostinfo->to_hash());
+  return $JSON->encode($hostinfo->to_hash());
 }
 
 sub decode_hostinfo {
   my $self = shift;
   my $json = shift;
-  my $data = JSON::decode_json($json);
+  my $data = $JSON->decode($json);
   return CIF::Models::HostInfo->from_hash($data);
 }
 
@@ -36,27 +38,27 @@ sub encode_query {
   my $query = shift;
   my $data = {};
   map { $data->{$_} = $query->{$_} } keys %{$query};
-  return JSON::encode_json($data);
+  return $JSON->encode($data);
 }
 
 sub decode_query {
   my $self = shift;
   my $json = shift;
-  my $data = JSON::decode_json($json);
+  my $data = $JSON->decode($json);
   return CIF::Models::Query->new($data);
 }
 
 sub encode_query_results {
   my $self = shift;
   my $query_results = shift;
-  return(JSON::encode_json($query_results->to_hash()));
+  return($JSON->encode($query_results->to_hash()));
 
 }
 
 sub decode_query_results {
   my $self = shift;
   my $json = shift;
-  my $data = JSON::decode_json($json);
+  my $data = $JSON->decode($json);
   my $query_results = CIF::Models::QueryResults->from_hash($data);
 
   return ($query_results);
@@ -66,13 +68,13 @@ sub encode_event {
   my $self = shift;
   my $event = shift;
   my $e = $event->to_hash();
-  return JSON::encode_json($event->to_hash());
+  return $JSON->encode($event->to_hash());
 }
 
 sub decode_event {
   my $self = shift;
   my $json = shift;
-  my $data = JSON::decode_json($json);
+  my $data = $JSON->decode($json);
   return CIF::Models::Event->from_hash($data);
 }
 
@@ -80,13 +82,13 @@ sub encode_submission {
   my $self = shift;
   my $submission = shift;
 
-  return JSON::encode_json($submission->to_hash());
+  return $JSON->encode($submission->to_hash());
 }
 
 sub decode_submission {
   my $self = shift;
   my $json = shift;
-  my $data = JSON::decode_json($json);
+  my $data = $JSON->decode($json);
   return CIF::Models::Submission->from_hash($data);
 }
 
