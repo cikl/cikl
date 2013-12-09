@@ -6,6 +6,7 @@ use warnings;
 use CIF::Router;
 use CIF::Archive::SimpleFlusher;
 use CIF::ArchiveDataStore;
+use CIF::PostgresDataStore;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -15,21 +16,29 @@ sub new {
     $args->{driver_name} = "direct";
     my $self = $class->SUPER::new($args);
 
-    my $datastore = CIF::ArchiveDataStore->new_from_config($self->get_global_config);
+    my $datastore = CIF::PostgresDataStore->new_from_config($self->get_global_config);
+    my $last_flush = [gettimeofday];
     my $flusher = CIF::Archive::SimpleFlusher->new(
       commit_interval => 2,
-      commit_size => 10000,
+      commit_size => 1000,
       commit_callback => sub { 
         my $count = shift;
         return if ($count == 0);
-        my $start = [gettimeofday()];
+        my $start = [gettimeofday];
         $datastore->flush();
-        my $delta = tv_interval($start);
-        debug("Commit of $count events took $delta seconds.");
+        my $flush_time = tv_interval($start);
+        my $overall_time = tv_interval($last_flush);
+        my $flush_percent = ($flush_time / $overall_time) * 100;
+        my $rate = $count / $overall_time;
+        my $diff = $overall_time - $flush_time;
+        $last_flush = [gettimeofday];
+        debug("Flush time: $flush_time seconds for $count events. Percent: $flush_percent");
+        debug("Non-Flush time: $diff seconds");
+        debug("RATE: $rate events per second");
       },
 
     );
-    $self->{flusher} = $flusher;
+    $datastore->flusher($flusher);
     $self->{router} = CIF::Router->new({
       config => $self->get_global_config(),
       datastore => $datastore
