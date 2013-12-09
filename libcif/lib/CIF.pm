@@ -65,8 +65,7 @@ CIF::Utils - Perl extension for misc 'helper' CIF like functions
 =cut
 
 sub is_uuid {
-    return undef unless($_[0] && $_[0] =~ UUID_RE);
-    return(1);
+    return(($_[0] && $_[0] =~ UUID_RE) ? 1 : undef);
 }
 
 =item debug($string)

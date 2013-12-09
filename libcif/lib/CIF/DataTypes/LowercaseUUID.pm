@@ -8,7 +8,7 @@ use CIF qw(is_uuid);
 
 subtype "CIF::DataTypes::LowercaseUUID", 
   as 'Str',
-  where { is_uuid($_) && ($_ !~ /[A-Z]/) },
+  where { is_uuid($_) },
   message { "Not a UUID with all lower-case characters: " . $_ };
 
 1;

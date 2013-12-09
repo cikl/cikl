@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Deep;
-use CIF qw/normalize_timestamp/;
+use CIF;
 
 use constant FAKE_NOW => DateTime->new(
   year       => 2012,
@@ -31,7 +31,7 @@ sub normalizes_properly {
   my $val = shift;
   my $expected = shift;
   subtest $name => sub {
-    my $ret = normalize_timestamp($val);
+    my $ret = CIF::normalize_timestamp($val);
     like($ret, qr/^\d{1,10}$/);
     is($ret, $expected, "is the expected epoch value");
   };
@@ -41,7 +41,7 @@ sub returns_now {
   my $name = shift;
   my $val = shift;
   subtest $name => sub {
-    my $ret = normalize_timestamp($val, FAKE_NOW_EPOCH);
+    my $ret = CIF::normalize_timestamp($val, FAKE_NOW_EPOCH);
     like($ret, qr/^\d{10}$/);
     is($ret, FAKE_NOW_EPOCH, "fails to parse and returns default value (now)");
   };
@@ -120,7 +120,15 @@ sub test_normalize_timestamp : Test(13) {
       time_zone  => 'UTC',
   )->epoch());
 
-  is(normalize_timestamp("asdfasdf"), undef, "returns undef for things it can't parse");
+  is(CIF::normalize_timestamp("asdfasdf"), undef, "returns undef for things it can't parse");
+}
+
+sub test_is_uuid : Test(3) {
+  my $self = shift;
+
+  is(CIF::is_uuid('asdf'), undef, "returns undef when it is not a uuid");
+  is(CIF::is_uuid('91570cce-cd0f-41b4-8bd5-540fdac50b0a'), 1, "returns 1 when it is a uuid");
+  is(CIF::is_uuid('91570CCE-CD0F-41B4-8BD5-540FDAC50B0A'), undef, "returns undef if the UUID contains any upper-case characters");
 }
 
 Test::Class->runtests;
