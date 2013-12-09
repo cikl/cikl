@@ -80,6 +80,15 @@ sub _build_sql {
   return $ret;
 }
 
+sub submit { 
+  my $self = shift;
+  my $submission = shift;
+  my $guid_id = $self->sql->get_guid_id($submission->event->guid);
+  $self->sql->queue_event($guid_id, $submission->event(), $submission->event_json());
+  $self->flusher->tick() if ($self->flusher);
+  return (undef, 1);
+}
+
 sub insert_event {
   my $self = shift;
   my $event = shift;

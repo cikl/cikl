@@ -82,6 +82,12 @@ sub _init_dbi {
   debug("ret: " . $ret);
 }
 
+sub submit { 
+  my $self = shift;
+  my $submission = shift;
+  $self->insert_event($submission->event);
+}
+
 sub insert_event {
   my $self = shift;
   my $event = shift;

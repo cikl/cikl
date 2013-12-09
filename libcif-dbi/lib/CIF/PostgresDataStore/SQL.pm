@@ -9,6 +9,7 @@ use SQL::Abstract;
 use CIF::Codecs::JSON;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
+use Time::HiRes qw/tv_interval gettimeofday/;
 
 use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
 our @LOOKUP_COLUMNS = qw(asn cidr email fqdn url);
@@ -49,6 +50,12 @@ has 'dbh' => (
   is => 'ro',
   isa => 'DBI::db',
   required => 1
+);
+
+has 'last_flush' => (
+  is => 'rw',
+  init_arg => undef,
+  default => sub { [gettimeofday] } 
 );
 
 has '_db_codec' => (
@@ -154,8 +161,9 @@ sub queue_event {
   my $self = shift;
   my $guid_id = shift;
   my $event = shift;
+  my $event_json = shift;
   $self->_push_event_data([
-      $guid_id, $event
+      $guid_id, $event, $event_json
     ]);
 }
 
@@ -280,8 +288,9 @@ sub do_insert_events {
   my $codec = $self->_db_codec();
   my @values;
   foreach my $value_ref (@$events) {
-    my ($guid_id, $event) = @$value_ref;
-    push(@values, $codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
+    my ($guid_id, $event, $event_json) = @$value_ref;
+    #push(@values, $codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
+    push(@values, $event_json, $guid_id, $event->detecttime, $event->reporttime);
   }
   $sth->execute(@values) or die($self->dbh->errstr);
   my $ids = $sth->fetchall_arrayref();
@@ -404,11 +413,16 @@ sub insert_index {
 
 sub flush {
   my $self = shift;
+  my $num_events = $self->num_queued_events();
   $self->_insert_events($self->queued_events());
   $self->clear_queued_events();
   $self->insert_index();
   $self->clear_index_operations();
   $self->dbh->commit();
+  my $delta = tv_interval($self->last_flush);
+  $self->last_flush([gettimeofday]);
+  my $rate = $num_events  / $delta;
+  debug("Events per second: $rate");
 }
 
 
