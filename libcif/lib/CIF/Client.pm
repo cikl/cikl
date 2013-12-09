@@ -3,11 +3,6 @@ use base 'Class::Accessor';
 
 use strict;
 use warnings;
-use Data::Dumper;
-
-use Carp;
-use Module::Pluggable require => 1, search_path => [__PACKAGE__], 
-  on_require_error => \&croak;
 use Try::Tiny;
 use Config::Simple;
 use Regexp::Common qw/net/;
@@ -28,9 +23,6 @@ __PACKAGE__->mk_accessors(qw(
     nolog limit guid filter_me no_maprestrictions
     table_nowarning related
 ));
-
-our @queries = __PACKAGE__->plugins();
-@queries = map { $_ =~ /::Query::/ } @queries;
 
 sub new {
     my $class = shift;
@@ -97,6 +89,7 @@ sub _init_driver {
     my $self = shift;
     my $driver_name = shift;
     my $driver_class     = 'CIF::Client::Transport::'.$driver_name;
+    eval("use $driver_class;");
     my $err;
     my $driver;
     try {
