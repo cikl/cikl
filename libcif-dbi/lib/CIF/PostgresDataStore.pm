@@ -84,7 +84,7 @@ sub insert_event {
   my $self = shift;
   my $event = shift;
   my $guid_id = $self->sql->get_guid_id($event->guid);
-  $self->sql->queue_event($guid_id, $event, $self->_db_codec->encode_event($event));
+  $self->sql->queue_event($guid_id, $event);
   $self->flusher->tick() if ($self->flusher);
   return (undef, 1);
 }
