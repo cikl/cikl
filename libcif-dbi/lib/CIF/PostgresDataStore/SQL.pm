@@ -65,6 +65,16 @@ sub build_insert_event_sql {
     " RETURNING id;";
 }
 
+has 'insert_event_500_sth' => (
+  is => 'ro',
+  #isa => ,
+  init_arg => undef,
+  lazy => 1,
+  default => sub { 
+    $_[0]->dbh->prepare(build_insert_event_sql(500)) ;
+  }
+);
+
 has 'insert_event_100_sth' => (
   is => 'ro',
   #isa => ,
@@ -103,8 +113,7 @@ has "queued_events" => (
   handles => {
     _push_event_data => 'push',
     num_queued_events => 'count',
-    clear_queued_events => 'clear',
-    each_slice => 'natatime'
+    clear_queued_events => 'clear'
   }
 );
 
@@ -243,22 +252,6 @@ sub shutdown {
   $self->dbh->disconnect();
 }
 
-sub insert_event_100 {
-  my $self = shift;
-  my $events = shift;
-  my @values;
-  my $sth = $self->insert_event_100_sth;
-  foreach my $value_ref (@$events) {
-    #my ($data, $guid_id, $created, $reporttime) = @_;
-    my ($guid_id, $event) = @$value_ref;
-    push(@values, $self->_db_codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
-  }
-  $sth->execute(@values) or die($self->dbh->errstr);
-  my $ids = $sth->fetchall_arrayref();
-  $sth->finish(); # TODO read the return;
-  return $ids;
-}
-
 sub do_insert_events {
   my $self = shift;
   my $sth = shift;
@@ -289,6 +282,9 @@ sub _insert_events {
     if ($num_events >= 1000) {
       $chunk_size = 1000;
       $sth = $self->insert_event_1000_sth;
+    } elsif ($num_events >= 500) {
+      $chunk_size = 500;
+      $sth = $self->insert_event_500_sth;
     } elsif ($num_events >= 100) {
       $chunk_size = 100;
       $sth = $self->insert_event_100_sth;
@@ -315,11 +311,9 @@ sub _insert_events {
 
 sub flush {
   my $self = shift;
-  #DB::enable_profile();
   $self->_insert_events($self->queued_events());
   $self->clear_queued_events();
   $self->dbh->commit();
-  #DB::disable_profile();
 }
 
 
