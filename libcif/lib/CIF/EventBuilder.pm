@@ -28,16 +28,16 @@ has 'refresh' => (
 
 has 'not_before' => (
   is => 'rw', 
-  isa => 'DateTime',
+  isa => 'Int',
   required => 1,
   default => sub {
-    return DateTime->now()->subtract(days => 3);
+    return DateTime->now()->subtract(days => 3)->epoch();
   }
 );
 
 has '_now' => (
   is => 'ro', 
-  default => sub { DateTime->from_epoch(epoch => time()) },
+  default => sub { time() },
   init_arg => undef
 );
 
@@ -62,17 +62,21 @@ sub normalize {
   my $now  = $self->_now;
   my $dt = $r->{'detecttime'} || $now;
   my $rt = $r->{'reporttime'} || $now;
-  $rt = $now if($self->refresh);
+
+  if ($self->refresh) {
+    $rt = $now;
+  } else {
+    $rt = normalize_timestamp($rt,$now);
+  }
     
   $dt = normalize_timestamp($dt,$now);
-  $rt = normalize_timestamp($rt,$now);
 
-  if(DateTime->compare($dt, $self->not_before) == -1) {
+  if($dt < $self->not_before) {
     return(undef);
   }
 
-  $r->{'detecttime'}        = $dt->epoch();
-  $r->{'reporttime'}        = $rt->epoch();
+  $r->{'detecttime'}        = $dt;
+  $r->{'reporttime'}        = $rt;
 
   my $addresses = $r->{addresses} || [];
   @$addresses = (@$addresses, @{create_addresses($r)});

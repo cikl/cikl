@@ -91,7 +91,7 @@ has 'decoder' => (
 sub _event_builder {
   my $self = shift;
   return CIF::EventBuilder->new(
-    not_before => $self->not_before(),
+    not_before => $self->not_before()->epoch(),
     default_event_data => $self->default_event_data(),
     refresh => $self->refresh()
   ) 

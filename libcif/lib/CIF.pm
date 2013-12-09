@@ -165,35 +165,53 @@ sub generate_uuid_url {
 
 sub normalize_timestamp {
     my $dt  = shift;
-    my $now = shift || DateTime->from_epoch(epoch => time()); # better perf in loops if we can pass the default now value
-    
-    return DateTime::Format::DateParse->parse_datetime($dt, "UTC") if($dt =~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    my $now = shift || time(); # better perf in loops if we can pass the default now value
+
+    if (!defined($dt)) {
+      # Default to now.
+      return $now;
+    }
+
+    if(ref($dt) eq 'DateTime'){
+      return $dt->epoch();
+    }
     
     # already epoch
-    return DateTime->from_epoch(epoch => $dt) if($dt =~ /^\d{10}$/);
+    if($dt =~ /^\d{10}$/) {
+      return $dt ;
+    }
+    
+
+    if($dt =~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/) {
+      my $ret = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
+      if ($ret) { 
+        return $ret->epoch();
+      }
+      return undef;
+    }
     
     # something else
-    if($dt && ref($dt) ne 'DateTime'){
-        if($dt =~ /^\d+$/){
-            if($dt =~ /^\d{8}$/){
-                $dt.= 'T00:00:00Z';
-                $dt = eval { DateTime::Format::DateParse->parse_datetime($dt, "UTC") };
-                unless($dt){
-                    $dt = $now;
-                }
-            } else {
-                $dt = $now;
-            }
-        } elsif($dt =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\S+)?$/) {
-            my ($year,$month,$day,$hour,$min,$sec,$tz) = ($1,$2,$3,$4,$5,$6,$7);
-            $dt = DateTime::Format::DateParse->parse_datetime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':'.$sec,$tz || "UTC");
-        } else {
-            $dt =~ s/_/ /g;
-            $dt = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
-            return undef unless($dt);
+    if($dt =~ /^\d+$/){
+      if($dt =~ /^\d{8}$/){
+        $dt.= 'T00:00:00Z';
+        $dt = eval { DateTime::Format::DateParse->parse_datetime($dt, "UTC") };
+        unless($dt){
+          return $now;
         }
-    }
-    return $dt;
+        return $dt->epoch();
+      } else {
+        return $now;
+      }
+    } elsif($dt =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\S+)?$/) {
+      my ($year,$month,$day,$hour,$min,$sec,$tz) = ($1,$2,$3,$4,$5,$6,$7);
+      $dt = DateTime::Format::DateParse->parse_datetime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':'.$sec,$tz || "UTC");
+      return $dt->epoch();
+    } 
+
+    $dt =~ s/_/ /g;
+    $dt = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
+    return undef unless($dt);
+    return $dt->epoch();
 }
 
 =back
