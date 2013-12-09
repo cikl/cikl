@@ -40,8 +40,9 @@ CIF::Utils - Perl extension for misc 'helper' CIF like functions
 
   use CIF::Utils;
   use Data::Dumper;
+  use DateTime;
 
-  my $dt = time()
+  my $dt = DateTime->now()
   $dt = CIF::Utils::normalize_timestamp($dt);
   warn $dt;
 
@@ -158,7 +159,7 @@ sub generate_uuid_url {
 
 =item normalize_timestamp($ts)
 
-  Takea in a timestamp (see DateTime::Format::DateParse), does a little extra normalizing and returns a DateTime object
+  Take in a timestamp (see DateTime::Format::DateParse), does a little extra normalizing and returns a DateTime object
 
 =cut
 
@@ -179,7 +180,6 @@ sub normalize_timestamp {
     if($dt =~ /^\d{10}$/) {
       return $dt ;
     }
-    
 
     if($dt =~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/) {
       my $ret = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
