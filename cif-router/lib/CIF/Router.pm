@@ -67,7 +67,7 @@ sub process_submission {
   }
 
   #debug('inserting...') if($debug > 4);
-  my ($err, $id) = $self->{datastore}->insert_event($submission->event());
+  my ($err, $id) = $self->{datastore}->submit($submission);
   if ($err) { 
     debug("ERR: " . $err);
     return $err;
