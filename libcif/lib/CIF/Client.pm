@@ -90,6 +90,9 @@ sub _init_driver {
     my $driver_name = shift;
     my $driver_class     = 'CIF::Client::Transport::'.$driver_name;
     eval("use $driver_class;");
+    if ($@) {
+      die($@);
+    }
     my $err;
     my $driver;
     try {
