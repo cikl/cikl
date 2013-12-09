@@ -97,20 +97,12 @@ sub address {
 }
 
 sub to_hash {
-  my $self = shift;
-  my $data = {};
-  foreach my $key (keys %$self) {
-    my $val = $self->{$key};
-    if ($key eq 'addresses') {
-      my @addresses = map {
-        {type => $_->type, value => $_->as_string()}
-      } @$val;
-      $data->{$key} = \@addresses;
-    } else {
-      $data->{$key} = $val;
-    }
-  }
-  return $data;
+  my $ret = { %{$_[0]} };
+  $ret->{addresses}  = [ map {
+        {type => $_->type, value => $_->value()}
+      } @{$ret->{addresses}} ];
+
+  return $ret;
 }
 
 sub from_hash {
