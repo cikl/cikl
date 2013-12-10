@@ -55,9 +55,9 @@ sub build_insert_event_sql {
   my $count = shift;
   my @values;
   for (my $i = 0; $i < $count; $i++) {
-    push(@values, "(?,?,?,?,?,?,?,?,?,?)");
+    push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
   }
-  return "INSERT INTO archive (data,guid_id,created,reporttime,assessment,asn,cidr,email,fqdn,url) VALUES " . 
+  return "INSERT INTO archive (data,guid_id,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
     join(",", @values) . ';';
 }
 
@@ -191,6 +191,7 @@ sub do_insert_events {
       $event->detecttime, 
       $event->reporttime,
       $event->assessment,
+      $event->confidence,
       $addresses->{asn},
       $addresses->{cidr},
       $addresses->{email},

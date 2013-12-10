@@ -15,6 +15,7 @@ CREATE UNIQUE INDEX idx_archive_guid_map_guid ON archive_guid_map(guid);
 DROP INDEX IF EXISTS idx_archive_created;
 DROP INDEX IF EXISTS idx_archive_reporttime;
 DROP INDEX IF EXISTS idx_archive_assessment;
+DROP INDEX IF EXISTS idx_archive_confidence;
 DROP INDEX IF EXISTS idx_archive_asn;
 DROP INDEX IF EXISTS idx_archive_cidr;
 DROP INDEX IF EXISTS idx_archive_email;
@@ -31,6 +32,7 @@ CREATE TABLE archive (
     created INT NOT NULL,
     data text not null,
     assessment VARCHAR(64),
+    confidence SMALLINT CHECK (confidence >= 0 AND confidence <= 100),
     asn BIGINT[],
     cidr cidr[],
     email VARCHAR(320)[],
@@ -42,6 +44,7 @@ CREATE TABLE archive (
 CREATE INDEX idx_archive_created ON archive (created);
 CREATE INDEX idx_archive_reporttime ON archive (reporttime);
 CREATE INDEX idx_archive_assessment ON archive (assessment);
+CREATE INDEX idx_archive_confidence ON archive (confidence);
 CREATE INDEX idx_archive_asn ON archive USING GIN(asn);
 CREATE INDEX idx_archive_cidr ON archive USING GIN(cidr);
 CREATE INDEX idx_archive_email ON archive USING GIN(email);
