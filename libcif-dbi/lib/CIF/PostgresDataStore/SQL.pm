@@ -3,17 +3,15 @@ use strict;
 use warnings;
 use Try::Tiny;
 use Mouse;
-use CIF qw/debug is_uuid generate_uuid_ns/;
-use CIF::PostgresDataStore::ApikeyInfo;
-use SQL::Abstract;
-use CIF::Codecs::JSON;
+use CIF qw/debug/;
+require CIF::PostgresDataStore::ApikeyInfo;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
 
 use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
-our @LOOKUP_COLUMNS = qw(asn cidr email fqdn url);
-our $INDEX_TYPE_MAP = {
+use constant LOOKUP_COLUMNS => qw(asn cidr email fqdn url);
+use constant INDEX_TYPE_MAP => {
   asn => 'asn',
   email => 'email',
   fqdn => 'fqdn',
@@ -31,11 +29,6 @@ use constant SQL_CREATE_GUID_MAP => q{
 LOCK TABLE archive_guid_map IN ACCESS EXCLUSIVE MODE;
 INSERT INTO archive_guid_map (guid) 
 SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM archive_guid_map WHERE guid = $1);
-};
-
-use constant SQL_INSERT_EVENT => q{
-INSERT INTO archive (data,guid_id,created,reporttime)
-VALUES (?, ?, ?, ?) RETURNING id
 };
 
 use constant SQL_GET_APIKEY_INFO => q{
@@ -56,21 +49,6 @@ has 'last_flush' => (
   is => 'rw',
   init_arg => undef,
   default => sub { [gettimeofday] } 
-);
-
-has '_db_codec' => (
-  is => 'ro', 
-  init_arg => undef,
-  default => sub {CIF::Codecs::JSON->new()}
-);
-
-
-has 'insert_event_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { $_[0]->dbh->prepare(SQL_INSERT_EVENT) }
 );
 
 sub build_insert_event_sql {
@@ -94,46 +72,6 @@ sub build_insert_event_index_sql {
   return "INSERT INTO archive_lookup (id, $column) VALUES " . 
     join(", ", @values) . ';'; 
 }
-
-has 'insert_event_500_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { 
-    $_[0]->dbh->prepare(build_insert_event_sql(500)) ;
-  }
-);
-
-has 'insert_event_100_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { 
-    $_[0]->dbh->prepare(build_insert_event_sql(100)) ;
-  }
-);
-
-has 'insert_event_1000_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { 
-    $_[0]->dbh->prepare(build_insert_event_sql(1000)) ;
-  }
-);
-
-has 'insert_event_2000_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { 
-    $_[0]->dbh->prepare(build_insert_event_sql(2000)) ;
-  }
-);
 
 has "queued_events" => (
   traits => ['Array'],
@@ -201,6 +139,14 @@ has '_guid_id_cache' => (
 );
 
 
+has 'inserter_sth_map' => (
+  is => 'ro',
+  isa => 'HashRef',
+  init_arg => undef,
+  lazy => 1,
+  builder => '_build_inserters'
+);
+
 has 'indexer_sth_map' => (
   is => 'ro',
   isa => 'HashRef',
@@ -209,6 +155,15 @@ has 'indexer_sth_map' => (
   builder => '_build_indexer_sth_map'
 );
 
+sub _build_inserters {
+  my $self = shift;
+  my $column = shift;
+  my $ret = {};
+  foreach my $count (INDEX_SIZES) {
+    $ret->{$count} = $self->dbh->prepare(build_insert_event_sql($count)),
+  }
+  return $ret;
+}
 sub _build_indexers {
   my $self = shift;
   my $column = shift;
@@ -223,20 +178,10 @@ sub _build_indexers {
 sub _build_indexer_sth_map {
   my $self = shift;
   my $ret = {};
-  foreach my $column (@LOOKUP_COLUMNS) {
+  foreach my $column (LOOKUP_COLUMNS) {
     $ret->{$column} = $self->_build_indexers($column);
   }
   $ret;
-}
-
-sub insert_event_old {
-  my $self = shift;
-  my ($data, $guid_id, $created, $reporttime) = @_;
-  my $sth = $self->insert_event_sth;
-  $sth->execute($data, $guid_id, $created, $reporttime) or die($self->dbh->errstr);
-  my $id = $sth->fetchrow_hashref->{'id'};
-  $sth->finish();
-  return $id;
 }
 
 sub get_guid_id {
@@ -279,11 +224,9 @@ sub do_insert_events {
   my $self = shift;
   my $sth = shift;
   my $events = shift;
-  my $codec = $self->_db_codec();
   my @values;
   foreach my $value_ref (@$events) {
     my ($guid_id, $event, $event_json) = @$value_ref;
-    #push(@values, $codec->encode_event($event), $guid_id, $event->detecttime, $event->reporttime);
     push(@values, $event_json, $guid_id, $event->detecttime, $event->reporttime);
   }
   $sth->execute(@values) or die($self->dbh->errstr);
@@ -295,6 +238,7 @@ sub do_insert_events {
 sub _insert_events {
   my $self = shift;
   my $events = shift;
+  my $sths = $self->inserter_sth_map;
   my $sth;
   my $chunk_size;
   my $it;
@@ -302,19 +246,13 @@ sub _insert_events {
   my $remaining_events = [];
 
   while ($num_events > 0) {
-    if ($num_events >= 1000) {
-      $chunk_size = 1000;
-      $sth = $self->insert_event_1000_sth;
-    } elsif ($num_events >= 500) {
-      $chunk_size = 500;
-      $sth = $self->insert_event_500_sth;
-    } elsif ($num_events >= 100) {
-      $chunk_size = 100;
-      $sth = $self->insert_event_100_sth;
-    } else {
-      $chunk_size = 1;
-      $sth = $self->insert_event_sth;
+    foreach my $sz (INDEX_SIZES) {
+      if ($num_events > $sz) {
+        $chunk_size = $sz;
+        last;
+      }
     }
+    $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
     $it = natatime($chunk_size, @$events);
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
@@ -344,7 +282,7 @@ sub build_index_operations {
     my $id = $ids->[$i]->[0];
     my $event = $chunkref->[$i]->[1];
     foreach my $address (@{$event->addresses()}) {
-      my $index = $INDEX_TYPE_MAP->{$address->type()};
+      my $index = INDEX_TYPE_MAP->{$address->type()};
       if (!$index) {
         die("Unknown type: " . $address->type());
       }
