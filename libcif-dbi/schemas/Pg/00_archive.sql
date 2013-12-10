@@ -21,8 +21,8 @@ CREATE TABLE archive (
 --    uuid uuid NOT NULL,
     guid_id BIGINT REFERENCES archive_guid_map(id) NOT NULL,
 --    format text,
-    reporttime timestamp with time zone DEFAULT NOW(),
-    created timestamp with time zone DEFAULT NOW(),
+    reporttime INT NOT NULL,
+    created INT NOT NULL,
     data text not null
 );
 

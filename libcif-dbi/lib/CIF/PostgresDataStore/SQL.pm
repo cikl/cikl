@@ -35,7 +35,7 @@ SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM archive_guid_map WHERE guid = $1);
 
 use constant SQL_INSERT_EVENT => q{
 INSERT INTO archive (data,guid_id,created,reporttime)
-VALUES (?, ?, to_timestamp(?), to_timestamp(?)) RETURNING id
+VALUES (?, ?, ?, ?) RETURNING id
 };
 
 use constant SQL_GET_APIKEY_INFO => q{
@@ -77,10 +77,10 @@ sub build_insert_event_sql {
   my $count = shift;
   my @values;
   for (my $i = 0; $i < $count; $i++) {
-    push(@values, "(?,?,to_timestamp(?),to_timestamp(?))");
+    push(@values, "(?,?,?,?)");
   }
   return "INSERT INTO archive (data,guid_id,created,reporttime) VALUES " . 
-    join(", ", @values) .
+    join(",", @values) .
     " RETURNING id;";
 }
 
