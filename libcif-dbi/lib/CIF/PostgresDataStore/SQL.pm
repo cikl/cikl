@@ -141,7 +141,6 @@ has "queued_events" => (
   isa => 'ArrayRef',
   default => sub {[]},
   handles => {
-    _push_event_data => 'push',
     num_queued_events => 'count',
     clear_queued_events => 'clear'
   }
@@ -159,12 +158,7 @@ has "index_operations" => (
 
 sub queue_event {
   my $self = shift;
-  my $guid_id = shift;
-  my $event = shift;
-  my $event_json = shift;
-  $self->_push_event_data([
-      $guid_id, $event, $event_json
-    ]);
+  push(@{$self->queued_events}, \@_);
 }
 
 has 'get_guid_id_sth' => (
