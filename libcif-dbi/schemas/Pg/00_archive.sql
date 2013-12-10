@@ -14,6 +14,12 @@ CREATE UNIQUE INDEX idx_archive_guid_map_guid ON archive_guid_map(guid);
 
 DROP INDEX IF EXISTS idx_archive_created;
 DROP INDEX IF EXISTS idx_archive_reporttime;
+DROP INDEX IF EXISTS idx_archive_assessment;
+DROP INDEX IF EXISTS idx_archive_asn;
+DROP INDEX IF EXISTS idx_archive_cidr;
+DROP INDEX IF EXISTS idx_archive_email;
+DROP INDEX IF EXISTS idx_archive_fqdn;
+DROP INDEX IF EXISTS idx_archive_url;
 DROP TABLE IF EXISTS archive CASCADE;
 
 CREATE TABLE archive (
@@ -23,32 +29,21 @@ CREATE TABLE archive (
 --    format text,
     reporttime INT NOT NULL,
     created INT NOT NULL,
-    data text not null
+    data text not null,
+    assessment VARCHAR(64),
+    asn BIGINT[],
+    cidr cidr[],
+    email VARCHAR(320)[],
+    fqdn VARCHAR(255)[],
+    url VARCHAR(2048)[]
 );
 
 -- CREATE INDEX idx_archive_uuid ON archive (uuid);
 CREATE INDEX idx_archive_created ON archive (created);
 CREATE INDEX idx_archive_reporttime ON archive (reporttime);
-
--- Lookup table
-DROP INDEX IF EXISTS idx_archive_lookup_asn;
-DROP INDEX IF EXISTS idx_archive_lookup_cidr;
-DROP INDEX IF EXISTS idx_archive_lookup_email;
-DROP INDEX IF EXISTS idx_archive_lookup_fqdn;
-DROP INDEX IF EXISTS idx_archive_lookup_url;
-DROP TABLE IF EXISTS archive_lookup CASCADE;
-
-CREATE TABLE archive_lookup (
-    id BIGINT REFERENCES archive(id) NOT NULL,
-    asn BIGINT,
-    cidr CIDR,
-    email VARCHAR(320),
-    fqdn VARCHAR(255),
-    url VARCHAR(2048)
-);
-
-CREATE INDEX idx_archive_lookup_asn ON archive_lookup (asn);
-CREATE INDEX idx_archive_lookup_cidr ON archive_lookup (cidr);
-CREATE INDEX idx_archive_lookup_email ON archive_lookup (email);
-CREATE INDEX idx_archive_lookup_fqdn ON archive_lookup (fqdn);
-CREATE INDEX idx_archive_lookup_url ON archive_lookup (url);
+CREATE INDEX idx_archive_assessment ON archive (assessment);
+CREATE INDEX idx_archive_asn ON archive USING GIN(asn);
+CREATE INDEX idx_archive_cidr ON archive USING GIN(cidr);
+CREATE INDEX idx_archive_email ON archive USING GIN(email);
+CREATE INDEX idx_archive_fqdn ON archive USING GIN(fqdn);
+CREATE INDEX idx_archive_url ON archive USING GIN(url);

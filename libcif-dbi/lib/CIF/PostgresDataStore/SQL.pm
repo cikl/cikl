@@ -55,22 +55,10 @@ sub build_insert_event_sql {
   my $count = shift;
   my @values;
   for (my $i = 0; $i < $count; $i++) {
-    push(@values, "(?,?,?,?)");
+    push(@values, "(?,?,?,?,?,?,?,?,?,?)");
   }
-  return "INSERT INTO archive (data,guid_id,created,reporttime) VALUES " . 
-    join(",", @values) .
-    " RETURNING id;";
-}
-
-sub build_insert_event_index_sql {
-  my $column = shift;
-  my $count = shift;
-  my @values;
-  for (my $i = 0; $i < $count; $i++) {
-    push(@values, "(?,?)");
-  }
-  return "INSERT INTO archive_lookup (id, $column) VALUES " . 
-    join(", ", @values) . ';'; 
+  return "INSERT INTO archive (data,guid_id,created,reporttime,assessment,asn,cidr,email,fqdn,url) VALUES " . 
+    join(",", @values) . ';';
 }
 
 has "queued_events" => (
@@ -81,16 +69,6 @@ has "queued_events" => (
   handles => {
     num_queued_events => 'count',
     clear_queued_events => 'clear'
-  }
-);
-
-has "index_operations" => (
-  traits => ['Hash'],
-  is => 'ro',
-  isa => 'HashRef',
-  default => sub { {} },
-  handles => {
-    clear_index_operations => 'clear'
   }
 );
 
@@ -147,14 +125,6 @@ has 'inserter_sth_map' => (
   builder => '_build_inserters'
 );
 
-has 'indexer_sth_map' => (
-  is => 'ro',
-  isa => 'HashRef',
-  init_arg => undef,
-  lazy => 1,
-  builder => '_build_indexer_sth_map'
-);
-
 sub _build_inserters {
   my $self = shift;
   my $column = shift;
@@ -163,25 +133,6 @@ sub _build_inserters {
     $ret->{$count} = $self->dbh->prepare(build_insert_event_sql($count)),
   }
   return $ret;
-}
-sub _build_indexers {
-  my $self = shift;
-  my $column = shift;
-  my $ret = {};
-  foreach my $count (INDEX_SIZES) {
-    $ret->{$count} = $self->dbh->prepare(build_insert_event_index_sql($column, $count)),
-  }
-  return $ret;
-}
-
-
-sub _build_indexer_sth_map {
-  my $self = shift;
-  my $ret = {};
-  foreach my $column (LOOKUP_COLUMNS) {
-    $ret->{$column} = $self->_build_indexers($column);
-  }
-  $ret;
 }
 
 sub get_guid_id {
@@ -227,12 +178,27 @@ sub do_insert_events {
   my @values;
   foreach my $value_ref (@$events) {
     my ($guid_id, $event, $event_json) = @$value_ref;
-    push(@values, $event_json, $guid_id, $event->detecttime, $event->reporttime);
+    my $addresses = {};
+    foreach my $address (@{$event->addresses()}) {
+      my $index = INDEX_TYPE_MAP->{$address->type()} 
+          or die("Unknown type: " . $address->type());
+      my $x = ($addresses->{$index} ||= []);
+      push(@$x, $address->value());
+    }
+    push(@values, 
+      $event_json, 
+      $guid_id, 
+      $event->detecttime, 
+      $event->reporttime,
+      $event->assessment,
+      $addresses->{asn},
+      $addresses->{cidr},
+      $addresses->{email},
+      $addresses->{fqdn},
+      $addresses->{url},
+    );
   }
   $sth->execute(@values) or die($self->dbh->errstr);
-  my $ids = $sth->fetchall_arrayref();
-  $sth->finish(); # TODO read the return;
-  return $ids;
 }
 
 sub _insert_events {
@@ -257,8 +223,7 @@ sub _insert_events {
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
-        my $ids = $self->do_insert_events($sth, \@chunk);
-        $self->build_index_operations($ids, \@chunk);
+        $self->do_insert_events($sth, \@chunk);
       } else {
         $remaining_events = \@chunk;
         last CHUNKER;
@@ -271,85 +236,11 @@ sub _insert_events {
   debug("done");
 }
 
-sub build_index_operations {
-  my $self = shift;
-  my $ids = shift;
-  my $chunkref = shift;
-  my $index_operations = $self->index_operations();
-
-  my $num_ids = scalar(@$ids);
-  for (my $i = 0; $i < $num_ids; $i++) {
-    my $id = $ids->[$i]->[0];
-    my $event = $chunkref->[$i]->[1];
-    foreach my $address (@{$event->addresses()}) {
-      my $index = INDEX_TYPE_MAP->{$address->type()};
-      if (!$index) {
-        die("Unknown type: " . $address->type());
-      }
-      my $opref = ($index_operations->{$index} ||= []);
-      push(@$opref, [$id, $address->value()]);
-    }
-  }
-}
-
-sub do_index {
-  my $self = shift;
-  my $sth = shift;
-  my $ops = shift;
-  # flatten the ops.
-}
-
-sub _index {
-  my $self = shift;
-  my $sths = shift;
-  my $ops = shift;
-
-  my $sth;
-  my $chunk_size;
-  my $it;
-  my $num_ops = scalar(@$ops);
-  my $remaining_ops = [];
-
-  while ($num_ops > 0) {
-    foreach my $sz (INDEX_SIZES) {
-      if ($num_ops > $sz) {
-        $chunk_size = $sz;
-        last;
-      }
-    }
-    $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
-    $it = natatime($chunk_size, @$ops);
-    INDEX_CHUNKER: while (my @chunk = $it->()) {
-      if (scalar(@chunk) == $chunk_size) {
-        my @flat_chunk = map { @$_ } @chunk;
-        $sth->execute(@flat_chunk) or die($self->dbh->errstr);
-        $sth->finish();
-      } else {
-        $remaining_ops = \@chunk;
-        last INDEX_CHUNKER;
-      }
-    }
-    $ops = $remaining_ops;
-    $remaining_ops = [];
-    $num_ops = scalar(@$ops);
-  }
-}
-
-sub insert_index {
-  my $self = shift;
-  while (my ($index, $ops) = each(%{$self->index_operations})) {
-    my $sths = $self->indexer_sth_map->{$index};
-    $self->_index($sths, $ops);
-  }
-}
-
 sub flush {
   my $self = shift;
   my $num_events = $self->num_queued_events();
   $self->_insert_events($self->queued_events());
   $self->clear_queued_events();
-  $self->insert_index();
-  $self->clear_index_operations();
   $self->dbh->commit();
   my $delta = tv_interval($self->last_flush);
   $self->last_flush([gettimeofday]);
