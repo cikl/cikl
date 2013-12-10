@@ -3,10 +3,10 @@ use strict;
 use warnings;
 use namespace::autoclean;
 use Mouse::Util::TypeConstraints;
-use constant RE_UPPER => qr/\p{Upper}/;
+
 subtype "CIF::DataTypes::LowerCaseStr", 
   as 'Str',
-  where { ! RE_UPPER },
+  where { !/\p{Upper}/ms },
   message { "Must be lowercase." };
 
 coerce 'CIF::DataTypes::LowerCaseStr',
@@ -14,4 +14,5 @@ coerce 'CIF::DataTypes::LowerCaseStr',
   via { lc };
 
 1;
+
 
