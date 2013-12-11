@@ -85,7 +85,7 @@ has 'limit' => (
 sub to_hash {
   my $self = shift;
   my $ret = { %$self };
-  $ret->{address_criteria} = [ map { $_->to_hash } @{$ret->{criteria}} ];
+  $ret->{address_criteria} = [ map { $_->to_hash } @{$ret->{address_criteria}} ];
   foreach my $field (qw(confidence reporttime detecttime)) {
     $ret->{$field} = $ret->{$field}->to_hash() if (defined($ret->{$field}));
   }
