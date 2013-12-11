@@ -402,10 +402,8 @@ sub search {
 
   foreach my $op (@{$query->address_criteria}) {
     my $operator = $op->operator;
-    my $column = INDEX_TYPE_MAP->{$op->operator};
     if ($operator eq 'asn') {
       push(@asns, $op->value());
-
     } elsif ($operator eq 'email') {
       push(@emails, $op->value());
     } elsif ($operator eq 'fqdn') {
