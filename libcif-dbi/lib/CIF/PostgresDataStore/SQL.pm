@@ -16,7 +16,8 @@ use constant INDEX_TYPE_MAP => {
   asn => 'asn',
   email => 'email',
   fqdn => 'fqdn',
-  ip => 'cidr',
+  ipv4 => 'cidr',
+  ipv4_cidr => 'cidr',
   url => 'url'
 };
 
