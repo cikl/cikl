@@ -23,6 +23,8 @@ sub new {
       pass => $self->config("password") || "guest",
       vhost => $self->config("vhost") || "/cif",
     };
+
+    $self->{prefetch_count} = $self->config("prefetch_count") || 500;
     
     my $service_name = $self->service->name();
 
@@ -60,18 +62,16 @@ sub _init_channel {
     my $config = shift;
     my $service = shift;
 
-    $channel->qos(prefetch_count => ($self->config("prefetch_count") || 1));
-
     $channel->declare_exchange(
       exchange => $config->{exchange_name},
       type => $config->{exchange_type},
       durable => 1,
       auto_delete => 0
     );
-    $channel->qos(prefetch_count => 100);
+    $channel->qos(prefetch_count => $self->{prefetch_count});
     my $acker = CIF::Router::Transport::RabbitMQ::DeferredAcker->new(
       channel => $channel,
-      max_outstanding => 100,
+      max_outstanding => $self->{prefetch_count},
       timeout => 1
     );
 
