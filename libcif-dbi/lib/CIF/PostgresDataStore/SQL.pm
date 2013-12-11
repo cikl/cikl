@@ -149,13 +149,8 @@ sub get_guid_id {
 
   if (!$opts{no_create}) {
     my $sth = $self->create_guid_map_if_not_exists_sth;
-
-    try {
-      $sth->execute($guid) or die ($dbh->errstr);
-      $dbh->commit();
-    } catch {
-      $dbh->rollback();
-    };
+    $sth->execute($guid) or die ($dbh->errstr);
+    $sth->finish();
   }
 
   my $sth2 = $self->get_guid_id_sth;
@@ -249,11 +244,22 @@ sub _insert_events {
 sub flush {
   my $self = shift;
   my $num_events = $self->num_queued_events();
-  $self->_insert_events($self->queued_events());
-  $self->clear_queued_events();
-  $self->dbh->commit();
+  my $err;
+  my $dbh = $self->dbh;
+  $dbh->begin_work() or die($dbh->errstr);
+  try {
+    $self->_insert_events($self->queued_events());
+    $self->clear_queued_events();
+    $dbh->commit();
+  } catch {
+    $err = shift;
+    $dbh->rollback();
+  };
   my $delta = tv_interval($self->last_flush);
   $self->last_flush([gettimeofday]);
+  if ($err) {
+    die($err);
+  }
   my $rate = $num_events  / $delta;
   debug("Events per second: $rate");
 }

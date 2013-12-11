@@ -72,7 +72,7 @@ has 'sql' => (
 sub _build_sql {
   my $self = shift;
   my $connect_str = 'DBI:Pg:database='. $self->database.';host='.$self->host;
-  my $dbh = DBI->connect($connect_str,$self->user,$self->password, {AutoCommit => 0});
+  my $dbh = DBI->connect($connect_str,$self->user,$self->password, {AutoCommit => 1});
   if (!$dbh) {
     die($!);
   }
