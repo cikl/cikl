@@ -15,7 +15,7 @@ use CIF::Router::Services::Submission;
 use CIF::Router::Constants;
 use CIF::Router::Services;
 use CIF::Router::AnyEventFlusher;
-use CIF::ArchiveDataStore;
+use CIF::PostgresDataStore;
 
 use CIF qw/debug init_logging generate_uuid_ns/;
 
@@ -46,7 +46,7 @@ sub new {
 
     init_logging($self->{server_config}->{'debug'} || 0);
 
-    my $datastore = CIF::ArchiveDataStore->new_from_config($self->{config});
+    my $datastore = CIF::PostgresDataStore->new_from_config($self->{config});
     my $flusher = CIF::Router::AnyEventFlusher->new(
       commit_callback => sub { 
         my $count = shift;

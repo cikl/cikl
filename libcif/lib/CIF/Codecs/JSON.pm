@@ -36,16 +36,13 @@ sub decode_hostinfo {
 sub encode_query {
   my $self = shift;
   my $query = shift;
-  my $data = {};
-  map { $data->{$_} = $query->{$_} } keys %{$query};
-  return $JSON->encode($data);
+  return $JSON->encode($query->to_hash());
 }
 
 sub decode_query {
   my $self = shift;
   my $json = shift;
-  my $data = $JSON->decode($json);
-  return CIF::Models::Query->new($data);
+  return CIF::Models::Query->from_hash($JSON->decode($json));
 }
 
 sub encode_query_results {

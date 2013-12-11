@@ -36,55 +36,52 @@ BEGIN {
 }
 
 use CIF::Client;
-use Getopt::Std;
+use Getopt::Long;
 use JSON::XS;
 use CIF qw/debug/;
 
 use CIF::Report::QueryResultsReport;
 use CIF::Report::CSVFormatter;
 use CIF::Report::TableFormatter;
+require CIF::Models::QueryAddress;
 use Config::Simple;
 
-
-my %opts;
-getopt('D:S:O:G:l:g:THL:p:f:q:c:s:r:C:zP:Fe:', \%opts);
-
-our $debug       = ($opts{'d'}) ? 1 : 0;
+our $debug       = 0;
 
 # config opts
-my $config_file      = $opts{'C'} || $ENV{'HOME'}.'/.cif';
-my $outfile     = $opts{'O'};
-my $query       = $opts{'q'} || shift;
+my $config_file      = $ENV{'HOME'}.'/.cif';
+my $outfile;
+my @queries;
 
 # query options
-my $nolog       = $opts{'n'} || 0;
-my $confidence  = $opts{'c'};
-my $guid        = $opts{'g'};
-my $limit       = $opts{'l'};
+my $nolog       = 0;
+my $confidence;
+my $guid;
+my $limit;
 
 # plugin opts
-my $plugin      = $opts{'p'} || 'Table';
-my $fields      = $opts{'f'};
-my $max_desc    = $opts{'L'} || 100;
+my $plugin      = 'Table';
+my $fields;
+my $help = 0;
+
+Getopt::Long::Configure ("bundling");
+GetOptions(
+  'config|C=s' => \$config_file,
+  'outfile|O=s' => \$outfile,
+  'debug|d|v+' => \$debug,
+  'query|q=s' => \@queries,
+  'nolog|n' => \$nolog,
+  'confidence|c=i' => \$confidence,
+  'guid|g=s' => \$guid,
+  'limit|l=i' => \$limit,
+
+  'plugin|p=s' => \$plugin,
+  'fields|f=s' => \$fields,
+  'help|h' => => \$help 
+) or die($!);
 
 
-# display options
-my $summary             = $opts{'S'};
-my $nomap               = $opts{'N'};
-our $uuid               = $opts{'u'} || 0;
-our $relateduuid        = $opts{'R'} || 0;
-my $round_confidence    = $opts{'I'} || 0;
-my $group_map           = (defined($opts{'G'})) ? $opts{'G'} : 1;
-my $compress_address    = (defined($opts{'z'})) ? $opts{'z'} : 1;
-my $table_showmeta      = $opts{'M'} || 0;
-my $filter_me           = $opts{'F'};
-my $sortby              = $opts{'S'} || 'detecttime';
-my $sortby_direction    = $opts{'D'} || 'DESC';
-my $exclude_assessment   = $opts{'e'};
-my $new_only            = $opts{'m'} || 0;
-
-die usage() unless($query);
-die usage() if($opts{'h'});
+die usage() if($help);
 
 sub usage {
     return <<EOF;
@@ -103,17 +100,9 @@ Query Options:
 Format Options:
     -p  --plugin:           output plugin ('Table','Csv'), default: Table
     -f  --fields:           set default output fields for default table display
-    -S  --summary:          consolidated Text::Table output (default: True)
-    -N  --nomap:            don't map restrictions
     -g  --guid:             filter by a specific group id (guid), ex: group1.example.com
-    -G  --groupmap:         turn group mapping (guid to 'group name') on/off, default: $group_map
-    -e  --exclude:          exclude a specific assessment (search,botnet,malware, etc).
     
 Nonstandard Options:
-    -z                      compact address field to 32 chars, applies only to defalt table output, default: 1 (0 turns it off)
-    -I  --round-confidence: round (down) confidence to the nearest integer, default 0.
-    -m                      return only the results where "\$DETECTTIME >= \$TODAY (UTC)" (the most recent results from a feed)
-    -F  --filter-me:        exclude results based on my apikey (usually logged searches)
 
 Example Queries:
 
@@ -171,12 +160,6 @@ if (!defined($formatter)) {
     exit(0);
 }
 
-if($exclude_assessment && $exclude_assessment =~ /\,/){
-    print usage();
-    print '-e only accepts a single assessment at this time'."\n";
-    exit(0);
-}
-
 my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
 my ($err,$cli) = CIF::Client->new({
     config          => $config,
@@ -191,21 +174,40 @@ if($err){
 if($outfile){
     open(F,">",$outfile) || die($!);
 }
+my %args;
 
-my $orig_query = $query;
+if ($limit) {
+  $args{limit} = $limit;
+}
 
-# make sure if there are no spaces between queries
-$query =~ s/\s//g;
+if ($guid) {
+  $args{guid} = $guid;
+}
 
-#my @q = split(/,/,$query);
+if ($confidence) {
+  $args{confidence} = CIF::Models::QueryRange->new(min => $confidence);
+}
+
+my @address_criteria;
+foreach my $query (@queries) {
+  my @query_parts = split(':', $query, 2);
+  if (!defined($query_parts[1])) {
+    die("Invalid query: $query");
+  }
+
+  push(@address_criteria, CIF::Models::QueryAddress->new(
+      operator => $query_parts[0],
+      value => $query_parts[1] 
+    ));
+}
+$args{address_criteria} = \@address_criteria;
+
+use Time::HiRes qw/tv_interval gettimeofday/;
+my $start = [gettimeofday];
 my $query_results;
-($err,$query_results) = $cli->search($orig_query, {
-    filter_me           => $filter_me,
-    nolog               => $nolog,
-    no_maprestrictions  => $nomap,
-    confidence          => $confidence,
-    limit               => $limit,
-});
+($err,$query_results) = $cli->search(%args);
+my $runtime = tv_interval($start);
+debug("Query round trip: $runtime seconds");
 $cli->shutdown();
 
 

@@ -8,6 +8,7 @@ require CIF::PostgresDataStore::ApikeyInfo;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
+require SQL::Abstract::More;
 
 use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
 use constant LOOKUP_COLUMNS => qw(asn cidr email fqdn url);
@@ -15,8 +16,7 @@ use constant INDEX_TYPE_MAP => {
   asn => 'asn',
   email => 'email',
   fqdn => 'fqdn',
-  ipv4 => 'cidr',
-  ipv4_cidr => 'cidr',
+  ip => 'cidr',
   url => 'url'
 };
 
@@ -138,31 +138,36 @@ sub _build_inserters {
 sub get_guid_id {
   my $self = shift;
   my $guid = lc(shift);
+  my %opts = @_;
+
   if (my $existing = $self->_guid_id_cache->{$guid}) {
     return $existing;
   }
+
   my $dbh = $self->dbh;
-  my $sth = $self->create_guid_map_if_not_exists_sth;;
 
-  try {
-    $sth->execute($guid) or die ($dbh->errstr);
-    $dbh->commit();
-  } catch {
-    $dbh->rollback();
-  };
+  if (!$opts{no_create}) {
+    my $sth = $self->create_guid_map_if_not_exists_sth;
 
-  $sth = $self->get_guid_id_sth;
-  if (!$sth->execute($guid)) {
+    try {
+      $sth->execute($guid) or die ($dbh->errstr);
+      $dbh->commit();
+    } catch {
+      $dbh->rollback();
+    };
+  }
+
+  my $sth2 = $self->get_guid_id_sth;
+  if (!$sth2->execute($guid)) {
     die("Failed to get guid mapping!: " . $dbh->errstr);
   }
-  if (my $data = $sth->fetchrow_hashref()) {
-    $sth->finish();
-    my $id = $data->{id};
+  my $id = undef;
+  if (my $data = $sth2->fetchrow_hashref()) {
+    $sth2->finish();
+    $id = $data->{id};
     $self->_guid_id_cache->{$guid} = $id;
-    return $id;
   }
-  $sth->finish();
-  die("Failed to get guid mapping!");
+  return $id;
 }
 
 sub shutdown {
@@ -218,6 +223,9 @@ sub _insert_events {
         $chunk_size = $sz;
         last;
       }
+    }
+    if (!defined($chunk_size)) {
+      die("Undefined chunk size!");
     }
     $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
     $it = natatime($chunk_size, @$events);
@@ -313,6 +321,141 @@ sub key_retrieve {
 
   my $auth_obj = CIF::PostgresDataStore::ApikeyInfo->from_db($apikey_info, $apikey_groups);
   return ($self->_store_auth_in_cache($apikey, $auth_obj));
+}
+
+sub _add_range {
+  my $arrayref = shift;
+  my $fieldname = shift;
+  my $range = shift;
+  
+  if (defined($range->min())) {
+    push(@$arrayref, {$fieldname => {">=" => $range->min()}});
+  }
+  if (defined($range->max())) {
+    push(@$arrayref, {$fieldname => {">=" => $range->max()}});
+  }
+}
+
+sub _sql_array_contains {
+  my ($self, $field, $op, $arg) = @_;
+  my $label         = $self->_quote($field);
+  my $placeholder = $self->_convert('?');
+  my $sql           = "$label <@ $placeholder";
+  my @bind = $self->_bindtype($field, [$arg]);
+  return ($sql, @bind);
+}
+
+sub _sql_overlaps_cidr {
+  my $self = shift;
+  my $field = shift;
+  my $op = shift;
+  my $cidr = shift;
+
+  my $label = $self->_quote($field);
+  my $placeholder = $self->_convert('?');
+  my $sql = "${placeholder}::cidr >>= ANY($label)" . 
+    " OR ${placeholder}::cidr <<= ANY($label)";
+  my @bind = $self->_bindtype($field, $cidr, $cidr);
+  return ($sql, @bind);
+}
+
+use constant SQL_ABSTRACT_SPECIAL_OPS => [
+  { regex => qr/^array_contains$/, handler => \&_sql_array_contains },
+  { regex => qr/^overlaps_cidr$/, handler => \&_sql_overlaps_cidr }
+];
+
+sub search {
+  my $self = shift;
+  my $query = shift;
+
+  my $guid_id = $self->get_guid_id($query->guid, no_create => 1);
+  if (!defined($guid_id)) {
+    debug("unknown guid: " . $query->guid);
+    return [];
+  }
+
+  my $sql = SQL::Abstract::More->new(
+    special_ops => SQL_ABSTRACT_SPECIAL_OPS
+  );
+
+
+  my @and;
+  push(@and, { guid_id => $guid_id});
+
+  my @address_criteria;
+
+  if ($query->confidence) {
+    _add_range(\@and, "confidence", $query->confidence);
+  }
+  if ($query->reporttime) {
+    _add_range(\@and, "reporttime", $query->reporttime);
+  }
+  if ($query->detecttime) {
+    _add_range(\@and, "created", $query->detecttime);
+  }
+
+  my @asns;
+  my @emails;
+  my @fqdns;
+  my @urls;
+
+  foreach my $op (@{$query->address_criteria}) {
+    my $operator = $op->operator;
+    my $column = INDEX_TYPE_MAP->{$op->operator};
+    if ($operator eq 'asn') {
+      push(@asns, $op->value());
+
+    } elsif ($operator eq 'email') {
+      push(@emails, $op->value());
+    } elsif ($operator eq 'fqdn') {
+      push(@fqdns, $op->value());
+    } elsif ($operator eq 'url') {
+      push(@urls, $op->value());
+    } elsif ($operator eq 'ip') {
+      push(@address_criteria, {cidr => {-overlaps_cidr => $op->value()}});
+    } else {
+      die("unknown operator: " . $operator);
+    }
+  }
+
+  if (@asns >= 1) {
+    push(@address_criteria, {asn => {-array_contains => \@asns}});
+  }
+  if (@emails >= 1) {
+    push(@address_criteria, {email => {-array_contains => \@emails}});
+  }
+  if (@fqdns >= 1) {
+    push(@address_criteria, {fqdn => {-array_contains => \@fqdns}});
+  }
+  if (@urls>= 1) {
+    push(@address_criteria, {url=> {-array_contains => \@urls}});
+  }
+
+  if (scalar(@address_criteria)) {
+    push(@and, {-or => \@address_criteria});
+  }
+
+  my ($stmt, @bind) = $sql->select(
+    -columns => ['data'],
+    -from => 'archive',
+    -where => {-and => \@and},
+
+    # TODO add limit handling. Don't want to pull the whole DB.
+    -limit => $query->limit, 
+    -order_by => [ '-reporttime' ],
+  );
+
+  debug("Generated query SQL: $stmt");
+
+  my $sth = $self->dbh->prepare_cached($stmt) or die ($self->dbh->errstr);
+
+  $sth->execute(@bind) or die($self->dbh->errstr);
+
+  my $event_json = $sth->fetchall_arrayref();
+  # It's the first column of each row, so we map it down.
+  $event_json =  [ map {$_->[0]} @$event_json ];
+  return $event_json;
+
 }
 
 

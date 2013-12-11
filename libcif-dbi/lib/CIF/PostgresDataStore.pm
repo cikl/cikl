@@ -84,6 +84,9 @@ sub submit {
   my $self = shift;
   my $submission = shift;
   my $guid_id = $self->sql->get_guid_id($submission->event->guid);
+  if (!defined($guid_id)) {
+    die("Failed to create/retreive guid ID for: " . $submission->event->guid);
+  }
   $self->sql->queue_event($guid_id, $submission->event(), $submission->event_json());
   $self->flusher->tick() if ($self->flusher);
   return (undef, 1);
@@ -93,43 +96,22 @@ sub insert_event {
   my $self = shift;
   my $event = shift;
   my $guid_id = $self->sql->get_guid_id($event->guid);
+  if (!defined($guid_id)) {
+    die("Failed to create/retreive guid ID for: " . $event->guid);
+  }
   $self->sql->queue_event($guid_id, $event);
   $self->flusher->tick() if ($self->flusher);
   return (undef, 1);
 }
 
-sub insert_event_old {
-  my $self = shift;
-  my $event = shift;
-  my ($err, $ret);
-  my $guid_id = $self->sql->get_guid_id($event->guid);
-  my $id;
-  try {
-    $id = $self->sql->insert_event(
-      $self->_db_codec->encode_event($event), 
-      $guid_id, $event->detecttime, $event->reporttime);
-  }
-  catch {
-    $err = shift;
-  };
-  die($err) if ($err);
-  if (!$id) {
-    die("Failed to get guid ID!");
-  }
-#  foreach my $address (@{$event->addresses()}) {
-#    if (!$self->sql->index_address($id, $address)) {
-#      debug("Unknown address type: " . $address->type);
-#    }
-#  }
-  $self->flusher->tick() if ($self->flusher);
-  return ($err) if($err);
-  return (undef, $ret);
-}
-
 sub search {
   my $self = shift;
   my $query = shift;
-  #TODO
+  my $arrayref_event_json = $self->sql->search($query);
+
+  my $codec = $self->_db_codec;
+  my $ret = [ map { $codec->decode_event($_); } @$arrayref_event_json ];
+  return $ret;
 }
 
 sub flush {

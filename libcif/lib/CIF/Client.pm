@@ -113,54 +113,35 @@ sub _init_driver {
 
 sub search {
     my $self = shift;
-    my $query = shift;
-    my $args = shift;
-    
-    my $err;
-    my $orig_query = $query;
-    # make sure if there are no spaces between queries
-    $query =~ s/\s//g;
+    my %args = @_;
 
-    my @orig_queries = split(/,/,$query);
+    $args{nolog} //= $self->get_nolog();
+    $args{limit} //= $self->get_limit();
+    $args{apikey} //= $self->get_apikey();
 
-    my $filter_me   = $args->{'filter_me'} || $self->get_filter_me();
-    my $nolog       = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_nolog();
-
-    unless($args->{'apikey'}){
-        $args->{'apikey'} = $self->get_apikey();
+    if (my $guid = $args{guid}) {
+      if (!is_uuid($guid)) {
+         $guid = generate_uuid_ns($guid);
+      }
+      $args{guid} = $guid;
     }
 
-    my @queries;
+    my $err;
+    my $query;
     
-    # we have to pass this along so we can check it later in the code
-    # for our original queries since the server will give us back more 
-    # than we asked for
-    my $ip_tree = Net::Patricia->new();
-    
-    my $query_model;
     try {
-      my $params = {
-        apikey => $args->{'apikey'},
-        query => $query
-      };
-      $params->{guid} = $args->{guid} if (defined($args->{guid}));
-      $params->{nolog} = $nolog if (defined($nolog));
-      $params->{limit} = $args->{limit} if (defined($args->{limit}));
-      $params->{confidence} = $args->{confidence} if (defined($args->{confidence}));
-      $params->{description} = $args->{description} if (defined($args->{description}));
-
-      $query_model = CIF::Models::Query->new(%$params);
+      $query = CIF::Models::Query->new(%args);
     } catch {
       $err = $_;
     };
 
-    if (!defined($query_model)) {
+    if (!defined($query)) {
       return("Failed to create query object: $err");
     }
 
     my $query_results;
     try {
-      $query_results = $self->get_driver->query($query_model);
+      $query_results = $self->get_driver->query($query);
     } catch {
       $err = shift;
     };
