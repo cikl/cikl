@@ -1,12 +1,12 @@
-package CIF::Router::AnyEventFlusher;
+package CIF::DataStore::AnyEventFlusher;
 
 use strict;
 use warnings;
 use AnyEvent;
 use Coro;
 use Mouse;
-use CIF::Archive::Flusher;
-extends 'CIF::Archive::Flusher';
+use CIF::DataStore::Flusher;
+extends 'CIF::DataStore::Flusher';
 use namespace::autoclean;
 
 has '_flush_timer' => (

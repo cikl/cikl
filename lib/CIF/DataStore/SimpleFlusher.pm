@@ -1,12 +1,10 @@
-package CIF::Archive::SimpleFlusher;
+package CIF::DataStore::SimpleFlusher;
 
 use strict;
 use warnings;
-use AnyEvent;
-use Coro;
 use Mouse;
-use CIF::Archive::Flusher;
-extends 'CIF::Archive::Flusher';
+use CIF::DataStore::Flusher;
+extends 'CIF::DataStore::Flusher';
 use namespace::autoclean;
 
 has '_next_flush' => (

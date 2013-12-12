@@ -7,7 +7,7 @@ use Try::Tiny;
 use CIF::Codecs::JSON;
 use DBI;
 use CIF::PostgresDataStore::SQL;
-use CIF::Archive::Flusher;
+use CIF::DataStore::Flusher;
 use CIF qw/debug is_uuid generate_uuid_ns/;
 use namespace::autoclean;
 
@@ -51,7 +51,7 @@ has 'restriction_map' => (
 
 has 'flusher' => (
   is => 'rw',
-  isa => 'Maybe[CIF::Archive::Flusher]',
+  isa => 'Maybe[CIF::DataStore::Flusher]',
   required => 0
 );
 

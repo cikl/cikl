@@ -4,7 +4,7 @@ use base 'CIF::Client::Transport';
 use strict;
 use warnings;
 use CIF::Router;
-use CIF::Archive::SimpleFlusher;
+use CIF::DataStore::SimpleFlusher;
 use CIF::PostgresDataStore;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -17,7 +17,7 @@ sub new {
 
     my $datastore = CIF::PostgresDataStore->new_from_config($self->get_global_config);
     my $last_flush = [gettimeofday];
-    my $flusher = CIF::Archive::SimpleFlusher->new(
+    my $flusher = CIF::DataStore::SimpleFlusher->new(
       commit_interval => 2,
       commit_size => 1000,
       commit_callback => sub { 
