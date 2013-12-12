@@ -1,10 +1,10 @@
-package CIF::PostgresDataStore::SQL;
+package CIF::Postgres::SQL;
 use strict;
 use warnings;
 use Try::Tiny;
 use Mouse;
 use CIF qw/debug/;
-require CIF::PostgresDataStore::UserInfo;
+require CIF::Postgres::UserInfo;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
@@ -322,7 +322,7 @@ sub key_retrieve {
     return $self->_store_auth_in_cache($apikey, undef);
   }
 
-  my $user_info = CIF::PostgresDataStore::UserInfo->from_db($user_info_row);
+  my $user_info = CIF::Postgres::UserInfo->from_db($user_info_row);
   return ($self->_store_auth_in_cache($apikey, $user_info));
 }
 

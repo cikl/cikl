@@ -1,4 +1,4 @@
-package CIF::PostgresDataStore;
+package CIF::Postgres::DataStore;
 use strict;
 use warnings;
 use Mouse;
@@ -6,7 +6,7 @@ use CIF::DataStore;
 use Try::Tiny;
 use CIF::Codecs::JSON;
 use DBI;
-use CIF::PostgresDataStore::SQL;
+use CIF::Postgres::SQL;
 use CIF::DataStore::Flusher;
 use CIF qw/debug is_uuid generate_uuid_ns/;
 use namespace::autoclean;
@@ -63,7 +63,7 @@ has '_db_codec' => (
 
 has 'sql' => (
   is => 'ro',
-  isa => 'CIF::PostgresDataStore::SQL',
+  isa => 'CIF::Postgres::SQL',
   init_arg => undef,
   lazy => 1,
   builder => '_build_sql'
@@ -76,7 +76,7 @@ sub _build_sql {
   if (!$dbh) {
     die($!);
   }
-  my $ret = CIF::PostgresDataStore::SQL->new(dbh => $dbh);
+  my $ret = CIF::Postgres::SQL->new(dbh => $dbh);
   return $ret;
 }
 
@@ -186,7 +186,7 @@ sub new_from_config {
     push(@$restriction_map,$m);
   }
 
-  my $datastore = CIF::PostgresDataStore->new(
+  my $datastore = CIF::Postgres::DataStore->new(
     database => $db_config->{database} || 'cif',
     user => $db_config->{user} || 'cif',
     password => $db_config->{password} || '',

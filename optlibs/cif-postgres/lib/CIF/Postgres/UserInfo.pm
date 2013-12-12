@@ -1,4 +1,4 @@
-package CIF::PostgresDataStore::UserInfo;
+package CIF::Postgres::UserInfo;
 use strict;
 use warnings;
 use Mouse;
