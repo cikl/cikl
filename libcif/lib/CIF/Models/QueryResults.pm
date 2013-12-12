@@ -39,11 +39,11 @@ has 'restriction_map' => (
   #isa => 'HashRef'
 );
 
-has 'guid' => (
+has 'group' => (
   is => 'ro',
-  isa => 'CIF::DataTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   lazy => 1,
-  default => sub { my $self = shift; $self->query->guid() }
+  default => sub { my $self = shift; $self->query->group() }
 );
 
 has 'uuid' => (
@@ -55,17 +55,6 @@ has 'uuid' => (
 sub event_count { $#{$_[0]->events}; };
 sub query_limit { $_[0]->query->limit(); };
 
-sub get_pretty_group_name {
-  my $self = shift;
-  my $guid = shift;
-  foreach my $x (@{$self->group_map()}) {
-    if ($guid eq $x->{key}) {
-      return $x->{value};
-    }
-  }
-  return undef;
-}
-
 sub to_hash {
   my $self = shift;
   my @events = map { $_->to_hash() } @{$self->events};
@@ -75,7 +64,7 @@ sub to_hash {
     events => \@events,
     reporttime => $self->reporttime,
     group_map => \@group_map,
-    guid => $self->guid,
+    group => $self->group,
     uuid => $self->uuid
   };
 

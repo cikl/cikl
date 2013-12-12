@@ -83,11 +83,11 @@ sub _build_sql {
 sub submit { 
   my $self = shift;
   my $submission = shift;
-  my $guid_id = $self->sql->get_guid_id($submission->event->guid);
-  if (!defined($guid_id)) {
-    die("Failed to create/retreive guid ID for: " . $submission->event->guid);
+  my $group_id = $self->sql->get_group_id($submission->event->group);
+  if (!defined($group_id)) {
+    die("Failed to create/retreive group ID for: " . $submission->event->group);
   }
-  $self->sql->queue_event($guid_id, $submission->event(), $submission->event_json());
+  $self->sql->queue_event($group_id, $submission->event(), $submission->event_json());
   $self->flusher->tick() if ($self->flusher);
   return (undef, 1);
 }
@@ -95,11 +95,11 @@ sub submit {
 sub insert_event {
   my $self = shift;
   my $event = shift;
-  my $guid_id = $self->sql->get_guid_id($event->guid);
-  if (!defined($guid_id)) {
-    die("Failed to create/retreive guid ID for: " . $event->guid);
+  my $group_id = $self->sql->get_group_id($event->group);
+  if (!defined($group_id)) {
+    die("Failed to retreive group ID for: " . $event->group);
   }
-  $self->sql->queue_event($guid_id, $event);
+  $self->sql->queue_event($group_id, $event);
   $self->flusher->tick() if ($self->flusher);
   return (undef, 1);
 }
@@ -122,29 +122,29 @@ sub flush {
 sub authorized_write {
   my $self = shift;
   my $apikey = shift;
-  my $guid = shift;
+  my $group = shift;
 
   my $rec = $self->sql->key_retrieve($apikey);
-  return (defined($rec) && $rec->can_write() && $rec->in_group($guid));
+  return (defined($rec) && $rec->can_write() && $rec->in_group($group));
 }
 
 sub authorized_read {
     my $self = shift;
     my $key = shift;
-    my $guid = shift;
+    my $group = shift;
     
     my $rec = $self->sql->key_retrieve($key);
     die('invaild/expired apikey') unless($rec);
-    if (!defined($guid)) {
-      $guid = $rec->default_guid;
+    if (!defined($group)) {
+      $group = $rec->default_group_name;
     }
 
-    if (!$rec->in_group($guid)) {
-      die("not authorized for supplied guid");
+    if (!$rec->in_group($group)) {
+      die("not authorized for supplied group");
     }
     
     my $ret = {
-      default_guid => $rec->default_guid()
+      default_group => $rec->default_group_name()
     };
 
     ## TODO -- datatype access control?

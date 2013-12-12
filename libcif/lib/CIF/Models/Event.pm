@@ -11,20 +11,11 @@ use CIF::Models::AddressRole;
 use CIF::AddressBuilder qw/create_address/;
 use namespace::autoclean;
 
-has 'guid' => (
+has 'group' => (
   is => 'rw',
-  isa => 'CIF::DataTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   required => 1,
 );
-
-has 'id' => (
-  is => 'rw',
-  isa => 'CIF::DataTypes::LowercaseUUID',
-  default => sub { generate_uuid_random() },
-);
-sub uuid {
-  return id(@_);
-}
 
 has 'assessment' => (
   is => 'rw',

@@ -20,7 +20,7 @@ use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
     config global_config apikey 
-    nolog limit guid filter_me no_maprestrictions
+    nolog limit group filter_me no_maprestrictions
     table_nowarning related
 ));
 
@@ -37,7 +37,7 @@ sub new {
     $self->set_config(          $args->{'config'}->param(-block => 'client'));
     $self->set_apikey(          $args->{'apikey'} || $self->get_config->{'apikey'});
     
-    $self->{'guid'}             = $args->{'guid'}               || $self->get_config->{'default_guid'};
+    $self->{'group'}             = $args->{'group'}               || $self->get_config->{'default_group'};
     $self->{'limit'}            = $args->{'limit'}              || $self->get_config->{'limit'};
     $self->{'compress_address'} = $args->{'compress_address'}   || $self->get_config->{'compress_address'};
     $self->{'round_confidence'} = $args->{'round_confidence'}   || $self->get_config->{'round_confidence'};
@@ -119,11 +119,8 @@ sub search {
     $args{limit} //= $self->get_limit();
     $args{apikey} //= $self->get_apikey();
 
-    if (my $guid = $args{guid}) {
-      if (!is_uuid($guid)) {
-         $guid = generate_uuid_ns($guid);
-      }
-      $args{guid} = $guid;
+    if (my $group = $args{group}) {
+      $args{group} = $group;
     }
 
     my $err;

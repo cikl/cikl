@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use constant HEADER_ROW => qw(
-restriction guid assessment description confidence detecttime reporttime
+restriction group assessment description confidence detecttime reporttime
 address alternativeid_restriction alternativeid
 );
 
@@ -70,10 +70,6 @@ sub body_iterator {
     }
 
     my $ret = $self->_generate_row($events->[$num]);
-    my $pretty_guid = $self->{query_results}->get_pretty_group_name($ret->{guid});
-    if ($pretty_guid) {
-      $ret->{guid} = $pretty_guid;
-    }
     return $ret;
   };
 }

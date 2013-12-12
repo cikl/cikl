@@ -1,32 +1,55 @@
 set default_tablespace=:tablespace_archive;
 
--- CREATE EXTENSION btree_gin;
+CREATE EXTENSION "btree_gin";
 
-DROP INDEX IF EXISTS idx_archive_guid_map_guid;
 DROP TABLE IF EXISTS archive_guid_map CASCADE;
 
 CREATE TABLE archive_guid_map (
     id BIGSERIAL NOT NULL PRIMARY KEY,
-    guid uuid
+    guid UUID UNIQUE NOT NULL  
 );
 
-CREATE UNIQUE INDEX idx_archive_guid_map_guid ON archive_guid_map(guid);
+DROP TABLE IF EXISTS cif_group CASCADE;
+DROP SEQUENCE IF EXISTS cif_group_id_seq;
+CREATE SEQUENCE cif_group_id_seq START WITH 2;
+CREATE TABLE cif_group (
+    id INT DEFAULT NEXTVAL('cif_group_id_seq') NOT NULL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
 
-DROP INDEX IF EXISTS idx_archive_created;
-DROP INDEX IF EXISTS idx_archive_reporttime;
-DROP INDEX IF EXISTS idx_archive_assessment;
-DROP INDEX IF EXISTS idx_archive_confidence;
-DROP INDEX IF EXISTS idx_archive_asn;
-DROP INDEX IF EXISTS idx_archive_cidr;
-DROP INDEX IF EXISTS idx_archive_email;
-DROP INDEX IF EXISTS idx_archive_fqdn;
-DROP INDEX IF EXISTS idx_archive_url;
+-- Create the default user group;
+INSERT INTO cif_group (id, name) VALUES (1, 'everyone');
+
+DROP TABLE IF EXISTS cif_user CASCADE;
+
+CREATE TABLE cif_user (
+    id SERIAL NOT NULL PRIMARY KEY,
+    apikey UUID UNIQUE NOT NULL,
+    name varchar(50) UNIQUE NOT NULL,
+    revoked BOOLEAN DEFAULT FALSE NOT NULL,
+    write BOOLEAN DEFAULT FALSE NOT NULL,
+    created INT NOT NULL DEFAULT (EXTRACT(EPOCH FROM now())::INT),
+    expires INT,
+    default_group_id INT REFERENCES cif_group(id) DEFAULT 1 NOT NULL
+);
+
+DROP TABLE IF EXISTS cif_user_group_map CASCADE;
+
+CREATE TABLE cif_user_group_map (
+    user_id INT REFERENCES cif_user(id) NOT NULL,
+    group_id INT REFERENCES cif_group(id) NOT NULL
+);
+
+CREATE INDEX idx_cif_user_group_map_user_id ON cif_user_group_map (user_id);
+CREATE INDEX idx_cif_user_group_map_group_id ON cif_user_group_map (group_id);
+CREATE UNIQUE INDEX idx_cif_user_group_map_unique ON cif_user_group_map (user_id, group_id);
+
 DROP TABLE IF EXISTS archive CASCADE;
 
 CREATE TABLE archive (
     id BIGSERIAL NOT NULL PRIMARY KEY,
 --    uuid uuid NOT NULL,
-    guid_id BIGINT REFERENCES archive_guid_map(id) NOT NULL,
+    group_id INT REFERENCES cif_group(id) NOT NULL,
 --    format text,
     reporttime INT NOT NULL,
     created INT NOT NULL,

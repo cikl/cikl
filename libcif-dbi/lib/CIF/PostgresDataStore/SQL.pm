@@ -4,7 +4,7 @@ use warnings;
 use Try::Tiny;
 use Mouse;
 use CIF qw/debug/;
-require CIF::PostgresDataStore::ApikeyInfo;
+require CIF::PostgresDataStore::UserInfo;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
@@ -22,22 +22,52 @@ use constant INDEX_TYPE_MAP => {
 };
 
 
-use constant SQL_GET_GUID_ID_MAPPING => q{
-SELECT id FROM archive_guid_map WHERE guid = ? LIMIT 1;
-};
-
-use constant SQL_CREATE_GUID_MAP => q{
-LOCK TABLE archive_guid_map IN ACCESS EXCLUSIVE MODE;
-INSERT INTO archive_guid_map (guid) 
-SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM archive_guid_map WHERE guid = $1);
+use constant SQL_GET_GROUP_ID_MAPPING => q{
+SELECT id FROM cif_group WHERE name = ?;
 };
 
 use constant SQL_GET_APIKEY_INFO => q{
-SELECT * from apikeys WHERE uuid = ?;
+SELECT * from cif_users WHERE apikey = ?;
 };
 
+
+use constant SQL_GET_USER_INFO => q{
+SELECT
+  u.id
+  ,u.apikey
+  ,u.name
+  ,u.revoked
+  ,u.write
+  ,u.created
+  ,u.expires
+  ,ug.name as "default_group_name"
+  ,(
+      SELECT 
+        ARRAY_AGG(g.name) 
+      FROM 
+        cif_user_group_map as m 
+        INNER JOIN cif_group as g 
+          ON (m.group_id = g.id) 
+      WHERE 
+        m.user_id = u.id
+    ) as "additional_groups"
+FROM 
+  cif_user AS u 
+  INNER JOIN cif_group as ug
+    ON (u.default_group_id = ug.id)
+WHERE 
+  u.apikey = ?;
+};
+
+
+
 use constant SQL_GET_APIKEY_GROUPS => q{
-SELECT * from apikeys_groups WHERE uuid = ?;
+SELECT g.id,g.name 
+FROM 
+  cif_groups g 
+  INNER JOIN cif_user_group_map m 
+    ON (g.id = m.group_id) 
+WHERE m.user_id = ?;
 };
 
 has 'dbh' => (
@@ -58,7 +88,7 @@ sub build_insert_event_sql {
   for (my $i = 0; $i < $count; $i++) {
     push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
   }
-  return "INSERT INTO archive (data,guid_id,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
+  return "INSERT INTO archive (data,group_id,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
     join(",", @values) . ';';
 }
 
@@ -78,28 +108,20 @@ sub queue_event {
   push(@{$self->queued_events}, \@_);
 }
 
-has 'get_guid_id_sth' => (
+has 'get_group_id_sth' => (
   is => 'ro',
   #isa => ,
   init_arg => undef,
   lazy => 1,
-  default => sub { $_[0]->dbh->prepare(SQL_GET_GUID_ID_MAPPING) }
+  default => sub { $_[0]->dbh->prepare(SQL_GET_GROUP_ID_MAPPING) }
 );
 
-has 'create_guid_map_if_not_exists_sth' => (
+has 'get_user_info_sth' => (
   is => 'ro',
   #isa => ,
   init_arg => undef,
   lazy => 1,
-  default => sub { $_[0]->dbh->prepare(SQL_CREATE_GUID_MAP) }
-);
-
-has 'get_apikey_info_sth' => (
-  is => 'ro',
-  #isa => ,
-  init_arg => undef,
-  lazy => 1,
-  default => sub { $_[0]->dbh->prepare(SQL_GET_APIKEY_INFO) }
+  default => sub { $_[0]->dbh->prepare(SQL_GET_USER_INFO) }
 );
 
 has 'get_apikey_groups_sth' => (
@@ -110,7 +132,7 @@ has 'get_apikey_groups_sth' => (
   default => sub { $_[0]->dbh->prepare(SQL_GET_APIKEY_GROUPS) }
 );
 
-has '_guid_id_cache' => (
+has '_group_id_cache' => (
   is => 'ro',
   isa => 'HashRef',
   init_arg => undef,
@@ -136,32 +158,23 @@ sub _build_inserters {
   return $ret;
 }
 
-sub get_guid_id {
+sub get_group_id {
   my $self = shift;
-  my $guid = lc(shift);
-  my %opts = @_;
+  my $group = lc(shift);
 
-  if (my $existing = $self->_guid_id_cache->{$guid}) {
+  if (my $existing = $self->_group_id_cache->{$group}) {
     return $existing;
   }
 
-  my $dbh = $self->dbh;
-
-  if (!$opts{no_create}) {
-    my $sth = $self->create_guid_map_if_not_exists_sth;
-    $sth->execute($guid) or die ($dbh->errstr);
-    $sth->finish();
-  }
-
-  my $sth2 = $self->get_guid_id_sth;
-  if (!$sth2->execute($guid)) {
-    die("Failed to get guid mapping!: " . $dbh->errstr);
+  my $sth = $self->get_group_id_sth;
+  if (!$sth->execute($group)) {
+    die("Failed to get group mapping!: " . $self->dbh->errstr);
   }
   my $id = undef;
-  if (my $data = $sth2->fetchrow_hashref()) {
-    $sth2->finish();
+  if (my $data = $sth->fetchrow_hashref()) {
+    $sth->finish();
     $id = $data->{id};
-    $self->_guid_id_cache->{$guid} = $id;
+    $self->_group_id_cache->{$group} = $id;
   }
   return $id;
 }
@@ -178,7 +191,7 @@ sub do_insert_events {
   my $events = shift;
   my @values;
   foreach my $value_ref (@$events) {
-    my ($guid_id, $event, $event_json) = @$value_ref;
+    my ($group_id, $event, $event_json) = @$value_ref;
     my $addresses = {};
     foreach my $address (@{$event->addresses()}) {
       my $index = INDEX_TYPE_MAP->{$address->type()} 
@@ -188,7 +201,7 @@ sub do_insert_events {
     }
     push(@values, 
       $event_json, 
-      $guid_id, 
+      $group_id, 
       $event->detecttime, 
       $event->reporttime,
       $event->assessment,
@@ -278,32 +291,19 @@ sub _store_auth_in_cache {
   my $ret = shift;
   $self->_auth_cache->{lc($apikey)} = {
     expire => time() + 60,
-    apikey_info => $ret
+    user_info => $ret
   };
   return $ret;
 };
 
-sub get_apikey_info {
+sub get_user_info {
   my $self = shift;
   my $apikey = shift;
-  my $sth = $self->get_apikey_info_sth;
+  my $sth = $self->get_user_info_sth;
   $sth->execute($apikey) or die($self->dbh->errstr);
-  my $apikey_info = $sth->fetchrow_hashref();
+  my $user_info = $sth->fetchrow_hashref();
   $sth->finish();
-  return $apikey_info;
-}
-
-sub get_apikey_groups {
-  my $self = shift;
-  my $apikey = shift;
-  my $sth = $self->get_apikey_groups_sth;
-  $sth->execute($apikey) or die($self->dbh->errstr);
-  my $apikey_groups = $sth->fetchall_hashref('guid');
-  $sth->finish();
-  if (!scalar(keys(%$apikey_groups))) {
-    return undef;
-  }
-  return $apikey_groups;
+  return $user_info;
 }
 
 sub key_retrieve {
@@ -311,23 +311,19 @@ sub key_retrieve {
   my $apikey = shift;
   if (my $cache_info = $self->_auth_cache->{lc($apikey)}) {
     if ($cache_info->{expire} > time()) {
-      return $cache_info->{apikey_info};
+      return $cache_info->{user_info};
     }
     undef $self->_auth_cache->{lc($apikey)};
   }
 
-  my $apikey_info = $self->get_apikey_info($apikey);
-  if (!$apikey_info) {
+  my $user_info_row = $self->get_user_info($apikey);
+  if (!$user_info_row) {
+    debug("could not find $apikey");
     return $self->_store_auth_in_cache($apikey, undef);
   }
 
-  my $apikey_groups = $self->get_apikey_groups($apikey);;
-  if (!$apikey_groups) {
-    return $self->_store_auth_in_cache($apikey, undef);
-  }
-
-  my $auth_obj = CIF::PostgresDataStore::ApikeyInfo->from_db($apikey_info, $apikey_groups);
-  return ($self->_store_auth_in_cache($apikey, $auth_obj));
+  my $user_info = CIF::PostgresDataStore::UserInfo->from_db($user_info_row);
+  return ($self->_store_auth_in_cache($apikey, $user_info));
 }
 
 sub _add_range {
@@ -375,9 +371,9 @@ sub search {
   my $self = shift;
   my $query = shift;
 
-  my $guid_id = $self->get_guid_id($query->guid, no_create => 1);
-  if (!defined($guid_id)) {
-    debug("unknown guid: " . $query->guid);
+  my $group_id = $self->get_group_id($query->group);
+  if (!defined($group_id)) {
+    debug("unknown group" . $query->group);
     return [];
   }
 
@@ -387,7 +383,7 @@ sub search {
 
 
   my @and;
-  push(@and, { guid_id => $guid_id});
+  push(@and, { group_id => $group_id});
 
   my @address_criteria;
 

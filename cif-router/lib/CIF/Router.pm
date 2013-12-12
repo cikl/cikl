@@ -33,10 +33,10 @@ sub process_query {
   my $results = [];
 
   my $apikey_info = $self->{datastore}->authorized_read(
-    $query->apikey, $query->guid());
+    $query->apikey, $query->group());
 
-  if (!defined($query->guid())) {
-    $query->guid($apikey_info->{'default_guid'});
+  if (!defined($query->group())) {
+    $query->group($apikey_info->{'default_group'});
   }
 
   my $events = $self->{datastore}->search($query);
@@ -47,7 +47,7 @@ sub process_query {
       reporttime => time(),
       group_map => $apikey_info->{'group_map'},
       restriction_map => $apikey_info->{'restriction_map'},
-      guid => $query->guid() || $apikey_info->{'default_guid'}
+      group => $query->group() || $apikey_info->{'default_group'}
     });
 
   return $query_results;
@@ -58,12 +58,12 @@ sub process_submission {
   my $submission = shift;
   my $apikey = $submission->apikey();
 
-  my $guid = $submission->event->guid();
+  my $group = $submission->event->group();
   my $auth = $self->{datastore}->authorized_write($submission->apikey(), 
-    $guid);
+    $group);
 
   if (!$auth) {
-    return("apikey '$apikey' is not authorized to write for guid '$guid'");
+    return("apikey '$apikey' is not authorized to write for group '$group'");
   }
 
   #debug('inserting...') if($debug > 4);

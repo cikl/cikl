@@ -56,7 +56,7 @@ my @queries;
 # query options
 my $nolog       = 0;
 my $confidence;
-my $guid;
+my $group;
 my $limit;
 
 # plugin opts
@@ -72,7 +72,7 @@ GetOptions(
   'query|q=s' => \@queries,
   'nolog|n' => \$nolog,
   'confidence|c=i' => \$confidence,
-  'guid|g=s' => \$guid,
+  'group|g=s' => \$group,
   'limit|l=i' => \$limit,
 
   'plugin|p=s' => \$plugin,
@@ -100,7 +100,7 @@ Query Options:
 Format Options:
     -p  --plugin:           output plugin ('Table','Csv'), default: Table
     -f  --fields:           set default output fields for default table display
-    -g  --guid:             filter by a specific group id (guid), ex: group1.example.com
+    -g  --group:             filter by a specific group name, ex: group1.example.com
     
 Nonstandard Options:
 
@@ -180,8 +180,8 @@ if ($limit) {
   $args{limit} = $limit;
 }
 
-if ($guid) {
-  $args{guid} = $guid;
+if ($group) {
+  $args{group} = $group;
 }
 
 if ($confidence) {

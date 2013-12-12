@@ -9,7 +9,7 @@ use Storable qw/dclone/;
 use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug/;
 
 use constant FIELDS => {
-  guid => 'everyone',
+  group => 'everyone',
   parser => undef,
   feed => undef,
   source => undef,
@@ -37,7 +37,7 @@ use constant FIELDS => {
 };
 
 use constant REQUIRED_FIELDS => {
-  guid => 1,
+  group => 1,
   feed => 1,
   source => 1,
   parser => 1
@@ -96,13 +96,9 @@ sub new {
     }
   }
 
-  unless(is_uuid($self->{guid})){
-    $self->{guid} = generate_uuid_url($self->{guid});
-  }
-
   bless($self,$class);
 
-  $config_data->{guid} = $self->{guid};
+  $config_data->{group} = $self->{group};
   # The remaining fields will act as defaults for events, when they are created.
   $self->{event_fields} = $config_data;
 
@@ -112,11 +108,6 @@ sub new {
 sub feed {
   my $self = shift;
   return $self->{feed};
-}
-
-sub guid {
-  my $self = shift;
-  return $self->{guid};
 }
 
 sub parser {

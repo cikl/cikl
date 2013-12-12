@@ -1,15 +1,15 @@
-package CIF::PostgresDataStore::ApikeyInfo;
+package CIF::PostgresDataStore::UserInfo;
 use strict;
 use warnings;
 use Mouse;
 use namespace::autoclean;
 
-has 'uuid' => (
+has 'apikey' => (
   is => 'ro',
   required => 1
 );
 
-has 'default_guid' => (
+has 'default_group_name' => (
   is => 'ro',
   isa => 'Str',
   required => 1
@@ -27,18 +27,12 @@ has 'write' => (
   default => 0
 );
 
-has 'restricted_access' => (
-  is => 'ro',
-  isa => 'Bool',
-  default => 0
-);
-
 has 'expires' => (
   is => 'ro',
   isa => 'Maybe[Int]'  # Epoch
 );
 
-has 'groups' => (
+has 'additional_groups' => (
   is => 'ro',
   isa => 'HashRef',
   default => sub { {} }
@@ -52,14 +46,16 @@ has 'in_good_standing' => (
 
 sub _build_in_good_standing {
   return (
-    ! $_[0]->restricted_access()
-    && ! $_[0]->revoked()
+    ! $_[0]->revoked()
     && ! $_[0]->is_expired()
   );
 }
 
 sub in_group {
-  return $_[0]->groups->{$_[1]};
+  my $self = shift;
+  my $group_name = shift;
+  return ($group_name eq $self->default_group_name) || 
+    ($self->additional_groups->{$group_name});
 }
 
 sub is_expired {
@@ -77,27 +73,22 @@ sub can_read {
 
 sub from_db {
   my $class = shift;
-  my $key_info = shift;
-  my $groups = shift;
+  my $user_info = shift;
 
   my $args = {
-    uuid => $key_info->{uuid},
-    revoked => $key_info->{revoked} || 0,
-    write => $key_info->{write} || 0,
-    restricted_access => $key_info->{restricted_access} || 0,
-    groups => {}
+    apikey => $user_info->{apikey},
+    revoked => $user_info->{revoked},
+    write => $user_info->{write},
+    default_group_name => $user_info->{default_group_name},
+    expires => $user_info->{expires},
+    additional_groups => {
+    }
   };
 
-  if (my $expires = $key_info->{expires}) {
-    $args->{expires} = DateTime::Format::DateParse->parse_datetime($expires)->epoch();
-  }
-
-  foreach my $guid (keys %{$groups}) {
-    my $group = $groups->{$guid};
-    if ($group->{default_guid}) {
-      $args->{default_guid} = $guid;
+  if (defined($user_info->{additional_groups})) {
+    foreach my $group (@{$user_info->{additional_groups}}) {
+      $args->{additional_groups}->{$group} = 1;
     }
-    $args->{groups}->{$guid} = 1;
   }
 
   return $class->new(%$args);
@@ -106,3 +97,4 @@ sub from_db {
 __PACKAGE__->meta->make_immutable();
 
 1;
+

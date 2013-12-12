@@ -31,9 +31,9 @@ has 'apikey' => (
   required => 1
 );
 
-has 'guid' => (
+has 'group' => (
   is => 'rw',
-  isa => 'CIF::DataTypes::LowercaseUUID',
+  isa => 'CIF::DataTypes::LowerCaseStr',
   required => 0
 );
 
