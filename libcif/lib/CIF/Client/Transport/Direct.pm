@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use CIF::Router;
 use CIF::Archive::SimpleFlusher;
-use CIF::ArchiveDataStore;
 use CIF::PostgresDataStore;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
