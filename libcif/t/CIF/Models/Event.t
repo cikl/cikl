@@ -19,7 +19,7 @@ sub test_required_args : Test(4) {
   my $self = shift;
 
   my %working_args = (
-    guid => generate_uuid_random(),
+    group => "everyone",
     assessment => "malware",
   );
 
@@ -27,8 +27,8 @@ sub test_required_args : Test(4) {
   dies_ok { CIF::Models::Event->new() }  "die with no arguments";
 
   my %badargs = %working_args;
-  delete($badargs{guid});
-  dies_ok { CIF::Models::Event->new(%badargs) }  "requires guid";
+  delete($badargs{group});
+  dies_ok { CIF::Models::Event->new(%badargs) }  "requires group";
 
   %badargs = %working_args;
   delete($badargs{assessment});
