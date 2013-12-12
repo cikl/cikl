@@ -43,8 +43,6 @@ sub new {
     $self->{'round_confidence'} = $args->{'round_confidence'}   || $self->get_config->{'round_confidence'};
     $self->{'table_nowarning'}  = $args->{'table_nowarning'}    || $self->get_config->{'table_nowarning'};
     
-    $self->{'group_map'}        = (defined($args->{'group_map'})) ? $args->{'group_map'} : $self->get_config->{'group_map'};
-    
     $self->set_no_maprestrictions(  $args->{'no_maprestrictions'}   || $self->get_config->{'no_maprestrictions'});
     $self->set_filter_me(           $args->{'filter_me'}            || $self->get_config->{'filter_me'});
     $self->set_nolog(               $args->{'nolog'}                || $self->get_config->{'nolog'});

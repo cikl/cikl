@@ -45,8 +45,6 @@ sub process_query {
       query => $query,
       events => $events,
       reporttime => time(),
-      group_map => $apikey_info->{'group_map'},
-      restriction_map => $apikey_info->{'restriction_map'},
       group => $query->group() || $apikey_info->{'default_group'}
     });
 

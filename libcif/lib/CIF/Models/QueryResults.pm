@@ -8,7 +8,6 @@ use Mouse;
 use namespace::autoclean;
 
 use constant MANDATORY_FIELDS => qw/query events/;
-use CIF qw/generate_uuid_random/;
 
 has 'query' => (
   is => 'ro',
@@ -28,28 +27,11 @@ has 'reporttime' => (
   default => sub { time() }
 );
 
-has 'group_map' => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  required => 1
-);
-
-has 'restriction_map' => (
-  is => 'ro',
-  #isa => 'HashRef'
-);
-
 has 'group' => (
   is => 'ro',
   isa => 'CIF::DataTypes::LowerCaseStr',
   lazy => 1,
   default => sub { my $self = shift; $self->query->group() }
-);
-
-has 'uuid' => (
-  is => 'ro',
-  isa => 'CIF::DataTypes::LowercaseUUID',
-  default => sub { generate_uuid_random() }
 );
 
 sub event_count { $#{$_[0]->events}; };
@@ -58,17 +40,12 @@ sub query_limit { $_[0]->query->limit(); };
 sub to_hash {
   my $self = shift;
   my @events = map { $_->to_hash() } @{$self->events};
-  my @group_map = map { {value => $_->{value}, key => $_->{key}} } @{$self->group_map};
   my $ret = {
     query => $self->query()->to_hash(),
     events => \@events,
     reporttime => $self->reporttime,
-    group_map => \@group_map,
     group => $self->group,
-    uuid => $self->uuid
   };
-
-  $ret->{restriction_map} =  $self->restriction_map if (defined($self->restriction_map));
 
   return $ret;
 }
