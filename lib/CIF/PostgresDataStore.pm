@@ -92,18 +92,6 @@ sub submit {
   return (undef, 1);
 }
 
-sub insert_event {
-  my $self = shift;
-  my $event = shift;
-  my $group_id = $self->sql->get_group_id($event->group);
-  if (!defined($group_id)) {
-    die("Failed to retreive group ID for: " . $event->group);
-  }
-  $self->sql->queue_event($group_id, $event);
-  $self->flusher->tick() if ($self->flusher);
-  return (undef, 1);
-}
-
 sub search {
   my $self = shift;
   my $query = shift;
