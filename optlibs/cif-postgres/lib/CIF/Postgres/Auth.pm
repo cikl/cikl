@@ -2,12 +2,12 @@ package CIF::Postgres::Auth;
 use strict;
 use warnings;
 use Mouse;
-use CIF::Auth ();
+use CIF::Authentication::Role ();
 use CIF::Postgres::SQLRole ();
 use DBI ();
 use namespace::autoclean;
 
-with  "CIF::Auth", "CIF::Postgres::SQLRole";
+with  "CIF::Authentication::Role", "CIF::Postgres::SQLRole";
 
 sub authorized_write {
   my $self = shift;

@@ -6,7 +6,7 @@ use Try::Tiny;
 use Config::Simple;
 use CIF qw/debug/;
 use CIF::DataStore;
-use CIF::Auth;
+use CIF::Authentication::Role;
 use CIF::Models::QueryResults;
 use Mouse;
 
@@ -18,7 +18,7 @@ has 'datastore' => (
 
 has 'auth' => (
   is => 'ro',
-  isa => 'CIF::Auth',
+  isa => 'CIF::Authentication::Role',
   required => 1
 );
 
