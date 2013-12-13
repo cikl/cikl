@@ -1,13 +1,17 @@
 package CIF::Router::Services::Query;
-use parent 'CIF::Router::Service';
 
 use strict;
 use warnings;
+use CIF::Router::Service;
 use CIF::Router::Constants;
 use Try::Tiny;
 use CIF qw/debug/;
+use Mouse;
+with 'CIF::Router::Service';
 
-sub service_type { SVC_QUERY }
+use namespace::autoclean;
+
+sub service_type { CIF::Router::Constants::SVC_QUERY }
 
 # Should return 1 or 0
 sub queue_should_autodelete {
@@ -52,6 +56,7 @@ sub process {
   }
   return($encoded_results, "query_response", $self->codec->content_type(), 0);
 }
+
+__PACKAGE__->meta->make_immutable();
+
 1;
-
-

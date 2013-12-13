@@ -2,61 +2,43 @@ package CIF::Router::Service;
 
 use strict;
 use warnings;
-use CIF::Models::HostInfo;
-use Sys::Hostname;
-use Try::Tiny;
 use CIF qw/debug/;
 use CIF::Router::Constants;
+use Mouse::Role;
+use namespace::autoclean;
 
-sub new {
-  my $class = shift;
-  my $router = shift;
-  my $codec = shift;
+has 'router' => (
+  is => 'ro',
+  isa => 'CIF::Router',
+  required => 1
+);
 
-  my $self = {
-    starttime => time(),
-    codec => $codec,
-    router => $router
-  };
+has 'codec' => (
+  is => 'ro',
+  isa => 'CIF::Codecs::CodecRole',
+  required => 1
+);
 
-  bless $self, $class;
+has 'starttime' => (
+  is => 'ro', 
+  isa => 'Num',
+  init_arg => undef,
+  default => sub { time() }
+);
 
-  return $self;
-}
-
-sub service_type {
-  my $class = shift;
-  die("$class has not implemented name()");
-}
-
-# Should return 1 or 0
-sub queue_should_autodelete {
-  my $class = shift;
-  die("$class has not implemented queue_should_autodelete()");
-}
-
-# Should return 1 or 0
-sub queue_is_durable {
-  my $class = shift;
-  die("$class has not implemented queue_is_durable()");
-}
+requires "service_type";
+requires "queue_should_autodelete";
+requires "queue_is_durable";
 
 sub name {
   my $class = shift;
-  return SVCNAMES->{$class->service_type()};
-}
-
-sub router {
-  return $_[0]->{router};
-}
-
-sub codec {
-  return $_[0]->{codec};
+  return CIF::Router::Constants::SVCNAMES->{$class->service_type()};
 }
 
 sub uptime {
   my $self = shift;
-  return time() - $self->{starttime};
+  return time() - $self->starttime();
 }
+
 
 1;

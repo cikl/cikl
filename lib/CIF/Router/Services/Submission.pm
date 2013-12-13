@@ -1,13 +1,16 @@
 package CIF::Router::Services::Submission;
-use parent 'CIF::Router::Service';
 
 use strict;
 use warnings;
 use CIF::Router::Constants;
+use CIF::Router::Service;
 use Try::Tiny;
 use CIF qw/debug/;
+use Mouse;
+with 'CIF::Router::Service';
+use namespace::autoclean;
 
-sub service_type { SVC_SUBMISSION }
+sub service_type { CIF::Router::Constants::SVC_SUBMISSION }
 
 # Should return 1 or 0
 sub queue_should_autodelete {
@@ -43,6 +46,8 @@ sub process {
   }
   return($results, "submission_response", $self->codec->content_type(), 0);
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 

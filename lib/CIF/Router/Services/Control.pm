@@ -1,13 +1,17 @@
 package CIF::Router::Services::Control;
-use parent 'CIF::Router::Service';
-
 use strict;
 use warnings;
+use CIF::Router::Service;
 use CIF::Router::Constants;
 use Try::Tiny;
 use CIF qw/debug/;
+use Mouse;
 
-sub service_type { SVC_CONTROL }
+with 'CIF::Router::Service';
+
+use namespace::autoclean;
+
+sub service_type { CIF::Router::Constants::SVC_CONTROL }
 
 # Should return 1 or 0
 sub queue_should_autodelete {
@@ -17,14 +21,6 @@ sub queue_should_autodelete {
 # Should return 1 or 0
 sub queue_is_durable {
   return 0;
-}
-
-sub new {
-  # This actually wraps another service so that we can control it. 
-  my $class = shift;
-  my $self = $class->SUPER::new(@_);
-
-  return $self;
 }
 
 sub process {
@@ -68,6 +64,8 @@ sub process {
   }
   return($encoded_response, "pong", $self->codec->content_type());
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
 

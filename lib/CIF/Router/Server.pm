@@ -73,8 +73,8 @@ sub new {
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
 
-    $self->{service} = $service_class->new($self->{router}, $self->{codec});
-    $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{codec});
+    $self->{service} = $service_class->new(router => $self->{router}, codec => $self->{codec});
+    $self->{control_service} = CIF::Router::Services::Control->new(router => $self->{router}, codec => $self->{codec});
     my $driver;
     my $err = shift;
     try {
