@@ -87,6 +87,9 @@ sub shutdown {
   if ($self->auth) {
     $self->auth->shutdown();
   }
+  if ($self->query_handler) {
+    $self->query_handler->shutdown();
+  }
 }
 
 __PACKAGE__->meta->make_immutable();
