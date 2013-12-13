@@ -33,7 +33,7 @@ sub submit {
   }
   $self->sql->queue_event($group_id, $submission->event(), $submission->event_json());
   $self->flusher->tick();
-  return (undef, 1);
+  return 1;
 }
 
 sub flush {

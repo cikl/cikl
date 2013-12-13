@@ -8,7 +8,6 @@ use CIF qw/debug/;
 use CIF::QueryHandler::Role;
 use CIF::DataStore::Role;
 use CIF::Authentication::Role;
-use CIF::Models::QueryResults;
 use Mouse;
 
 has 'datastore' => (
@@ -44,16 +43,7 @@ sub process_query {
     $query->group($apikey_info->{'default_group'});
   }
 
-  my $events = $self->query_handler->search($query);
-
-  my $query_results = CIF::Models::QueryResults->new({
-      query => $query,
-      events => $events,
-      reporttime => time(),
-      group => $query->group() || $apikey_info->{'default_group'}
-    });
-
-  return $query_results;
+  return $self->query_handler->search($query);
 }
 
 sub process_submission {
@@ -69,13 +59,7 @@ sub process_submission {
     return("apikey '$apikey' is not authorized to write for group '$group'");
   }
 
-  #debug('inserting...') if($debug > 4);
-  my ($err, $id) = $self->datastore->submit($submission);
-  if ($err) { 
-    debug("ERR: " . $err);
-    return $err;
-  }
-
+  $self->datastore->submit($submission);
   return undef;
 }
 
