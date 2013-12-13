@@ -3,7 +3,6 @@ use base 'CIF::Client::Transport';
 
 use strict;
 use warnings;
-use CIF::Router;
 use CIF::DataStore::SimpleFlusher;
 use CIF::DataStore::Factory;
 use CIF::Authentication::Factory;
@@ -26,19 +25,13 @@ sub new {
       commit_size => $datastore_config->{commit_size} || 1000);
 
     $datastore_config->{flusher} = $flusher;
-    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+    $self->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
 
     my $auth_config = $self->get_global_config()->get_block('auth');
-    my $auth = CIF::Authentication::Factory->instantiate($auth_config);
+    $self->{auth} = CIF::Authentication::Factory->instantiate($auth_config);
 
     my $query_handler_config = $self->get_global_config()->get_block('query_handler');
-    my $query_handler = CIF::QueryHandler::Factory->instantiate($query_handler_config);
-
-    $self->{router} = CIF::Router->new({
-      datastore => $datastore,
-      auth => $auth,
-      query_handler => $query_handler
-    });
+    $self->{query_handler} = CIF::QueryHandler::Factory->instantiate($query_handler_config);
 
     return $self;
 }
@@ -50,9 +43,11 @@ sub shutdown {
       return 0;
     }
 
-    if ($self->{router}) {
-      $self->{router}->shutdown();
-      $self->{router} = undef;
+    foreach my $service (qw/auth query_handler datastore/) {
+      if ($self->{$service}) {
+        $self->{$service}->shutdown();
+        $self->{$service} = undef;
+      }
     }
     return 1;
 }
@@ -60,7 +55,14 @@ sub shutdown {
 sub query {
     my $self = shift;
     my $query = shift;
-    return $self->{router}->process_query($query);
+
+    my $apikey_info = $self->{auth}->authorized_read(
+      $query->apikey, $query->group());
+
+    if (!defined($query->group())) {
+      $query->group($apikey_info->{'default_group'});
+    }
+    return $self->{query_handler}->search($query);
 }
 
 sub ping {
@@ -71,7 +73,15 @@ sub ping {
 sub submit {
     my $self = shift;
     my $submission = shift;
-    return $self->{router}->process_submission($submission);
+    my $group = $submission->event->group();
+    my $apikey = $submission->apikey();
+    my $auth = $self->{auth}->authorized_write($apikey, $group);
+
+    if (!$auth) {
+      die("apikey '$apikey' is not authorized to write for group '$group'");
+    }
+    $self->{datastore}->submit($submission);
+    return undef;
 }
 
 1;

@@ -7,12 +7,6 @@ use CIF::Router::Constants;
 use Mouse::Role;
 use namespace::autoclean;
 
-has 'router' => (
-  is => 'ro',
-  isa => 'CIF::Router',
-  required => 1
-);
-
 has 'codec' => (
   is => 'ro',
   isa => 'CIF::Codecs::CodecRole',
@@ -40,5 +34,7 @@ sub uptime {
   return time() - $self->starttime();
 }
 
+sub shutdown {
+}
 
 1;

@@ -6,11 +6,11 @@ use AnyEvent;
 use Coro;
 use CIF::Router::Transport;
 use Config::Simple;
-use CIF::Router;
 use Try::Tiny;
 use CIF::Codecs::JSON;
 use Sys::Hostname;
 use CIF::Router::Services::Query;
+use CIF::Router::AuthenticatedRole;
 use CIF::Router::Services::Submission;
 use CIF::Router::Constants;
 use CIF::Router::Services;
@@ -44,37 +44,45 @@ sub new {
 
     init_logging($self->{server_config}->{'debug'} || 0);
 
-    my $datastore_config = $self->{config}->get_block('datastore');
-    my $commit_interval = $datastore_config->{commit_interval} || 2;
-    my $commit_size = $datastore_config->{commit_size} || 1000;
-    $datastore_config->{flusher} = CIF::DataStore::AnyEventFlusher->new(
-      commit_interval => $commit_interval,
-      commit_size => $commit_size
-    );
-
-    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
-
-    my $auth_config = $self->{config}->get_block('auth');
-    my $auth = CIF::Authentication::Factory->instantiate($auth_config);
-
-    my $query_handler_config = $self->{config}->get_block('query_handler');
-    my $query_handler = CIF::QueryHandler::Factory->instantiate($query_handler_config);
-
-    # Initialize the router.
-    my $router = CIF::Router->new({
-        datastore => $datastore,
-        auth => $auth,
-        query_handler => $query_handler
-      });
-
-    $self->{router} = $router;
-
     my $driver_name = $self->{server_config}->{driver} || "RabbitMQ";
     my $driver_config = $self->{config}->param(-block => ('router_server_' . lc($driver_name)));
     my $driver_class = "CIF::Router::Transport::" . $driver_name;
 
-    $self->{service} = $service_class->new(router => $self->{router}, codec => $self->{codec});
-    $self->{control_service} = CIF::Router::Services::Control->new(router => $self->{router}, codec => $self->{codec});
+    my $service_opts = {
+      codec => $self->{codec}
+    };
+
+    if ($service_class->does("CIF::Router::AuthenticatedRole")) {
+      my $auth_config = $self->{config}->get_block('auth');
+      my $auth = CIF::Authentication::Factory->instantiate($auth_config);
+
+      $service_opts->{auth} = $auth;
+    }
+
+    if ($service_class->does("CIF::Router::QueryHandlingRole")) {
+      my $query_handler_config = $self->{config}->get_block('query_handler');
+      my $query_handler = CIF::QueryHandler::Factory->instantiate($query_handler_config);
+
+      $service_opts->{query_handler} = $query_handler;
+    }
+
+    if ($service_class->does("CIF::Router::DataSubmissionRole")) {
+      my $datastore_config = $self->{config}->get_block('datastore');
+      my $commit_interval = $datastore_config->{commit_interval} || 2;
+      my $commit_size = $datastore_config->{commit_size} || 1000;
+      $datastore_config->{flusher} = CIF::DataStore::AnyEventFlusher->new(
+        commit_interval => $commit_interval,
+        commit_size => $commit_size
+      );
+
+      $service_opts->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
+    }
+
+    $self->{service} = $service_class->new(%$service_opts);
+
+    $self->{control_service} = CIF::Router::Services::Control->new(
+      codec => $self->{codec}
+    );
     my $driver;
     my $err = shift;
     try {
@@ -119,15 +127,16 @@ sub stop {
 sub shutdown {
     my $self = shift;
 
+    if ($self->{service}) {
+      $self->{service}->shutdown();
+      delete $self->{service};
+    }
+
     if ($self->{driver}) {
       $self->{driver}->shutdown();
       $self->{driver} = undef;
     }
 
-    if ($self->{router}) {
-      $self->{router}->shutdown();
-      $self->{router} = undef;
-    }
 }
 
 1;

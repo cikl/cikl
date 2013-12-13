@@ -7,7 +7,10 @@ use CIF::Router::ServiceRole;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
-with 'CIF::Router::ServiceRole';
+with 'CIF::Router::ServiceRole', 
+     'CIF::Router::AuthenticatedRole', 
+     'CIF::Router::DataSubmissionRole';
+
 use namespace::autoclean;
 
 sub service_type { CIF::Router::Constants::SVC_SUBMISSION }
@@ -26,7 +29,7 @@ sub process {
   my $self = shift;
   my $payload = shift;
   my $content_type = shift;
-  my ($err, $submission, $results);
+  my ($err, $submission);
   try {
     $submission = $self->codec->decode_submission($payload);
   } catch {
@@ -36,14 +39,16 @@ sub process {
     die("Error while trying to decode submission: $err");
   }
 
-  try {
-    $results = $self->router->process_submission($submission);
-  } catch {
-    $err = shift;
-  };
-  if ($err) {
-    die("Error while trying to process submission: $err");
+  my $group = $submission->event->group();
+  my $apikey = $submission->apikey();
+  my $auth = $self->auth->authorized_write($apikey, $group);
+
+  if (!$auth) {
+    die("apikey '$apikey' is not authorized to write for group '$group'");
   }
+
+  my $results = $self->datastore->submit($submission);
+
   return($results, "submission_response", $self->codec->content_type(), 0);
 }
 

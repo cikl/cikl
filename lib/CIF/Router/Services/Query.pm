@@ -3,11 +3,15 @@ package CIF::Router::Services::Query;
 use strict;
 use warnings;
 use CIF::Router::ServiceRole;
+use CIF::Router::AuthenticatedRole;
 use CIF::Router::Constants;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
-with 'CIF::Router::ServiceRole';
+with 'CIF::Router::ServiceRole', 
+     'CIF::Router::AuthenticatedRole',
+     'CIF::Router::QueryHandlingRole'
+     ;
 
 use namespace::autoclean;
 
@@ -37,8 +41,15 @@ sub process {
     die("Error while trying to decode query: $err");
   }
 
+  my $apikey_info = $self->auth->authorized_read(
+    $query->apikey, $query->group());
+
+  if (!defined($query->group())) {
+    $query->group($apikey_info->{'default_group'});
+  }
+
   try {
-    $results = $self->router->process_query($query);
+    $results = $self->query_handler->search($query);
   } catch {
     $err = shift;
   };
