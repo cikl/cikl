@@ -36,16 +36,6 @@ sub submit {
   return (undef, 1);
 }
 
-sub search {
-  my $self = shift;
-  my $query = shift;
-  my $arrayref_event_json = $self->sql->search($query);
-
-  my $codec = $self->_db_codec;
-  my $ret = [ map { $codec->decode_event($_); } @$arrayref_event_json ];
-  return $ret;
-}
-
 sub flush {
   my $self = shift;
   $self->sql->flush();

@@ -5,6 +5,7 @@ use warnings;
 use Try::Tiny;
 use Config::Simple;
 use CIF qw/debug/;
+use CIF::QueryHandler::Role;
 use CIF::DataStore::Role;
 use CIF::Authentication::Role;
 use CIF::Models::QueryResults;
@@ -19,6 +20,12 @@ has 'datastore' => (
 has 'auth' => (
   is => 'ro',
   isa => 'CIF::Authentication::Role',
+  required => 1
+);
+
+has 'query_handler' => (
+  is => 'ro',
+  isa => 'CIF::QueryHandler::Role',
   required => 1
 );
 
@@ -37,7 +44,7 @@ sub process_query {
     $query->group($apikey_info->{'default_group'});
   }
 
-  my $events = $self->datastore->search($query);
+  my $events = $self->query_handler->search($query);
 
   my $query_results = CIF::Models::QueryResults->new({
       query => $query,

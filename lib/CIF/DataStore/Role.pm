@@ -17,7 +17,6 @@ sub shutdown {
 }
 
 requires 'submit';
-requires 'search';
 requires 'flush';
 
 1;
