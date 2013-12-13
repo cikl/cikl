@@ -54,14 +54,9 @@ sub new {
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
 
     # Initialize the router.
-    my ($err,$router) = CIF::Router->new({
-        config  => $self->{config},
+    my $router = CIF::Router->new({
         datastore => $datastore
       });
-    if($err){
-      ## TODO -- set debugging variable
-      die $err;
-    }
 
     $self->{router} = $router;
 
@@ -72,6 +67,7 @@ sub new {
     $self->{service} = $service_class->new($self->{router}, $self->{codec});
     $self->{control_service} = CIF::Router::Services::Control->new($self->{router}, $self->{codec});
     my $driver;
+    my $err = shift;
     try {
       $driver = $driver_class->new($driver_config, $self->{service}, $self->{control_service});
     } catch {

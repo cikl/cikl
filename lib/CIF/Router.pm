@@ -5,25 +5,15 @@ use warnings;
 use Try::Tiny;
 use Config::Simple;
 use CIF qw/debug/;
+use CIF::DataStore;
 use CIF::Models::QueryResults;
+use Mouse;
 
-our $debug = 0;
-
-sub new {
-  my $class = shift;
-  my $args = shift;
-
-  return('missing config file') unless($args->{'config'});
-  my $datastore = $args->{'datastore'} or die("Missing datastore!");
-
-  my $self = {};
-  $self->{datastore} = $datastore;
-  $self->{config} = $args->{'config'}->param(-block => 'router');
-  $debug = $self->{config}->{'debug'} || 0;
-
-  bless($self,$class);
-  return(undef,$self);
-}
+has 'datastore' => (
+  is => 'ro',
+  isa => 'CIF::DataStore',
+  required => 1
+);
 
 sub process_query {
   my $self = shift;
@@ -32,14 +22,14 @@ sub process_query {
 
   my $results = [];
 
-  my $apikey_info = $self->{datastore}->authorized_read(
+  my $apikey_info = $self->datastore->authorized_read(
     $query->apikey, $query->group());
 
   if (!defined($query->group())) {
     $query->group($apikey_info->{'default_group'});
   }
 
-  my $events = $self->{datastore}->search($query);
+  my $events = $self->datastore->search($query);
 
   my $query_results = CIF::Models::QueryResults->new({
       query => $query,
@@ -57,7 +47,7 @@ sub process_submission {
   my $apikey = $submission->apikey();
 
   my $group = $submission->event->group();
-  my $auth = $self->{datastore}->authorized_write($submission->apikey(), 
+  my $auth = $self->datastore->authorized_write($submission->apikey(), 
     $group);
 
   if (!$auth) {
@@ -65,7 +55,7 @@ sub process_submission {
   }
 
   #debug('inserting...') if($debug > 4);
-  my ($err, $id) = $self->{datastore}->submit($submission);
+  my ($err, $id) = $self->datastore->submit($submission);
   if ($err) { 
     debug("ERR: " . $err);
     return $err;
@@ -76,10 +66,11 @@ sub process_submission {
 
 sub shutdown {
   my $self = shift;
-  if ($self->{datastore}) {
-    $self->{datastore}->shutdown();
-    undef $self->{datastore};
+  if ($self->datastore) {
+    $self->datastore->shutdown();
   }
 }
+
+__PACKAGE__->meta->make_immutable();
 
 1;
