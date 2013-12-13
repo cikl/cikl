@@ -3,11 +3,11 @@ package CIF::Router::Services::Submission;
 use strict;
 use warnings;
 use CIF::Router::Constants;
-use CIF::Router::Service;
+use CIF::Router::ServiceRole;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
-with 'CIF::Router::Service';
+with 'CIF::Router::ServiceRole';
 use namespace::autoclean;
 
 sub service_type { CIF::Router::Constants::SVC_SUBMISSION }

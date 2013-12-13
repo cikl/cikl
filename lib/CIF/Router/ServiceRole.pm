@@ -1,4 +1,4 @@
-package CIF::Router::Service;
+package CIF::Router::ServiceRole;
 
 use strict;
 use warnings;

@@ -1,13 +1,13 @@
 package CIF::Router::Services::Control;
 use strict;
 use warnings;
-use CIF::Router::Service;
+use CIF::Router::ServiceRole;
 use CIF::Router::Constants;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
 
-with 'CIF::Router::Service';
+with 'CIF::Router::ServiceRole';
 
 use namespace::autoclean;
 
