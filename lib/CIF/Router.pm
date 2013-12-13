@@ -5,14 +5,14 @@ use warnings;
 use Try::Tiny;
 use Config::Simple;
 use CIF qw/debug/;
-use CIF::DataStore;
+use CIF::DataStore::Role;
 use CIF::Authentication::Role;
 use CIF::Models::QueryResults;
 use Mouse;
 
 has 'datastore' => (
   is => 'ro',
-  isa => 'CIF::DataStore',
+  isa => 'CIF::DataStore::Role',
   required => 1
 );
 

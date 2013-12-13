@@ -2,12 +2,12 @@ package CIF::Postgres::DataStore;
 use strict;
 use warnings;
 use Mouse;
-use CIF::DataStore ();
+use CIF::DataStore::Role ();
 use CIF::Postgres::SQLRole ();
 use CIF::Codecs::JSON ();
 use namespace::autoclean;
 
-with "CIF::DataStore", "CIF::Postgres::SQLRole";
+with "CIF::DataStore::Role", "CIF::Postgres::SQLRole";
 
 has '_db_codec' => (
   is => 'ro', 

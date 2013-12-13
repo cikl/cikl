@@ -1,4 +1,4 @@
-package CIF::DataStore;
+package CIF::DataStore::Role;
 use strict;
 use warnings;
 use Mouse::Role;
