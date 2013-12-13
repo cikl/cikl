@@ -7,6 +7,7 @@ use CIF::Router;
 use CIF::DataStore::SimpleFlusher;
 use CIF::DataStore::Factory;
 use CIF::Authentication::Factory;
+use CIF::QueryHandler::Factory;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -19,7 +20,6 @@ sub new {
     my $last_flush = [gettimeofday];
 
     my $datastore_config = $self->get_global_config()->get_block('datastore');
-    my $auth_config = $self->get_global_config()->get_block('auth');
 
     my $flusher = CIF::DataStore::SimpleFlusher->new(
       commit_interval => $datastore_config->{commit_interval} || 2,
@@ -27,11 +27,17 @@ sub new {
 
     $datastore_config->{flusher} = $flusher;
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+
+    my $auth_config = $self->get_global_config()->get_block('auth');
     my $auth = CIF::Authentication::Factory->instantiate($auth_config);
+
+    my $query_handler_config = $self->get_global_config()->get_block('query_handler');
+    my $query_handler = CIF::QueryHandler::Factory->instantiate($query_handler_config);
 
     $self->{router} = CIF::Router->new({
       datastore => $datastore,
-      auth => $auth
+      auth => $auth,
+      query_handler => $query_handler
     });
 
     return $self;
