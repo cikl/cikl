@@ -25,6 +25,16 @@ instance = cif-vm.local
 # the apikey for cif_smrt
 apikey = CONFIG_ME!
 
+[auth]
+# This specifies the name of the modules that implements our authentication. 
+driver = "CIF::Postgres::Auth"
+
+# These are auth specific attributes
+host = '127.0.0.1'
+user = 'postgres'
+password = ''
+database = 'cif'
+
 [datastore]
 # These are required by the flusher. 
 commit_size = 500   # The number of events that trigger an immediate commit.
