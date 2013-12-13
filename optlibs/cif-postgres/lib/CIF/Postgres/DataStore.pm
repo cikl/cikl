@@ -2,13 +2,12 @@ package CIF::Postgres::DataStore;
 use strict;
 use warnings;
 use Mouse;
-use CIF::DataStore;
-use Try::Tiny;
-use CIF::Codecs::JSON;
-use DBI;
-use CIF::Postgres::SQL;
-use CIF::DataStore::Flusher;
 use CIF qw/debug is_uuid generate_uuid_ns/;
+use CIF::DataStore ();
+use CIF::Codecs::JSON ();
+use DBI ();
+use CIF::Postgres::SQL ();
+use CIF::DataStore::Flusher ();
 use namespace::autoclean;
 
 with "CIF::DataStore";
@@ -37,24 +36,6 @@ has 'host' => (
   default => sub { 'localhost' }
 );
 
-has 'group_map' => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  required => 1
-);
-
-has 'restriction_map' => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  required => 1
-);
-
-has 'flusher' => (
-  is => 'rw',
-  isa => 'Maybe[CIF::DataStore::Flusher]',
-  required => 0
-);
-
 has '_db_codec' => (
   is => 'ro', 
   init_arg => undef,
@@ -76,8 +57,14 @@ sub _build_sql {
   if (!$dbh) {
     die($!);
   }
-  my $ret = CIF::Postgres::SQL->new(dbh => $dbh);
-  return $ret;
+  my $sql = CIF::Postgres::SQL->new(dbh => $dbh);
+
+  $self->flusher->set_datastore_flush_coderef(
+    sub {
+      $self->sql->flush();
+    }
+  );
+  return $sql;
 }
 
 sub submit { 
@@ -88,7 +75,7 @@ sub submit {
     die("Failed to create/retreive group ID for: " . $submission->event->group);
   }
   $self->sql->queue_event($group_id, $submission->event(), $submission->event_json());
-  $self->flusher->tick() if ($self->flusher);
+  $self->flusher->tick();
   return (undef, 1);
 }
 
@@ -100,11 +87,6 @@ sub search {
   my $codec = $self->_db_codec;
   my $ret = [ map { $codec->decode_event($_); } @$arrayref_event_json ];
   return $ret;
-}
-
-sub flush {
-  my $self = shift;
-  $self->sql->flush();
 }
 
 sub authorized_write {
@@ -135,78 +117,18 @@ sub authorized_read {
       default_group => $rec->default_group_name()
     };
 
-    ## TODO -- datatype access control?
-    
-    my @groups = ($self->group_map) ? @{$self->group_map()} : undef;
-   
-    my @array;
-    #debug('groups: '.join(',',map { $_->get_key() } @groups));
-    
-    foreach my $g (@groups){
-        next unless($rec->in_group($g->{key}));
-        push(@array,$g);
-    }
-
-    $ret->{'group_map'} = \@array;
-    
-    if(my $m = $self->restriction_map()){
-        $ret->{'restriction_map'} = $m;
-    }
-
     return $ret; # all good
 }
 
-sub new_from_config {
-  my $class = shift;
-  my $config = shift;
-  my $db_config = $config->param(-block => 'db');
-  my $archive_config = $config->param(-block => 'archive');
-
-  my $groups = $archive_config->{'groups'};
-
-  # system wide groups
-  push(@$groups, qw(everyone root));
-  my $group_map;
-  foreach (@$groups){
-    my $m = {
-      key     => generate_uuid_ns($_),
-      value   => $_,
-    };
-    push(@$group_map,$m);
-  }
-
-  my $restriction_map_conf = $config->param(-block => 'restriction_map');
-  my $restriction_map = [];
-  foreach (keys %{$restriction_map_conf}){
-    ## TODO map to the correct Protobuf RestrictionType
-    my $m = {
-      key => $_,
-      value   => $restriction_map_conf->{$_},
-    };
-    push(@$restriction_map,$m);
-  }
-
-  my $datastore = CIF::Postgres::DataStore->new(
-    database => $db_config->{database} || 'cif',
-    user => $db_config->{user} || 'cif',
-    password => $db_config->{password} || '',
-    host => $db_config->{host} || 'localhost',
-    group_map => $group_map,
-    restriction_map => $restriction_map
-  );
-
-  return $datastore;
-}
-
-sub shutdown {
+sub flush {
   my $self = shift;
-  debug("Shutting down");
-  if ($self->flusher()) {
-    $self->flusher()->flush();
-    $self->flusher(undef);
-  }
-  $self->sql->shutdown();
+  $self->sql->flush();
 }
+
+after "shutdown" => sub {
+  my $self = shift;
+  $self->sql->shutdown();
+};
 
 __PACKAGE__->meta->make_immutable();
 

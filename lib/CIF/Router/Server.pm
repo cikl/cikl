@@ -16,6 +16,7 @@ use CIF::Router::Constants;
 use CIF::Router::Services;
 use CIF::DataStore::AnyEventFlusher;
 use CIF::Postgres::DataStore;
+use CIF::DataStore::Factory;
 
 use CIF qw/debug init_logging generate_uuid_ns/;
 
@@ -35,30 +36,22 @@ sub new {
       die("Unknown service type: $type");
     }
     $self->{service_class} = $service_class;
+    $self->{codec} = CIF::Codecs::JSON->new();
 
     $self->{config} = Config::Simple->new($config) || die("Could not load config file: '$config'");
     $self->{server_config} = $self->{config}->param(-block => 'router_server');
 
-    $self->{dbi_commit_interval} = $self->{server_config}->{dbi_commit_interval} || 2;
-    $self->{dbi_commit_size} = $self->{server_config}->{'dbi_commit_size'} || 1000;
-
-    $self->{codec} = CIF::Codecs::JSON->new();
-
     init_logging($self->{server_config}->{'debug'} || 0);
 
-    my $datastore = CIF::Postgres::DataStore->new_from_config($self->{config});
-    my $flusher = CIF::DataStore::AnyEventFlusher->new(
-      commit_callback => sub { 
-        my $count = shift;
-        debug("Committing $count");
-        $datastore->flush();
-      },
-      commit_interval => $self->{dbi_commit_interval},
-      commit_size => $self->{dbi_commit_size}
+    my $datastore_config = $self->{config}->get_block('datastore');
+    my $commit_interval = $datastore_config->{commit_interval} || 2;
+    my $commit_size = $datastore_config->{commit_size} || 1000;
+    $datastore_config->{flusher} = CIF::DataStore::AnyEventFlusher->new(
+      commit_interval => $commit_interval,
+      commit_size => $commit_size
     );
 
-    $datastore->flusher($flusher);
-
+    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
 
     # Initialize the router.
     my ($err,$router) = CIF::Router->new({

@@ -257,6 +257,9 @@ sub _insert_events {
 sub flush {
   my $self = shift;
   my $num_events = $self->num_queued_events();
+  if ($num_events == 0) {
+    return;
+  }
   my $err;
   my $dbh = $self->dbh;
   $dbh->begin_work() or die($dbh->errstr);

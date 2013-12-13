@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use CIF::Router;
 use CIF::DataStore::SimpleFlusher;
-use CIF::PostgresDataStore;
+use CIF::DataStore::Factory;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -15,29 +15,27 @@ sub new {
     $args->{driver_name} = "direct";
     my $self = $class->SUPER::new($args);
 
-    my $datastore = CIF::PostgresDataStore->new_from_config($self->get_global_config);
     my $last_flush = [gettimeofday];
+
+    my $datastore_config = $self->get_global_config()->get_block('datastore');
     my $flusher = CIF::DataStore::SimpleFlusher->new(
-      commit_interval => 2,
-      commit_size => 1000,
-      commit_callback => sub { 
+      commit_interval => $datastore_config->{commit_interval} || 2,
+      commit_size => $datastore_config->{commit_size} || 1000);
+
+    $flusher->add_flush_callback(
+      sub { 
         my $count = shift;
         return if ($count == 0);
-        my $start = [gettimeofday];
-        $datastore->flush();
-        my $flush_time = tv_interval($start);
         my $overall_time = tv_interval($last_flush);
-        my $flush_percent = ($flush_time / $overall_time) * 100;
         my $rate = $count / $overall_time;
-        my $diff = $overall_time - $flush_time;
         $last_flush = [gettimeofday];
-        debug("Flush time: $flush_time seconds for $count events. Percent: $flush_percent");
-        debug("Non-Flush time: $diff seconds");
-        debug("RATE: $rate events per second");
-      },
-
+        debug("INTERVAL: $overall_time seconds. RATE: $rate events per second");
+      }
     );
-    $datastore->flusher($flusher);
+
+    $datastore_config->{flusher} = $flusher;
+    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+
     $self->{router} = CIF::Router->new({
       config => $self->get_global_config(),
       datastore => $datastore

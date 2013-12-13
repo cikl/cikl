@@ -7,10 +7,22 @@ use Coro;
 use Mouse;
 use namespace::autoclean;
 
-has 'commit_callback' => (
+has 'datastore_flush_coderef' => (
   is => 'ro',
+  writer => "set_datastore_flush_coderef",
   isa => 'CodeRef',
-  required => 1
+  required => 0
+);
+
+has 'flush_callbacks' => (
+  is => 'ro',
+  isa => 'ArrayRef[CodeRef]',
+  init_arg => undef,
+  default => sub {[]},
+  traits => ['Array'],
+  handles => {
+    add_flush_callback => 'push'
+  }
 );
 
 has 'commit_interval' => (
@@ -37,7 +49,13 @@ sub flush {
   return if ($self->num_inserts == 0);
   my $num_inserts = $self->num_inserts;
   $self->num_inserts(0);
-  $self->commit_callback->($num_inserts);
+  if (my $dcb = $self->datastore_flush_coderef()) {
+    $dcb->($num_inserts);
+  }
+
+  foreach my $cb (@{$self->flush_callbacks()}) {
+    $cb->($num_inserts);
+  }
 }
 
 sub tick {

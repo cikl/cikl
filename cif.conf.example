@@ -1,22 +1,16 @@
-# the simple stuff
-# cif_archive configuration is required by cif-router, cif_feed (cif-router, libcif-dbi)
-[cif_archive]
-# if we want to enable rir/asn/cc, etc... they take up more space in our repo
-# datatypes = infrastructure,domain,url,email,search,malware,cc,asn,rir
-datatypes = infrastructure,domain,url,email,search,malware
-feeds = infrastructure,domain,url,email,search,malware
-
-# if you're going to enable feeds
-# feeds = infrastructure,domain,url,email,search,malware
-
-# enable your own groups is you start doing data-sharing with various groups
-#groups = everyone,group1.example.com,group2.example.com,group3.example.com
-
-# client is required by the client, cif_router, cif_smrt (libcif, cif-router, cif-smrt)
+# client is required by the cif, cif_ping, and cif_smrt
 [client]
 # the apikey for your client
-apikey = 
+apikey = CONFIG_ME!
 driver = RabbitMQ
+#driver = Direct
+
+[client_rabbitmq]
+host = localhost
+port = 5672
+username = guest
+password = guest
+vhost = /cif
 
 # cif_smrt is required by cif_smrt
 [cif_smrt]
@@ -29,53 +23,41 @@ name = local
 instance = cif-vm.local
 
 # the apikey for cif_smrt
-apikey = 
+apikey = CONFIG_ME!
 
-# advanced stuff
-# db config is required by cif-router, cif_feed, cif_apikeys (cif-router, libcif-dbi)
-[db]
-host = 127.0.0.1
-user = postgres
-password =
-database = cif
+[datastore]
+# These are required by the flusher. 
+commit_size = 500   # The number of events that trigger an immediate commit.
 
-# if the normal IODEF restriction classes don't fit your needs
-# ref: https://code.google.com/p/collective-intelligence-framework/wiki/RestrictionMapping_v1
-# restriction map is required by cif-router, cif_feed (cif-router, libcif-dbi)
-[restriction_map]
-#white = public 
-#green = public 
-#amber = need-to-know 
-#red   = private         
+# After commit_interval seconds, trigger a commit if we have less than 
+# commit_size events
+commit_interval = 2 
+
+# This specifies the name of the modules that implements our datastore. 
+driver = "CIF::Postgres::DataStore"
+
+# These are datastore specific attributes
+host = '127.0.0.1'
+user = 'postgres'
+password = ''
+database = 'cif'
 
 # logging
 # values 0-4
 [router]
 # set to 0 if it's too noisy and reload the cif-router (apache), only on for RC2
-debug = 3
+debug = 0
+auth_cache_ageoff = 60
+# Number of seconds between commits.
 
 [router_server]
 driver = RabbitMQ
-debug = 10
+debug = 1
 
 [router_server_rabbitmq]
 host = localhost
 port = 5672
 username = guest
 password = guest
-
-[cif_feed]
-# max size of any feed generated
-limit = 50000
-
-# each confidence level to generate
-confidence = 95,85,75,65
-
-# what 'role' keys to use to generate the feeds
-roles = role_everyone_feed
-
-# how far back in time to generate the feeds from
-limit_days = 7
-
-# how many days of generated feeds to keep in the archive
-feed_retention = 7
+vhost = /cif
+prefetch_count = 500
