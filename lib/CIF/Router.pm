@@ -6,6 +6,7 @@ use Try::Tiny;
 use Config::Simple;
 use CIF qw/debug/;
 use CIF::DataStore;
+use CIF::Auth;
 use CIF::Models::QueryResults;
 use Mouse;
 
@@ -15,6 +16,13 @@ has 'datastore' => (
   required => 1
 );
 
+has 'auth' => (
+  is => 'ro',
+  isa => 'CIF::Auth',
+  required => 1
+);
+
+
 sub process_query {
   my $self = shift;
   my $query = shift;
@@ -22,7 +30,7 @@ sub process_query {
 
   my $results = [];
 
-  my $apikey_info = $self->datastore->authorized_read(
+  my $apikey_info = $self->auth->authorized_read(
     $query->apikey, $query->group());
 
   if (!defined($query->group())) {
@@ -47,7 +55,7 @@ sub process_submission {
   my $apikey = $submission->apikey();
 
   my $group = $submission->event->group();
-  my $auth = $self->datastore->authorized_write($submission->apikey(), 
+  my $auth = $self->auth->authorized_write($submission->apikey(), 
     $group);
 
   if (!$auth) {
@@ -68,6 +76,9 @@ sub shutdown {
   my $self = shift;
   if ($self->datastore) {
     $self->datastore->shutdown();
+  }
+  if ($self->auth) {
+    $self->auth->shutdown();
   }
 }
 

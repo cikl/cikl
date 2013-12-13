@@ -15,8 +15,8 @@ use CIF::Router::Services::Submission;
 use CIF::Router::Constants;
 use CIF::Router::Services;
 use CIF::DataStore::AnyEventFlusher;
-use CIF::Postgres::DataStore;
 use CIF::DataStore::Factory;
+use CIF::Auth::Factory;
 
 use CIF qw/debug init_logging generate_uuid_ns/;
 
@@ -53,9 +53,13 @@ sub new {
 
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
 
+    my $auth_config = $self->{config}->get_block('auth');
+    my $auth = CIF::Auth::Factory->instantiate($auth_config);
+
     # Initialize the router.
     my $router = CIF::Router->new({
-        datastore => $datastore
+        datastore => $datastore,
+        auth => $auth
       });
 
     $self->{router} = $router;

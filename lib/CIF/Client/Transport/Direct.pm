@@ -6,6 +6,7 @@ use warnings;
 use CIF::Router;
 use CIF::DataStore::SimpleFlusher;
 use CIF::DataStore::Factory;
+use CIF::Auth::Factory;
 use CIF qw/debug/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -18,6 +19,8 @@ sub new {
     my $last_flush = [gettimeofday];
 
     my $datastore_config = $self->get_global_config()->get_block('datastore');
+    my $auth_config = $self->get_global_config()->get_block('auth');
+
     my $flusher = CIF::DataStore::SimpleFlusher->new(
       commit_interval => $datastore_config->{commit_interval} || 2,
       commit_size => $datastore_config->{commit_size} || 1000);
@@ -35,10 +38,11 @@ sub new {
 
     $datastore_config->{flusher} = $flusher;
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+    my $auth = CIF::Auth::Factory->instantiate($auth_config);
 
     $self->{router} = CIF::Router->new({
-      config => $self->get_global_config(),
-      datastore => $datastore
+      datastore => $datastore,
+      auth => $auth
     });
 
     return $self;

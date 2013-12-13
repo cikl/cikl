@@ -2,7 +2,7 @@ package CIF::DataStore;
 use strict;
 use warnings;
 use Mouse::Role;
-use CIF qw/debug/;
+use CIF::DataStore::Flusher ();
 use namespace::autoclean;
 
 has 'flusher' => (
@@ -19,8 +19,6 @@ sub shutdown {
 requires 'submit';
 requires 'search';
 requires 'flush';
-requires 'authorized_write';
-requires 'authorized_read';
 
 1;
 

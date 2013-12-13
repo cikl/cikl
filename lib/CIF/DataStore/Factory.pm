@@ -8,7 +8,10 @@ sub instantiate {
   my $driver_class = $datastore_config->{driver} or 
     die("No driver provided for datastore config!");
 
-  eval("require $driver_class") or die("Failed to load $driver_class: $!");
+  eval("use $driver_class;");
+  if ($@) {
+    die("Failed to load $driver_class: $@");
+  }
 
   return $driver_class->new($datastore_config);
 }
