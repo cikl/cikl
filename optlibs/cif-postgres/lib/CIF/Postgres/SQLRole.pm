@@ -2,7 +2,6 @@ package CIF::Postgres::SQLRole;
 use strict;
 use warnings;
 use Mouse::Role;
-use CIF::Postgres::SQL ();
 use DBI ();
 use namespace::autoclean;
 
@@ -30,22 +29,22 @@ has 'host' => (
   default => sub { 'localhost' }
 );
 
-has 'sql' => (
+has 'dbh' => (
   is => 'ro',
-  isa => 'CIF::Postgres::SQL',
+  isa => 'DBI::db',
   init_arg => undef,
   lazy => 1,
-  builder => '_build_sql'
+  builder => '_build_dbh'
 );
 
-sub _build_sql {
+sub _build_dbh {
   my $self = shift;
   my $connect_str = 'DBI:Pg:database='. $self->database.';host='.$self->host;
   my $dbh = DBI->connect($connect_str,$self->user,$self->password, {AutoCommit => 1});
   if (!$dbh) {
     die($!);
   }
-  return CIF::Postgres::SQL->new(dbh => $dbh);
+  return $dbh;
 }
 
 1;

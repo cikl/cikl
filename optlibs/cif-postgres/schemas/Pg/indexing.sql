@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS indexing CASCADE;
 
 CREATE TABLE indexing (
     id BIGINT NOT NULL,
-    group_id INT,
+    group_name VARCHAR(50),
     reporttime INT NOT NULL,
     created INT NOT NULL,
     assessment VARCHAR(64),
@@ -19,6 +19,7 @@ CREATE TABLE indexing (
 );
 
 -- CREATE INDEX idx_indexing_uuid ON indexing (uuid);
+CREATE INDEX idx_indexing_group_name ON indexing (group_name);
 CREATE INDEX idx_indexing_created ON indexing (created);
 CREATE INDEX idx_indexing_reporttime ON indexing (reporttime);
 CREATE INDEX idx_indexing_assessment ON indexing (assessment);

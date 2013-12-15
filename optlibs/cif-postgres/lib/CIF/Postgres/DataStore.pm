@@ -4,10 +4,24 @@ use warnings;
 use Mouse;
 use CIF::DataStore::Role ();
 use CIF::Postgres::SQLRole ();
+use CIF::Postgres::DataStoreSQL ();
 use CIF::Codecs::JSON ();
 use namespace::autoclean;
 
 with "CIF::DataStore::Role", "CIF::Postgres::SQLRole";
+
+has 'sql' => (
+  is => 'ro',
+  isa => 'CIF::Postgres::DataStoreSQL',
+  init_arg => undef,
+  lazy => 1,
+  builder => '_build_sql'
+);
+
+sub _build_sql {
+  my $self = shift;
+  return CIF::Postgres::DataStoreSQL->new(dbh => $self->dbh);
+}
 
 has '_db_codec' => (
   is => 'ro', 
@@ -27,11 +41,7 @@ sub BUILD {
 sub submit { 
   my $self = shift;
   my $submission = shift;
-  my $group_id = $self->sql->get_group_id($submission->event->group);
-  if (!defined($group_id)) {
-    die("Failed to create/retreive group ID for: " . $submission->event->group);
-  }
-  $self->sql->queue_event($group_id, $submission->event(), $submission->event_json());
+  $self->sql->queue_event($submission->event(), $submission->event_json());
   $self->flusher->tick();
   return 1;
 }

@@ -4,11 +4,26 @@ use warnings;
 use Mouse;
 use CIF::QueryHandler::Role ();
 use CIF::Postgres::SQLRole ();
+use CIF::Postgres::QuerySQL ();
 use CIF::Codecs::JSON ();
 use CIF::Models::QueryResults ();
 use namespace::autoclean;
 
 with "CIF::QueryHandler::Role", "CIF::Postgres::SQLRole";
+
+has 'sql' => (
+  is => 'ro',
+  isa => 'CIF::Postgres::QuerySQL',
+  init_arg => undef,
+  lazy => 1,
+  builder => '_build_sql'
+);
+
+sub _build_sql {
+  my $self = shift;
+  return CIF::Postgres::QuerySQL->new(dbh => $self->dbh);
+}
+
 
 has '_db_codec' => (
   is => 'ro', 
@@ -41,4 +56,3 @@ __PACKAGE__->meta->make_immutable();
 
 
 1;
-

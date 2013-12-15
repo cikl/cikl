@@ -4,10 +4,25 @@ use warnings;
 use Mouse;
 use CIF::Authentication::Role ();
 use CIF::Postgres::SQLRole ();
+use CIF::Postgres::AuthSQL ();
 use DBI ();
 use namespace::autoclean;
 
 with  "CIF::Authentication::Role", "CIF::Postgres::SQLRole";
+
+has 'sql' => (
+  is => 'ro',
+  isa => 'CIF::Postgres::AuthSQL',
+  init_arg => undef,
+  lazy => 1,
+  builder => '_build_sql'
+);
+
+sub _build_sql {
+  my $self = shift;
+  return CIF::Postgres::AuthSQL->new(dbh => $self->dbh);
+}
+
 
 sub authorized_write {
   my $self = shift;
