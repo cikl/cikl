@@ -32,7 +32,7 @@ has '_db_codec' => (
 sub submit { 
   my $self = shift;
   my $submission = shift;
-  $self->sql->queue_event($submission->event(), $submission->event_json());
+  $self->sql->queue_submission($submission);
   return 1;
 }
 

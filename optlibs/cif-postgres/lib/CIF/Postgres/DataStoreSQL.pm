@@ -52,20 +52,20 @@ sub build_index_event_sql {
 }
 
 
-has "queued_events" => (
+has "queued_submissions" => (
   traits => ['Array'],
   is => 'ro',
   isa => 'ArrayRef',
   default => sub {[]},
   handles => {
-    num_queued_events => 'count',
-    clear_queued_events => 'clear'
+    num_queued_submissions => 'count',
+    clear_queued_submissions => 'clear'
   }
 );
 
-sub queue_event {
+sub queue_submission {
   my $self = shift;
-  push(@{$self->queued_events}, \@_);
+  push(@{$self->queued_submissions}, shift);
 }
 
 has 'inserter_sth_map' => (
@@ -109,15 +109,14 @@ sub shutdown {
   $self->dbh->disconnect();
 }
 
-sub do_insert_events {
+sub do_insert_submissions {
   my $self = shift;
   my $sth = shift;
-  my $events = shift;
+  my $submissions = shift;
   my @values;
-  foreach my $value_ref (@$events) {
-    my (undef, $event_json) = @$value_ref;
+  foreach my $submission (@$submissions) {
     push(@values, 
-      $event_json, 
+      $submission->event_json, 
     );
   }
   $sth->execute(@values) or die($self->dbh->errstr);
@@ -130,15 +129,15 @@ sub do_insert_events {
   return $ids;
 }
 
-sub do_index_events {
+sub do_index_submissions {
   my $self = shift;
   my $sth = shift;
-  my $event_data = shift;
+  my $submissions = shift;
   my $ids = shift;
   my @values;
-  my $num_events = scalar(@$event_data);
-  for (my $i = 0; $i < $num_events; $i++) {
-    my ($event, undef) = @{$event_data->[$i]};
+  my $num_submissions = scalar(@$submissions);
+  for (my $i = 0; $i < $num_submissions; $i++) {
+    my $event = $submissions->[$i]->event();
     my $id = $ids->[$i];
 
     my $addresses = {};
@@ -165,21 +164,21 @@ sub do_index_events {
   $sth->execute(@values) or die($self->dbh->errstr);
 }
 
-sub _insert_events {
+sub _insert_submissions {
   my $self = shift;
-  my $events = shift;
+  my $submissions = shift;
   my $sths = $self->inserter_sth_map;
   my $index_sths = $self->indexer_sth_map;
   my $sth;
   my $index_sth;
   my $chunk_size;
   my $it;
-  my $num_events = scalar(@$events);
-  my $remaining_events = [];
+  my $num_submissions = scalar(@$submissions);
+  my $remaining_submissions = [];
 
-  while ($num_events > 0) {
+  while ($num_submissions > 0) {
     foreach my $sz (INDEX_SIZES) {
-      if ($num_events > $sz) {
+      if ($num_submissions > $sz) {
         $chunk_size = $sz;
         last;
       }
@@ -189,37 +188,37 @@ sub _insert_events {
     }
     $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
     $index_sth = $index_sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
-    $it = natatime($chunk_size, @$events);
+    $it = natatime($chunk_size, @$submissions);
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
-        my $ids = $self->do_insert_events($sth, \@chunk);
-        $self->do_index_events($index_sth, \@chunk, $ids);
+        my $ids = $self->do_insert_submissions($sth, \@chunk);
+        $self->do_index_submissions($index_sth, \@chunk, $ids);
       } else {
-        $remaining_events = \@chunk;
+        $remaining_submissions = \@chunk;
         last CHUNKER;
       }
     }
-    $events = $remaining_events;
-    $remaining_events = [];
-    $num_events = scalar(@$events);
+    $submissions = $remaining_submissions;
+    $remaining_submissions = [];
+    $num_submissions = scalar(@$submissions);
   }
   debug("done");
 }
 
 sub flush {
   my $self = shift;
-  my $num_events = $self->num_queued_events();
-  if ($num_events == 0) {
+  my $num_submissions = $self->num_queued_submissions();
+  if ($num_submissions == 0) {
     return;
   }
   my $err;
   my $dbh = $self->dbh;
   $dbh->begin_work() or die($dbh->errstr);
   try {
-    $self->_insert_events($self->queued_events());
+    $self->_insert_submissions($self->queued_submissions());
 
-    $self->clear_queued_events();
+    $self->clear_queued_submissions();
     $dbh->commit();
   } catch {
     $err = shift;
@@ -230,7 +229,7 @@ sub flush {
   if ($err) {
     die($err);
   }
-  my $rate = $num_events  / $delta;
+  my $rate = $num_submissions  / $delta;
   debug("Events per second: $rate");
 }
 
