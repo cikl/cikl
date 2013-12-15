@@ -61,7 +61,9 @@ sub instantiate {
     codec => $codec
   );
 
-  my $transport = build_transport($config, $service, $control_service);
+  my $transport = build_transport($config);
+  $transport->register_service($service);
+  $transport->register_control_service($control_service);
 
   return CIF::Router::Server->new(
     service => $service,
@@ -83,7 +85,7 @@ sub build_transport {
   if ($@) { 
     die $@; 
   }
-  return $driver_class->new($driver_config, $service, $control_service);
+  return $driver_class->new(%$driver_config);
 }
 
 
