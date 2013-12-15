@@ -124,21 +124,24 @@ sub do_insert_submissions {
   my $ids = $sth->fetchall_arrayref();
 
   # Map out only the id column;
-  $ids = [map { $_->[0]; } @$ids];
 
-  return $ids;
+  my $num_submissions = scalar(@$submissions);
+  for (my $i = 0; $i < $num_submissions; $i++) {
+    $submissions->[$i]->datastore_id($ids->[$i]->[0]);
+  }
 }
 
 sub do_index_submissions {
   my $self = shift;
   my $sth = shift;
   my $submissions = shift;
-  my $ids = shift;
   my @values;
-  my $num_submissions = scalar(@$submissions);
-  for (my $i = 0; $i < $num_submissions; $i++) {
-    my $event = $submissions->[$i]->event();
-    my $id = $ids->[$i];
+  foreach my $submission (@$submissions) {
+    my $event = $submission->event();
+    my $id = $submission->datastore_id();
+    if (!defined($id)) {
+      die("Can't index submission that does not have a submission id");
+    }
 
     my $addresses = {};
     foreach my $address (@{$event->addresses()}) {
@@ -192,8 +195,8 @@ sub _insert_submissions {
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
-        my $ids = $self->do_insert_submissions($sth, \@chunk);
-        $self->do_index_submissions($index_sth, \@chunk, $ids);
+        $self->do_insert_submissions($sth, \@chunk);
+        #$self->do_index_submissions($index_sth, \@chunk);
       } else {
         $remaining_submissions = \@chunk;
         last CHUNKER;

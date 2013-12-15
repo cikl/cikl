@@ -16,6 +16,14 @@ has 'apikey' => (
   required => 1
 );
 
+# Set this after the submission has been inserted.
+has 'datastore_id' => (
+  is => 'rw',
+  isa => 'Any',
+  predicate => 'has_datastore_id',
+  required => 0
+);
+
 has 'event' => (
   is => 'rw',
   isa => 'CIF::Models::Event',

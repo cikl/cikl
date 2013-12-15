@@ -39,6 +39,11 @@ sub process {
     die("Error while trying to decode submission: $err");
   }
 
+  if ($submission->has_datastore_id()) {
+    # TODO : Something smarter here?
+    return(0, "submission_response", $self->codec->content_type(), 0);
+  }
+
   my $group = $submission->event->group();
   my $apikey = $submission->apikey();
   my $auth = $self->auth->authorized_write($apikey, $group);
