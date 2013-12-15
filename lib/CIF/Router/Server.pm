@@ -10,6 +10,7 @@ use CIF::Router::ServiceRole;
 use Config::Simple;
 use Mouse;
 use namespace::autoclean;
+use CIF qw/init_logging/;
 
 use CIF qw/debug init_logging generate_uuid_ns/;
 
@@ -43,6 +44,12 @@ has 'starttime' => (
   init_arg => undef,
   default => sub {time()}
 );
+
+sub BUILD {
+  my $self = shift;
+  my $router_config = $self->config->block('router');
+  init_logging($router_config->{'debug'} || 0);
+}
 
 sub run {
   my $self = shift;
