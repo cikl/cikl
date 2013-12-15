@@ -38,19 +38,19 @@ BEGIN {
 }
 
 use Getopt::Long;
-use CIF::Router::Server;
+use CIF::Router::ServerFactory;
 use Pod::Usage;
 use CIF qw/debug/;
 
 my $help;
 my $man;
-my $config = $ENV{'HOME'}.'/.cif';
+my $config_file = $ENV{'HOME'}.'/.cif';
 
 Getopt::Long::Configure ("bundling");
 GetOptions(
   'help|?|h' => \$help, 
   'man' => \$man,
-  'config|C=s' => \$config,
+  'config|C=s' => \$config_file,
 ) or pod2usage(2);
 
 pod2usage(1) if $help;
@@ -66,7 +66,7 @@ if ($#ARGV > 0) {
 
 my $mode = shift(@ARGV);
 
-my $server = CIF::Router::Server->new($mode, $config);
+my $server = CIF::Router::ServerFactory->instantiate($mode, $config_file);
 
 $SIG{INT} = sub {
   debug("Caught interrupt. Stopping server.");
