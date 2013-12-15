@@ -197,7 +197,7 @@ sub _handle_msg {
 sub _init_queue {
   my $self = shift;
   my $channel = shift;
-  y $config = shift;
+  my $config = shift;
 
   my $result = $channel->declare_queue(
     queue => $config->{queue_name},
