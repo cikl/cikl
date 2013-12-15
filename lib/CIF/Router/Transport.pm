@@ -4,9 +4,6 @@ use strict;
 use warnings;
 use Scalar::Util qw(blessed);
 use Carp;
-use Module::Pluggable search_path => [__PACKAGE__], require => 1, 
-  on_require_error => \&croak;
-__PACKAGE__->plugins();
 
 sub new {
     my $class = shift;

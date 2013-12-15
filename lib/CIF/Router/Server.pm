@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use AnyEvent;
 use Coro;
+use Coro::AnyEvent;
 use CIF::Router::Transport;
 use CIF::Router::ServiceRole;
 use Config::Simple;
