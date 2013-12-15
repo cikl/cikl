@@ -51,13 +51,12 @@ EOS
 postamble <<EOS
 
 create_tables:
-\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/00_archive.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/datastore.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/auth.sql
+\t\$(PSQLX) -d \$(DB_NAME) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -f schemas/Pg/indexing.sql
 
 create_db:
 \t\$(PSQLX) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -c 'CREATE DATABASE \$(DB_NAME)'
-
-load_schema:
-\t\$(PSQLX) -U \$(DB_USER) -h \$(DB_HOST) -p \$(DB_PORT) -d \$(DB_NAME) -f 'schemas/schema.sql'
 
 initdb: create_db create_tables
 

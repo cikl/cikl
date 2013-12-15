@@ -1,1 +1,1 @@
-TRUNCATE  archive;
+TRUNCATE  datastore, indexing;

@@ -70,6 +70,11 @@ FROM
 WHERE m.user_id = ?;
 };
 
+use constant SQL_GET_DATA_BY_IDS => q{
+SELECT data FROM datastore WHERE id = ANY(?);
+};
+
+
 has 'dbh' => (
   is => 'ro',
   isa => 'DBI::db',
@@ -86,11 +91,23 @@ sub build_insert_event_sql {
   my $count = shift;
   my @values;
   for (my $i = 0; $i < $count; $i++) {
-    push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
+     push(@values, "(?)");
   }
-  return "INSERT INTO archive (data,group_id,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
+  return "INSERT INTO datastore (data) VALUES " . 
+    join(",", @values) . 
+    ' RETURNING id;';
+}
+
+sub build_index_event_sql {
+  my $count = shift;
+  my @values;
+  for (my $i = 0; $i < $count; $i++) {
+     push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
+  }
+  return "INSERT INTO indexing (id,group_id,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
     join(",", @values) . ';';
 }
+
 
 has "queued_events" => (
   traits => ['Array'],
@@ -116,6 +133,13 @@ has 'get_group_id_sth' => (
   default => sub { $_[0]->dbh->prepare(SQL_GET_GROUP_ID_MAPPING) }
 );
 
+has 'get_data_by_ids_sth' => (
+  is => 'ro',
+  #isa => ,
+  init_arg => undef,
+  lazy => 1,
+  default => sub { $_[0]->dbh->prepare(SQL_GET_DATA_BY_IDS) }
+);
 has 'get_user_info_sth' => (
   is => 'ro',
   #isa => ,
@@ -148,12 +172,29 @@ has 'inserter_sth_map' => (
   builder => '_build_inserters'
 );
 
+has 'indexer_sth_map' => (
+  is => 'ro',
+  isa => 'HashRef',
+  init_arg => undef,
+  lazy => 1,
+  builder => '_build_indexers'
+);
+
 sub _build_inserters {
   my $self = shift;
   my $column = shift;
   my $ret = {};
   foreach my $count (INDEX_SIZES) {
     $ret->{$count} = $self->dbh->prepare(build_insert_event_sql($count)),
+  }
+  return $ret;
+}
+
+sub _build_indexers {
+  my $self = shift;
+  my $ret = {};
+  foreach my $count (INDEX_SIZES) {
+    $ret->{$count} = $self->dbh->prepare(build_index_event_sql($count)),
   }
   return $ret;
 }
@@ -191,7 +232,32 @@ sub do_insert_events {
   my $events = shift;
   my @values;
   foreach my $value_ref (@$events) {
-    my ($group_id, $event, $event_json) = @$value_ref;
+    my (undef, undef, $event_json) = @$value_ref;
+    push(@values, 
+      $event_json, 
+    );
+  }
+  $sth->execute(@values) or die($self->dbh->errstr);
+
+  my $ids = $sth->fetchall_arrayref();
+
+  # Map out only the id column;
+  $ids = [map { $_->[0]; } @$ids];
+
+  return $ids;
+}
+
+sub do_index_events {
+  my $self = shift;
+  my $sth = shift;
+  my $event_data = shift;
+  my $ids = shift;
+  my @values;
+  my $num_events = scalar(@$event_data);
+  for (my $i = 0; $i < $num_events; $i++) {
+    my ($group_id, $event, undef) = @{$event_data->[$i]};
+    my $id = $ids->[$i];
+
     my $addresses = {};
     foreach my $address (@{$event->addresses()}) {
       my $index = INDEX_TYPE_MAP->{$address->type()} 
@@ -200,7 +266,7 @@ sub do_insert_events {
       push(@$x, $address->value());
     }
     push(@values, 
-      $event_json, 
+      $id,
       $group_id, 
       $event->detecttime, 
       $event->reporttime,
@@ -220,7 +286,9 @@ sub _insert_events {
   my $self = shift;
   my $events = shift;
   my $sths = $self->inserter_sth_map;
+  my $index_sths = $self->indexer_sth_map;
   my $sth;
+  my $index_sth;
   my $chunk_size;
   my $it;
   my $num_events = scalar(@$events);
@@ -237,11 +305,13 @@ sub _insert_events {
       die("Undefined chunk size!");
     }
     $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
+    $index_sth = $index_sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
     $it = natatime($chunk_size, @$events);
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
-        $self->do_insert_events($sth, \@chunk);
+        my $ids = $self->do_insert_events($sth, \@chunk);
+        $self->do_index_events($index_sth, \@chunk, $ids);
       } else {
         $remaining_events = \@chunk;
         last CHUNKER;
@@ -265,6 +335,7 @@ sub flush {
   $dbh->begin_work() or die($dbh->errstr);
   try {
     $self->_insert_events($self->queued_events());
+
     $self->clear_queued_events();
     $dbh->commit();
   } catch {
@@ -440,8 +511,8 @@ sub search {
   }
 
   my ($stmt, @bind) = $sql->select(
-    -columns => ['data'],
-    -from => 'archive',
+    -columns => ['id'],
+    -from => 'indexing',
     -where => {-and => \@and},
 
     # TODO add limit handling. Don't want to pull the whole DB.
@@ -455,7 +526,14 @@ sub search {
 
   $sth->execute(@bind) or die($self->dbh->errstr);
 
-  my $event_json = $sth->fetchall_arrayref();
+  my $ids = $sth->fetchall_arrayref();
+  $ids = [ map { $_->[0] } @$ids ];
+  my $sth2 = $self->get_data_by_ids_sth();
+
+  #$sth2->execute($ids) or die($self->dbh->errstr);
+  $sth2->execute($ids) or die($self->dbh->errstr);
+  my $event_json = $sth2->fetchall_arrayref();
+
   # It's the first column of each row, so we map it down.
   $event_json =  [ map {$_->[0]} @$event_json ];
   return $event_json;
