@@ -29,20 +29,10 @@ has '_db_codec' => (
   default => sub {CIF::Codecs::JSON->new()}
 );
 
-sub BUILD {
-  my $self = shift;
-  $self->flusher->set_datastore_flush_coderef(
-    sub {
-      $self->sql->flush();
-    }
-  );
-}
-
 sub submit { 
   my $self = shift;
   my $submission = shift;
   $self->sql->queue_event($submission->event(), $submission->event_json());
-  $self->flusher->tick();
   return 1;
 }
 

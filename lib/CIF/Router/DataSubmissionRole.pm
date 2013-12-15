@@ -13,6 +13,21 @@ has 'datastore' => (
   required => 1
 );
 
+has 'flusher' => (
+  is => 'rw',
+  isa => 'CIF::DataStore::Flusher',
+  required => 1
+);
+
+sub BUILD {
+  my $self = shift;
+  $self->flusher->set_datastore_flush_coderef(
+    sub {
+      $self->datastore->flush();
+    }
+  );
+}
+
 after 'shutdown' => sub {
   my $self = shift;
   $self->datastore->shutdown();

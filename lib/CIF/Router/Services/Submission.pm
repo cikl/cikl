@@ -49,6 +49,8 @@ sub process {
 
   my $results = $self->datastore->submit($submission);
 
+  $self->flusher->tick();
+
   return($results, "submission_response", $self->codec->content_type(), 0);
 }
 
