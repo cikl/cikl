@@ -47,13 +47,15 @@ sub instantiate {
     my $datastore_config = $config->get_block('datastore');
     my $commit_interval = $datastore_config->{commit_interval} || 2;
     my $commit_size = $datastore_config->{commit_size} || 1000;
+    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+    $service_opts->{datastore} = $datastore;
+
     my $flusher = CIF::DataStore::AnyEventFlusher->new(
+      datastore => $datastore,
       commit_interval => $commit_interval,
       commit_size => $commit_size
     );
     $service_opts->{flusher} = $flusher;
-
-    $service_opts->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
   }
 
   my $service = $service_class->new(%$service_opts);

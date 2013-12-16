@@ -19,17 +19,9 @@ has 'flusher' => (
   required => 1
 );
 
-sub BUILD {
-  my $self = shift;
-  $self->flusher->set_datastore_flush_coderef(
-    sub {
-      $self->datastore->flush();
-    }
-  );
-}
-
 after 'shutdown' => sub {
   my $self = shift;
+  $self->flusher->flush();
   $self->datastore->shutdown();
 };
 

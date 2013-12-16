@@ -105,7 +105,6 @@ sub _build_indexers {
 
 sub shutdown {
   my $self = shift;
-  $self->flush();
   $self->dbh->disconnect();
 }
 
@@ -196,7 +195,7 @@ sub _insert_submissions {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
         $self->do_insert_submissions($sth, \@chunk);
-        #$self->do_index_submissions($index_sth, \@chunk);
+        $self->do_index_submissions($index_sth, \@chunk);
       } else {
         $remaining_submissions = \@chunk;
         last CHUNKER;
@@ -213,13 +212,14 @@ sub flush {
   my $self = shift;
   my $num_submissions = $self->num_queued_submissions();
   if ($num_submissions == 0) {
-    return;
+    return [];
   }
   my $err;
   my $dbh = $self->dbh;
+  my @submissions = @{$self->queued_submissions()};
   $dbh->begin_work() or die($dbh->errstr);
   try {
-    $self->_insert_submissions($self->queued_submissions());
+    $self->_insert_submissions(\@submissions);
 
     $self->clear_queued_submissions();
     $dbh->commit();
@@ -234,6 +234,7 @@ sub flush {
   }
   my $rate = $num_submissions  / $delta;
   debug("Events per second: $rate");
+  return \@submissions;
 }
 
 __PACKAGE__->meta->make_immutable();

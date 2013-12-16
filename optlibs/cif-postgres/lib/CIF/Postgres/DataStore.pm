@@ -38,7 +38,7 @@ sub submit {
 
 sub flush {
   my $self = shift;
-  $self->sql->flush();
+  return $self->sql->flush();
 }
 
 after "shutdown" => sub {

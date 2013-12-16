@@ -6,12 +6,13 @@ use AnyEvent;
 use Coro;
 use Mouse;
 use namespace::autoclean;
+use CIF::DataStore::Role;
+use CIF qw/debug/;
 
-has 'datastore_flush_coderef' => (
+has 'datastore' => (
   is => 'ro',
-  writer => "set_datastore_flush_coderef",
-  isa => 'CodeRef',
-  required => 0
+  isa => 'CIF::DataStore::Role',
+  required => 1
 );
 
 has 'flush_callbacks' => (
@@ -49,13 +50,14 @@ sub flush {
   return if ($self->num_inserts == 0);
   my $num_inserts = $self->num_inserts;
   $self->num_inserts(0);
-  if (my $dcb = $self->datastore_flush_coderef()) {
-    $dcb->($num_inserts);
-  }
+
+  my $submissions = $self->datastore->flush($num_inserts);
 
   foreach my $cb (@{$self->flush_callbacks()}) {
-    $cb->($num_inserts);
+    $cb->($submissions);
   }
+
+  return $submissions;
 }
 
 sub tick {

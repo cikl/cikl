@@ -6,8 +6,6 @@ use CIF::DataStore::Flusher ();
 use namespace::autoclean;
 
 sub shutdown {
-  my $self = shift;
-  $self->flush();
 }
 
 requires 'submit';
