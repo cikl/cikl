@@ -3,7 +3,7 @@ use base 'CIF::Client::Transport';
 
 use strict;
 use warnings;
-use CIF::DataStore::SimpleFlusher;
+use CIF::Util::Flusher;
 use CIF::DataStore::Factory;
 use CIF::Authentication::Factory;
 use CIF::QueryHandler::Factory;
@@ -20,12 +20,12 @@ sub new {
 
     my $datastore_config = $self->get_global_config()->get_block('datastore');
 
-    my $flusher = CIF::DataStore::SimpleFlusher->new(
+    $self->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
+    my $flusher = CIF::Util::Flusher->new(
+      flushable => $self->{datastore},
       commit_interval => $datastore_config->{commit_interval} || 2,
       commit_size => $datastore_config->{commit_size} || 1000);
-
-    $datastore_config->{flusher} = $flusher;
-    $self->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
+    $self->{flusher} = $flusher;
 
     my $auth_config = $self->get_global_config()->get_block('auth');
     $self->{auth} = CIF::Authentication::Factory->instantiate($auth_config);
@@ -42,6 +42,9 @@ sub shutdown {
       # We've already shutdown.
       return 0;
     }
+
+    $self->{flusher}->flush();
+    $self->{flusher} = undef;
 
     foreach my $service (qw/auth query_handler datastore/) {
       if ($self->{$service}) {
@@ -81,6 +84,7 @@ sub submit {
       die("apikey '$apikey' is not authorized to write for group '$group'");
     }
     $self->{datastore}->submit($submission);
+    $self->{flusher}->tick();
     return undef;
 }
 

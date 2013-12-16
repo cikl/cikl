@@ -34,6 +34,9 @@ sub uptime {
   return time() - $self->starttime();
 }
 
+sub checkpoint {
+}
+
 sub shutdown {
 }
 

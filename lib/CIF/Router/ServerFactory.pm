@@ -3,10 +3,9 @@ use strict;
 use warnings;
 use CIF::Authentication::Factory;
 use CIF::Codecs::JSON;
-use CIF::DataStore::AnyEventFlusher;
+use CIF::Util::Flusher;
 use CIF::DataStore::Factory;
 use CIF::Indexer::Factory;
-use CIF::Indexer::AnyEventFlusher;
 use CIF::QueryHandler::Factory;
 use CIF::Router::Server;
 use CIF::Router::Services;
@@ -52,8 +51,8 @@ sub instantiate {
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
     $service_opts->{datastore} = $datastore;
 
-    my $flusher = CIF::DataStore::AnyEventFlusher->new(
-      datastore => $datastore,
+    my $flusher = CIF::Util::Flusher->new(
+      flushable => $datastore,
       commit_interval => $commit_interval,
       commit_size => $commit_size
     );
@@ -67,8 +66,8 @@ sub instantiate {
     my $indexer = CIF::Indexer::Factory->instantiate($indexer_config);
     $service_opts->{indexer} = $indexer;
 
-    my $flusher = CIF::Indexer::AnyEventFlusher->new(
-      indexer => $indexer,
+    my $flusher = CIF::Util::Flusher->new(
+      flushable => $indexer,
       commit_interval => $commit_interval,
       commit_size => $commit_size
     );

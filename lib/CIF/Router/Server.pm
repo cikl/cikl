@@ -58,6 +58,15 @@ sub run {
 
   $self->{cv} = AnyEvent->condvar;
 
+  my $checkpoint_timer = AnyEvent->timer(
+    after => 0.1,
+    interval => 0.1,
+    cb => sub {
+      $self->service->checkpoint();
+      $self->control_service->checkpoint();
+    }
+  );
+
   my $thr = async {
     $self->{cv}->recv();
     $self->{cv} = undef;
