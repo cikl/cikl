@@ -7,11 +7,17 @@ use namespace::autoclean;
 
 with "CIF::Util::Flushable";
 
+requires 'index';
+
 sub shutdown {
 }
 
-requires 'index';
+sub checkpoint {
+}
 
+after 'index' => sub {
+  $_[0]->flusher->tick();
+};
 1;
 
 

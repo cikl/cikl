@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use CIF::Authentication::Factory;
 use CIF::Codecs::JSON;
-use CIF::Util::Flusher;
 use CIF::DataStore::Factory;
 use CIF::Indexer::Factory;
 use CIF::QueryHandler::Factory;
@@ -50,13 +49,6 @@ sub instantiate {
     my $commit_size = $datastore_config->{commit_size} || 1000;
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
     $service_opts->{datastore} = $datastore;
-
-    my $flusher = CIF::Util::Flusher->new(
-      flushable => $datastore,
-      commit_interval => $commit_interval,
-      commit_size => $commit_size
-    );
-    $service_opts->{flusher} = $flusher;
   }
 
   if ($service_class->does("CIF::Router::IndexerRole")) {
@@ -65,13 +57,6 @@ sub instantiate {
     my $commit_size = $indexer_config->{commit_size} || 1000;
     my $indexer = CIF::Indexer::Factory->instantiate($indexer_config);
     $service_opts->{indexer} = $indexer;
-
-    my $flusher = CIF::Util::Flusher->new(
-      flushable => $indexer,
-      commit_interval => $commit_interval,
-      commit_size => $commit_size
-    );
-    $service_opts->{indexer_flusher} = $flusher;
   }
 
   my $service = $service_class->new(%$service_opts);

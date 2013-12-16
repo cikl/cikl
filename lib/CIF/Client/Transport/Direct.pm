@@ -3,8 +3,8 @@ use base 'CIF::Client::Transport';
 
 use strict;
 use warnings;
-use CIF::Util::Flusher;
 use CIF::DataStore::Factory;
+use CIF::Indexer::Factory;
 use CIF::Authentication::Factory;
 use CIF::QueryHandler::Factory;
 use CIF qw/debug/;
@@ -16,16 +16,20 @@ sub new {
     $args->{driver_name} = "direct";
     my $self = $class->SUPER::new($args);
 
-    my $last_flush = [gettimeofday];
-
     my $datastore_config = $self->get_global_config()->get_block('datastore');
+    my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
+    $self->{datastore} = $datastore;
 
-    $self->{datastore} = CIF::DataStore::Factory->instantiate($datastore_config);
-    my $flusher = CIF::Util::Flusher->new(
-      flushable => $self->{datastore},
-      commit_interval => $datastore_config->{commit_interval} || 2,
-      commit_size => $datastore_config->{commit_size} || 1000);
-    $self->{flusher} = $flusher;
+    my $indexer_config = $self->get_global_config()->get_block('indexer');
+    my $indexer = CIF::Indexer::Factory->instantiate($indexer_config);
+    $self->{indexer} = $indexer;
+
+    $datastore->add_flush_callback(sub {
+        my $submissions = shift;
+        foreach my $submission (@$submissions) {
+          $indexer->index($submission);
+        }
+      });
 
     my $auth_config = $self->get_global_config()->get_block('auth');
     $self->{auth} = CIF::Authentication::Factory->instantiate($auth_config);
@@ -43,10 +47,7 @@ sub shutdown {
       return 0;
     }
 
-    $self->{flusher}->flush();
-    $self->{flusher} = undef;
-
-    foreach my $service (qw/auth query_handler datastore/) {
+    foreach my $service (qw/auth query_handler indexer datastore/) {
       if ($self->{$service}) {
         $self->{$service}->shutdown();
         $self->{$service} = undef;
@@ -84,7 +85,6 @@ sub submit {
       die("apikey '$apikey' is not authorized to write for group '$group'");
     }
     $self->{datastore}->submit($submission);
-    $self->{flusher}->tick();
     return undef;
 }
 

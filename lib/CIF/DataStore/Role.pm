@@ -7,10 +7,18 @@ use namespace::autoclean;
 
 with 'CIF::Util::Flushable';
 
+requires 'submit';
+
 sub shutdown {
 }
 
-requires 'submit';
+sub checkpoint {
+}
+
+after 'submit' => sub {
+  $_[0]->flusher->tick();
+};
+
 
 1;
 

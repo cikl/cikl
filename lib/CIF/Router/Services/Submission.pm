@@ -31,13 +31,11 @@ sub queue_is_durable {
 
 sub BUILD {
   my $self = shift;
-  $self->flusher->add_flush_callback(sub {
+  $self->datastore->add_flush_callback(sub {
       my $submissions = shift;
       my $indexer = $self->indexer;
-      my $flusher = $self->indexer_flusher;
       foreach my $submission (@$submissions) {
         $indexer->index($submission);
-        $flusher->tick();
       }
     });
 }
@@ -70,8 +68,6 @@ sub process {
   }
 
   my $results = $self->datastore->submit($submission);
-
-  $self->flusher->tick();
 
   return($results, "submission_response", $self->codec->content_type(), 0);
 }
