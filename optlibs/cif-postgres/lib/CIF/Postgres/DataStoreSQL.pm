@@ -156,7 +156,7 @@ sub flush {
     die($err);
   }
   my $rate = $num_submissions  / $delta;
-  debug("Insert Events per second: $rate");
+  debug("Inserted $num_submissions, Submissions per second: $rate");
   return \@submissions;
 }
 
