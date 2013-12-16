@@ -4,12 +4,16 @@ use strict;
 use warnings;
 use CIF::Router::Constants;
 use CIF::Router::ServiceRole;
+use CIF::Router::AuthenticatedRole;
+use CIF::Router::DataSubmissionRole;
+use CIF::Router::IndexerRole;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
 with 'CIF::Router::ServiceRole', 
      'CIF::Router::AuthenticatedRole', 
-     'CIF::Router::DataSubmissionRole';
+     'CIF::Router::DataSubmissionRole',
+     'CIF::Router::IndexerRole' ;
 
 use namespace::autoclean;
 
@@ -23,6 +27,19 @@ sub queue_should_autodelete {
 # Should return 1 or 0
 sub queue_is_durable {
   return 1;
+}
+
+sub BUILD {
+  my $self = shift;
+  $self->flusher->add_flush_callback(sub {
+      my $submissions = shift;
+      my $indexer = $self->indexer;
+      my $flusher = $self->indexer_flusher;
+      foreach my $submission (@$submissions) {
+        $indexer->index($submission);
+        $flusher->tick();
+      }
+    });
 }
 
 sub process {

@@ -1,4 +1,4 @@
-package CIF::Postgres::DataStoreSQL;
+package CIF::Postgres::IndexerSQL;
 use strict;
 use warnings;
 use Try::Tiny;
@@ -9,6 +9,14 @@ use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
 
 use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
+use constant INDEX_TYPE_MAP => {
+  asn => 'asn',
+  email => 'email',
+  fqdn => 'fqdn',
+  ipv4 => 'cidr',
+  ipv4_cidr => 'cidr',
+  url => 'url'
+};
 
 has 'dbh' => (
   is => 'ro',
@@ -22,15 +30,14 @@ has 'last_flush' => (
   default => sub { [gettimeofday] } 
 );
 
-sub build_insert_event_sql {
+sub build_index_event_sql {
   my $count = shift;
   my @values;
   for (my $i = 0; $i < $count; $i++) {
-     push(@values, "(?)");
+     push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
   }
-  return "INSERT INTO datastore (data) VALUES " . 
-    join(",", @values) . 
-    ' RETURNING id;';
+  return "INSERT INTO indexing (id,group_name,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
+    join(",", @values) . ';';
 }
 
 has "queued_submissions" => (
@@ -49,20 +56,19 @@ sub queue_submission {
   push(@{$self->queued_submissions}, shift);
 }
 
-has 'inserter_sth_map' => (
+has 'indexer_sth_map' => (
   is => 'ro',
   isa => 'HashRef',
   init_arg => undef,
   lazy => 1,
-  builder => '_build_inserters'
+  builder => '_build_indexers'
 );
 
-sub _build_inserters {
+sub _build_indexers {
   my $self = shift;
-  my $column = shift;
   my $ret = {};
   foreach my $count (INDEX_SIZES) {
-    $ret->{$count} = $self->dbh->prepare(build_insert_event_sql($count)),
+    $ret->{$count} = $self->dbh->prepare(build_index_event_sql($count)),
   }
   return $ret;
 }
@@ -72,32 +78,46 @@ sub shutdown {
   $self->dbh->disconnect();
 }
 
-sub do_insert_submissions {
+sub do_index_submissions {
   my $self = shift;
   my $sth = shift;
   my $submissions = shift;
   my @values;
   foreach my $submission (@$submissions) {
+    my $event = $submission->event();
+    my $id = $submission->datastore_id();
+    if (!defined($id)) {
+      die("Can't index submission that does not have a submission id");
+    }
+
+    my $addresses = {};
+    foreach my $address (@{$event->addresses()}) {
+      my $index = INDEX_TYPE_MAP->{$address->type()} 
+          or die("Unknown type: " . $address->type());
+      my $x = ($addresses->{$index} ||= []);
+      push(@$x, $address->value());
+    }
     push(@values, 
-      $submission->event_json, 
+      $id,
+      $event->group, 
+      $event->detecttime, 
+      $event->reporttime,
+      $event->assessment,
+      $event->confidence,
+      $addresses->{asn},
+      $addresses->{cidr},
+      $addresses->{email},
+      $addresses->{fqdn},
+      $addresses->{url},
     );
   }
   $sth->execute(@values) or die($self->dbh->errstr);
-
-  my $ids = $sth->fetchall_arrayref();
-
-  # Map out only the id column;
-
-  my $num_submissions = scalar(@$submissions);
-  for (my $i = 0; $i < $num_submissions; $i++) {
-    $submissions->[$i]->datastore_id($ids->[$i]->[0]);
-  }
 }
 
-sub _insert_submissions {
+sub _index_submissions {
   my $self = shift;
   my $submissions = shift;
-  my $sths = $self->inserter_sth_map;
+  my $sths = $self->indexer_sth_map;
   my $sth;
   my $chunk_size;
   my $it;
@@ -119,7 +139,7 @@ sub _insert_submissions {
     CHUNKER: while (my @chunk = $it->()) {
       my $x = scalar(@chunk);
       if ($x == $chunk_size) {
-        $self->do_insert_submissions($sth, \@chunk);
+        $self->do_index_submissions($sth, \@chunk);
       } else {
         $remaining_submissions = \@chunk;
         last CHUNKER;
@@ -139,11 +159,9 @@ sub flush {
   }
   my $err;
   my $dbh = $self->dbh;
-  my @submissions = @{$self->queued_submissions()};
   $dbh->begin_work() or die($dbh->errstr);
   try {
-    $self->_insert_submissions(\@submissions);
-
+    $self->_index_submissions($self->queued_submissions);
     $self->clear_queued_submissions();
     $dbh->commit();
   } catch {
@@ -156,11 +174,11 @@ sub flush {
     die($err);
   }
   my $rate = $num_submissions  / $delta;
-  debug("Insert Events per second: $rate");
-  return \@submissions;
+  debug("Index  Events per second: $rate");
 }
 
 __PACKAGE__->meta->make_immutable();
 
 1;
+
 

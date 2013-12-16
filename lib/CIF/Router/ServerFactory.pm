@@ -5,6 +5,8 @@ use CIF::Authentication::Factory;
 use CIF::Codecs::JSON;
 use CIF::DataStore::AnyEventFlusher;
 use CIF::DataStore::Factory;
+use CIF::Indexer::Factory;
+use CIF::Indexer::AnyEventFlusher;
 use CIF::QueryHandler::Factory;
 use CIF::Router::Server;
 use CIF::Router::Services;
@@ -56,6 +58,21 @@ sub instantiate {
       commit_size => $commit_size
     );
     $service_opts->{flusher} = $flusher;
+  }
+
+  if ($service_class->does("CIF::Router::IndexerRole")) {
+    my $indexer_config = $config->get_block('indexer');
+    my $commit_interval = $indexer_config->{commit_interval} || 2;
+    my $commit_size = $indexer_config->{commit_size} || 1000;
+    my $indexer = CIF::Indexer::Factory->instantiate($indexer_config);
+    $service_opts->{indexer} = $indexer;
+
+    my $flusher = CIF::Indexer::AnyEventFlusher->new(
+      indexer => $indexer,
+      commit_interval => $commit_interval,
+      commit_size => $commit_size
+    );
+    $service_opts->{indexer_flusher} = $flusher;
   }
 
   my $service = $service_class->new(%$service_opts);
