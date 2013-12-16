@@ -17,6 +17,10 @@ sub as_string {
   return $self->value;
 }
 
+sub to_hash {
+  return { type => $_[0]->type, value => $_[0]->value };
+}
+
 sub normalize_value {
   my $class = shift;
   return shift;

@@ -20,9 +20,18 @@ sub _format_timestamp {
   return($t->ymd().'T'.$t->hms().'Z');
 }
 
+sub _format_address{
+  my $address = shift;
+  if (!defined($address)) {
+    return '';
+  }
+  return $address->value();
+}
+
 use constant FIELD_MAP => {
   detecttime => \&_format_timestamp,
   reporttime => \&_format_timestamp,
+  address => \&_format_address,
 };
 
 sub new {

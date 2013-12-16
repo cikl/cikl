@@ -8,7 +8,7 @@ use Module::Pluggable search_path => "CIF::Models::Address", require => 1,
 use namespace::autoclean;
 require Exporter;
 our @ISA = qw/Exporter/;
-our @EXPORT_OK = qw/create_address create_addresses/;
+our @EXPORT_OK = qw/address_from_protoevent create_address create_addresses/;
 
 my $type_map = _build_type_map();
 
@@ -46,6 +46,20 @@ sub create_addresses {
     }
   }
   return \@ret;
+}
+
+sub address_from_protoevent {
+  my $protoevent = shift; # hashref
+  my $address;
+  foreach my $type (keys(%{$type_map})) {
+    if (my $value = delete($protoevent->{$type})) {
+      if (defined($address)) {
+        die("An event can only have one address! Has: " . $address->type() . " and $type");
+      }
+      $address = create_address($type, $value);
+    }
+  }
+  return $address;
 }
 
 1;

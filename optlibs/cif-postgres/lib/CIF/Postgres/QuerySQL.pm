@@ -59,8 +59,8 @@ sub _sql_overlaps_cidr {
 
   my $label = $self->_quote($field);
   my $placeholder = $self->_convert('?');
-  my $sql = "${placeholder}::cidr >>= ANY($label)" . 
-    " OR ${placeholder}::cidr <<= ANY($label)";
+  my $sql = "${placeholder}::cidr >>= $label" . 
+    " OR ${placeholder}::cidr <<= $label";
   my @bind = $self->_bindtype($field, $cidr, $cidr);
   return ($sql, @bind);
 }
@@ -117,17 +117,28 @@ sub search {
     }
   }
 
-  if (@asns >= 1) {
-    push(@address_criteria, {asn => {-array_contains => \@asns}});
+  if (@asns > 1) {
+    push(@address_criteria, {asn => {-in => \@asns}});
+  } elsif (@asns == 1) {
+    push(@address_criteria, {asn => $asns[0]});
   }
-  if (@emails >= 1) {
-    push(@address_criteria, {email => {-array_contains => \@emails}});
+
+  if (@emails > 1) {
+    push(@address_criteria, {email => {-in => \@emails}});
+  } elsif (@emails == 1) {
+    push(@address_criteria, {email => $emails[0]});
   }
-  if (@fqdns >= 1) {
-    push(@address_criteria, {fqdn => {-array_contains => \@fqdns}});
+
+  if (@fqdns > 1) {
+    push(@address_criteria, {fqdn => {-in => \@fqdns}});
+  } elsif (@fqdns == 1) {
+    push(@address_criteria, {fqdn => $fqdns[0]});
   }
-  if (@urls>= 1) {
-    push(@address_criteria, {url=> {-array_contains => \@urls}});
+
+  if (@urls > 1) {
+    push(@address_criteria, {url => {-in => \@urls}});
+  } elsif (@urls == 1) {
+    push(@address_criteria, {url => $urls[0]});
   }
 
   if (scalar(@address_criteria)) {

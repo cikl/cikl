@@ -11,11 +11,12 @@ CREATE TABLE indexing (
     created INT NOT NULL,
     assessment VARCHAR(64),
     confidence SMALLINT CHECK (confidence >= 0 AND confidence <= 100),
-    asn BIGINT[],
-    cidr cidr[],
-    email VARCHAR(320)[],
-    fqdn VARCHAR(255)[],
-    url VARCHAR(2048)[]
+
+    asn BIGINT,
+    cidr cidr,
+    email VARCHAR(320),
+    fqdn VARCHAR(255),
+    url VARCHAR(2048)
 );
 
 -- CREATE INDEX idx_indexing_uuid ON indexing (uuid);

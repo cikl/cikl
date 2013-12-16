@@ -31,9 +31,9 @@ has 'description' => (
   coerce => 1
 );
 
-has 'addresses' => (
+has 'address' => (
   is => 'rw',
-  isa => 'ArrayRef[CIF::Models::AddressRole]',
+  does => 'CIF::Models::AddressRole'
 );
 
 has 'detecttime' => (
@@ -79,28 +79,22 @@ has 'timestamp' => (is => 'rw');
 has 'cc' => (is => 'rw');
 has 'rir' => (is => 'rw');
 
-sub address {
-  my $self = shift;
-  if (my $address = $self->addresses->[0]) {
-    return $address->as_string();
-  }
-  return undef;
-}
-
 sub to_hash {
   my $ret = { %{$_[0]} };
-  $ret->{addresses}  = [ map {
-        {type => $_->type, value => $_->value()}
-      } @{$ret->{addresses}} ];
-
+  if ($ret->{address}) {
+    $ret->{address} = $ret->{address}->to_hash();
+  }
   return $ret;
 }
 
 sub from_hash {
   my $class = shift;
   my $data = shift;
-  my @addresses = map {create_address($_->{type}, $_->{value});} @{$data->{addresses} || []};
-  $data->{addresses} = \@addresses;
+  my $address = $data->{address};
+  if ($address) {
+    $address = create_address($address->{type}, $address->{value});
+    $data->{address} = $address;
+  }
   return $class->new($data);
 }
 

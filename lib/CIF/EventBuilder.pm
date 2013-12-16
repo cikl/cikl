@@ -2,7 +2,7 @@ package CIF::EventBuilder;
 use strict;
 use warnings;
 use CIF::Models::Event;
-use CIF::AddressBuilder qw/create_addresses/;
+use CIF::AddressBuilder qw/address_from_protoevent/;
 use Mouse;
 use namespace::autoclean;
 use Try::Tiny;
@@ -59,11 +59,7 @@ sub normalize {
   $r->{reporttime} = $self->refresh ? $now : 
       normalize_timestamp($r->{reporttime}, $now);
 
-  $r->{addresses} = [
-    @{$r->{addresses} || []}, 
-    @{create_addresses($r)}
-  ];
-
+  $r->{address} = address_from_protoevent($r);
   # MPR: Disabling value expansion, for now.
 #  foreach my $key (keys %$r){
 #    my $v = $r->{$key};

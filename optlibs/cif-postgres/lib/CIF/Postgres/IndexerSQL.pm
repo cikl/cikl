@@ -89,14 +89,25 @@ sub do_index_submissions {
     if (!defined($id)) {
       die("Can't index submission that does not have a submission id");
     }
+    my ($asn, $cidr, $email, $fqdn, $url);
 
-    my $addresses = {};
-    foreach my $address (@{$event->addresses()}) {
-      my $index = INDEX_TYPE_MAP->{$address->type()} 
-          or die("Unknown type: " . $address->type());
-      my $x = ($addresses->{$index} ||= []);
-      push(@$x, $address->value());
+    if (my $address = $event->address) {
+      my $type = $address->type();
+      if ($type eq 'asn') {
+        $asn = $address->value();
+      } elsif ($type eq 'ipv4') {
+        $cidr = $address->value();
+      } elsif ($type eq 'ipv4_cidr') {
+        $cidr = $address->value();
+      } elsif ($type eq 'email') {
+        $email = $address->value();
+      } elsif ($type eq 'fqdn' ) {
+        $fqdn = $address->value();
+      } elsif ($type eq 'url' ) {
+        $url = $address->value();
+      }
     }
+
     push(@values, 
       $id,
       $event->group, 
@@ -104,11 +115,11 @@ sub do_index_submissions {
       $event->reporttime,
       $event->assessment,
       $event->confidence,
-      $addresses->{asn},
-      $addresses->{cidr},
-      $addresses->{email},
-      $addresses->{fqdn},
-      $addresses->{url},
+      $asn,
+      $cidr,
+      $email,
+      $fqdn,
+      $url,
     );
   }
   $sth->execute(@values) or die($self->dbh->errstr);
