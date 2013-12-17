@@ -4,11 +4,10 @@ use warnings;
 use Try::Tiny;
 use Mouse;
 use CIF qw/debug/;
-use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
+use Text::CSV_XS;
 
-use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
 use constant INDEX_TYPE_MAP => {
   asn => 'asn',
   email => 'email',
@@ -24,21 +23,19 @@ has 'dbh' => (
   required => 1
 );
 
+has 'csv' => (
+  is => 'ro',
+  isa => 'Text::CSV_XS',
+  init_arg => undef,
+  required => 1,
+  default => sub { Text::CSV_XS->new({eol => "\n"}) or die(Text::CSV_XS->error_diag); }
+);
+
 has 'last_flush' => (
   is => 'rw',
   init_arg => undef,
   default => sub { [gettimeofday] } 
 );
-
-sub build_index_event_sql {
-  my $count = shift;
-  my @values;
-  for (my $i = 0; $i < $count; $i++) {
-     push(@values, "(?,?,?,?,?,?,?,?,?,?,?)");
-  }
-  return "INSERT INTO indexing (id,group_name,created,reporttime,assessment,confidence,asn,cidr,email,fqdn,url) VALUES " . 
-    join(",", @values) . ';';
-}
 
 has "queued_submissions" => (
   traits => ['Array'],
@@ -51,26 +48,67 @@ has "queued_submissions" => (
   }
 );
 
-sub queue_submission {
-  my $self = shift;
-  push(@{$self->queued_submissions}, shift);
+has "index_main_copy_sth" => (
+  is => 'ro',
+  lazy => 1,
+  default => sub { $_[0]->dbh->prepare(
+      'COPY cif_index_main (id,group_name,created,reporttime,assessment,confidence) 
+      FROM STDIN WITH CSV'); }
+);
+for my $INDEX (qw(asn cidr email fqdn url)) {
+  has "${INDEX}s" => (
+    traits => ['Array'],
+    is => 'ro',
+    isa => 'ArrayRef',
+    default => sub {[]},
+    handles => {
+      "num_${INDEX}s" => 'count',
+      "clear_${INDEX}s" => 'clear'
+    }
+  );
+
+  has "index_${INDEX}_copy_sth" => (
+    is => 'ro',
+    lazy => 1,
+    default => sub { $_[0]->dbh->prepare(
+        "COPY cif_index_${INDEX} (id, ${INDEX}) FROM STDIN WITH CSV"); }
+  );
 }
 
-has 'indexer_sth_map' => (
-  is => 'ro',
-  isa => 'HashRef',
-  init_arg => undef,
-  lazy => 1,
-  builder => '_build_indexers'
-);
-
-sub _build_indexers {
+sub queue_submission {
   my $self = shift;
-  my $ret = {};
-  foreach my $count (INDEX_SIZES) {
-    $ret->{$count} = $self->dbh->prepare(build_index_event_sql($count)),
+  my $submission = shift;
+  my $event = $submission->event();
+  my $id = $submission->datastore_id();
+  if (!defined($id)) {
+    die("datastore_id is required for indexing!");
   }
-  return $ret;
+
+  if (my $address = $event->address()) {
+    if (my $index = INDEX_TYPE_MAP->{$address->type()}) {
+      if ($index eq 'asn') {
+        push(@{$self->asns}, [$id, $address->value()])
+      } elsif ($index eq 'cidr') {
+        push(@{$self->cidrs}, [$id, $address->value()])
+      } elsif ($index eq 'email') {
+        push(@{$self->emails}, [$id, $address->value()])
+      } elsif ($index eq 'fqdn') {
+        push(@{$self->fqdns}, [$id, $address->value()])
+      } elsif ($index eq 'url') {
+        push(@{$self->urls}, [$id, $address->value()])
+      }
+      #QUEUE_ADDRESS->{$index}->($self, $id, $address->value());
+    };
+  }
+  push(@{$self->queued_submissions}, 
+    [
+      $id,
+      $event->group, 
+      $event->detecttime, 
+      $event->reporttime,
+      $event->assessment,
+      $event->confidence
+    ]);
 }
 
 sub shutdown {
@@ -78,114 +116,72 @@ sub shutdown {
   $self->dbh->disconnect();
 }
 
-sub do_index_submissions {
+sub _insert_via_copy {
   my $self = shift;
+  my $rows = shift;
   my $sth = shift;
-  my $submissions = shift;
-  my @values;
-  foreach my $submission (@$submissions) {
-    my $event = $submission->event();
-    my $id = $submission->datastore_id();
-    if (!defined($id)) {
-      die("Can't index submission that does not have a submission id");
-    }
-    my ($asn, $cidr, $email, $fqdn, $url);
-
-    if (my $address = $event->address) {
-      my $type = $address->type();
-      if ($type eq 'asn') {
-        $asn = $address->value();
-      } elsif ($type eq 'ipv4') {
-        $cidr = $address->value();
-      } elsif ($type eq 'ipv4_cidr') {
-        $cidr = $address->value();
-      } elsif ($type eq 'email') {
-        $email = $address->value();
-      } elsif ($type eq 'fqdn' ) {
-        $fqdn = $address->value();
-      } elsif ($type eq 'url' ) {
-        $url = $address->value();
-      }
-    }
-
-    push(@values, 
-      $id,
-      $event->group, 
-      $event->detecttime, 
-      $event->reporttime,
-      $event->assessment,
-      $event->confidence,
-      $asn,
-      $cidr,
-      $email,
-      $fqdn,
-      $url,
-    );
+  my $dbh = $self->dbh;
+  $sth->execute() or die($dbh->errstr);
+  my $buffer = "";
+  my $csv = $self->csv();
+  open(my $io, ">", \$buffer) or die($!);
+  foreach my $row (@$rows) {
+    $csv->print($io,  $row);
+    #$dbh->pg_putline (join ("\t", @$row) . "\n");
   }
-  $sth->execute(@values) or die($self->dbh->errstr);
-}
-
-sub _index_submissions {
-  my $self = shift;
-  my $submissions = shift;
-  my $sths = $self->indexer_sth_map;
-  my $sth;
-  my $chunk_size;
-  my $it;
-  my $num_submissions = scalar(@$submissions);
-  my $remaining_submissions = [];
-
-  while ($num_submissions > 0) {
-    foreach my $sz (INDEX_SIZES) {
-      if ($num_submissions > $sz) {
-        $chunk_size = $sz;
-        last;
-      }
-    }
-    if (!defined($chunk_size)) {
-      die("Undefined chunk size!");
-    }
-    $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
-    $it = natatime($chunk_size, @$submissions);
-    CHUNKER: while (my @chunk = $it->()) {
-      my $x = scalar(@chunk);
-      if ($x == $chunk_size) {
-        $self->do_index_submissions($sth, \@chunk);
-      } else {
-        $remaining_submissions = \@chunk;
-        last CHUNKER;
-      }
-    }
-    $submissions = $remaining_submissions;
-    $remaining_submissions = [];
-    $num_submissions = scalar(@$submissions);
-  }
+  $dbh->pg_putcopydata($buffer);
+  $dbh->pg_endcopy;
+  close($io) or die($!);
 }
 
 sub flush {
   my $self = shift;
   my $num_submissions = $self->num_queued_submissions();
   if ($num_submissions == 0) {
-    return [];
+    return undef;
   }
   my $err;
   my $dbh = $self->dbh;
+  my $start = [gettimeofday];
   $dbh->begin_work() or die($dbh->errstr);
   try {
-    $self->_index_submissions($self->queued_submissions);
+    $self->_insert_via_copy($self->queued_submissions, $self->index_main_copy_sth);
     $self->clear_queued_submissions();
+    if ($self->num_asns()) {
+      $self->_insert_via_copy($self->asns(), $self->index_asn_copy_sth);
+      $self->clear_asns();
+    }
+    if ($self->num_cidrs()) {
+      $self->_insert_via_copy($self->cidrs(), $self->index_cidr_copy_sth);
+      $self->clear_cidrs();
+    }
+    if ($self->num_emails()) {
+      $self->_insert_via_copy($self->emails(), $self->index_email_copy_sth);
+      $self->clear_emails();
+    }
+    if ($self->num_fqdns()) {
+      $self->_insert_via_copy($self->fqdns(), $self->index_fqdn_copy_sth);
+      $self->clear_fqdns();
+    }
+    if ($self->num_urls()) {
+      $self->_insert_via_copy($self->urls(), $self->index_url_copy_sth);
+      $self->clear_urls();
+    }
     $dbh->commit();
   } catch {
     $err = shift;
     $dbh->rollback();
   };
   my $delta = tv_interval($self->last_flush);
+  my $delta_local = tv_interval($start);
   $self->last_flush([gettimeofday]);
   if ($err) {
     die($err);
   }
   my $rate = $num_submissions  / $delta;
-  debug("Index  Events per second: $rate");
+  my $rate_local = $num_submissions / $delta_local;
+  
+  debug("Index  Events per second: $rate / Local: $rate_local");
 }
 
 __PACKAGE__->meta->make_immutable();

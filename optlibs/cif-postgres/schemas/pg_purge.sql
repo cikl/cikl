@@ -1,1 +1,9 @@
-TRUNCATE  datastore, indexing;
+TRUNCATE  
+  datastore, 
+  cif_index_main,
+  cif_index_asn,
+  cif_index_cidr,
+  cif_index_email,
+  cif_index_fqdn,
+  cif_index_url
+;

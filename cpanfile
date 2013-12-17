@@ -46,6 +46,7 @@ requires 'SQL::Abstract::More', '1.17';
 requires 'Test::Class', '0.41';
 requires 'Test::Exception', '0.32';
 requires 'Text::CSV', '1.18';
+requires 'Text::CSV_XS';
 requires 'Text::Table', '1.127';
 requires 'Time::HiRes', '1.972101';
 requires 'Try::Tiny', '0.11';
