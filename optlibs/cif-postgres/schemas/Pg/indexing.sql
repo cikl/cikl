@@ -1,6 +1,7 @@
 set default_tablespace=:cif_default_tablespace;
 
 CREATE EXTENSION "btree_gin";
+CREATE EXTENSION "ip4r";
 
 DROP TABLE IF EXISTS cif_index_main CASCADE;
 
@@ -27,15 +28,15 @@ CREATE TABLE cif_index_asn (
     asn BIGINT NOT NULL
 );
 CREATE INDEX idx_cif_index_asn_id ON cif_index_asn (id);
-CREATE INDEX idx_cif_index_asn ON cif_index_asn USING GIN(asn);
+CREATE INDEX idx_cif_index_asn ON cif_index_asn (asn);
 
 DROP TABLE IF EXISTS cif_index_cidr CASCADE;
 CREATE TABLE cif_index_cidr (
     id BIGINT NOT NULL,
-    cidr CIDR NOT NULL
+    cidr iprange NOT NULL
 );
 CREATE INDEX idx_cif_index_cidr_id ON cif_index_cidr (id);
-CREATE INDEX idx_cif_index_cidr ON cif_index_cidr USING GIN(cidr);
+CREATE INDEX idx_cif_index_cidr ON cif_index_cidr USING GIST (cidr);
 
 DROP TABLE IF EXISTS cif_index_email CASCADE;
 CREATE TABLE cif_index_email (
@@ -43,7 +44,7 @@ CREATE TABLE cif_index_email (
     email VARCHAR(320) NOT NULL
 );
 CREATE INDEX idx_cif_index_email_id ON cif_index_email (id);
-CREATE INDEX idx_cif_index_email ON cif_index_email USING GIN(email);
+CREATE INDEX idx_cif_index_email ON cif_index_email (email);
 
 DROP TABLE IF EXISTS cif_index_fqdn CASCADE;
 CREATE TABLE cif_index_fqdn (
@@ -51,7 +52,7 @@ CREATE TABLE cif_index_fqdn (
     fqdn VARCHAR(255) NOT NULL
 );
 CREATE INDEX idx_cif_index_fqdn_id ON cif_index_fqdn (id);
-CREATE INDEX idx_cif_index_fqdn ON cif_index_fqdn USING GIN(fqdn);
+CREATE INDEX idx_cif_index_fqdn ON cif_index_fqdn (fqdn);
 
 DROP TABLE IF EXISTS cif_index_url CASCADE;
 CREATE TABLE cif_index_url (
@@ -59,4 +60,4 @@ CREATE TABLE cif_index_url (
     url VARCHAR(2048) NOT NULL
 );
 CREATE INDEX idx_cif_index_url_id ON cif_index_url (id);
-CREATE INDEX idx_cif_index_url ON cif_index_url USING GIN(url);
+CREATE INDEX idx_cif_index_url ON cif_index_url (url);

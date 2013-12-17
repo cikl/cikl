@@ -59,8 +59,7 @@ sub _sql_overlaps_cidr {
 
   my $label = $self->_quote($field);
   my $placeholder = $self->_convert('?');
-  my $sql = "${placeholder}::cidr >>= $label" . 
-    " OR ${placeholder}::cidr <<= $label";
+  my $sql = "$label && ${placeholder}"; 
   my @bind = $self->_bindtype($field, $cidr, $cidr);
   return ($sql, @bind);
 }
@@ -96,6 +95,7 @@ sub search {
   }
 
   my @asns;
+  my @cidrs;
   my @emails;
   my @fqdns;
   my @urls;
@@ -103,42 +103,78 @@ sub search {
   foreach my $op (@{$query->address_criteria}) {
     my $operator = $op->operator;
     if ($operator eq 'asn') {
-      push(@asns, $op->value());
+      push(@asns, {asn => $op->value()});
     } elsif ($operator eq 'email') {
-      push(@emails, $op->value());
+      push(@emails, {email => $op->value()});
     } elsif ($operator eq 'fqdn') {
-      push(@fqdns, $op->value());
+      push(@fqdns, {fqdn => $op->value()});
     } elsif ($operator eq 'url') {
-      push(@urls, $op->value());
+      push(@urls, {url => $op->value()});
     } elsif ($operator eq 'ip') {
-      push(@address_criteria, {cidr => {-overlaps_cidr => $op->value()}});
+      push(@cidrs, {cidr => {'&&' => $op->value()}});
     } else {
       die("unknown operator: " . $operator);
     }
   }
 
-  if (@asns > 1) {
-    push(@address_criteria, {asn => {-in => \@asns}});
-  } elsif (@asns == 1) {
-    push(@address_criteria, {asn => $asns[0]});
+  if (@asns >= 1) {
+    my ($sub_stmt, @sub_bind) = $sql->select(
+      -columns => ['id'],
+      -from => 'cif_index_asn',
+      -where => {-or => \@asns},
+
+      -limit => $query->limit, 
+      -order_by => [ '-id' ],
+    );
+    push(@address_criteria, {id => \["IN ($sub_stmt)" => @sub_bind]});
   }
 
-  if (@emails > 1) {
-    push(@address_criteria, {email => {-in => \@emails}});
-  } elsif (@emails == 1) {
-    push(@address_criteria, {email => $emails[0]});
+  if (@emails >= 1) {
+    my ($sub_stmt, @sub_bind) = $sql->select(
+      -columns => ['id'],
+      -from => 'cif_index_email',
+      -where => {-or => \@emails},
+
+      -limit => $query->limit, 
+      -order_by => [ '-id' ],
+    );
+    push(@address_criteria, {id => \["IN ($sub_stmt)" => @sub_bind]});
   }
 
-  if (@fqdns > 1) {
-    push(@address_criteria, {fqdn => {-in => \@fqdns}});
-  } elsif (@fqdns == 1) {
-    push(@address_criteria, {fqdn => $fqdns[0]});
+  if (@fqdns >= 1) {
+    my ($sub_stmt, @sub_bind) = $sql->select(
+      -columns => ['id'],
+      -from => 'cif_index_fqdn',
+      -where => {-or => \@fqdns},
+
+      -limit => $query->limit, 
+      -order_by => [ '-id' ],
+    );
+    push(@address_criteria, {id => \["IN ($sub_stmt)" => @sub_bind]});
   }
 
-  if (@urls > 1) {
-    push(@address_criteria, {url => {-in => \@urls}});
-  } elsif (@urls == 1) {
-    push(@address_criteria, {url => $urls[0]});
+  if (@urls >= 1) {
+    my ($sub_stmt, @sub_bind) = $sql->select(
+      -columns => ['id'],
+      -from => 'cif_index_url',
+      -where => {-or => \@urls},
+
+      -limit => $query->limit, 
+      -order_by => [ '-id' ],
+    );
+    push(@address_criteria, {id => \["IN ($sub_stmt)" => @sub_bind]});
+  }
+
+  if (@cidrs >= 1) {
+    my ($sub_stmt, @sub_bind) = $sql->select(
+      -columns => ['id'],
+      -from => 'cif_index_cidr',
+      -where => {-or => \@cidrs},
+
+      -limit => $query->limit, 
+      -order_by => [ '-id' ],
+    );
+    push(@address_criteria, {id => \["IN ($sub_stmt)" => @sub_bind]});
   }
 
   if (scalar(@address_criteria)) {
@@ -147,7 +183,7 @@ sub search {
 
   my ($stmt, @bind) = $sql->select(
     -columns => ['id'],
-    -from => 'indexing',
+    -from => 'cif_index_main',
     -where => {-and => \@and},
 
     # TODO add limit handling. Don't want to pull the whole DB.
