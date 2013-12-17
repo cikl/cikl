@@ -38,7 +38,7 @@ sub _add_range {
     push(@$arrayref, {$fieldname => {">=" => $range->min()}});
   }
   if (defined($range->max())) {
-    push(@$arrayref, {$fieldname => {">=" => $range->max()}});
+    push(@$arrayref, {$fieldname => {"<=" => $range->max()}});
   }
 }
 
