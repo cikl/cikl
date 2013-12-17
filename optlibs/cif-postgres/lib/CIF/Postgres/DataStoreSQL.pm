@@ -7,8 +7,7 @@ use CIF qw/debug/;
 use List::MoreUtils qw/natatime/;
 use namespace::autoclean;
 use Time::HiRes qw/tv_interval gettimeofday/;
-
-use constant INDEX_SIZES => (2000, 1000, 500, 100, 1);
+use Text::CSV_XS;
 
 has 'dbh' => (
   is => 'ro',
@@ -22,20 +21,17 @@ has 'last_flush' => (
   default => sub { [gettimeofday] } 
 );
 
-sub build_insert_event_sql {
-  my $count = shift;
-  my @values;
-  for (my $i = 0; $i < $count; $i++) {
-     push(@values, "(?)");
-  }
-  return "INSERT INTO datastore (data) VALUES " . 
-    join(",", @values) . 
-    ' RETURNING id;';
-}
+has 'csv' => (
+  is => 'ro',
+  isa => 'Text::CSV_XS',
+  init_arg => undef,
+  required => 1,
+  default => sub { Text::CSV_XS->new({eol => "\n"}) or die(Text::CSV_XS->error_diag); }
+);
 
 has "queued_submissions" => (
   traits => ['Array'],
-  is => 'ro',
+  is => 'rw',
   isa => 'ArrayRef',
   default => sub {[]},
   handles => {
@@ -49,22 +45,27 @@ sub queue_submission {
   push(@{$self->queued_submissions}, shift);
 }
 
-has 'inserter_sth_map' => (
+has "insert_via_copy_sth" => (
   is => 'ro',
-  isa => 'HashRef',
-  init_arg => undef,
   lazy => 1,
-  builder => '_build_inserters'
+  default => sub { $_[0]->dbh->prepare(
+      'COPY datastore (id,data) FROM STDIN WITH CSV'); }
 );
 
-sub _build_inserters {
+has "get_ids_sth" => (
+  is => 'ro',
+  lazy => 1,
+  default => sub { $_[0]->dbh->prepare(
+      "SELECT NEXTVAL('datastore_id_seq') FROM GENERATE_SERIES(1,?);"); }
+);
+
+sub get_ids {
   my $self = shift;
-  my $column = shift;
-  my $ret = {};
-  foreach my $count (INDEX_SIZES) {
-    $ret->{$count} = $self->dbh->prepare(build_insert_event_sql($count)),
-  }
-  return $ret;
+  my $num_ids = shift;
+  my $sth = $self->get_ids_sth();
+  $sth->execute($num_ids) or die($self->dbh->errstr);
+
+  return $sth->fetchall_arrayref();
 }
 
 sub shutdown {
@@ -72,63 +73,25 @@ sub shutdown {
   $self->dbh->disconnect();
 }
 
-sub do_insert_submissions {
+sub _insert_via_copy {
   my $self = shift;
-  my $sth = shift;
   my $submissions = shift;
-  my @values;
+  my $sth = $self->insert_via_copy_sth;
+  my $num_submissions = scalar(@$submissions);
+  my $ids_arrayref = $self->get_ids($num_submissions);
+  my $dbh = $self->dbh;
+  $sth->execute() or die($dbh->errstr);
+  my $buffer = "";
+  my $csv = $self->csv();
+  open(my $io, ">", \$buffer) or die($!);
   foreach my $submission (@$submissions) {
-    push(@values, 
-      $submission->event_json, 
-    );
+    my $submission_id = pop(@$ids_arrayref)->[0];
+    $submission->datastore_id($submission_id);
+    $csv->print($io, [$submission_id, $submission->event_json]);
   }
-  $sth->execute(@values) or die($self->dbh->errstr);
-
-  my $ids = $sth->fetchall_arrayref();
-
-  # Map out only the id column;
-
-  my $num_submissions = scalar(@$submissions);
-  for (my $i = 0; $i < $num_submissions; $i++) {
-    $submissions->[$i]->datastore_id($ids->[$i]->[0]);
-  }
-}
-
-sub _insert_submissions {
-  my $self = shift;
-  my $submissions = shift;
-  my $sths = $self->inserter_sth_map;
-  my $sth;
-  my $chunk_size;
-  my $it;
-  my $num_submissions = scalar(@$submissions);
-  my $remaining_submissions = [];
-
-  while ($num_submissions > 0) {
-    foreach my $sz (INDEX_SIZES) {
-      if ($num_submissions >= $sz) {
-        $chunk_size = $sz;
-        last;
-      }
-    }
-    if (!defined($chunk_size)) {
-      die("Undefined chunk size!");
-    }
-    $sth = $sths->{$chunk_size} or die("Bad chunk size: $chunk_size");
-    $it = natatime($chunk_size, @$submissions);
-    CHUNKER: while (my @chunk = $it->()) {
-      my $x = scalar(@chunk);
-      if ($x == $chunk_size) {
-        $self->do_insert_submissions($sth, \@chunk);
-      } else {
-        $remaining_submissions = \@chunk;
-        last CHUNKER;
-      }
-    }
-    $submissions = $remaining_submissions;
-    $remaining_submissions = [];
-    $num_submissions = scalar(@$submissions);
-  }
+  $dbh->pg_putcopydata($buffer);
+  $dbh->pg_endcopy;
+  close($io) or die($!);
 }
 
 sub flush {
@@ -139,17 +102,9 @@ sub flush {
   }
   my $err;
   my $dbh = $self->dbh;
-  my @submissions = @{$self->queued_submissions()};
-  $dbh->begin_work() or die($dbh->errstr);
-  try {
-    $self->_insert_submissions(\@submissions);
-
-    $self->clear_queued_submissions();
-    $dbh->commit();
-  } catch {
-    $err = shift;
-    $dbh->rollback();
-  };
+  my $submissions = $self->queued_submissions();
+  $self->_insert_via_copy($submissions);
+  $self->queued_submissions([]);
   my $delta = tv_interval($self->last_flush);
   $self->last_flush([gettimeofday]);
   if ($err) {
@@ -157,7 +112,7 @@ sub flush {
   }
   my $rate = $num_submissions  / $delta;
   debug("Inserted $num_submissions, Submissions per second: $rate");
-  return \@submissions;
+  return $submissions;
 }
 
 __PACKAGE__->meta->make_immutable();
