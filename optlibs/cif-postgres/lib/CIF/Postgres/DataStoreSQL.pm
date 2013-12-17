@@ -106,7 +106,7 @@ sub _insert_submissions {
 
   while ($num_submissions > 0) {
     foreach my $sz (INDEX_SIZES) {
-      if ($num_submissions > $sz) {
+      if ($num_submissions >= $sz) {
         $chunk_size = $sz;
         last;
       }
