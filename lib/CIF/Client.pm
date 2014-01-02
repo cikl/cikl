@@ -27,7 +27,7 @@ has 'transport' => (
   clearer => 'clear_transport'
 );
 
-sub DESTROY {
+sub DEMOLISH {
     my $self = shift;
     $self->shutdown();
 }
