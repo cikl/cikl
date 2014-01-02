@@ -97,7 +97,7 @@ sub submit {
     my $self = shift;
     my $submission = shift;
 
-    die(blessed($self) . " has not implemented the submit_event() method!");
+    die(blessed($self) . " has not implemented the submit() method!");
 }
 
 sub ping {
