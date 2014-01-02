@@ -20,8 +20,7 @@ use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
     config global_config apikey 
-    nolog limit group filter_me no_maprestrictions
-    table_nowarning related
+    nolog limit group 
 ));
 
 sub new {
@@ -39,14 +38,8 @@ sub new {
     
     $self->{'group'}             = $args->{'group'}               || $self->get_config->{'default_group'};
     $self->{'limit'}            = $args->{'limit'}              || $self->get_config->{'limit'};
-    $self->{'compress_address'} = $args->{'compress_address'}   || $self->get_config->{'compress_address'};
-    $self->{'round_confidence'} = $args->{'round_confidence'}   || $self->get_config->{'round_confidence'};
-    $self->{'table_nowarning'}  = $args->{'table_nowarning'}    || $self->get_config->{'table_nowarning'};
     
-    $self->set_no_maprestrictions(  $args->{'no_maprestrictions'}   || $self->get_config->{'no_maprestrictions'});
-    $self->set_filter_me(           $args->{'filter_me'}            || $self->get_config->{'filter_me'});
     $self->set_nolog(               $args->{'nolog'}                || $self->get_config->{'nolog'});
-    $self->set_related(             $args->{'related'}              || $self->get_config->{'related'});
     
     my $nolog = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_config->{'nolog'};
     
@@ -145,23 +138,6 @@ sub search {
     return(undef,$query_results);
 }
 
-sub send {
-    my $self = shift;
-    my $msg = shift;
-    
-    return $self->get_driver->send($msg);
-}
-
-sub send_json {
-    my $self = shift;
-    my $msg = shift;
- 
-    return $self->get_driver->send_json({
-        data    => $msg,
-        apikey  => $self->get_apikey(),
-    });   
-}
-
 sub submit {
     my $self = shift;
     my $event = shift;
@@ -180,44 +156,5 @@ sub ping {
 
     return $self->get_driver()->ping($hostinfo);
 }    
-
-# confor($conf, ['infrastructure/botnet', 'client'], 'massively_cool_output', 0)
-#
-# search the given sections, in order, for the given config param. if found, 
-# return its value or the default one specified.
-
-sub confor {
-    my $conf = shift;
-    my $sections = shift;
-    my $name = shift;
-    my $def = shift;
-
-    # return unless we get called with a config (eg: via the WebAPI)
-    return unless($conf->{'config'});
-
-    # handle
-    # snort_foo = 1,2,3
-    # snort_foo = "1,2,3"
-
-    foreach my $s (@$sections) { 
-        my $sec = $conf->{'config'}->param(-block => $s);
-        next if isempty($sec);
-        next if !exists $sec->{$name};
-        if (defined($sec->{$name})) {
-            return ref($sec->{$name} eq "ARRAY") ? join(', ', @{$sec->{$name}}) : $sec->{$name};
-        } else {
-            return $def;
-        }
-    }
-    return $def;
-}
-
-sub isempty {
-    my $h = shift;
-    return 1 unless ref($h) eq "HASH";
-    my @k = keys %$h;
-    return 1 if $#k == -1;
-    return 0;
-}
 
 1;
