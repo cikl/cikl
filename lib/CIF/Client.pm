@@ -27,7 +27,7 @@ sub new {
     my $class = shift;
     my $args = shift;
     
-    return('missing config') unless($args->{'config'});
+    die('missing config') unless($args->{'config'});
     
     my $self = {};
     bless($self,$class);
@@ -47,10 +47,9 @@ sub new {
         @{$self->{'fields'}} = split(/,/,$args->{'fields'}); 
     } 
     
-    my $err = $self->_init_driver($self->get_config->{'driver'} || 'RabbitMQ');
-    return($err) if ($err);
+    $self->{driver} = $self->_init_driver($self->get_config->{'driver'} || 'RabbitMQ');
 
-    return (undef,$self);
+    return $self;
 }
 
 sub DESTROY {
@@ -84,25 +83,14 @@ sub _init_driver {
     if ($@) {
       die($@);
     }
-    my $err;
-    my $driver;
-    try {
-        $driver     = $driver_class->new({
+    my $driver     = $driver_class->new({
             config => $self->get_global_config()
         });
-    } catch {
-        $err = shift;
-    };
-    if($err){
-        debug($err) if($::debug);
-        return($err);
-    }
     
-    $self->{driver} = $driver;
-    return undef;
+    return $driver;
 }
 
-sub search {
+sub query {
     my $self = shift;
     my %args = @_;
 
@@ -124,18 +112,12 @@ sub search {
     };
 
     if (!defined($query)) {
-      return("Failed to create query object: $err");
+      die("Failed to create query object: $err");
     }
 
-    my $query_results;
-    try {
-      $query_results = $self->get_driver->query($query);
-    } catch {
-      $err = shift;
-    };
-    return $err if($err);
+    my $query_results = $self->get_driver->query($query);
 
-    return(undef,$query_results);
+    return($query_results);
 }
 
 sub submit {

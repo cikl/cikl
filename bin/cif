@@ -161,14 +161,11 @@ if (!defined($formatter)) {
 }
 
 my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
-my ($err,$cli) = CIF::Client->new({
+my $err;
+my $cli = CIF::Client->new({
     config          => $config,
 });
 
-if($err){
-    print 'ERROR: '.$err."\n";
-    exit(-1);
-}
 
 # else we're doing query
 if($outfile){
@@ -204,8 +201,7 @@ $args{address_criteria} = \@address_criteria;
 
 use Time::HiRes qw/tv_interval gettimeofday/;
 my $start = [gettimeofday];
-my $query_results;
-($err,$query_results) = $cli->search(%args);
+my $query_results = $cli->query(%args);
 my $runtime = tv_interval($start);
 debug("Query round trip: $runtime seconds");
 $cli->shutdown();

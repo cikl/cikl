@@ -103,14 +103,11 @@ sub _refresh {
 
 sub get_client {
   my $self = shift;
-  my ($err,$client) = CIF::Client->new({
+  my $client = CIF::Client->new({
       config  => $self->global_config,
       apikey  => $self->apikey,
     });
 
-  if ($err) {
-    die($err);
-  }
   return($client);
 }
 

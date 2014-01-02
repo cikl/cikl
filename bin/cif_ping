@@ -57,14 +57,9 @@ EOF
 }
 
 my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
-my ($err,$cli) = CIF::Client->new({
+my $cli = CIF::Client->new({
     config          => $config,
 });
-
-if($err){
-    print 'ERROR: '.$err."\n";
-    exit(-1);
-}
 
 print "Waiting for responses....\n";
 my $responses = $cli->ping();
