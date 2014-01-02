@@ -35,7 +35,7 @@ BEGIN {
     }
 }
 
-use CIF::Client;
+use CIF::Client::Factory;
 use Getopt::Long;
 use JSON::XS;
 use CIF qw/debug/;
@@ -162,9 +162,11 @@ if (!defined($formatter)) {
 
 my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
 my $err;
-my $cli = CIF::Client->new({
-    config          => $config,
-});
+my $client_config = $config->get_block('client');
+#$client_config->{global_config} = $config;
+
+
+my $cli = CIF::Client::Factory->instantiate($client_config);
 
 
 # else we're doing query

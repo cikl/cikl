@@ -31,7 +31,7 @@ BEGIN {
     }
 }
 
-use CIF::Client;
+use CIF::Client::Factory;
 use Getopt::Std;
 use CIF qw/debug/;
 
@@ -57,9 +57,8 @@ EOF
 }
 
 my $config = Config::Simple->new($config_file) or die("Failed to open config file $config_file: " . $!);
-my $cli = CIF::Client->new({
-    config          => $config,
-});
+my $client_config = $config->get_block('client');
+my $cli = CIF::Client::Factory->instantiate($client_config);
 
 print "Waiting for responses....\n";
 my $responses = $cli->ping();

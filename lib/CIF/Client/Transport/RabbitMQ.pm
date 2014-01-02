@@ -1,66 +1,120 @@
 package CIF::Client::Transport::RabbitMQ;
-use base 'CIF::Client::Transport';
 
 use strict;
 use warnings;
-use JSON qw{encode_json};
+use Mouse;
+use CIF::Client::Transport;
+with 'CIF::Client::Transport';
+use namespace::autoclean;
 
 use Net::RabbitFoot;
 use CIF qw/debug/;
 
-sub new {
-    my $class = shift;
-    my $args = shift;
-    $args->{driver_name} = "rabbitmq";
+has 'host' => (
+  is => 'ro',
+  isa => 'Str',
+  default => 'localhost'
+);
 
-    my $self = $class->SUPER::new($args);
-    my $config = $self->get_config();
+has 'port' => (
+  is => 'ro',
+  isa => 'Num',
+  default => 5572
+);
 
-    my $amqp = Net::RabbitFoot->new()->load_xml_spec()->connect(
-      host => $self->config("host") || "localhost",
-      port => $self->config("port") || 5672,
-      user => $self->config("username") || "guest",
-      pass => $self->config("password") || "guest",
-      vhost => $self->config("vhost") || "/cif",
-    );
-    my $channel = $amqp->open_channel();
+has 'username' => (
+  is => 'ro',
+  isa => 'Str',
+  default => 'guest'
+);
 
-    $self->{exchange_name} = "amq.topic";
-    $self->{submit_key} = "submit";
-    $self->{query_key} = "query";
-    $self->{control_key} = "control";
-    $self->{amqp} = $amqp;
-    $self->{channel} = $channel;
+has 'password' => (
+  is => 'ro',
+  isa => 'Str',
+  default => 'guest'
+);
 
-    return $self;
+has 'vhost' => (
+  is => 'ro',
+  isa => 'Str',
+  default => '/cif'
+);
+
+has 'exchange_name' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'amq.topic'
+);
+
+has 'submit_key' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'submit'
+);
+
+has 'query_key' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'query'
+);
+
+has 'control_key' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'query'
+);
+
+has 'amqp' => (
+  is => 'ro', 
+  isa => 'Net::RabbitFoot',
+  init_arg => undef,
+  lazy_build => 1
+);
+
+has 'channel' => (
+  is => 'ro', 
+  init_arg => undef,
+  lazy_build => 1
+);
+
+sub _build_amqp {
+  my $self = shift;
+  return Net::RabbitFoot->new()->load_xml_spec()->connect(
+    host => $self->host(),
+    port => $self->port(),
+    user => $self->username(),
+    pass => $self->password(),
+    vhost => $self->vhost()
+  );
 }
 
-sub shutdown {
+sub _build_channel {
+  my $self = shift;
+  return $self->amqp()->open_channel();
+}
+
+after 'shutdown' => sub {
     my $self = shift;
-    if (!$self->SUPER::shutdown()) {
-      # We've already shutdown.
-      return 0;
+
+    if ($self->has_channel()) {
+      $self->channel->close();
+      $self->clear_channel();
     }
 
-    if ($self->{channel}) {
-      $self->{channel}->close();
-      $self->{channel} = undef;
-    }
-
-    if ($self->{amqp}) {
-      $self->{amqp}->close();
-      $self->{amqp} = undef;
+    if ($self->has_amqp()) {
+      $self->amqp->close();
+      $self->clear_amqp();
     }
 
     return 1;
-}
+};
 
-sub query {
+sub _query {
     my $self = shift;
     my $query = shift;
     my $body = $self->encode_query($query);
 
-    my $result = $self->{channel}->declare_queue( 
+    my $result = $self->channel->declare_queue( 
       queue => "",
       durable => 0,
       exclusive => 1
@@ -71,7 +125,7 @@ sub query {
 
     my $timer = AnyEvent->timer(after => 5, cb => sub {$cv->send(undef);});
 
-    $self->{channel}->consume(
+    $self->channel->consume(
         no_ack => 1, 
         on_consume => sub {
           my $resp = shift;
@@ -79,9 +133,9 @@ sub query {
         }
     );
 
-    $self->{channel}->publish(
-      exchange => $self->{exchange_name},
-      routing_key => $self->{query_key},
+    $self->channel->publish(
+      exchange => $self->exchange_name,
+      routing_key => $self->query_key,
       body => $body,
       header => {
         reply_to => $queue_name
@@ -103,12 +157,12 @@ sub query {
     }
 }
 
-sub ping {
+sub _ping {
     my $self = shift;
     my $hostinfo = shift;
     my $body = $self->encode_hostinfo($hostinfo);
 
-    my $result = $self->{channel}->declare_queue( 
+    my $result = $self->channel->declare_queue( 
       queue => "",
       durable => 0,
       exclusive => 1
@@ -121,7 +175,7 @@ sub ping {
 
     my $timer = AnyEvent->timer(after => 5, cb => sub {$cv->send(undef);});
 
-    $self->{channel}->consume(
+    $self->channel->consume(
         no_ack => 1, 
         on_consume => sub {
           my $resp = shift;
@@ -129,9 +183,9 @@ sub ping {
         }
     );
 
-    $self->{channel}->publish(
+    $self->channel->publish(
       exchange => 'control',
-      routing_key => $self->{control_key},
+      routing_key => $self->control_key,
       body => $body,
       header => {
         reply_to => $queue_name
@@ -156,18 +210,19 @@ sub ping {
     return \@ret;
 }
 
-sub submit {
+sub _submit {
     my $self = shift;
     my $submission = shift;
 
     my $body = $self->encode_submission($submission);
-    $self->{channel}->publish(
-      exchange => $self->{exchange_name},
-      routing_key => $self->{submit_key},
+    $self->channel->publish(
+      exchange => $self->exchange_name,
+      routing_key => $self->submit_key,
       body => $body 
     );
     return undef;
 }
+__PACKAGE__->meta->make_immutable();
 1;
 
 

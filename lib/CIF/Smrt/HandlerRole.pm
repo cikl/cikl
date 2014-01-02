@@ -2,7 +2,7 @@ package CIF::Smrt::HandlerRole;
 
 use strict;
 use warnings;
-use CIF::Client;
+use CIF::Client::Factory;
 use CIF::Smrt::ClientBroker;
 use CIF::Smrt::Decoders::Null;
 use CIF::EventBuilder;
@@ -103,12 +103,9 @@ sub _refresh {
 
 sub get_client {
   my $self = shift;
-  my $client = CIF::Client->new({
-      config  => $self->global_config,
-      apikey  => $self->apikey,
-    });
-
-  return($client);
+  my $client_config = $self->global_config()->get_block('client');
+  $client_config->{apikey} = $self->apikey();
+  return CIF::Client::Factory->instantiate($client_config);
 }
 
 sub process {
