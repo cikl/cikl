@@ -5,17 +5,11 @@ use strict;
 use warnings;
 use Try::Tiny;
 use Config::Simple;
-use Regexp::Common qw/net/;
-use Regexp::Common::net::CIDR;
-use Net::Patricia;
-use URI::Escape;
-use Digest::MD5 qw/md5_hex/;
-use Encode qw(encode_utf8);
 use CIF::Models::Submission;
 use CIF::Models::Query;
 use CIF::Models::HostInfo;
 
-use CIF qw(generate_uuid_ns generate_uuid_random is_uuid debug);
+use CIF qw(debug);
 
 __PACKAGE__->follow_best_practice();
 __PACKAGE__->mk_accessors(qw(
@@ -42,10 +36,6 @@ sub new {
     $self->set_nolog(               $args->{'nolog'}                || $self->get_config->{'nolog'});
     
     my $nolog = (defined($args->{'nolog'})) ? $args->{'nolog'} : $self->get_config->{'nolog'};
-    
-    if($args->{'fields'}){
-        @{$self->{'fields'}} = split(/,/,$args->{'fields'}); 
-    } 
     
     $self->{driver} = $self->_init_driver($self->get_config->{'driver'} || 'RabbitMQ');
 
