@@ -188,6 +188,7 @@ sub _handle_msg {
       body => $reply,
       header => {
         content_type => $content_type,
+        correlation_id => $msg->{header}->{correlation_id},
         type => $type 
       }
     );
