@@ -191,7 +191,7 @@ sub search {
     -order_by => [ '-reporttime' ],
   );
 
-  debug("Generated query SQL: $stmt");
+  #debug("Generated query SQL: $stmt");
 
   my $sth = $self->dbh->prepare_cached($stmt) or die ($self->dbh->errstr);
 
