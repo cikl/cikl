@@ -1,15 +1,12 @@
 requires 'AnyEvent', '7.05';
 requires 'AnyEvent::RabbitMQ', '1.15';
 requires 'Class::Accessor', '0.34';
-requires 'Class::DBI', '3.0.17';
 requires 'Class::Trigger', '0.14';
 requires 'Config::Simple', '4.58';
 requires 'Coro', '6.31';
 requires 'Cwd', '3.40';
 requires 'DateTime', '0.70';
 requires 'DateTime::Format::DateParse', '0.05';
-requires 'DBD::Pg', '2.19.0';
-requires 'DBI', '1.616';
 requires 'Digest::MD5', '2.51';
 requires 'Digest::SHA', '5.70';
 requires 'DynaLoader', '1.13';
@@ -41,10 +38,6 @@ requires 'Net::SSLeay', '1.43';
 requires 'Regexp::Common', '2.122';
 requires 'Regexp::Common::net::CIDR', '0.02';
 requires 'Storable', '2.27';
-requires 'SQL::Abstract', '1.74';
-requires 'SQL::Abstract::More', '1.17';
-requires 'Test::Class', '0.41';
-requires 'Test::Exception', '0.32';
 requires 'Text::CSV', '1.18';
 requires 'Text::CSV_XS';
 requires 'Text::Table', '1.127';
@@ -53,8 +46,21 @@ requires 'Try::Tiny', '0.11';
 requires 'URI::Escape', '3.31';
 requires 'UUID::Tiny', '1.04';
 requires 'XML::LibXML', '1.89';
-on develop => sub {
+
+on 'test' => sub {
+  requires 'Test::Class', '0.41';
+  requires 'Test::Exception', '0.32';
+};
+
+on 'develop' => sub {
     requires 'Memory::Usage';
     requires 'Devel::Size';
     requires 'Class::Inspector';
+};
+
+feature 'postgres', "Postgres DBI support" => sub {
+  requires 'DBD::Pg', '2.19.0';
+  requires 'DBI', '1.616';
+  requires 'SQL::Abstract', '1.74';
+  requires 'SQL::Abstract::More', '1.17';
 };
