@@ -33,10 +33,7 @@ sub BUILD {
   my $self = shift;
   $self->datastore->add_flush_callback(sub {
       my $submissions = shift;
-      my $indexer = $self->indexer;
-      foreach my $submission (@$submissions) {
-        $indexer->index($submission);
-      }
+      $self->indexer->index_array($submissions);
     });
 }
 

@@ -9,6 +9,15 @@ with "CIF::Util::Flushable";
 
 requires 'index';
 
+sub index_array {
+  my $self = shift;
+  my $submissions = shift;
+
+  foreach my $submission (@$submissions) {
+    $self->index($submission);
+  }
+}
+
 sub shutdown {
 }
 
