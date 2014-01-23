@@ -11,6 +11,7 @@ use CIF qw/generate_uuid_url generate_uuid_random is_uuid debug/;
 use constant FIELDS => {
   group => 'everyone',
   parser => undef,
+  detecttime_format => undef,
   feed => undef,
   source => undef,
   feed_limit => undef,

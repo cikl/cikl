@@ -27,6 +27,11 @@ has 'feedparser_config' => (
   required => 1
 );
 
+sub _build_detecttime_format {
+  my $self = shift;
+  return $self->feedparser_config->{detecttime_format};
+}
+
 sub _refresh {
   my $self = shift;
   return $self->feedparser_config->{refresh};

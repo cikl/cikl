@@ -21,6 +21,7 @@ Net::SSLeay::SSLeay_add_ssl_algorithms();
 use namespace::autoclean;
 
 requires 'name';
+requires '_default_event_data';
 
 has 'apikey' => (
   is => 'ro',
@@ -88,12 +89,25 @@ has 'decoder' => (
   builder => "_decoder"
 );
 
+has 'detecttime_format' => (
+  is => 'ro',
+  isa => 'Maybe[Str]',
+  required => 0,
+  lazy => 1,
+  builder => '_build_detecttime_format'
+);
+
+sub _build_detecttime_format {
+  return undef;
+}
+
 sub _event_builder {
   my $self = shift;
   return CIF::EventBuilder->new(
     not_before => $self->not_before()->epoch(),
     default_event_data => $self->default_event_data(),
-    refresh => $self->refresh()
+    refresh => $self->refresh(),
+    detecttime_format => $self->detecttime_format()
   ) 
 }
 

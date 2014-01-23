@@ -8,7 +8,7 @@ use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
 use CIF qw/debug/;
-use CIF::Util::TimeHelpers qw/normalize_timestamp/;
+use CIF::Util::TimeHelpers qw/normalize_timestamp create_strptime_parser create_default_timestamp_parser/;
 
 has 'default_event_data' => (
   is => 'rw',
@@ -23,6 +23,28 @@ has 'refresh' => (
   default => 0,
   required => 1
 );
+
+has 'detecttime_format' => (
+  is => 'rw', 
+  isa => 'Maybe[Str]',
+  required => 0
+);
+
+has 'detecttime_parser' => (
+  is => 'ro',
+  init_arg => undef,
+  isa => 'CodeRef',
+  lazy => 1,
+  builder => '_build_detecttime_parser'
+);
+
+sub _build_detecttime_parser {
+  my $self = shift;
+  if (defined($self->detecttime_format)) {
+    return create_strptime_parser($self->detecttime_format);
+  }
+  return create_default_timestamp_parser();
+}
 
 has 'not_before' => (
   is => 'rw', 
@@ -51,7 +73,7 @@ sub normalize {
   my $r = shift;
 
   my $now  = $self->_now;
-  my $dt = normalize_timestamp($r->{detecttime}, $now);
+  my $dt = $self->detecttime_parser->($r->{detecttime}, $now);
   if($dt < $self->not_before) {
     return(undef);
   }
@@ -79,17 +101,27 @@ sub normalize {
 sub build_event {
   my $self = shift;
   my $hashref = shift;
+  my $err;
+
   if (!defined($hashref)) {
     die("build_event requires a hashref of arguments!");
   }
   my $merged_hash = {%{$self->default_event_data}, %$hashref};
-  my $normalized = $self->normalize($merged_hash);
+  my $normalized;
+  try {
+    $normalized = $self->normalize($merged_hash);
+  } catch {
+    $err = shift;
+  };
+  if ($err) {
+    #debug($err);
+    die($err);
+  }
   if (!defined($normalized)) {
     return undef;
   }
 
   my $event;
-  my $err;
   try {
     $event = CIF::Models::Event->new($normalized);
   } catch {
