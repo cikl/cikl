@@ -18,7 +18,7 @@ sub as_string {
 }
 
 sub to_hash {
-  return { type => $_[0]->type, value => $_[0]->value };
+  return { $_[0]->type => $_[0]->value };
 }
 
 sub normalize_value {
