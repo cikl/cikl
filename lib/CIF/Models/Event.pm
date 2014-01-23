@@ -92,8 +92,11 @@ sub from_hash {
   my $data = shift;
   my $address = $data->{address};
   if ($address) {
-    $address = create_address($address->{type}, $address->{value});
-    $data->{address} = $address;
+    my $type = (keys %$address)[0];
+    if ($type) {
+      $address = create_address($type, $address->{$type});
+      $data->{address} = $address;
+    }
   }
   return $class->new($data);
 }
