@@ -7,7 +7,8 @@ use Mouse;
 use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
-use CIF qw/normalize_timestamp debug/;
+use CIF qw/debug/;
+use CIF::Util::TimeHelpers qw/normalize_timestamp/;
 
 has 'default_event_data' => (
   is => 'rw',

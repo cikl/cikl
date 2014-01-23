@@ -7,7 +7,6 @@ use warnings;
 our $VERSION = '0.99_05';
 $VERSION = eval $VERSION;
 
-use DateTime::Format::DateParse;
 use UUID::Tiny;
 
 require Exporter;
@@ -23,7 +22,7 @@ our @ISA = qw(Exporter);
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
     is_uuid generate_uuid_random generate_uuid_url generate_uuid_hash 
-    normalize_timestamp generate_uuid_ns debug init_logging 
+    generate_uuid_ns debug init_logging 
 ) ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw//;
@@ -41,10 +40,6 @@ CIF::Utils - Perl extension for misc 'helper' CIF like functions
   use CIF::Utils;
   use Data::Dumper;
   use DateTime;
-
-  my $dt = DateTime->now()
-  $dt = CIF::Utils::normalize_timestamp($dt);
-  warn $dt;
 
   my $uuid = generate_uuid_random();
   my $uuid = generate_uuid_domain('example.com');
@@ -155,62 +150,6 @@ sub generate_uuid_ns {
 # deprecate
 sub generate_uuid_url {
     return generate_uuid_ns(shift);
-}
-
-=item normalize_timestamp($ts)
-
-  Take in a timestamp (see DateTime::Format::DateParse), does a little extra normalizing and returns a DateTime object
-
-=cut
-
-sub normalize_timestamp {
-    my $dt  = shift;
-    my $now = shift || time(); # better perf in loops if we can pass the default now value
-
-    if (!defined($dt)) {
-      # Default to now.
-      return $now;
-    }
-
-    if(ref($dt) eq 'DateTime'){
-      return $dt->epoch();
-    }
-    
-    # already epoch
-    if($dt =~ /^\d{10}$/) {
-      return $dt ;
-    }
-
-    if($dt =~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/) {
-      my $ret = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
-      if ($ret) { 
-        return $ret->epoch();
-      }
-      return undef;
-    }
-    
-    # something else
-    if($dt =~ /^\d+$/){
-      if($dt =~ /^\d{8}$/){
-        $dt.= 'T00:00:00Z';
-        $dt = eval { DateTime::Format::DateParse->parse_datetime($dt, "UTC") };
-        unless($dt){
-          return $now;
-        }
-        return $dt->epoch();
-      } else {
-        return $now;
-      }
-    } elsif($dt =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\S+)?$/) {
-      my ($year,$month,$day,$hour,$min,$sec,$tz) = ($1,$2,$3,$4,$5,$6,$7);
-      $dt = DateTime::Format::DateParse->parse_datetime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':'.$sec,$tz || "UTC");
-      return $dt->epoch();
-    } 
-
-    $dt =~ s/_/ /g;
-    $dt = DateTime::Format::DateParse->parse_datetime($dt, "UTC");
-    return undef unless($dt);
-    return $dt->epoch();
 }
 
 =back
