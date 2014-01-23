@@ -12,6 +12,7 @@ use constant FIELDS => {
   group => 'everyone',
   parser => undef,
   detecttime_format => undef,
+  detecttime_zone => undef,
   feed => undef,
   source => undef,
   feed_limit => undef,

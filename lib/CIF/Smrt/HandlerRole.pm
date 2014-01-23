@@ -97,7 +97,20 @@ has 'detecttime_format' => (
   builder => '_build_detecttime_format'
 );
 
+has 'detecttime_zone' => (
+  is => 'ro',
+  isa => 'Maybe[Str]',
+  required => 0,
+  lazy => 1,
+  builder => '_build_detecttime_zone'
+);
+
+
 sub _build_detecttime_format {
+  return undef;
+}
+
+sub _build_detecttime_zone {
   return undef;
 }
 
@@ -107,7 +120,8 @@ sub _event_builder {
     not_before => $self->not_before()->epoch(),
     default_event_data => $self->default_event_data(),
     refresh => $self->refresh(),
-    detecttime_format => $self->detecttime_format()
+    detecttime_format => $self->detecttime_format(),
+    detecttime_zone => $self->detecttime_zone()
   ) 
 }
 

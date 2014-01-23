@@ -32,6 +32,11 @@ sub _build_detecttime_format {
   return $self->feedparser_config->{detecttime_format};
 }
 
+sub _build_detecttime_zone {
+  my $self = shift;
+  return $self->feedparser_config->{detecttime_zone};
+}
+
 sub _refresh {
   my $self = shift;
   return $self->feedparser_config->{refresh};

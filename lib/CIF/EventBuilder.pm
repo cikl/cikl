@@ -30,6 +30,12 @@ has 'detecttime_format' => (
   required => 0
 );
 
+has 'detecttime_zone' => (
+  is => 'rw', 
+  isa => 'Maybe[Str]',
+  required => 0
+);
+
 has 'detecttime_parser' => (
   is => 'ro',
   init_arg => undef,
@@ -41,7 +47,8 @@ has 'detecttime_parser' => (
 sub _build_detecttime_parser {
   my $self = shift;
   if (defined($self->detecttime_format)) {
-    return create_strptime_parser($self->detecttime_format);
+    return create_strptime_parser(
+      $self->detecttime_format, $self->detecttime_zone);
   }
   return create_default_timestamp_parser();
 }
