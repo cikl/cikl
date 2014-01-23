@@ -101,6 +101,7 @@ sub new {
   bless($self,$class);
 
   $config_data->{group} = $self->{group};
+  $config_data->{source} = $self->{source};
   # The remaining fields will act as defaults for events, when they are created.
   $self->{event_fields} = $config_data;
 
