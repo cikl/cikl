@@ -133,7 +133,7 @@ sub fetch {
 
     my $response = $ua->mirror($feedurl->as_string(), $filename);
 
-    if(! $response->is_success()){
+    if( $response->is_error()){
       die('failed to get feed: '.$feedurl->as_string()."\n".$response->status_line());
     }
     $ua = undef;
