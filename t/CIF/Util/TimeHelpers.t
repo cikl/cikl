@@ -5,7 +5,7 @@ use warnings;
 use Test::More;
 use Test::Deep;
 use DateTime;
-use CIF::Util::TimeHelpers;
+use CIF::Util::TimeHelpers qw/normalize_timestamp create_strptime_parser/;
 
 use constant FAKE_NOW => DateTime->new(
   year       => 2012,
@@ -32,7 +32,7 @@ sub normalizes_properly {
   my $val = shift;
   my $expected = shift;
   subtest $name => sub {
-    my $ret = CIF::Util::TimeHelpers::normalize_timestamp($val);
+    my $ret = normalize_timestamp($val);
     like($ret, qr/^\d{1,10}$/);
     is($ret, $expected, "is the expected epoch value");
   };
@@ -42,7 +42,7 @@ sub returns_now {
   my $name = shift;
   my $val = shift;
   subtest $name => sub {
-    my $ret = CIF::Util::TimeHelpers::normalize_timestamp($val, FAKE_NOW_EPOCH);
+    my $ret = normalize_timestamp($val, FAKE_NOW_EPOCH);
     like($ret, qr/^\d{10}$/);
     is($ret, FAKE_NOW_EPOCH, "fails to parse and returns default value (now)");
   };
@@ -121,7 +121,14 @@ sub test_normalize_timestamp : Test(13) {
       time_zone  => 'UTC',
   )->epoch());
 
-  is(CIF::Util::TimeHelpers::normalize_timestamp("asdfasdf"), undef, "returns undef for things it can't parse");
+  is(normalize_timestamp("asdfasdf"), undef, "returns undef for things it can't parse");
+}
+
+sub test_parse_timestamp : Test(1) {
+  my $self = shift;
+  my $parser = create_strptime_parser("%y/%m/%d_%H:%M", "UTC");
+  my $ret = $parser->("2013/10/09_13:48");
+  is($ret, 1381326480, "Parses using a pattern");
 }
 
 Test::Class->runtests;
