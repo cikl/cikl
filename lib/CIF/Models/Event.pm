@@ -38,19 +38,25 @@ has 'address' => (
 
 has 'detecttime' => (
   is => 'rw',
-  isa => "Int"
+  isa => "CIF::DataTypes::Integer",
+  coerce => 1
 );
 
 has 'reporttime' => (
   is => 'rw',
-  isa => "Int"
+  isa => "CIF::DataTypes::Integer",
+  coerce => 1
 );
 
 has 'address_mask' => (is => 'rw');
 has 'alternativeid' => (is => 'rw');
 has 'alternativeid_restriction' => (is => 'rw');
 has 'carboncopy' => (is => 'rw');
-has 'confidence' => (is => 'rw');
+has 'confidence' => (
+  is => 'rw', 
+  isa => 'CIF::DataTypes::Integer', 
+  coerce => 1
+);
 has 'contact' => (is => 'rw');
 has 'contact_email' => (is => 'rw');
 has 'hash' => (is => 'rw');
