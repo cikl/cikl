@@ -8,6 +8,7 @@ our $VERSION = '0.99_05';
 $VERSION = eval $VERSION;
 
 use UUID::Tiny;
+use DateTime;
 
 require Exporter;
 
