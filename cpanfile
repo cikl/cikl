@@ -7,6 +7,7 @@ requires 'Coro', '6.31';
 requires 'Cwd', '3.40';
 requires 'DateTime', '0.70';
 requires 'DateTime::Format::DateParse', '0.05';
+requires 'DateTime::Format::Strptime', '1.54';
 requires 'Digest::MD5', '2.51';
 requires 'Digest::SHA', '5.70';
 requires 'DynaLoader', '1.13';
