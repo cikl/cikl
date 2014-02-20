@@ -6,14 +6,12 @@ use CIF::Router::Constants;
 use CIF::Router::ServiceRole;
 use CIF::Router::AuthenticatedRole;
 use CIF::Router::DataSubmissionRole;
-use CIF::Router::IndexerRole;
 use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
 with 'CIF::Router::ServiceRole', 
      'CIF::Router::AuthenticatedRole', 
-     'CIF::Router::DataSubmissionRole',
-     'CIF::Router::IndexerRole' ;
+     'CIF::Router::DataSubmissionRole';
 
 use namespace::autoclean;
 
@@ -27,14 +25,6 @@ sub queue_should_autodelete {
 # Should return 1 or 0
 sub queue_is_durable {
   return 1;
-}
-
-sub BUILD {
-  my $self = shift;
-  $self->datastore->add_flush_callback(sub {
-      my $submissions = shift;
-      $self->indexer->index_array($submissions);
-    });
 }
 
 sub process {

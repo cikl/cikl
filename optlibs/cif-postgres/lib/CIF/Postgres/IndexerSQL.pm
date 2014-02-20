@@ -113,7 +113,7 @@ sub queue_submission {
 
 sub shutdown {
   my $self = shift;
-  $self->dbh->disconnect();
+  #$self->dbh->disconnect();
 }
 
 sub _insert_via_copy {

@@ -62,24 +62,6 @@ user = 'postgres'
 password = ''
 database = 'cif'
 
-[indexer]
-# The number of events that trigger an immediate commit by the flusher.
-commit_size = 2000
-
-# After commit_interval seconds, trigger a commit if we have less than 
-# commit_size events
-commit_interval = 2 
-
-# This specifies the name of the modules that implements our indexer. 
-driver = "CIF::Postgres::Indexer"
-
-# These are datastore specific attributes
-host = '127.0.0.1'
-user = 'postgres'
-password = ''
-database = 'cif'
-# logging
-# values 0-4
 [router]
 # set to 0 if it's too noisy and reload the cif-router (apache), only on for RC2
 debug = 1

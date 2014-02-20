@@ -4,7 +4,6 @@ use warnings;
 use CIF::Authentication::Factory;
 use CIF::Codecs::JSON;
 use CIF::DataStore::Factory;
-use CIF::Indexer::Factory;
 use CIF::QueryHandler::Factory;
 use CIF::Router::Server;
 use CIF::Router::Services;
@@ -49,14 +48,6 @@ sub instantiate {
     my $commit_size = $datastore_config->{commit_size} || 1000;
     my $datastore = CIF::DataStore::Factory->instantiate($datastore_config);
     $service_opts->{datastore} = $datastore;
-  }
-
-  if ($service_class->does("CIF::Router::IndexerRole")) {
-    my $indexer_config = $config->get_block('indexer');
-    my $commit_interval = $indexer_config->{commit_interval} || 2;
-    my $commit_size = $indexer_config->{commit_size} || 1000;
-    my $indexer = CIF::Indexer::Factory->instantiate($indexer_config);
-    $service_opts->{indexer} = $indexer;
   }
 
   my $service = $service_class->new(%$service_opts);
