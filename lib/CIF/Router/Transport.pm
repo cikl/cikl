@@ -9,7 +9,6 @@ requires 'start';
 requires 'stop';
 requires 'shutdown';
 requires 'register_service';
-requires 'register_control_service';
 
 1;
 

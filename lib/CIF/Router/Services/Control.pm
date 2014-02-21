@@ -13,16 +13,6 @@ use namespace::autoclean;
 
 sub service_type { CIF::Router::Constants::SVC_CONTROL }
 
-# Should return 1 or 0
-sub queue_should_autodelete {
-  return 1;
-}
-
-# Should return 1 or 0
-sub queue_is_durable {
-  return 0;
-}
-
 sub process {
   my $self = shift;
   my $payload = shift;

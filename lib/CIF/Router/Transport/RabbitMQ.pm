@@ -5,15 +5,16 @@ use warnings;
 
 use CIF::Router::Transport;
 use Mouse;
-use Net::RabbitFoot;
 use AnyEvent;
 use Coro;
 use Try::Tiny;
 use CIF qw/debug/;
 use CIF::Router::Constants;
+use CIF::Common::RabbitMQRole;
 use namespace::autoclean;
 
 with 'CIF::Router::Transport';
+with 'CIF::Common::RabbitMQRole';
 
 has 'prefetch_count' => (
   is => 'ro',
@@ -21,40 +22,16 @@ has 'prefetch_count' => (
   builder => sub { $_[0]->{prefetch_count} || 500 }
 );
 
-has 'host' => (
+has 'query_queue' => (
   is => 'ro',
   isa => 'Str',
-  default => sub { 'localhost' } 
+  default => 'query-queue'
 );
 
-has 'port' => (
-  is => 'ro',
-  isa => 'Num',
-  default => 5672,
-);
-
-has 'username' => (
+has 'submit_queue' => (
   is => 'ro',
   isa => 'Str',
-  default => sub {'guest'}
-);
-
-has 'password' => (
-  is => 'ro',
-  isa => 'Str',
-  default => sub {'guest'}
-);
-
-has 'vhost' => (
-  is => 'ro',
-  isa => 'Str',
-  default => sub { '/cif' }
-);
-
-has 'amqp' => (
-  is => 'rw',
-  isa => 'Net::RabbitFoot',
-  lazy_build => 1
+  default => 'submit-queue'
 );
 
 has 'channels' => (
@@ -69,53 +46,59 @@ sub _build_channels {
   return [];
 }
 
-sub _build_amqp {
-  my $self = shift;
-  my $rabbitmq_opts = {
-    host => $self->host(),
-    port => $self->port(),
-    user => $self->username(),
-    pass => $self->password(),
-    vhost => $self->vhost()
-  };
-
-  my $amqp = Net::RabbitFoot->new()->load_xml_spec()->connect(%$rabbitmq_opts);
-  return $amqp;
-}
-
 sub register_service {
   my $self = shift;
   my $service = shift;
-  my $service_name = $service->name();
+  my $service_type = $service->service_type();
 
-  my $config = {
-    exchange_name => "amq.topic",
-    exchange_type => "topic",
-    queue_name => "$service_name-queue",
-    routing_key =>  $service_name,
-    durable => $service->queue_is_durable(),
-    auto_delete => $service->queue_should_autodelete()
-  };
+  my $config = undef;
+  if ($service_type == CIF::Router::Constants::SVC_SUBMISSION) {
+    $config = $self->_submission_service_config();
+  } elsif ($service_type == CIF::Router::Constants::SVC_QUERY) {
+    $config = $self->_query_service_config();
+  } elsif ($service_type == CIF::Router::Constants::SVC_CONTROL) {
+    $config = $self->_control_service_config();
+  } else {
+    die "Unknown service type: $service_type";
+  }
   $self->_setup_processor($config, $service);
 }
 
-sub register_control_service {
+sub _query_service_config {
   my $self = shift;
-  my $service = shift;
-  my $service_name = $service->name();
+  return {
+    exchange_name => $self->query_exchange,
+    exchange_type => "topic",
+    queue_name => $self->query_queue,
+    routing_key =>  $self->query_key,
+    durable => 0,
+    auto_delete => 1
+  };
+}
 
-  my $config = {
-    exchange_name => "control",
+sub _submission_service_config {
+  my $self = shift;
+  return {
+    exchange_name => $self->submit_exchange,
+    exchange_type => "topic",
+    queue_name => $self->submit_queue,
+    routing_key =>  $self->submit_key,
+    durable => 1,
+    auto_delete => 0
+  };
+}
+
+sub _control_service_config {
+  my $self = shift;
+  return {
+    exchange_name => $self->control_exchange,
     exchange_type => "fanout",
     queue_name => "",
-    routing_key =>  $service_name,
-    durable => $service->queue_is_durable(),
-    auto_delete => $service->queue_should_autodelete()
+    routing_key =>  $self->control_key,
+    durable => 0,
+    auto_delete => 1
   };
-
-  $self->_setup_processor($config, $service);
 }
-
 sub _init_channel {
   my $self = shift;
   my $channel = $self->amqp->open_channel();
