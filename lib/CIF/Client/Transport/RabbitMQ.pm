@@ -4,89 +4,18 @@ use strict;
 use warnings;
 use Mouse;
 use CIF::Client::Transport;
+use CIF::Common::RabbitMQRole;
 with 'CIF::Client::Transport';
+with 'CIF::Common::RabbitMQRole';
 use namespace::autoclean;
 
-use Net::RabbitFoot;
 use CIF qw/debug/;
-
-has 'host' => (
-  is => 'ro',
-  isa => 'Str',
-  default => 'localhost'
-);
-
-has 'port' => (
-  is => 'ro',
-  isa => 'Num',
-  default => 5572
-);
-
-has 'username' => (
-  is => 'ro',
-  isa => 'Str',
-  default => 'guest'
-);
-
-has 'password' => (
-  is => 'ro',
-  isa => 'Str',
-  default => 'guest'
-);
-
-has 'vhost' => (
-  is => 'ro',
-  isa => 'Str',
-  default => '/cif'
-);
-
-has 'exchange_name' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'amq.topic'
-);
-
-has 'submit_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'submit'
-);
-
-has 'query_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'query'
-);
-
-has 'control_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'query'
-);
-
-has 'amqp' => (
-  is => 'ro', 
-  isa => 'Net::RabbitFoot',
-  init_arg => undef,
-  lazy_build => 1
-);
 
 has 'channel' => (
   is => 'ro', 
   init_arg => undef,
   lazy_build => 1
 );
-
-sub _build_amqp {
-  my $self = shift;
-  return Net::RabbitFoot->new()->load_xml_spec()->connect(
-    host => $self->host(),
-    port => $self->port(),
-    user => $self->username(),
-    pass => $self->password(),
-    vhost => $self->vhost()
-  );
-}
 
 sub _build_channel {
   my $self = shift;
@@ -101,10 +30,7 @@ after 'shutdown' => sub {
       $self->clear_channel();
     }
 
-    if ($self->has_amqp()) {
-      $self->amqp->close();
-      $self->clear_amqp();
-    }
+    $self->shutdown_amqp();
 
     return 1;
 };
@@ -134,7 +60,7 @@ sub _query {
     );
 
     $self->channel->publish(
-      exchange => $self->exchange_name,
+      exchange => $self->query_exchange,
       routing_key => $self->query_key,
       body => $body,
       header => {
@@ -184,7 +110,7 @@ sub _ping {
     );
 
     $self->channel->publish(
-      exchange => 'control',
+      exchange => $self->control_exchange,
       routing_key => $self->control_key,
       body => $body,
       header => {
@@ -216,7 +142,7 @@ sub _submit {
 
     my $body = $self->encode_submission($submission);
     $self->channel->publish(
-      exchange => $self->exchange_name,
+      exchange => $self->submit_exchange,
       routing_key => $self->submit_key,
       body => $body 
     );
