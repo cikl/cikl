@@ -21,8 +21,6 @@ has 'starttime' => (
 );
 
 requires "service_type";
-requires "queue_should_autodelete";
-requires "queue_is_durable";
 
 sub name {
   my $class = shift;

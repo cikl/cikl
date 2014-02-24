@@ -41,6 +41,7 @@ use Getopt::Long;
 use CIF::Router::ServerFactory;
 use Pod::Usage;
 use CIF qw/debug/;
+use AnyEvent;
 
 my $help;
 my $man;
@@ -68,10 +69,14 @@ my $mode = shift(@ARGV);
 
 my $server = CIF::Router::ServerFactory->instantiate($mode, $config_file);
 
-$SIG{INT} = sub {
-  debug("Caught interrupt. Stopping server.");
-  $server->stop();
-};
+my $w = AnyEvent->signal(
+  signal => "INT",
+  cb => sub {
+    debug("Caught interrupt. Stopping server.");
+    $server->stop();
+  }
+);
+
 print "Running. Ctrl-C or SIGINT to shutdown.\n";
 $server->run();
 $server->shutdown();

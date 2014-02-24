@@ -58,7 +58,8 @@ sub instantiate {
 
   my $transport = build_transport($config);
   $transport->register_service($service);
-  $transport->register_control_service($control_service);
+  $transport->register_service($control_service);
+  #$transport->register_control_service($control_service);
 
   return CIF::Router::Server->new(
     service => $service,
