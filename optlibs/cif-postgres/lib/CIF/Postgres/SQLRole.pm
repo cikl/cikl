@@ -40,7 +40,7 @@ has 'dbh' => (
 sub _build_dbh {
   my $self = shift;
   my $connect_str = 'DBI:Pg:database='. $self->database.';host='.$self->host;
-  my $dbh = DBI->connect_cached($connect_str,$self->user,$self->password, {AutoCommit => 1});
+  my $dbh = DBI->connect($connect_str,$self->user,$self->password, {AutoCommit => 1});
   if (!$dbh) {
     die($!);
   }
