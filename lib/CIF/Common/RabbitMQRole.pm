@@ -39,13 +39,13 @@ has 'vhost' => (
 has 'submit_key' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'submit'
+  default => 'submission.new'
 );
 
 has 'submit_exchange' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'amq.topic'
+  default => 'cif.submission'
 );
 
 has 'query_key' => (
@@ -57,19 +57,19 @@ has 'query_key' => (
 has 'query_exchange' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'amq.topic'
+  default => 'cif.query'
 );
 
 has 'control_key' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'query'
+  default => 'service.control'
 );
 
 has 'control_exchange' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'control'
+  default => 'cif.service'
 );
 
 has 'amqp' => (
