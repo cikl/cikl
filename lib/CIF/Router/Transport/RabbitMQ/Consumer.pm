@@ -139,7 +139,7 @@ sub _handle_msg {
   my ($reply, $type, $content_type, $err);
 
   try {
-    ($reply, $type, $content_type) = $self->service->process($payload);
+    ($reply, $type, $content_type) = $self->service->process({payload => $payload});
   } catch {
     $err = shift;
   };

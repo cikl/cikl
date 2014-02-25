@@ -19,8 +19,9 @@ sub service_type { CIF::Router::Constants::SVC_SUBMISSION }
 
 sub process {
   my $self = shift;
-  my $payload = shift;
-  my $content_type = shift;
+  my $args = shift || {};
+  my $payload = $args->{payload} || die("Missing payload argument");
+  #my $content_type = shift;
   my ($err, $submission);
   try {
     $submission = $self->codec->decode_submission($payload);

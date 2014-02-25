@@ -15,7 +15,8 @@ sub service_type { CIF::Router::Constants::SVC_CONTROL }
 
 sub process {
   my $self = shift;
-  my $payload = shift;
+  my $args = shift || {};
+  my $payload = $args->{payload} || die("Missing payload argument");
   my $err;
   my ($remote_hostinfo, $response, $encoded_response);
   try {

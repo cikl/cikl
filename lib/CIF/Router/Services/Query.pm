@@ -19,8 +19,9 @@ sub service_type { CIF::Router::Constants::SVC_QUERY }
 
 sub process {
   my $self = shift;
-  my $payload = shift;
-  my $content_type = shift;
+  my $args = shift || {};
+  my $payload = $args->{payload} || die("Missing payload argument");
+  #my $content_type = shift;
   my ($query, $results, $encoded_results, $err);
   try {
     $query = $self->codec->decode_query($payload);
