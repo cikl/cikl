@@ -60,12 +60,79 @@ has 'acker' => (
   lazy_build => 1
 );
 
+has 'on_success_callback' => (
+  is => 'rw',
+  isa => 'CodeRef',
+  lazy_build => 1
+);
+
+has 'on_failure_callback' => (
+  is => 'rw',
+  isa => 'CodeRef',
+  lazy_build => 1
+);
+
 has 'consumer_tag' => (
   is => 'rw',
   init_arg => undef,
   clearer => "clear_consumer_tag",
   predicate => "has_consumer_tag"
 );
+
+sub handle_success {
+  my $self = shift;
+  my $args = shift;
+  my $m = $args->{callback_data};
+  $self->acker->ack($m->{deliver}->method_frame->delivery_tag);
+  my $reply_queue = $m->{header}->{reply_to};
+  if (defined($reply_queue)) {
+    $self->_send_reply(
+      $reply_queue, 
+      $m->{header}->{correlation_id}, 
+      $args->{encoded_work_results},
+      $args->{response_type},
+      $args->{content_type}
+    );
+  }
+}
+
+sub _build_on_success_callback {
+  my $self = shift;
+  my $ret = sub {
+    $self->handle_success(@_);
+  };
+  return $ret;
+}
+
+use constant FAILURE_MESSAGE_TYPE => 'error';
+use constant FAILURE_CONTENT_TYPE => 'text/plain';
+use constant FAILURE_MESSAGE_FORMAT => "Error while processing message: %s";
+
+sub handle_failure {
+  my $self = shift;
+  my $args = shift;
+  print Dumper $args;
+  my $m = $args->{callback_data};
+  my $err = $args->{error};
+  $self->acker->reject($m->{deliver}->method_frame->delivery_tag);
+  my $reply_queue = $m->{header}->{reply_to};
+  if (defined($reply_queue)) {
+    $self->_send_reply(
+      $reply_queue, 
+      $m->{header}->{correlation_id},
+      sprintf(FAILURE_MESSAGE_FORMAT, $err),
+      FAILURE_MESSAGE_TYPE, 
+      FAILURE_CONTENT_TYPE);
+  }
+}
+
+sub _build_on_failure_callback {
+  my $self = shift;
+  my $ret = sub {
+    $self->handle_failure(@_);
+  };
+  return $ret;
+}
 
 sub _build_acker {
   my $self = shift;
@@ -117,6 +184,9 @@ sub stop {
     $self->acker->flush();
     $self->clear_acker();
   }
+
+  $self->clear_on_success_callback();
+  $self->clear_on_failure_callback();
 }
 
 sub _init_consume {
@@ -131,42 +201,37 @@ sub _init_consume {
 
 }
 
+sub _send_reply {
+  my $self = shift;
+  my $reply_queue = shift;
+  my $correlation_id = shift;
+  my $reply = shift;
+  my $type = shift;
+  my $content_type = shift;
+
+  $self->channel->publish(
+    # Note that we don't specify an exchange when replying.
+    exchange => '',
+    routing_key => $reply_queue,
+    body => $reply,
+    header => {
+      content_type => $content_type,
+      correlation_id => $correlation_id,
+      type => $type 
+    }
+  );
+}
+
 sub _handle_msg {
   my $self = shift;
   my $msg = shift;
 
-  my $payload = $msg->{body}->payload;
-  my ($reply, $type, $content_type, $err);
-
-  try {
-    ($reply, $type, $content_type) = $self->service->process($payload);
-  } catch {
-    $err = shift;
-  };
-
-  if ($err) {
-    $reply = "Error while processing message: $err";
-    $type = "error";
-    $content_type = "text/plain";
-    debug($reply);
-    $self->acker->reject($msg->{deliver}->method_frame->delivery_tag);
-  } else {
-    $self->acker->ack($msg->{deliver}->method_frame->delivery_tag);
-  }
-
-  if (my $reply_queue = $msg->{header}->{reply_to}) {
-    $self->channel->publish(
-      # Note that we don't specify an exchange when replying.
-      exchange => '',
-      routing_key => $reply_queue,
-      body => $reply,
-      header => {
-        content_type => $content_type,
-        correlation_id => $msg->{header}->{correlation_id},
-        type => $type 
-      }
-    );
-  }
+  $self->service->process({
+      payload => $msg->{body}->payload,
+      callback_data => $msg,
+      on_success => $self->on_success_callback(),
+      on_failure => $self->on_failure_callback()
+    });
 }
 
 __PACKAGE__->meta->make_immutable();

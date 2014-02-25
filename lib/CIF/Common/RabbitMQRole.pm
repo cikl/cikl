@@ -48,6 +48,18 @@ has 'submit_exchange' => (
   default => 'cif.submission'
 );
 
+has 'postprocess_key' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'submission.postprocess'
+);
+
+has 'postprocess_exchange' => (
+  is => 'ro', 
+  isa => 'Str',
+  default => 'cif.submission'
+);
+
 has 'query_key' => (
   is => 'ro', 
   isa => 'Str',

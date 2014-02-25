@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use CIF::Router::ServiceRole;
 use CIF::Router::Constants;
-use Try::Tiny;
 use CIF qw/debug/;
 use Mouse;
 
@@ -13,46 +12,32 @@ use namespace::autoclean;
 
 sub service_type { CIF::Router::Constants::SVC_CONTROL }
 
-sub process {
+sub decode_payload {
   my $self = shift;
   my $payload = shift;
-  my $err;
-  my ($remote_hostinfo, $response, $encoded_response);
-  try {
-    $remote_hostinfo = $self->codec->decode_hostinfo($payload);
-  } catch {
-    $err = shift;
-  };
+  return $self->codec->decode_hostinfo($payload);
+}
 
-  if ($err) {
-    die("Error decoding hostinfo: $err");
-  }
-  debug("Got ping: " . $remote_hostinfo->to_string());
+sub do_work {
+  my $self = shift;
+  my $remote_hostinfo = shift;
 
-  try {
-    $response = CIF::Models::HostInfo->generate(
-      {
-        uptime => $self->uptime(),
-        service_type => $self->name()
-      });
-  } catch {
-    $err = shift;
-  };
+  return  CIF::Models::HostInfo->generate(
+    {
+      uptime => $self->uptime(),
+      service_type => $self->name()
+    });
+}
 
-  if ($err) {
-    die("Error generating hostinfo: $err");
-  }
+sub encode_response {
+  my $self = shift;
+  my $results = shift;
+  return $self->codec->encode_hostinfo($results);
+}
 
-  try {
-    $encoded_response = $self->codec->encode_hostinfo($response);
-  } catch {
-    $err = shift;
-  };
-
-  if ($err) {
-    die("Error encoding hostinfo: $err");
-  }
-  return($encoded_response, "pong", $self->codec->content_type());
+use constant RESPONSE_TYPE => "pong";
+sub response_type {
+  return RESPONSE_TYPE;
 }
 
 __PACKAGE__->meta->make_immutable();
