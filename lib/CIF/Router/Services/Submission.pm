@@ -43,7 +43,7 @@ sub do_work {
 sub encode_response {
   my $self = shift;
   my $results = shift;
-  return $self->codec->encode_hostinfo($results);
+  return $results;
 }
 
 use constant RESPONSE_TYPE => "submission_response";
