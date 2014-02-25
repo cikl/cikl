@@ -12,6 +12,7 @@ use CIF qw/debug/;
 use CIF::Router::Constants;
 use CIF::Common::RabbitMQRole;
 use CIF::Router::Transport::RabbitMQ::Consumer;
+use CIF::Router::Transport::RabbitMQ::SubmissionConsumer;
 use namespace::autoclean;
 
 with 'CIF::Router::Transport';
@@ -83,7 +84,9 @@ sub register_service {
 
   if ($service_type == CIF::Router::Constants::SVC_SUBMISSION) {
     %config = (%config, %{$self->_submission_service_config()});
-    $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new(\%config);
+    $config{postprocess_exchange} = $self->postprocess_exchange;
+    $config{postprocess_key} = $self->postprocess_key;
+    $consumer = CIF::Router::Transport::RabbitMQ::SubmissionConsumer->new(\%config);
   } elsif ($service_type == CIF::Router::Constants::SVC_QUERY) {
     %config = (%config, %{$self->_query_service_config()});
     $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new(\%config);

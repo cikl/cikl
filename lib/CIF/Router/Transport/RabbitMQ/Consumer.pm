@@ -79,46 +79,57 @@ has 'consumer_tag' => (
   predicate => "has_consumer_tag"
 );
 
+sub handle_success {
+  my $self = shift;
+  my $args = shift;
+  my $m = $args->{callback_data};
+  $self->acker->ack($m->{deliver}->method_frame->delivery_tag);
+  my $reply_queue = $m->{header}->{reply_to};
+  if (defined($reply_queue)) {
+    $self->_send_reply(
+      $reply_queue, 
+      $m->{header}->{correlation_id}, 
+      $args->{encoded_work_results},
+      $args->{response_type},
+      $args->{content_type}
+    );
+  }
+}
+
 sub _build_on_success_callback {
   my $self = shift;
-  my $acker = $self->acker;
   my $ret = sub {
-    my $args = shift;
-    my $m = $args->{callback_data};
-    $acker->ack($m->{deliver}->method_frame->delivery_tag);
-    my $reply_queue = $m->{header}->{reply_to};
-    if (defined($reply_queue)) {
-      $self->_send_reply(
-        $reply_queue, 
-        $m->{header}->{correlation_id}, 
-        $args->{encoded_work_results},
-        $args->{response_type},
-        $args->{content_type}
-      );
-    }
+    $self->handle_success(@_);
   };
   return $ret;
 }
 
+use constant FAILURE_MESSAGE_TYPE => 'error';
+use constant FAILURE_CONTENT_TYPE => 'text/plain';
+use constant FAILURE_MESSAGE_FORMAT => "Error while processing message: %s";
+
+sub handle_failure {
+  my $self = shift;
+  my $args = shift;
+  print Dumper $args;
+  my $m = $args->{callback_data};
+  my $err = $args->{error};
+  $self->acker->reject($m->{deliver}->method_frame->delivery_tag);
+  my $reply_queue = $m->{header}->{reply_to};
+  if (defined($reply_queue)) {
+    $self->_send_reply(
+      $reply_queue, 
+      $m->{header}->{correlation_id},
+      sprintf(FAILURE_MESSAGE_FORMAT, $err),
+      FAILURE_MESSAGE_TYPE, 
+      FAILURE_CONTENT_TYPE);
+  }
+}
+
 sub _build_on_failure_callback {
   my $self = shift;
-  my $acker = $self->acker;
-  my $message_type = "error";
-  my $content_type = "text/plain";
   my $ret = sub {
-    my $args = shift;
-    my $m = $args->{callback_data};
-    my $err = $args->{error};
-    $acker->reject($m->{deliver}->method_frame->delivery_tag);
-    my $reply_queue = $m->{header}->{reply_to};
-    if (defined($reply_queue)) {
-      $self->_send_reply(
-        $reply_queue, 
-        $m->{header}->{correlation_id},
-        "Error while processing message: $err", 
-        $message_type, 
-        $content_type);
-    }
+    $self->handle_failure(@_);
   };
   return $ret;
 }
