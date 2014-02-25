@@ -74,22 +74,26 @@ sub register_service {
   my $service = shift;
   my $service_type = $service->service_type();
 
-  my $config = undef;
+  my %config;
+  my $consumer = undef;
+  my $channel = $self->amqp->open_channel();
+  push(@{$self->channels()}, $channel); 
+  $config{channel} = $channel;
+  $config{service} = $service;
+
   if ($service_type == CIF::Router::Constants::SVC_SUBMISSION) {
-    $config = $self->_submission_service_config();
+    %config = (%config, %{$self->_submission_service_config()});
+    $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new(\%config);
   } elsif ($service_type == CIF::Router::Constants::SVC_QUERY) {
-    $config = $self->_query_service_config();
+    %config = (%config, %{$self->_query_service_config()});
+    $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new(\%config);
   } elsif ($service_type == CIF::Router::Constants::SVC_CONTROL) {
-    $config = $self->_control_service_config();
+    %config = (%config, %{$self->_control_service_config()});
+    $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new(\%config);
   } else {
     die "Unknown service type: $service_type";
   }
-  my $channel = $self->amqp->open_channel();
-  push(@{$self->channels()}, $channel); 
 
-  $config->{channel} = $channel;
-  $config->{service} = $service;
-  my $consumer = CIF::Router::Transport::RabbitMQ::Consumer->new($config);
   push(@{$self->consumers()}, $consumer); 
 
   $consumer->start();
