@@ -95,7 +95,7 @@
             "URI::Escape" : "3.31",
             "UUID::Tiny" : "1.04",
             "XML::LibXML" : "1.89",
-            "perl" : "5.008008"
+            "perl" : "5.014"
          }
       },
       "test" : {
