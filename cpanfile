@@ -60,8 +60,5 @@ on 'develop' => sub {
 };
 
 feature 'postgres', "Postgres DBI support" => sub {
-  requires 'DBD::Pg', '2.19.0';
-  requires 'DBI', '1.616';
-  requires 'SQL::Abstract', '1.74';
-  requires 'SQL::Abstract::More', '1.17';
+  requires 'Cikl::Postgres';
 };
