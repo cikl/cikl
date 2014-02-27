@@ -99,7 +99,7 @@ my $err;
 
 my $config = Config::Simple->new($config_file) 
     or die("Failed to open config file $config_file: " . $!);
-my $smrt_config = $config->param(-block => 'cif_smrt');
+my $smrt_config = $config->param(-block => 'cikl_smrt');
 
 $goback = $goback || $smrt_config->{'goback'} || 3;
 my $not_before = DateTime->now()->subtract(days => $goback);
