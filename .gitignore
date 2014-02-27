@@ -1,7 +1,7 @@
 *.swp
 *.swo
 local/
-cif.conf
+cikl.conf
 
 # Build related
 Makefile

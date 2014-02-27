@@ -1,6 +1,6 @@
 use inc::Module::Install;
-name 'cif';
-version '1.5';
+name 'cikl';
+version '1.0';
 license 'lgpl';
 tests_recursive 't';
 cpanfile;

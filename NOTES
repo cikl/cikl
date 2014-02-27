@@ -40,30 +40,30 @@ make dropdb
 make initdb
 cd ..
 
-- Create your cif.conf:
-cp cif.conf.example cif.conf
+- Create your cikl.conf:
+cp cikl.conf.example cikl.conf
 
 - Create the API keys:
-carton exec -- libcif-dbi/bin/cif_apikeys -C cif.conf --add -u mike
-carton exec -- libcif-dbi/bin/cif_apikeys -C cif.conf --add -u cif-smrt -w
+carton exec -- libcif-dbi/bin/cif_apikeys -C cikl.conf --add -u mike
+carton exec -- libcif-dbi/bin/cif_apikeys -C cikl.conf --add -u cif-smrt -w
 
-- Add the keys to your cif.conf...
+- Add the keys to your cikl.conf...
 
 - Open up a new terminal window, and start up the QUERY server
 cd /path/to/cif-v1
-carton exec -- perl  cif-router/bin/processor.pl -C cif.conf query
+carton exec -- perl  cif-router/bin/processor.pl -C cikl.conf query
 
 - Open up a new terminal window, and start up the SUBMISSION server
 cd /path/to/cif-v1
-carton exec -- perl  cif-router/bin/processor.pl -C cif.conf submit
+carton exec -- perl  cif-router/bin/processor.pl -C cikl.conf submit
 
 - Switch back to the first terminal window. 
 
 - Import some data:
-carton exec -- perl cif-smrt/bin/cif_smrt -C cif.conf  -r cif-smrt/rules/etc/00_alexa_whitelist.cfg -f top10 -v2
+carton exec -- perl cif-smrt/bin/cif_smrt -C cikl.conf  -r cif-smrt/rules/etc/00_alexa_whitelist.cfg -f top10 -v2
 
 - Now query the data:
-carton exec -- libcif/bin/cif -C cif.conf -n -q google.com,yahoo.com
+carton exec -- libcif/bin/cif -C cikl.conf -n -q google.com,yahoo.com
 
 - You should see something like:
 restriction |guid    |assessment|description  |confidence|detecttime          |reporttime          |address   |alternativeid_restriction|alternativeid                          |

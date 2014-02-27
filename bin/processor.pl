@@ -38,14 +38,14 @@ BEGIN {
 }
 
 use Getopt::Long;
-use CIF::Router::ServerFactory;
+use Cikl::Router::ServerFactory;
 use Pod::Usage;
-use CIF qw/debug/;
+use Cikl qw/debug/;
 use AnyEvent;
 
 my $help;
 my $man;
-my $config_file = $ENV{'HOME'}.'/.cif';
+my $config_file = $ENV{'HOME'}.'/.cikl';
 
 Getopt::Long::Configure ("bundling");
 GetOptions(
@@ -67,7 +67,7 @@ if ($#ARGV > 0) {
 
 my $mode = shift(@ARGV);
 
-my $server = CIF::Router::ServerFactory->instantiate($mode, $config_file);
+my $server = Cikl::Router::ServerFactory->instantiate($mode, $config_file);
 
 my $w = AnyEvent->signal(
   signal => "INT",
@@ -96,14 +96,14 @@ processor.pl [OPTION] MODE
     query                   Starts a query server
 
  Options:
-    -C, --config=FILE       specify cofiguration file, default: ~/.cif 
+    -C, --config=FILE       specify cofiguration file, default: ~/.cikl
     -h, -?, --help          this message
     --man                   detailed documentation        
 
  Examples:
     processor.pl query
     processor.pl submit
-    processor.pl -C /path/to/cif.conf submit
+    processor.pl -C /path/to/cikl.conf submit
 
 =head1 DESCRIPTION
 
@@ -115,7 +115,7 @@ processor.pl [OPTION] MODE
 
 =item B<-C>, B<--config CONFIG_FILE>
 
-    Specify the path to the cif.conf. Defaults to ~/.cif
+    Specify the path to the cikl.conf. Defaults to ~/.cikl
 
 =item B<--help>
 
