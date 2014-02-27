@@ -1,28 +1,24 @@
-# client is required by the cif, cif_ping, and cif_smrt
+# client is required by the cikl, cikl_ping, and cikl_smrt
 [client]
 # the apikey for your client
 apikey = CONFIG_ME!
-driver = RabbitMQ
-#driver = Direct
+driver = Cikl::Client::Transport::RabbitMQ
 
-[client_rabbitmq]
 host = localhost
 port = 5672
 username = guest
 password = guest
-vhost = /cif
+vhost = /cikl
 
-# cif_smrt is required by cif_smrt
-[cif_smrt]
+# cikl_smrt is required by cikl_smrt
+[cikl_smrt]
 # change example.com to your local domain and hostname respectively
 # this identifies the data in your instance and ties it to your specific instance in the event
 # that you start sharing with others
-#name = example.com
-#instance = cif.example.com
 name = local
-instance = cif-vm.local
+instance = hostname.example.com
 
-# the apikey for cif_smrt
+# the apikey for cikl_smrt
 apikey = CONFIG_ME!
 
 [query_handler]
@@ -33,7 +29,7 @@ driver = "Cikl::Postgres::QueryHandler"
 host = '127.0.0.1'
 user = 'postgres'
 password = ''
-database = 'cif'
+database = 'cikl'
 
 [auth]
 # This specifies the name of the modules that implements our authentication. 
@@ -43,7 +39,7 @@ driver = "Cikl::Postgres::Auth"
 host = '127.0.0.1'
 user = 'postgres'
 password = ''
-database = 'cif'
+database = 'cikl'
 
 [datastore]
 # The number of events that trigger an immediate commit by the flusher.
@@ -60,10 +56,9 @@ driver = "Cikl::Postgres::DataStore"
 host = '127.0.0.1'
 user = 'postgres'
 password = ''
-database = 'cif'
+database = 'cikl'
 
 [router]
-# set to 0 if it's too noisy and reload the cif-router (apache), only on for RC2
 debug = 1
 auth_cache_ageoff = 60
 # Number of seconds between commits.
@@ -77,5 +72,5 @@ host = localhost
 port = 5672
 username = guest
 password = guest
-vhost = /cif
+vhost = /cikl
 prefetch_count = 500
