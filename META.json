@@ -1,0 +1,130 @@
+{
+   "abstract" : "It's new $module",
+   "author" : [
+      "Mike Ryan <falter at gmail.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Minilla/v0.11.0, CPAN::Meta::Converter version 2.133380",
+   "license" : [
+      "lgpl_3_0"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Cikl",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples",
+         "author",
+         "builder"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "CPAN::Meta" : "0",
+            "CPAN::Meta::Prereqs" : "0",
+            "Module::Build" : "0.38"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Class::Inspector" : "0",
+            "Devel::Size" : "0",
+            "Memory::Usage" : "0",
+            "Test::CPAN::Meta" : "0",
+            "Test::MinimumVersion" : "0.10108",
+            "Test::Pod" : "1.41",
+            "Test::Spellunker" : "v0.2.7"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "AnyEvent" : "7.05",
+            "AnyEvent::RabbitMQ" : "1.15",
+            "Class::Accessor" : "0.34",
+            "Class::Trigger" : "0.14",
+            "Config::Simple" : "4.58",
+            "Coro" : "6.31",
+            "Cwd" : "3.40",
+            "DateTime" : "0.70",
+            "DateTime::Format::DateParse" : "0.05",
+            "DateTime::Format::Strptime" : "1.54",
+            "Digest::MD5" : "2.51",
+            "Digest::SHA" : "5.70",
+            "DynaLoader" : "1.13",
+            "Encode" : "2.44",
+            "File::Spec" : "3.40",
+            "File::Type" : "0.22",
+            "Getopt::Long" : "0",
+            "IO::Uncompress::Unzip" : "2.02",
+            "JSON" : "2.53",
+            "LWP::Protocol::https" : "6.03",
+            "LWP::UserAgent" : "6.02",
+            "LWPx::ParanoidAgent" : "1.09",
+            "List::MoreUtils" : "0.33",
+            "Log::Dispatch" : "2.32",
+            "MIME::Base64" : "3.13",
+            "MIME::Lite" : "3.027",
+            "Mail::RFC822::Address" : "0.3",
+            "Module::Install" : "1.06",
+            "Module::Install::CPANfile" : "0.12",
+            "Module::Pluggable" : "3.9",
+            "Mouse" : "v2.0.0",
+            "MouseX::NativeTraits" : "0",
+            "Net::Abuse::Utils" : "0.13",
+            "Net::Abuse::Utils::Spamhaus" : "0.04",
+            "Net::DNS::Match" : "0.04",
+            "Net::Patricia" : "1.19",
+            "Net::RabbitFoot" : "1.03",
+            "Net::SSLeay" : "1.43",
+            "Regexp::Common" : "2.122",
+            "Regexp::Common::net::CIDR" : "0.02",
+            "Storable" : "2.27",
+            "Text::CSV" : "1.18",
+            "Text::CSV_XS" : "0",
+            "Text::Table" : "1.127",
+            "Time::HiRes" : "1.972101",
+            "Try::Tiny" : "0.11",
+            "URI::Escape" : "3.31",
+            "UUID::Tiny" : "1.04",
+            "XML::LibXML" : "1.89",
+            "perl" : "5.008008"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::Class" : "0.41",
+            "Test::Exception" : "0.32"
+         }
+      }
+   },
+   "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/cikl/p5-Cikl/issues"
+      },
+      "homepage" : "https://github.com/cikl/p5-Cikl",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/cikl/p5-Cikl.git",
+         "web" : "https://github.com/cikl/p5-Cikl"
+      }
+   },
+   "version" : "0.01",
+   "x_contributors" : [
+      "Kevin Benton <blak111@gmail.com>",
+      "Aaron K. Reffett <akreffett@cert.org>",
+      "Matt Carothers <macaroth@t5.sie.isc.org>",
+      "Wes Young <github@barely3am.com>",
+      "Gabriel Iovino <giovino@gmail.com>",
+      "Wes Young <wes@barely3am.com>",
+      "Mike Ryan <falter@gmail.com>"
+   ]
+}

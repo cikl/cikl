@@ -1,0 +1,6 @@
+name = "Cikl"
+license = "lgpl_3_0"
+# badges = ["travis"]
+
+[release]
+do_not_upload_to_cpan=true

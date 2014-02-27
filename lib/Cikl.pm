@@ -4,7 +4,7 @@ use 5.008008;
 use strict;
 use warnings;
 
-our $VERSION = '0.99_05';
+our $VERSION = '0.01';
 $VERSION = eval $VERSION;
 
 use UUID::Tiny;
@@ -34,21 +34,23 @@ use vars qw($Logger);
 
 =head1 NAME
 
-Cikl::Utils - Perl extension for misc 'helper' Cikl like functions
+Cikl - It's new $module
 
 =head1 SYNOPSIS
 
-  use Cikl::Utils;
-  use Data::Dumper;
-  use DateTime;
-
-  my $uuid = generate_uuid_random();
-  my $uuid = generate_uuid_domain('example.com');
-  my $uuid = generate_uuid_hash($source,$json_text);
+  use Cikl;
 
 =head1 DESCRIPTION
  
   These are mostly helper functions to be used within Cikl::Archive. We did some extra work to better parse timestamps and provide some internal uuid, cpu throttling and thread-batching for various Cikl functions.
+
+=head1 LICENSE
+
+Copyright (C) Mike Ryan.
+
+=head1 AUTHOR
+
+Mike Ryan E<lt>falter at gmail.comE<gt>
 
 =head1 Functions
 

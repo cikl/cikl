@@ -58,7 +58,3 @@ on 'develop' => sub {
     requires 'Devel::Size';
     requires 'Class::Inspector';
 };
-
-feature 'postgres', "Postgres DBI support" => sub {
-  requires 'Cikl::Postgres';
-};
