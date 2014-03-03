@@ -2,6 +2,8 @@ Revision history for Perl extension Cikl
 
 {{$NEXT}}
 
+0.02 2014-03-03T17:28:32Z
+
     - Clean up dependencies
       - Set minimum version of perl to 5.014
       - Stop using MouseX::NativeTraits - we really don't benefit.
