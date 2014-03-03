@@ -50,7 +50,6 @@ has 'channels' => (
   is => 'ro',
   isa => 'ArrayRef',
   lazy_build => 1,
-  traits => [ 'Array' ],
   init_arg => undef,
 );
 
@@ -58,16 +57,25 @@ sub _build_channels {
   return [];
 }
 
+sub clear_channels {
+  my $self = shift;
+  @{$self->channels()} = ();
+}
+
 has 'consumers' => (
   is => 'ro',
   isa => 'ArrayRef',
   lazy_build => 1,
-  traits => [ 'Array' ],
   init_arg => undef,
 );
 
 sub _build_consumers {
   return [];
+}
+
+sub clear_consumers {
+  my $self = shift;
+  @{$self->consumers()} = ();
 }
 
 sub register_service {
