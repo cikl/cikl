@@ -1,3 +1,5 @@
+requires 'perl', '5.014';
+
 requires 'AnyEvent', '7.05';
 requires 'AnyEvent::RabbitMQ', '1.15';
 requires 'Class::Accessor', '0.34';
