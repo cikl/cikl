@@ -2,6 +2,8 @@ Revision history for Perl extension Cikl
 
 {{$NEXT}}
 
+    - Remove test-rules to reduce dist size.    
+
 0.03 2014-03-03T19:16:36Z
 
     - Try pushing our stuff up to CPAN
