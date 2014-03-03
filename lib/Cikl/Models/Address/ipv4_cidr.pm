@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Mouse;
 use Cikl::Models::AddressRole;
-use Cikl::DataTypes;
+use Cikl::DataTypes::Ipv4Cidr;
 use namespace::autoclean;
 with 'Cikl::Models::AddressRole';
 

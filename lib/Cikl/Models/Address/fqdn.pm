@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Mouse;
 use Cikl::Models::AddressRole;
-use Cikl::DataTypes;
+use Cikl::DataTypes::Fqdn;
 use namespace::autoclean;
 with 'Cikl::Models::AddressRole';
 

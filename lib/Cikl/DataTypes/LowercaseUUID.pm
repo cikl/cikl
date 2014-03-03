@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use namespace::autoclean;
 use Mouse::Util::TypeConstraints;
-use Cikl::DataTypes::LowerCaseStr;
 use Cikl qw(is_uuid);
 
 subtype "Cikl::DataTypes::LowercaseUUID", 

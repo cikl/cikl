@@ -2,7 +2,7 @@ package Cikl::Models::HostInfo;
 use strict;
 use warnings;
 use Mouse;
-use Cikl::DataTypes;
+use Cikl::DataTypes::LowerCaseStr;
 use namespace::autoclean;
 use Sys::Hostname;
 

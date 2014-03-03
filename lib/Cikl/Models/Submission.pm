@@ -4,7 +4,7 @@ use warnings;
 use Scalar::Util qw(blessed);
 use Cikl::Models::Event;
 use Mouse;
-use Cikl::DataTypes;
+use Cikl::DataTypes::LowercaseUUID;
 use namespace::autoclean;
 use JSON::XS;
 

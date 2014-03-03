@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Cikl::Models::Event;
 use Cikl::Models::Query;
-use Cikl::DataTypes;
+use Cikl::DataTypes::LowerCaseStr;
 use Mouse;
 use namespace::autoclean;
 

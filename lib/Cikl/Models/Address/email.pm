@@ -4,7 +4,7 @@ use warnings;
 use Mouse;
 use Cikl::Models::AddressRole;
 use namespace::autoclean;
-use Cikl::DataTypes;
+use Cikl::DataTypes::Email;
 with 'Cikl::Models::AddressRole';
 
 sub type { 'email' }
