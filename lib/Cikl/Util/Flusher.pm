@@ -20,11 +20,7 @@ has 'flush_callbacks' => (
   is => 'ro',
   isa => 'ArrayRef[CodeRef]',
   init_arg => undef,
-  default => sub {[]},
-  traits => ['Array'],
-  handles => {
-    add_flush_callback => 'push'
-  }
+  default => sub {[]}
 );
 
 has 'commit_interval' => (
@@ -51,6 +47,12 @@ has '_next_flush' => (
   init_arg => undef,
   default => undef
 );
+
+sub add_flush_callback {
+  my $self = shift;
+  my $cb = shift;
+  push(@{$self->flush_callbacks}, $cb);
+}
 
 sub flush {
   my $self = shift;
