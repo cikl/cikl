@@ -24,15 +24,10 @@ has 'timeout' => (
 );
 
 has '_counter' => (
-  traits  => ['Counter'],
   is => 'rw',
   isa => 'Int',
   init_arg => undef,
-  default => 0,
-  handles => {
-    inc_counter   => 'inc',
-    reset_counter => 'reset',
-  }
+  default => 0
 );
 
 has '_last_tag' => (
@@ -49,7 +44,7 @@ has '_timer' => (
 sub ack {
   my $self = shift;
   $self->_last_tag(shift);
-  $self->inc_counter();
+  $self->_counter($self->_counter() + 1);
   if ($self->_counter >= $self->max_outstanding()) {
     # Flush after X messages.
     $self->flush();
@@ -72,7 +67,7 @@ sub reject {
 sub flush {
   my $self = shift;
   $self->_timer(undef);
-  $self->reset_counter();
+  $self->_counter(0);
   my $last_tag = $self->_last_tag;
   return if (!defined($last_tag));
   $self->channel->ack(delivery_tag => $last_tag, multiple => 1);

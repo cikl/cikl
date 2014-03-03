@@ -28,7 +28,6 @@ requires 'Module::Install', '1.06';
 requires 'Module::Install::CPANfile', '0.12';
 requires 'Module::Pluggable', '3.9';
 requires 'Mouse', "2.0.0";
-requires 'MouseX::NativeTraits';
 requires 'Net::RabbitFoot', '1.03';
 requires 'Net::SSLeay', '1.43';
 requires 'Regexp::Common', '2.122';
