@@ -26,7 +26,7 @@ cover_db/
 
 MYMETA.*
 
-/Cikl-Postgres-*
+/Cikl-*
 
 cikl.conf
 
