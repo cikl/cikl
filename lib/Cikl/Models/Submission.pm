@@ -6,9 +6,9 @@ use Cikl::Models::Event;
 use Mouse;
 use Cikl::DataTypes;
 use namespace::autoclean;
-use JSON;
+use JSON::XS;
 
-our $JSON = JSON->new()->utf8(1);
+our $JSON = JSON::XS->new()->utf8(1);
 
 has 'apikey' => (
   is => 'rw',

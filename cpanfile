@@ -15,7 +15,7 @@ requires 'File::Spec', '3.40';
 requires 'File::Type', "0.22";
 requires 'Getopt::Long';
 requires 'IO::Uncompress::Unzip', '2.02';
-requires 'JSON', '2.53';
+requires 'JSON::XS', '2.34';
 requires 'List::MoreUtils', '0.33';
 requires 'Log::Dispatch', '2.32';
 requires 'LWP::Protocol::https', '6.03';

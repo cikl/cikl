@@ -1,7 +1,6 @@
 package Cikl::Models::HostInfo;
 use strict;
 use warnings;
-require JSON;
 use Mouse;
 use Cikl::DataTypes;
 use namespace::autoclean;

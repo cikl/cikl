@@ -3,7 +3,7 @@ package Cikl::Smrt::Parsers::ParseJson;
 use strict;
 use warnings;
 
-use JSON;
+use JSON::XS;
 use Mouse;
 use Cikl::Smrt::Parser;
 extends 'Cikl::Smrt::Parser';
@@ -69,7 +69,7 @@ sub _parse_json_as_stream {
   my $cb = shift;
 
   my $buf;
-  my $json = JSON->new();
+  my $json = JSON::XS->new();
   my $firstread = 1;
   my $trim_comma_on_read = 0;
   while (read($fh, $buf, 10000)) {

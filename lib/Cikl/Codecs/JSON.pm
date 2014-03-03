@@ -7,12 +7,12 @@ use Cikl::Models::Event;
 use Cikl::Models::Query;
 use Cikl::Models::QueryResults;
 use Cikl::Models::HostInfo;
-require JSON;
+require JSON::XS;
 use Mouse;
 use Cikl::Codecs::CodecRole;
 use namespace::autoclean;
 
-our $JSON = JSON->new()->utf8(1);
+our $JSON = JSON::XS->new()->utf8(1);
 
 with 'Cikl::Codecs::CodecRole';
 
