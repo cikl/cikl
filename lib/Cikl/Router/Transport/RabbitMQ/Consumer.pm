@@ -111,7 +111,6 @@ use constant FAILURE_MESSAGE_FORMAT => "Error while processing message: %s";
 sub handle_failure {
   my $self = shift;
   my $args = shift;
-  print Dumper $args;
   my $m = $args->{callback_data};
   my $err = $args->{error};
   $self->acker->reject($m->{deliver}->method_frame->delivery_tag);
