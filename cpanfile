@@ -2,8 +2,6 @@ requires 'perl', '5.014';
 
 requires 'AnyEvent', '7.05';
 requires 'AnyEvent::RabbitMQ', '1.15';
-requires 'Class::Accessor', '0.34';
-requires 'Class::Trigger', '0.14';
 requires 'Config::Simple', '4.58';
 requires 'Coro', '6.31';
 requires 'Cwd', '3.40';
@@ -12,7 +10,6 @@ requires 'DateTime::Format::DateParse', '0.05';
 requires 'DateTime::Format::Strptime', '1.54';
 requires 'Digest::MD5', '2.51';
 requires 'Digest::SHA', '5.70';
-requires 'DynaLoader', '1.13';
 requires 'Encode', '2.44';
 requires 'File::Spec', '3.40';
 requires 'File::Type', "0.22";
@@ -32,10 +29,6 @@ requires 'Module::Install::CPANfile', '0.12';
 requires 'Module::Pluggable', '3.9';
 requires 'Mouse', "2.0.0";
 requires 'MouseX::NativeTraits';
-requires 'Net::Abuse::Utils', '0.13';
-requires 'Net::Abuse::Utils::Spamhaus', '0.04';
-requires 'Net::DNS::Match', '0.04';
-requires 'Net::Patricia', '1.19';
 requires 'Net::RabbitFoot', '1.03';
 requires 'Net::SSLeay', '1.43';
 requires 'Regexp::Common', '2.122';
@@ -46,7 +39,6 @@ requires 'Text::CSV_XS';
 requires 'Text::Table', '1.127';
 requires 'Time::HiRes', '1.972101';
 requires 'Try::Tiny', '0.11';
-requires 'URI::Escape', '3.31';
 requires 'UUID::Tiny', '1.04';
 requires 'XML::LibXML', '1.89';
 
@@ -56,7 +48,4 @@ on 'test' => sub {
 };
 
 on 'develop' => sub {
-    requires 'Memory::Usage';
-    requires 'Devel::Size';
-    requires 'Class::Inspector';
 };
