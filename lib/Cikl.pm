@@ -4,7 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 
-our $VERSION = '0.4.0';
+our $VERSION = '0.4.1';
 
 use UUID::Tiny;
 use DateTime;
