@@ -6,6 +6,9 @@ The codebase will be evolved over time from Perl to Ruby (likely with an emphasi
 ## Documentation
 Currently? We haven't got much in the way of documentation. Please accept my appologies.
 
+## Roadmap
+You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
+
 ## Issues and Pull Requests
 
 All issues are managed within the primary repository: [cikl/cikl/issues](https://github.com/cikl/cikl/issues). Pull requests should be sent to their respective reposirotires, referencing some issue within the main project repository.
