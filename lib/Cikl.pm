@@ -45,7 +45,9 @@ Cikl - It's new $module
 
 =head1 LICENSE
 
-Copyright (C) Mike Ryan.
+Copyright (C) 2013 Wes Young (wesyoung.me)
+Copyright (C) 2013 REN-ISAC and The Trustees of Indiana University (ren-isac.net)
+Copyright (C) 2014 Michael Ryan (github.com/justfalter)
 
 =head1 AUTHOR
 
