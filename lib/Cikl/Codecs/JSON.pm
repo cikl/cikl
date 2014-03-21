@@ -64,7 +64,6 @@ sub decode_query_results {
 sub encode_event {
   my $self = shift;
   my $event = shift;
-  my $e = $event->to_hash();
   return $JSON->encode($event->to_hash());
 }
 
