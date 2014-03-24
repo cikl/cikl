@@ -36,6 +36,11 @@ Cikl - It's new $module
   use Cikl;
 
 =head1 DESCRIPTION
+
+Cikl is a cyber threat intelligence management system. It is a fork of the 
+Collective Intelligence Framework (CIF), which aims for the same goal. The 
+primary goals of this (currently experimental) fork is to improve speed, 
+scalability, functionality, and ease of installation.
  
 =head1 LICENSE
 
