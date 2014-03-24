@@ -1,15 +1,12 @@
 requires 'perl', '5.014';
 
 requires 'AnyEvent', '7.05';
-requires 'AnyEvent::RabbitMQ', '1.15';
 requires 'Config::Simple', '4.58';
 requires 'Coro', '6.31';
 requires 'Cwd', '3.40';
 requires 'DateTime', '0.70';
 requires 'DateTime::Format::DateParse', '0.05';
 requires 'DateTime::Format::Strptime', '1.54';
-requires 'Digest::MD5', '2.51';
-requires 'Digest::SHA', '5.70';
 requires 'Encode', '2.44';
 requires 'File::Spec', '3.40';
 requires 'File::Type', "0.22";
@@ -35,7 +32,6 @@ requires 'Text::CSV_XS', '1.00';
 requires 'Text::Table', '1.127';
 requires 'Time::HiRes', '1.972101';
 requires 'Try::Tiny', '0.11';
-requires 'UUID::Tiny', '1.04';
 requires 'XML::LibXML', '1.89';
 
 on 'test' => sub {
