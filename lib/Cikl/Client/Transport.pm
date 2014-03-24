@@ -36,23 +36,9 @@ sub encode_submission {
   return $self->codec->encode_submission($submission);
 }
 
-sub encode_query {
-  my $self = shift;
-  my $query = shift;
-  return $self->codec->encode_query($query);
-}
-
-sub decode_query_results {
-  my $self = shift;
-  my $content_type = shift;
-  my $answer = shift;
-  return $self->codec->decode_query_results($answer);
-}
-
 sub shutdown {
 }
 
-requires '_query';
 requires '_submit';
 
 1;

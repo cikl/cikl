@@ -4,8 +4,6 @@ use strict;
 use warnings;
 use Cikl::Models::Submission;
 use Cikl::Models::Event;
-use Cikl::Models::Query;
-use Cikl::Models::QueryResults;
 require JSON::XS;
 use Mouse;
 use Cikl::Codecs::CodecRole;
@@ -17,34 +15,6 @@ with 'Cikl::Codecs::CodecRole';
 
 sub content_type {
   return "application/json";
-}
-
-sub encode_query {
-  my $self = shift;
-  my $query = shift;
-  return $JSON->encode($query->to_hash());
-}
-
-sub decode_query {
-  my $self = shift;
-  my $json = shift;
-  return Cikl::Models::Query->from_hash($JSON->decode($json));
-}
-
-sub encode_query_results {
-  my $self = shift;
-  my $query_results = shift;
-  return($JSON->encode($query_results->to_hash()));
-
-}
-
-sub decode_query_results {
-  my $self = shift;
-  my $json = shift;
-  my $data = $JSON->decode($json);
-  my $query_results = Cikl::Models::QueryResults->from_hash($data);
-
-  return ($query_results);
 }
 
 sub encode_event {

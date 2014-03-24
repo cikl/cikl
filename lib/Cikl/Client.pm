@@ -8,7 +8,6 @@ use Try::Tiny;
 use Config::Simple;
 use Cikl::Client::Transport;
 use Cikl::Models::Submission;
-use Cikl::Models::Query;
 
 use Cikl qw(debug);
 
@@ -32,30 +31,6 @@ sub shutdown {
       $self->clear_transport();
     }
     return 1;
-}
-
-sub query {
-    my $self = shift;
-    my %args = @_;
-
-    $args{apikey} //= $self->apikey();
-
-    my $err;
-    my $query;
-    
-    try {
-      $query = Cikl::Models::Query->new(%args);
-    } catch {
-      $err = $_;
-    };
-
-    if (!defined($query)) {
-      die("Failed to create query object: $err");
-    }
-
-    my $query_results = $self->transport->_query($query);
-
-    return($query_results);
 }
 
 sub submit {

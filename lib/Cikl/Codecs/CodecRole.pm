@@ -7,10 +7,6 @@ use namespace::autoclean;
 
 requires 'content_type';
 
-requires 'encode_query';
-requires 'decode_query';
-requires 'encode_query_results';
-requires 'decode_query_results';
 requires 'encode_event';
 requires 'decode_event';
 requires 'encode_submission';
