@@ -8,8 +8,6 @@ use Try::Tiny;
 use Config::Simple;
 use Cikl::Client::Transport;
 
-use Cikl qw(debug);
-
 has 'transport' => (
   is => 'ro',
   isa => 'Cikl::Client::Transport',

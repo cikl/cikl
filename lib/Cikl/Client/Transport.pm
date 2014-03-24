@@ -6,7 +6,6 @@ use Mouse::Role;
 use Scalar::Util qw(blessed);
 use Cikl::Codecs::JSON;
 use namespace::autoclean;
-use Cikl qw/debug/;
 
 has 'codec' => (
   is => 'ro',

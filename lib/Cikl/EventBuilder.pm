@@ -7,7 +7,6 @@ use Mouse;
 use namespace::autoclean;
 use Try::Tiny;
 use DateTime;
-use Cikl qw/debug/;
 use Cikl::Util::TimeHelpers qw/normalize_timestamp create_strptime_parser create_default_timestamp_parser/;
 
 has 'default_event_data' => (
@@ -121,7 +120,6 @@ sub build_event {
     $err = shift;
   };
   if ($err) {
-    #debug($err);
     die($err);
   }
   if (!defined($normalized)) {

@@ -14,7 +14,6 @@ requires 'Getopt::Long';
 requires 'IO::Uncompress::Unzip', '2.02';
 requires 'JSON::XS', '2.34';
 requires 'List::MoreUtils', '0.33';
-requires 'Log::Dispatch', '2.32';
 requires 'LWP::Protocol::https', '6.03';
 requires 'LWP::UserAgent', '6.02';
 requires 'LWPx::ParanoidAgent', '1.09';
@@ -33,6 +32,8 @@ requires 'Text::Table', '1.127';
 requires 'Time::HiRes', '1.972101';
 requires 'Try::Tiny', '0.11';
 requires 'XML::LibXML', '1.89';
+
+requires 'Log::Log4perl';
 
 on 'test' => sub {
   requires 'Test::Class', '0.41';

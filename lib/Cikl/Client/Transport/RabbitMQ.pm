@@ -9,8 +9,6 @@ with 'Cikl::Client::Transport';
 with 'Cikl::Common::RabbitMQRole';
 use namespace::autoclean;
 
-use Cikl qw/debug/;
-
 has 'channel' => (
   is => 'ro', 
   init_arg => undef,

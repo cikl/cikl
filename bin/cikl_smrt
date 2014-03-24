@@ -39,16 +39,21 @@ use Cikl::Smrt;
 use Config::Simple;
 use Data::Dumper;
 use MIME::Lite;
-use Cikl qw/debug/;
+use Cikl::Logging qw/get_logger/;
 use Cikl::Smrt::Handlers::ConfigBasedHandler;
 use Cikl::Smrt::Handlers::Alexa;
 use Cikl::Smrt::FeedParserConfig;
 use Try::Tiny;
 
+my $logger = get_logger();
+
 my %opts;
 getopts('g:hNA:s:dC:f:r:v:p:',\%opts);
 our $debug = $opts{'d'} || 0;
 $debug = $opts{'v'} if($opts{'v'});
+if ($debug != 0) {
+  $logger->more_logging($debug);
+}
 
 my $config_file      = $opts{'C'} || $ENV{'HOME'}.'/.cikl';
 my $rules       = $opts{'r'};
@@ -60,7 +65,7 @@ my $fail_closed = $opts{'N'} || 0;
 my $disable_p   = $opts{'z'};
 my $goback      = $opts{'g'} || 3;
 
-debug('fail closed: '.$fail_closed) if($debug);
+$logger->debug('fail closed: '.$fail_closed);
 
 die usage() if($opts{'h'} || !$rules);
 
@@ -103,9 +108,7 @@ my $smrt_config = $config->param(-block => 'cikl_smrt');
 
 $goback = $goback || $smrt_config->{'goback'} || 3;
 my $not_before = DateTime->now()->subtract(days => $goback);
-if ($debug) {
-  debug("Ignoring events prior to " . $not_before->datetime());
-}
+$logger->debug("Ignoring events prior to " . $not_before->datetime());
 
 my %handler_args = (
       apikey => $smrt_config->{'apikey'},
@@ -136,7 +139,7 @@ if($err){
 
 ($err,$ret) = $handler->process();
 unless($err){
-    debug('done...') if($debug);
+    $logger->debug('done...');
     exit(0);
 }
 

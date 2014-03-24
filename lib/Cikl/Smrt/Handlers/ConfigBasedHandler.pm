@@ -10,7 +10,6 @@ use Cikl::Smrt::Decoders::AutoDecoder;
 use Cikl::Smrt::Fetchers;
 use Cikl::Smrt::HandlerRole;
 use URI;
-use Cikl qw/debug/;
 
 use Mouse;
 with 'Cikl::Smrt::HandlerRole';

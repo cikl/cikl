@@ -2,7 +2,6 @@ package Cikl::Smrt::Parsers;
 
 use strict;
 use warnings;
-use Cikl qw/debug/;
 
 use Carp;
 use Module::Pluggable search_path => "Cikl::Smrt::Parsers", 

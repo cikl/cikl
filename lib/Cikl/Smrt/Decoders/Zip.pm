@@ -7,9 +7,11 @@ use Cikl::Smrt::AutoDecodableRole;
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
 use Mouse;
 use namespace::autoclean;
-use Cikl qw/debug/;
+use Cikl::Logging;
 with 'Cikl::Smrt::DecoderRole';
 with 'Cikl::Smrt::AutoDecodableRole';
+
+my $logger = get_logger();
 
 has 'zip_filename' => (
   is => 'ro',
@@ -29,7 +31,7 @@ sub decode {
 
     my $file = $self->zip_filename;
     if(!defined($file)){
-      debug("WARNING: No zip_filename provided. We'll be extracting the FIRST file that appears within the zip, whatever that may be!");
+      $logger->warn("No zip_filename provided. We'll be extracting the FIRST file that appears within the zip, whatever that may be!");
     }
 
     my $foundit = 0;

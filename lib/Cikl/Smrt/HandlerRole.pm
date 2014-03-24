@@ -14,11 +14,13 @@ use Coro;
 use DateTime;
 
 use Mouse::Role;
-use Cikl qw/debug/;
+use Cikl::Logging;
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
 
 use namespace::autoclean;
+
+my $logger = get_logger();
 
 requires 'name';
 requires '_default_event_data';
@@ -155,16 +157,14 @@ sub process {
       return($err);
     }
 
-    if($::debug) {
-      debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());
-    }
+    $logger->debug('records to be processed: '.$broker->count() . ", too old: " . $broker->count_too_old());
     if ($broker->count_failed() > 0) {
-      debug('failed to create events: '. $broker->count_failed());
+      $logger->debug('failed to create events: '. $broker->count_failed());
     }
 
     if($broker->count() == 0){
       if ($broker->count_too_old() != 0) {
-        debug('your goback is too small, if you want records, increase the goback time') if($::debug);
+        $logger->debug('your goback is too small, if you want records, increase the goback time');
       }
       return (undef, 'no records');
     }

@@ -3,7 +3,6 @@ package Cikl::Smrt::Decoders::AutoDecoder;
 use strict;
 use warnings;
 use Cikl::Smrt::DecoderRole;
-use Cikl qw/debug/;
 use File::Type;
 use Carp;
 use Module::Pluggable search_path => "Cikl::Smrt::Decoders", 

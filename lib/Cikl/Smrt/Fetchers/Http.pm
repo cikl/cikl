@@ -8,8 +8,11 @@ use IO::Scalar;
 use IO::File;
 use LWP::Authen::Basic;
 use File::Temp qw/tmpnam/;
-use Cikl qw/debug/;
+use Cikl::Logging;
+use Cikl;
 extends 'Cikl::Smrt::Fetcher';
+
+my $logger = get_logger();
 
 use namespace::autoclean;
 my @__tempfiles;
@@ -127,7 +130,7 @@ sub fetch {
       $is_tempfile = 1;
     }
 
-    debug("Saving response to $filename");
+    $logger->debug("Saving response to $filename");
 
     die($filename.' isn\'t writeable by our user') if(-e $filename && !-w $filename);
 
