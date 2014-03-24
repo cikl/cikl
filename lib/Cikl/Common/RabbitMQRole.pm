@@ -33,55 +33,19 @@ has 'password' => (
 has 'vhost' => (
   is => 'ro',
   isa => 'Str',
-  default => '/cikl'
+  default => '/'
 );
 
 has 'submit_key' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'submission.new'
+  default => 'cikl.event'
 );
 
 has 'submit_exchange' => (
   is => 'ro', 
   isa => 'Str',
-  default => 'cikl.submission'
-);
-
-has 'postprocess_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'submission.postprocess'
-);
-
-has 'postprocess_exchange' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'cikl.submission'
-);
-
-has 'query_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'query'
-);
-
-has 'query_exchange' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'cikl.query'
-);
-
-has 'control_key' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'service.control'
-);
-
-has 'control_exchange' => (
-  is => 'ro', 
-  isa => 'Str',
-  default => 'cikl.service'
+  default => ''
 );
 
 has 'amqp' => (
