@@ -9,7 +9,6 @@ use Config::Simple;
 use Cikl::Client::Transport;
 use Cikl::Models::Submission;
 use Cikl::Models::Query;
-use Cikl::Models::HostInfo;
 
 use Cikl qw(debug);
 
@@ -64,14 +63,6 @@ sub submit {
     my $event = shift;
 
     return $self->transport()->_submit($event);
-}    
-
-sub ping {
-    my $self = shift;
-
-    my $hostinfo = Cikl::Models::HostInfo->generate({uptime => 0, service_type => 'client'});
-
-    return $self->transport()->_ping($hostinfo);
 }    
 
 __PACKAGE__->meta->make_immutable();

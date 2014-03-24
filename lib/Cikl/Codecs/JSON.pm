@@ -6,7 +6,6 @@ use Cikl::Models::Submission;
 use Cikl::Models::Event;
 use Cikl::Models::Query;
 use Cikl::Models::QueryResults;
-use Cikl::Models::HostInfo;
 require JSON::XS;
 use Mouse;
 use Cikl::Codecs::CodecRole;
@@ -18,19 +17,6 @@ with 'Cikl::Codecs::CodecRole';
 
 sub content_type {
   return "application/json";
-}
-
-sub encode_hostinfo {
-  my $self = shift;
-  my $hostinfo = shift;
-  return $JSON->encode($hostinfo->to_hash());
-}
-
-sub decode_hostinfo {
-  my $self = shift;
-  my $json = shift;
-  my $data = $JSON->decode($json);
-  return Cikl::Models::HostInfo->from_hash($data);
 }
 
 sub encode_query {

@@ -24,12 +24,6 @@ sub DEMOLISH {
     $self->shutdown();
 }
 
-sub encode_hostinfo {
-  my $self = shift;
-  my $hostinfo = shift;
-  return $self->codec->encode_submission($hostinfo);
-}
-
 sub encode_event {
   my $self = shift;
   my $event = shift;
@@ -55,19 +49,11 @@ sub decode_query_results {
   return $self->codec->decode_query_results($answer);
 }
 
-sub decode_hostinfo {
-  my $self = shift;
-  my $content_type = shift;
-  my $answer = shift;
-  return $self->codec->decode_hostinfo($answer);
-}
-
 sub shutdown {
 }
 
 requires '_query';
 requires '_submit';
-requires '_ping';
 
 1;
 

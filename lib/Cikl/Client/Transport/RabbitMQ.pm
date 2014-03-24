@@ -83,59 +83,6 @@ sub _query {
     }
 }
 
-sub _ping {
-    my $self = shift;
-    my $hostinfo = shift;
-    my $body = $self->encode_hostinfo($hostinfo);
-
-    my $result = $self->channel->declare_queue( 
-      queue => "",
-      durable => 0,
-      exclusive => 1
-    );
-    my $queue_name =  $result->method_frame->queue;
-
-    my $cv = AnyEvent->condvar;
-
-    my @responses;
-
-    my $timer = AnyEvent->timer(after => 5, cb => sub {$cv->send(undef);});
-
-    $self->channel->consume(
-        no_ack => 1, 
-        on_consume => sub {
-          my $resp = shift;
-          push(@responses, $resp);
-        }
-    );
-
-    $self->channel->publish(
-      exchange => $self->control_exchange,
-      routing_key => $self->control_key,
-      body => $body,
-      header => {
-        reply_to => $queue_name
-      }
-    );
-
-    $cv->recv();
-
-    my @ret;
-
-    foreach my $response (@responses) {
-      my $content_type = $response->{header}->{content_type};
-      my $message_type = $response->{header}->{type};
-      if ($message_type eq 'pong') {
-        my $v = $self->decode_hostinfo($content_type, $response->{body}->{payload});
-        push(@ret, $v);
-      } else {
-        debug("Bad response: " . $response->{body}->{payload});
-      }
-    }
-
-    return \@ret;
-}
-
 sub _submit {
     my $self = shift;
     my $event = shift;
