@@ -13,12 +13,6 @@ use Cikl::Models::HostInfo;
 
 use Cikl qw(debug);
 
-has 'apikey' => (
-  is => 'ro',
-  isa => 'Str',
-  required => 1
-);
-
 has 'transport' => (
   is => 'ro',
   isa => 'Cikl::Client::Transport',

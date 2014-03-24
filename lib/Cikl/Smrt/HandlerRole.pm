@@ -23,12 +23,6 @@ use namespace::autoclean;
 requires 'name';
 requires '_default_event_data';
 
-has 'apikey' => (
-  is => 'ro',
-  isa => 'Str',
-  required => 1
-);
-
 has 'global_config' => (
   is => 'ro',
   isa => 'Config::Simple',
@@ -132,7 +126,6 @@ sub _refresh {
 sub get_client {
   my $self = shift;
   my $client_config = $self->global_config()->get_block('client');
-  $client_config->{apikey} = $self->apikey();
   return Cikl::Client::Factory->instantiate($client_config);
 }
 

@@ -18,8 +18,7 @@ sub instantiate {
   my $transport = $driver_class->new($args);
 
   return Cikl::Client->new(
-    transport => $transport,
-    apikey => $args->{apikey}
+    transport => $transport
   );
 }
 
