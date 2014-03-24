@@ -69,11 +69,7 @@ sub submit {
     my $self = shift;
     my $event = shift;
 
-    my $submission = Cikl::Models::Submission->new(
-      apikey => $self->apikey(), 
-      event => $event
-    );
-    return $self->transport()->_submit($submission);
+    return $self->transport()->_submit($event);
 }    
 
 sub ping {

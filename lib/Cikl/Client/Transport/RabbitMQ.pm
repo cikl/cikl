@@ -138,9 +138,9 @@ sub _ping {
 
 sub _submit {
     my $self = shift;
-    my $submission = shift;
+    my $event = shift;
 
-    my $body = $self->encode_submission($submission);
+    my $body = $self->encode_event($event);
     $self->channel->publish(
       exchange => $self->submit_exchange,
       routing_key => $self->submit_key,

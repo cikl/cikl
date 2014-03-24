@@ -30,6 +30,12 @@ sub encode_hostinfo {
   return $self->codec->encode_submission($hostinfo);
 }
 
+sub encode_event {
+  my $self = shift;
+  my $event = shift;
+  return $self->codec->encode_event($event);
+}
+
 sub encode_submission {
   my $self = shift;
   my $submission = shift;
