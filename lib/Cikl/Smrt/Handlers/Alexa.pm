@@ -6,7 +6,6 @@ use Cikl::Smrt::Fetchers::Http;
 use Cikl::Smrt::Decoders::Zip;
 use Cikl::Smrt::Parsers::ParseDelim;
 use Cikl::Smrt::HandlerRole;
-use Cikl qw/generate_uuid_ns/;
 use namespace::autoclean;
 use URI;
 use Mouse;

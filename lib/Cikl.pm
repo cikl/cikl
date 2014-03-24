@@ -6,7 +6,6 @@ use warnings;
 
 our $VERSION = '0.4.1';
 
-use UUID::Tiny;
 use DateTime;
 
 require Exporter;
@@ -21,13 +20,10 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-    is_uuid generate_uuid_random generate_uuid_url generate_uuid_hash 
-    generate_uuid_ns debug init_logging 
+    debug init_logging 
 ) ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw//;
-
-use constant UUID_RE => qr/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 use vars qw($Logger);
 
@@ -41,8 +37,6 @@ Cikl - It's new $module
 
 =head1 DESCRIPTION
  
-  These are mostly helper functions to be used within Cikl::Archive. We did some extra work to better parse timestamps and provide some internal uuid, cpu throttling and thread-batching for various Cikl functions.
-
 =head1 LICENSE
 
 Copyright (C) 2013 Wes Young (wesyoung.me)
@@ -56,17 +50,6 @@ Mike Ryan E<lt>falter at gmail.comE<gt>
 =head1 Functions
 
 =over
-
-=item is_uuid($uuid)
-
-  Returns 1 if the argument matches /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-  Returns 0 if it doesn't
-
-=cut
-
-sub is_uuid {
-    return(($_[0] && $_[0] =~ UUID_RE) ? 1 : undef);
-}
 
 =item debug($string)
 
@@ -128,33 +111,6 @@ sub init_logging {
         );
     }
 }   
-
-=item generate_uuid()
-
-  generates a random "v4" uuid and returns it as a string
-
-=cut
-
-sub generate_uuid_random {
-    return(create_UUID_as_string(UUID_V4));
-}
-
-sub generate_uuid_ns {
-    my $source = shift;
-    # NOTE: This isn't actually generating a URL namespaced UUID! There was 
-    # a bug in the original Cikl implementation that caused it to generate 
-    # with a 'nil' namespace UUID. If we 'fix' this, it'll break existing 
-    # repositories. 
-    ## return(create_UUID_as_string(UUID_V3, UUID_NS_URL, $source));
-    #
-    # Instead, we generate using a nil namespace:
-    return(create_UUID_as_string(UUID_V3, $source));
-}
-
-# deprecate
-sub generate_uuid_url {
-    return generate_uuid_ns(shift);
-}
 
 =back
 =cut

@@ -4,8 +4,6 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
-use Cikl qw/generate_uuid_random/;
-
 use Cikl::Models::Event;
 
 sub testing_class { 'Cikl::Models::Event'; }

@@ -6,7 +6,6 @@ use Data::Dumper;
 use Config::Simple;
 use Try::Tiny;
 use Storable qw/dclone/;
-use Cikl qw/generate_uuid_url generate_uuid_random is_uuid debug/;
 
 use constant FIELDS => {
   group => 'everyone',

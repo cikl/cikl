@@ -14,7 +14,7 @@ use Coro;
 use DateTime;
 
 use Mouse::Role;
-use Cikl qw/debug generate_uuid_ns/;
+use Cikl qw/debug/;
 use Net::SSLeay;
 Net::SSLeay::SSLeay_add_ssl_algorithms();
 
