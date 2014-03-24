@@ -5,7 +5,6 @@ use warnings;
 use Mouse::Role;
 use Scalar::Util qw(blessed);
 use Cikl::Codecs::JSON;
-use Cikl::Models::Submission;
 use namespace::autoclean;
 use Cikl qw/debug/;
 
@@ -28,12 +27,6 @@ sub encode_event {
   my $self = shift;
   my $event = shift;
   return $self->codec->encode_event($event);
-}
-
-sub encode_submission {
-  my $self = shift;
-  my $submission = shift;
-  return $self->codec->encode_submission($submission);
 }
 
 sub shutdown {

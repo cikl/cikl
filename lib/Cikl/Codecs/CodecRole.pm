@@ -9,7 +9,5 @@ requires 'content_type';
 
 requires 'encode_event';
 requires 'decode_event';
-requires 'encode_submission';
-requires 'decode_submission';
 
 1;

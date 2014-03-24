@@ -7,7 +7,6 @@ use namespace::autoclean;
 use Try::Tiny;
 use Config::Simple;
 use Cikl::Client::Transport;
-use Cikl::Models::Submission;
 
 use Cikl qw(debug);
 
