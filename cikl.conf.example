@@ -1,14 +1,12 @@
 # client is required by the cikl, cikl_ping, and cikl_smrt
 [client]
-# the apikey for your client
-apikey = CONFIG_ME!
 driver = Cikl::Client::Transport::RabbitMQ
 
 host = localhost
 port = 5672
 username = guest
 password = guest
-vhost = /cikl
+vhost = /
 
 # cikl_smrt is required by cikl_smrt
 [cikl_smrt]
@@ -19,58 +17,4 @@ name = local
 instance = hostname.example.com
 
 # the apikey for cikl_smrt
-apikey = CONFIG_ME!
 
-[query_handler]
-# This specifies the name of the modules that implements our query handler. 
-driver = "Cikl::Postgres::QueryHandler"
-
-# These are query handler specific attributes
-host = '127.0.0.1'
-user = 'postgres'
-password = ''
-database = 'cikl'
-
-[auth]
-# This specifies the name of the modules that implements our authentication. 
-driver = "Cikl::Postgres::Auth"
-
-# These are auth specific attributes
-host = '127.0.0.1'
-user = 'postgres'
-password = ''
-database = 'cikl'
-
-[datastore]
-# The number of events that trigger an immediate commit by the flusher.
-commit_size = 500
-
-# After commit_interval seconds, trigger a commit if we have less than 
-# commit_size events
-commit_interval = 2 
-
-# This specifies the name of the modules that implements our datastore. 
-driver = "Cikl::Postgres::DataStore"
-
-# These are datastore specific attributes
-host = '127.0.0.1'
-user = 'postgres'
-password = ''
-database = 'cikl'
-
-[router]
-debug = 1
-auth_cache_ageoff = 60
-# Number of seconds between commits.
-
-[router_server]
-driver = RabbitMQ
-debug = 1
-
-[router_server_rabbitmq]
-host = localhost
-port = 5672
-username = guest
-password = guest
-vhost = /cikl
-prefetch_count = 500
