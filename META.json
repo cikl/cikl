@@ -1,7 +1,7 @@
 {
    "abstract" : "It's new $module",
    "author" : [
-      "Mike Ryan <falter at gmail.com>"
+      "Wes Young (wesyoung.me)"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Minilla/v0.11.0, CPAN::Meta::Converter version 2.133380",
@@ -44,15 +44,12 @@
       "runtime" : {
          "requires" : {
             "AnyEvent" : "7.05",
-            "AnyEvent::RabbitMQ" : "1.15",
             "Config::Simple" : "4.58",
             "Coro" : "6.31",
             "Cwd" : "3.40",
             "DateTime" : "0.70",
             "DateTime::Format::DateParse" : "0.05",
             "DateTime::Format::Strptime" : "1.54",
-            "Digest::MD5" : "2.51",
-            "Digest::SHA" : "5.70",
             "Encode" : "2.44",
             "File::Spec" : "3.40",
             "File::Type" : "0.22",
@@ -63,13 +60,12 @@
             "LWP::UserAgent" : "6.02",
             "LWPx::ParanoidAgent" : "1.09",
             "List::MoreUtils" : "0.33",
-            "Log::Dispatch" : "2.32",
+            "Log::Log4perl" : "0",
             "MIME::Base64" : "3.13",
             "MIME::Lite" : "3.027",
             "Mail::RFC822::Address" : "0.3",
             "Module::Pluggable" : "3.9",
             "Mouse" : "v2.0.0",
-            "Net::RabbitFoot" : "1.03",
             "Net::SSLeay" : "1.43",
             "Regexp::Common" : "2.122",
             "Regexp::Common::net::CIDR" : "0.02",
@@ -78,7 +74,6 @@
             "Text::Table" : "1.127",
             "Time::HiRes" : "1.972101",
             "Try::Tiny" : "0.11",
-            "UUID::Tiny" : "1.04",
             "XML::LibXML" : "1.89",
             "perl" : "5.014"
          }
@@ -102,7 +97,7 @@
          "web" : "https://github.com/cikl/p5-Cikl"
       }
    },
-   "version" : "0.4.1",
+   "version" : "0.5.0",
    "x_contributors" : [
       "Kevin Benton <blak111@gmail.com>",
       "Aaron K. Reffett <akreffett@cert.org>",
