@@ -27,11 +27,12 @@ Copyright (C) 2013 Wes Young (wesyoung.me)
 Copyright (C) 2013 REN-ISAC and The Trustees of Indiana University (ren-isac.net)
 Copyright (C) 2014 Michael Ryan (github.com/justfalter)
 
+Licensed under LGPL v3. See LICENSE for details.
+
 =head1 AUTHOR
 
 Mike Ryan E<lt>falter at gmail.comE<gt>
 
-=back
 =cut
 
 1;
