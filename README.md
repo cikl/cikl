@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/cikl/p5-Cikl.png?branch=master)](https://travis-ci.org/cikl/p5-Cikl)
 # NAME
 
 Cikl - It's new $module

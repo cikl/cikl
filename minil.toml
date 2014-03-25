@@ -1,5 +1,5 @@
 name = "Cikl"
 license = "lgpl_3_0"
-# badges = ["travis"]
+badges = ["travis"]
 
 [release]
