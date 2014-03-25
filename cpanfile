@@ -22,7 +22,6 @@ requires 'MIME::Base64', '3.13';
 requires 'MIME::Lite', '3.027';
 requires 'Module::Pluggable', '3.9';
 requires 'Mouse', "2.0.0";
-requires 'Net::RabbitFoot', '1.03';
 requires 'Net::SSLeay', '1.43';
 requires 'Regexp::Common', '2.122';
 requires 'Regexp::Common::net::CIDR', '0.02';

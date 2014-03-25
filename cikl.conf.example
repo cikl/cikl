@@ -1,12 +1,17 @@
 # client is required by the cikl, cikl_ping, and cikl_smrt
 [client]
-driver = Cikl::Client::Transport::RabbitMQ
+## For Redis: 
+#driver = Cikl::Redis
+#server = localhost:6379
 
-host = localhost
-port = 5672
-username = guest
-password = guest
-vhost = /
+## For RabbitMQ: 
+#driver = Cikl::RabbitMQ
+#
+#host = localhost
+#port = 5672
+#username = guest
+#password = guest
+#vhost = /
 
 # cikl_smrt is required by cikl_smrt
 [cikl_smrt]

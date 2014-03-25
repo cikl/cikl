@@ -1,6 +1,12 @@
 Revision history for Perl extension Cikl
 
 {{$NEXT}}
+    
+    - Stripped out all the server-side code, given that we are shifting focus
+    to using Logstash as the 'backend'. 
+
+    - Spint RabbitMQ out to its own perl module to reduce dependencies of the
+    core library.
 
 0.4.1 2014-03-05T17:47:15Z
 
