@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/cikl/p5-Cikl-RabbitMQ.png?branch=master)](https://travis-ci.org/cikl/p5-Cikl-RabbitMQ)
 # NAME
 
 Cikl::RabbitMQ - It's new $module

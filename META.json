@@ -4,7 +4,7 @@
       "Mike Ryan <falter@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.11.0, CPAN::Meta::Converter version 2.133380",
+   "generated_by" : "Minilla/v0.12.0, CPAN::Meta::Converter version 2.133380",
    "license" : [
       "lgpl_3_0"
    ],
@@ -56,5 +56,13 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "homepage" : "https://github.com/cikl/p5-Cikl-RabbitMQ",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/cikl/p5-Cikl-RabbitMQ.git",
+         "web" : "https://github.com/cikl/p5-Cikl-RabbitMQ"
+      }
+   },
    "version" : "0.01"
 }
