@@ -37,6 +37,7 @@ requires 'Log::Log4perl';
 
 on 'test' => sub {
   requires 'Test::Class', '0.41';
+  requires 'Test::Deep';
   requires 'Test::Exception', '0.32';
 };
 
