@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Mouse;
 use Cikl::Smrt::Fetcher;
-use IO::Scalar;
 use IO::File;
 use LWP::Authen::Basic;
 use File::Temp qw/tmpnam/;
