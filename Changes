@@ -1,6 +1,9 @@
 Revision history for Perl extension Cikl
 
 {{$NEXT}}
+    - Fixed missing dependencies
+
+    - Moved rules/feeds out to cikl/cikl-feeds
 
 0.5.0 2014-03-25T16:00:04Z
     - Stripped out all the server-side code, given that we are shifting focus
