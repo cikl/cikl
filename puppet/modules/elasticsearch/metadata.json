@@ -1,0 +1,110 @@
+{
+  "source": "https://github.com/elasticsearch/puppet-elasticsearch",
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "10.04",
+        "10.10",
+        "12.04",
+        "12.10",
+        "13.04",
+        "13.10"
+      ]
+    },
+    {
+      "operatingsystem": "OpenSuSE",
+      "operatingsystemrelease": [
+        "12.x",
+        "13.x"
+      ]
+    }
+  ],
+  "license": "Apache License, Version 2.0",
+  "name": "elasticsearch-elasticsearch",
+  "version": "0.3.0",
+  "dependencies": [
+    {
+      "version_requirement": ">= 3.2.0",
+      "name": "puppetlabs/stdlib"
+    }
+  ],
+  "requirements": [
+    {
+      "version_requirement": ">= 3.1.3",
+      "name": "pe"
+    },
+    {
+      "version_requirement": ">=2.7.20 <4.0.0",
+      "name": "puppet"
+    }
+  ],
+  "author": "elasticsearch",
+  "description": "Module for managing and configuring Elasticsearch nodes",
+  "project_page": "https://github.com/elasticsearch/puppet-elasticsearch",
+  "checksums": {
+    "CHANGELOG": "9f5144d43c6c24a728f1a9c458d8af2b",
+    "templates/etc/sysconfig/defaults.erb": "432db6109af3fa2f84042baf4da2b247",
+    "templates/etc/init.d/elasticsearch.RedHat.erb": "162b3fc304ad35ce10f85fbfffd1ee2a",
+    "manifests/plugin.pp": "c03f79b2623e298671355c0c1cd542c3",
+    "README.md": "500c51c7ec8974474ab0efca350e9e0d",
+    "templates/etc/init.d/elasticsearch.Debian.erb": "cf2f1c14ad89417b84a1a4b494bd8a01",
+    "templates/etc/elasticsearch/logging.yml.erb": "919906c46bc18b86ce72e0546d5ebbc8",
+    "manifests/service.pp": "4a29ee40d3416213a1978e58f6ea8c0e",
+    "manifests/python.pp": "b3de17c8c8e4a01b011e41a8461a8792",
+    "LICENSE": "87206ee6a28567b8effa1bd7d4958e9a",
+    "manifests/init.pp": "c8e8ec402a3a4612db557b5ea9d4459f",
+    "manifests/template.pp": "4d70ad322c40b75db971eeed64ba0a09",
+    "manifests/config.pp": "2eee6df6cc5282a092a93c0574592475",
+    "Modulefile": "f0563bc870bf6547e089a71c5052d7ea",
+    "CONTRIBUTING.md": "15a79198ea0a81b5a67599172625b01f",
+    "manifests/java.pp": "fa526a3ba4b20c38a303c40f213205a0",
+    "manifests/params.pp": "42f26e2e87acb1c89b251a13f602cd6a",
+    "manifests/ruby.pp": "862ba4159312758293f25022ba61c0ac",
+    "CONTRIBUTORS": "14df2fd27cf7b6ca9833527f2ba93442",
+    "templates/etc/elasticsearch/elasticsearch.yml.erb": "568682a376a232070ce14deee8e9aee2",
+    "manifests/service/systemd.pp": "2de18754ddb8d205e7b198467118d876",
+    "manifests/package.pp": "070ba085742d13d8b64e4dcafe5ab169",
+    "manifests/repo.pp": "6ba8103e008e6fac9ed12b83fb308a4f",
+    "manifests/service/init.pp": "43902abc7336bcf68f059d4c8efbd731"
+  },
+  "types": [
+
+  ],
+  "summary": "Module for managing and configuring Elasticsearch nodes"
+}

@@ -1,0 +1,7 @@
+forge "http://forge.puppetlabs.com"
+
+mod 'puppetlabs/stdlib'
+mod 'puppetlabs/apt', '1.4.2'
+mod 'elasticsearch/elasticsearch', '0.3.0'
+mod 'elasticsearch/logstash', '0.4.3'
+mod 'puppetlabs/rabbitmq', '3.1.0'
