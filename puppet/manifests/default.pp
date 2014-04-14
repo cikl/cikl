@@ -45,4 +45,6 @@ exec { 'install Cikl':
   require => Package['build-essential', 'cpanminus', 'libxml2-dev']
 }
 
-
+class {'jruby': 
+  version => '1.7.11'
+}

@@ -11,6 +11,7 @@ FORGE
       puppetlabs/stdlib (>= 0.0.0)
       stahnma/epel (>= 0.0.0)
     ispavailability/file_concat (0.1.0)
+    jlbfalcao/jruby (1.7.11)
     puppetlabs/apt (1.4.2)
       puppetlabs/stdlib (>= 2.2.1)
     puppetlabs/rabbitmq (3.1.0)
@@ -23,6 +24,7 @@ FORGE
 DEPENDENCIES
   elasticsearch/elasticsearch (= 0.3.0)
   elasticsearch/logstash (= 0.4.3)
+  jlbfalcao/jruby (= 1.7.11)
   puppetlabs/apt (= 1.4.2)
   puppetlabs/rabbitmq (= 3.1.0)
   puppetlabs/stdlib (>= 0)
