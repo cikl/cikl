@@ -1,0 +1,12 @@
+[client]
+driver = Cikl::RabbitMQ
+host = <%= scope.lookupvar('rabbitmq_host') %>
+port = <%= scope.lookupvar('rabbitmq_port') %>
+username = <%= scope.lookupvar('rabbitmq_username') %>
+password = <%= scope.lookupvar('rabbitmq_password') %>
+vhost = <%= scope.lookupvar('rabbitmq_vhost') %>
+
+[cikl_smrt]
+# Go back 3 days
+goback = 3
+

@@ -1,0 +1,28 @@
+input {
+  rabbitmq {
+    host => "<%= scope.lookupvar('rabbitmq_host') %>"
+    port => <%= scope.lookupvar('rabbitmq_port') %>
+    user => "<%= scope.lookupvar('rabbitmq_username') %>"
+    password => "<%= scope.lookupvar('rabbitmq_password') %>"
+    vhost => "<%= scope.lookupvar('rabbitmq_vhost') %>"
+    queue => "cikl.event"
+    durable => true
+    add_field => {
+      'type' => 'event'
+    }
+  }
+
+  rabbitmq {
+    host => "<%= scope.lookupvar('rabbitmq_host') %>"
+    port => <%= scope.lookupvar('rabbitmq_port') %>
+    user => "<%= scope.lookupvar('rabbitmq_username') %>"
+    password => "<%= scope.lookupvar('rabbitmq_password') %>"
+    vhost => "<%= scope.lookupvar('rabbitmq_vhost') %>"
+    queue => "cikl.dns_answer"
+    durable => true
+    add_field => {
+      'type' => 'dns_answer'
+    }
+  }
+}
+
