@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
     puppet.manifest_file  = "default.pp"
-    puppet.options        = '--modulepath /vagrant/puppet/private_modules:/vagrant/puppet/modules --verbose --debug'
+    puppet.options        = '--modulepath /vagrant/puppet/private_modules:/vagrant/puppet/modules'
   end
   config.vm.provider "virtualbox" do |v|
     v.customize ["modifyvm", :id, "--cpus", "2"]
