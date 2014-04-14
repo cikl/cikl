@@ -2,11 +2,11 @@ output {
   if ([type] == 'event') {
     if [address][fqdn] {
       rabbitmq {
-        host => "<%= scope.lookupvar('rabbitmq_host') %>"
-        port => <%= scope.lookupvar('rabbitmq_port') %>
-        user => "<%= scope.lookupvar('rabbitmq_username') %>"
-        password => "<%= scope.lookupvar('rabbitmq_password') %>"
-        vhost => "<%= scope.lookupvar('rabbitmq_vhost') %>"
+        host => "<%= scope.lookupvar('cikl::rabbitmq::host') %>"
+        port => <%= scope.lookupvar('cikl::rabbitmq::port') %>
+        user => "<%= scope.lookupvar('cikl::rabbitmq::username') %>"
+        password => "<%= scope.lookupvar('cikl::rabbitmq::password') %>"
+        vhost => "<%= scope.lookupvar('cikl::rabbitmq::vhost') %>"
         exchange => ""
         exchange_type => "topic"
         key => "cikl.resolve_fqdn"
