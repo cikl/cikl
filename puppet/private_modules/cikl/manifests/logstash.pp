@@ -1,22 +1,16 @@
-class cikl::logstash (
-  $elasticsearch_template = '/etc/logstash/elasticsearch-cikl-template.json'
-) {
-  require cikl::repositories
-  require cikl::elasticsearch
-  include cikl::common_packages
-  include cikl::rabbitmq
+class cikl::logstash {
+  include cikl::repositories
 
   class { '::logstash':
-    require => [ 
-      Class['cikl::repositories', 'rabbitmq'], 
-      Package['cikl::common_packages::java7']
-    ]
+    require =>  
+      Class[
+        'cikl::repositories', 
+        'cikl::packages::java7'
+      ]
   }
-  Service['elasticsearch'] -> Service['logstash']
-  Service['rabbitmq-server'] -> Service['logstash']
 
   file { 'elasticsearch-cikl-template': 
-    path    => $elasticsearch_template,
+    path    => $cikl::params::elasticsearch_template,
     owner   => "root",
     group   => "root",
     mode    => '0644',

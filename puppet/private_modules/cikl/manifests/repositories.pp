@@ -16,6 +16,10 @@ class cikl::repositories {
     key               => 'D88E42B4',
     key_source        => 'http://packages.elasticsearch.org/GPG-KEY-elasticsearch',
   }
+  apt::key { 'logstash': 
+    key               => 'D88E42B4',
+    key_source        => 'http://packages.elasticsearch.org/GPG-KEY-elasticsearch',
+  }
 
   apt::source { 'elasticsearch':
     location          => 'http://packages.elasticsearch.org/elasticsearch/1.0/debian',
@@ -31,7 +35,7 @@ class cikl::repositories {
     release           => 'stable',
     repos             => 'main',
     include_src       => false,
-    require           => [ Apt::Key['elasticsearch'], Anchor['cikl::repositories::begin'] ],
+    require           => [ Apt::Key['logstash'], Anchor['cikl::repositories::begin'] ],
     before            => Anchor['cikl::repositories::end']
   } 
 

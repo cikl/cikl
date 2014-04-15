@@ -1,10 +1,10 @@
 input {
   rabbitmq {
-    host => "<%= scope.lookupvar('cikl::rabbitmq::host') %>"
-    port => <%= scope.lookupvar('cikl::rabbitmq::port') %>
-    user => "<%= scope.lookupvar('cikl::rabbitmq::username') %>"
-    password => "<%= scope.lookupvar('cikl::rabbitmq::password') %>"
-    vhost => "<%= scope.lookupvar('cikl::rabbitmq::vhost') %>"
+    host => "<%= scope.lookupvar('cikl::rabbitmq_host') %>"
+    port => <%= scope.lookupvar('cikl::rabbitmq_port') %>
+    user => "<%= scope.lookupvar('cikl::rabbitmq_username') %>"
+    password => "<%= scope.lookupvar('cikl::rabbitmq_password') %>"
+    vhost => "<%= scope.lookupvar('cikl::rabbitmq_vhost') %>"
     queue => "cikl.event"
     durable => true
     add_field => {
@@ -13,11 +13,11 @@ input {
   }
 
   rabbitmq {
-    host => "<%= scope.lookupvar('cikl::rabbitmq::host') %>"
-    port => <%= scope.lookupvar('cikl::rabbitmq::port') %>
-    user => "<%= scope.lookupvar('cikl::rabbitmq::username') %>"
-    password => "<%= scope.lookupvar('cikl::rabbitmq::password') %>"
-    vhost => "<%= scope.lookupvar('cikl::rabbitmq::vhost') %>"
+    host => "<%= scope.lookupvar('cikl::rabbitmq_host') %>"
+    port => <%= scope.lookupvar('cikl::rabbitmq_port') %>
+    user => "<%= scope.lookupvar('cikl::rabbitmq_username') %>"
+    password => "<%= scope.lookupvar('cikl::rabbitmq_password') %>"
+    vhost => "<%= scope.lookupvar('cikl::rabbitmq_vhost') %>"
     queue => "cikl.dns_answer"
     durable => true
     add_field => {

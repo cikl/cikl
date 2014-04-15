@@ -1,15 +1,8 @@
-class cikl::rabbitmq (
-  $host     = 'localhost',
-  $port     = 5672,
-  $username = 'guest',
-  $password = 'guest',
-  $vhost    = '/') 
-{
-
-  include cikl::common_packages
+class cikl::rabbitmq {
+  include cikl::packages::curl
 
   class { '::rabbitmq':
-    require => Package['cikl::common_packages::curl']
+    require => Class['cikl::packages::curl']
   }
 
 }

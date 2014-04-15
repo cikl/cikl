@@ -1,16 +1,13 @@
 class cikl::smrt () {
-  require cikl::rabbitmq
-  require cikl::common_packages
+  include cikl::packages::smrt-deps
 
-  exec { 'install Cikl': 
-    command => '/usr/bin/cpanm --notest --skip-satisfied Cikl Cikl::RabbitMQ',
-    require => [ 
-      Package[
-        'cikl::common_packages::build-essential', 
-        'cikl::common_packages::cpanminus', 
-        'cikl::common_packages::libxml2-dev']
-    ]
-  }
+#  exec { 'install Cikl': 
+#    command => '/usr/bin/cpanm --notest --skip-satisfied Cikl Cikl::RabbitMQ',
+#    require => [ 
+#      Class[
+#        'cikl::packages::smrt-deps']
+#    ]
+#  }
   # Generate cikl.conf
 
   file { 'cikl-conf': 

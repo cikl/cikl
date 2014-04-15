@@ -1,14 +1,5 @@
-class { 'cikl::elasticsearch':
-  cluster_name => "vagrant_logstash"
-}
-
-class { 'cikl::rabbitmq': 
-}
-
-class { 'cikl::logstash':
-}
-
-class { 'cikl::smrt': 
+class { 'cikl':
+  elasticsearch_cluster_name => "vagrant_logstash"
 }
 
 #class {'jruby': 
