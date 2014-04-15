@@ -7,8 +7,8 @@ class cikl (
   $rabbitmq_password = $cikl::params::rabbitmq_password,
   $rabbitmq_vhost    = $cikl::params::rabbitmq_vhost
 ) inherits cikl::params {
-  include cikl::elasticsearch
-  include cikl::rabbitmq
-  include cikl::logstash
-  include cikl::smrt
+  include cikl::elasticsearch::install
+  include cikl::rabbitmq::install
+  include cikl::logstash::install
+  include cikl::smrt::install
 }

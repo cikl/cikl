@@ -1,6 +1,6 @@
-class cikl::packages::smrt-deps () {
+class cikl::smrt::deps () {
   require cikl::packages::build-essential
-  require cikl::packages::curl
+  require cikl::packages::libxml2-dev
   require cikl::packages::cpanminus
 }
 

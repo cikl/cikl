@@ -1,16 +1,17 @@
-class cikl::logstash {
-  include cikl::repositories
+class cikl::logstash::install {
+  include cikl::logstash::deps
 
   class { '::logstash':
+    manage_repo  => true,
+    repo_version => '1.4',
     require =>  
       Class[
-        'cikl::repositories', 
-        'cikl::packages::java7'
+        'cikl::logstash::deps'
       ]
   }
 
   file { 'elasticsearch-cikl-template': 
-    path    => $cikl::params::elasticsearch_template,
+    path    => $cikl::elasticsearch_template,
     owner   => "root",
     group   => "root",
     mode    => '0644',
@@ -38,4 +39,5 @@ class cikl::logstash {
 #  order   => 30
 #}
 }
+
 

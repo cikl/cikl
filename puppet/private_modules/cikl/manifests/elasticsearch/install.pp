@@ -1,10 +1,11 @@
-class cikl::elasticsearch {
-  include cikl::repositories
-  include cikl::packages::java7
+class cikl::elasticsearch::install {
+  include cikl::elasticsearch::deps
 
   class { '::elasticsearch':
+    manage_repo  => true,
+    repo_version => '1.0',
     config => {
-      'cluster.name' => $cikl::params::elasticsearch_cluster_name,
+      'cluster.name' => $cikl::elasticsearch_cluster_name,
         'node.name' => $::ipaddress,
         'index' => {
           'number_of_replicas' => '0',
@@ -14,11 +15,7 @@ class cikl::elasticsearch {
           'host' => '0.0.0.0',
         }
     },
-    require =>  
-      Class[
-        'cikl::repositories',
-        'cikl::packages::java7'
-      ]
+    require =>  Class['cikl::elasticsearch::deps']
   }
 
   elasticsearch::plugin{'mobz/elasticsearch-head':
