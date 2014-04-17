@@ -1,0 +1,17 @@
+filter {
+  if ([type] == 'event') {
+    date {
+      match => [ "detecttime", "UNIX" ]
+        target => "@timestamp"
+        timezone => "UTC"
+    }
+    date {
+      match => [ "reporttime", "UNIX" ]
+        target => "reporttime"
+        timezone => "UTC"
+    }
+    mutate {
+      remove_field => [ "detecttime" ]
+    }
+  }
+}

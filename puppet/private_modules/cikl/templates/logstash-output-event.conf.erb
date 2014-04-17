@@ -1,0 +1,10 @@
+output { 
+  elasticsearch {
+    index   => "cikl-%{+YYYY.MM.dd}"
+    cluster => "<%= scope.lookupvar('cikl::elasticsearch_cluster_name') %>"
+    template => "<%= scope.lookupvar('cikl::elasticsearch_template') %>"
+    template_name => "cikl"
+    template_overwrite => true
+    index_type => "%{type}"
+  }
+}

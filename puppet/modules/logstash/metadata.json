@@ -1,0 +1,69 @@
+{
+  "author": "elasticsearch",
+  "license": "Apache License, Version 2.0",
+  "checksums": {
+    "CHANGELOG": "daac2b5caa6587187b6b6bff1d354994",
+    "spec/classes/002_logstash_init_redhat_spec.rb": "d01140180ca4da00a6643ff3881590ea",
+    "spec/acceptance/001_basic_spec.rb": "ecd466f6dd99f628bfd4ea531b335c76",
+    "CONTRIBUTORS": "db735984e5b54fa9d6f3ab854b5ed732",
+    "manifests/config.pp": "ad76aef285316592757caab3d72ae13a",
+    "Modulefile": "164d3cdbb0822a2a125c714233b9f4ad",
+    "Gemfile.lock": "4ac47d9cea42bc17986480be62395730",
+    "manifests/params.pp": "029d5a1872c38815fbcee1ead05e9aa1",
+    "templates/etc/init.d/logstash.Debian.erb": "464927f6fee2e9cfcafcb6c042a575c4",
+    "spec/spec_helper_acceptance.rb": "aaa7f1ef156eab2c18e5c526e4aa6bfd",
+    "spec/classes/004_logstash_java_spec.rb": "175c2aaa9dddf3b31475241590563e1c",
+    "Gemfile": "84315fd85419a20f0f614b468b7d17ba",
+    "manifests/patternfile.pp": "daccce818a835f591359568670fa6ab0",
+    "manifests/configfile.pp": "eea68fa8ee6df66f32d7f9dd79870231",
+    "manifests/package.pp": "344576670abe2670e557f61548b1a2e7",
+    "spec/classes/003_logstash_init_unknown_spec.rb": "66d432d836250c989dbd2bc71f5aaa87",
+    "spec/acceptance/nodesets/debian-73-x64.yml": "766d81275aecb182902e099eeac4aee2",
+    "templates/etc/init.d/logstash.RedHat.erb": "a6b62194729299e2ff264d520c8da900",
+    "spec/acceptance/nodesets/centos-65-x64.yml": "c558c16d428772d685fe0feeec2be03c",
+    "spec/lib/parser_validate_task.rb": "efac88c08221fab9dd0418c0edd0e95a",
+    "spec/defines/002_logstash_plugin_spec.rb": "00e4a75cbc08a2679281524182190b52",
+    "spec/spec_helper.rb": "3ea886dd135e120afa31e0aab12e85b0",
+    "manifests/java.pp": "31a167ac077f91bd4aa7ccae71f2cf7f",
+    "manifests/plugin.pp": "f7a2a5fb7610de1e6617d59d14b97892",
+    "Rakefile": "5eb2a7a112838a617083ad3f16876953",
+    "manifests/repo.pp": "f81b065b3b660efdabecc8cf8038b0fe",
+    "spec/defines/001_logstash_patternfile_spec.rb": "e57e25ee8b730b53af68aceec5ac134c",
+    "spec/defines/003_logstash_configfile_spec.rb": "0a6869e628b031cdfd85f0e97e9b42cd",
+    "spec/acceptance/nodesets/ubuntu-server-1310-x64.yml": "aa65fecc89a297c8bb8e7e3378b10e17",
+    "CONTRIBUTING.md": "15a79198ea0a81b5a67599172625b01f",
+    "manifests/service.pp": "e8141aa85b82df4b95219f5215c75bdc",
+    "rakelib/template.rake": "ac8db4ffb157b6968ab33c700981be04",
+    "rakelib/syntax.rake": "7e63f0b778383e87c668ca9878959308",
+    "manifests/init.pp": "275b7ff3fa408a3767f8137d8fffed0a",
+    "README.md": "e89858da3ce1f607261b3731c0f1a259",
+    "spec/lib/template_check_task.rb": "52faf116ba58133d33991433cc482caf",
+    "LICENSE": "87206ee6a28567b8effa1bd7d4958e9a",
+    "manifests/service/init.pp": "ba5c6896fce4288821a78dc3ae2c92f3",
+    "templates/etc/sysconfig/defaults.erb": "9b332d8466391c9feb04508fc168ba0e",
+    "spec/classes/001_logstash_init_debian_spec.rb": "3d64e23f9e2c765c576259553bebf3fa",
+    "spec/classes/099_coverage_spec.rb": "5b6dfa0dd426aca0ccfae23c0a629f0b",
+    "spec/acceptance/002_class_spec.rb": "44e0701fac133681fecc0bec04862937",
+    "spec/acceptance/003_remove_spec.rb": "72a08d08c08feeab02fac4791dfb51cc",
+    "spec/acceptance/nodesets/ubuntu-server-12042-x64.yml": "36a03aafcf8863542515cf307e5da052"
+  },
+  "name": "elasticsearch-logstash",
+  "description": "Module for managing and configuring Logstash",
+  "version": "0.4.3",
+  "types": [
+
+  ],
+  "project_page": "https://github.com/elasticsearch/puppet-logstash",
+  "source": "https://github.com/elasticsearch/puppet-logstash",
+  "summary": "Module for managing and configuring Logstash",
+  "dependencies": [
+    {
+      "version_requirement": ">= 3.2.0",
+      "name": "puppetlabs/stdlib"
+    },
+    {
+      "version_requirement": ">= 0.1.0",
+      "name": "ispavailability/file_concat"
+    }
+  ]
+}

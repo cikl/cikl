@@ -1,0 +1,40 @@
+{
+  "name": "garethr-erlang",
+  "version": "0.2.0",
+  "source": "git://github.com/garethr/garethr-erlang.git",
+  "author": "Gareth Rushgrove",
+  "license": "Apache License, Version 2.0",
+  "summary": "Module for installing erlang from official repos",
+  "description": "Install one of the official erlang packages",
+  "project_page": "UNKNOWN",
+  "dependencies": [
+    {
+      "name": "puppetlabs/apt"
+    },
+    {
+      "name": "puppetlabs/stdlib"
+    },
+    {
+      "name": "stahnma/epel"
+    }
+  ],
+  "types": [
+
+  ],
+  "checksums": {
+    "Gemfile": "5c601eb44f917774808fdb41e9624727",
+    "Gemfile.lock": "e7a18cf361a08031a50d9e9e593c1866",
+    "LICENSE": "e7fff5d8ca4f44f1279782ead2da5925",
+    "Modulefile": "283a4a4a4ce77c5c643dfa1f2d26ea9a",
+    "README.md": "c081c6e899bdb9470bb22c3b738d55a8",
+    "Rakefile": "6511f3e2bfcb18532ee0d5b6253ae57a",
+    "manifests/init.pp": "7ae5e00c46d7048bd19a74cb372e9d63",
+    "manifests/params.pp": "beb07f5b6d9e3f3c05928fa7011bc66b",
+    "manifests/repo/apt.pp": "2d3100a8f1fb7df0497002a769582f49",
+    "manifests/repo/yum.pp": "e444898ee4869a0a9af6e631156721c8",
+    "spec/classes/erlang_spec.rb": "702620044a983e66a728cf5dcd986976",
+    "spec/spec_helper.rb": "0db89c9a486df193c0e40095422e19dc",
+    "spec/spec_helper_system.rb": "9b81626367125e4c8c93b383cdfa86e4",
+    "spec/system/erlang_spec.rb": "8d1868990ee18cbaec25c08ecbb3546c"
+  }
+}

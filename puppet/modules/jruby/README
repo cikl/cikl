@@ -1,0 +1,32 @@
+Install Jruby
+
+Examples:
+
+	# default version
+    class {'jruby':}
+
+	# another version
+    class {'jruby':
+       version => '1.7.11'
+    }
+
+	# another server
+    class {'jruby':
+		url => 'http://your-server/jruby-bin-1.7.11.tar.gz'
+    }
+
+	# another prefix: install in /opt/my-company/jruby
+	class {'jruby':
+	    prefix => '/opt/my-company'
+    }
+
+
+TODO
+----
+* Add suport to puppet://
+
+
+License
+-------
+
+Apache

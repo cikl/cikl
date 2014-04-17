@@ -1,0 +1,17 @@
+output { 
+  if ([type] == 'event') {
+    if [address][fqdn] {
+      rabbitmq {
+        host => "<%= scope.lookupvar('cikl::rabbitmq_host') %>"
+        port => <%= scope.lookupvar('cikl::rabbitmq_port') %>
+        user => "<%= scope.lookupvar('cikl::rabbitmq_username') %>"
+        password => "<%= scope.lookupvar('cikl::rabbitmq_password') %>"
+        vhost => "<%= scope.lookupvar('cikl::rabbitmq_vhost') %>"
+        exchange => ""
+        exchange_type => "topic"
+        key => "cikl.resolve_fqdn"
+      }
+    }
+  }
+}
+
