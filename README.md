@@ -13,6 +13,7 @@ Currently? We haven't got much in the way of documentation. Please accept my app
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
+git submodule update --init
 vagrant up
 ```
 - Open up http://localhost:8080/
