@@ -9,4 +9,14 @@ class cikl::params {
   $rabbitmq_password = 'guest'
   $rabbitmq_vhost    = '/'
 
+  case $::osfamily {
+    'Debian': {
+    }
+    'RedHat': {
+      $use_perlbrew = true
+    }
+    default: {
+      fail("\"${module_name}\" provides no repository information for OSfamily \"${::osfamily}\"")
+    }
+  }
 }

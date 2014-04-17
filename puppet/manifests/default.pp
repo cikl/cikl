@@ -1,3 +1,8 @@
+stage { "init": before => Stage['main'] }
+class { 'cikl::repositories': 
+  stage => 'init'
+}
+
 class { 'cikl':
   elasticsearch_cluster_name => "vagrant_logstash"
 }
