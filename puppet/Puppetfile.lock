@@ -6,6 +6,9 @@ FORGE
     elasticsearch/logstash (0.4.3)
       ispavailability/file_concat (>= 0.1.0)
       puppetlabs/stdlib (>= 3.2.0)
+    example42/perl (2.0.16)
+      example42/puppi (>= 2.0.0)
+    example42/puppi (2.1.9)
     garethr/erlang (0.2.0)
       puppetlabs/apt (>= 0.0.0)
       puppetlabs/stdlib (>= 0.0.0)
@@ -24,8 +27,10 @@ FORGE
 DEPENDENCIES
   elasticsearch/elasticsearch (= 0.3.0)
   elasticsearch/logstash (= 0.4.3)
+  example42/perl (= 2.0.16)
   jlbfalcao/jruby (= 1.7.11)
   puppetlabs/apt (= 1.4.2)
   puppetlabs/rabbitmq (= 3.1.0)
   puppetlabs/stdlib (>= 0)
+  stahnma/epel (= 0.0.6)
 
