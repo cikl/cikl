@@ -6,9 +6,10 @@ The codebase will be evolved over time from Perl to Ruby (likely with an emphasi
 ## Documentation
 Currently? We haven't got much in the way of documentation. Please accept my appologies.
 
-## Getting started
+## Setting up the development environment
 
-- First you must install both VirtualBox and Vagrant 
+- Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+- Install [Vagrant](http://www.vagrantup.com/downloads.html)
 - Clone and start up the Vagrant VM:
 ```
 git clone https://github.com/cikl/cikl.git
