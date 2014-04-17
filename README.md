@@ -6,6 +6,19 @@ The codebase will be evolved over time from Perl to Ruby (likely with an emphasi
 ## Documentation
 Currently? We haven't got much in the way of documentation. Please accept my appologies.
 
+## Getting started
+
+- First you must install both VirtualBox and Vagrant 
+- Clone and start up the Vagrant VM:
+```
+git clone https://github.com/cikl/cikl.git
+cd cikl
+vagrant up
+```
+- Open up http://localhost:8080/
+- When you're done playing around, shutdown the VM:
+```vagrant halt```
+
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 
@@ -20,5 +33,3 @@ Cikl consists of many different sub-projects. The main ones are:
 ### p5-Cikl
 [cikl/p5-Cikl](https://github.com/cikl/p5-Cikl) - the current core of Cikl. This began as a fork of https://github.com/collectiveintel/cif-v1 and has evolved quite a bit over time. The code is available on CPAN as Cikl. 
 
-### p5-Cikl-Postgres
-[cikl/p5-Cikl-Postgres](https://github.com/cikl/p5-Cikl-Postgres) - a datastore implementation using Postgres.
