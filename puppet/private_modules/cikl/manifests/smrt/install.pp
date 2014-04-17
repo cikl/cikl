@@ -4,11 +4,11 @@ class cikl::smrt::install () {
   perl::module { 'Cikl': 
     require          => Class['cikl::smrt::deps'],
     exec_environment => [ 'PERL_CPANM_OPT=--notest --skip-satisfied' ],
-    timeout          => 0
+    exec_timeout          => 0
   } ->
   perl::module { 'Cikl::RabbitMQ': 
     exec_environment => [ 'PERL_CPANM_OPT=--notest --skip-satisfied' ],
-    timeout          => 0
+    exec_timeout          => 0
   }
 
   # Generate cikl.conf
