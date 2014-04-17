@@ -1,5 +1,9 @@
 class cikl::params {
 
+  $nginx_hostname   = $::fqdn
+  $elasticsearch_host   = $::ipaddress
+  $elasticsearch_port   = 9200
+
   $elasticsearch_cluster_name = 'vagrant_elasticsearch'
   $elasticsearch_template = '/etc/logstash/elasticsearch-cikl-template.json'
 
@@ -8,6 +12,10 @@ class cikl::params {
   $rabbitmq_username = 'guest'
   $rabbitmq_password = 'guest'
   $rabbitmq_vhost    = '/'
+
+  $kibana_base       = '/opt/kibana'
+  $kibana_root       = '/opt/kibana/current'
+  $kibana_dashboard = "cikl.json"
 
   case $::osfamily {
     'Debian': {
