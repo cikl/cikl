@@ -6,14 +6,12 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
+  #config.vm.synced_folder ".", "/vagrant", type: "rsync"
 
 
   config.vm.define "cikl" do |cikl|
     # Every Vagrant virtual environment requires a box to build off of.
-    cikl.vm.box = "hashicorp/precise64"
+    cikl.vm.box = "ubuntu/trusty64"
 
     cikl.vm.provider "virtualbox" do |v|
       v.customize ["modifyvm", :id, "--cpus", "2"]
@@ -22,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     cikl.vm.network :forwarded_port, guest: 80, host: 8080 
     #cikl.vm.network :forwarded_port, guest: 9200, host: 9200
-
+    
     cikl.vm.provision :puppet do |puppet|
       puppet.manifests_path = "puppet/manifests"
       puppet.manifest_file  = "default.pp"
