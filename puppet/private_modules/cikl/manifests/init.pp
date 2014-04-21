@@ -14,12 +14,13 @@ class cikl (
   $kibana_root          = $cikl::params::kibana_root
   $kibana_base          = $cikl::params::kibana_base
   $kibana_dashboard     = $cikl::params::kibana_dashboard
+
   include cikl::elasticsearch::install
   include cikl::rabbitmq::install
   include cikl::logstash::install
   include cikl::smrt::install
   include cikl::nginx::install
   include cikl::kibana::install
-  include cikl::worker::install
+  class { 'cikl::worker': }
   
 }
