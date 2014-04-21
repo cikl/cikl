@@ -13,11 +13,14 @@ We use Vagrant, VirtualBox, and Puppet to manage our development environment.
 Vagrant takes care of initializing the virtual machine, and hands things off
 to Puppet to handle the provisioning and setup. 
 
-- Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-- Install [Vagrant](http://www.vagrantup.com/downloads.html)
-  - Note: I've only tested this on versions of Vagrant >= 1.5.3. 
-  - I strongly recommend downloading and install the latest version of Vagrant. 
-  - If your OS distribution provides Vagrant as a package, it will very likely be very out of date and not work. 
+- Hardware
+- Software Requirements
+  - [VirtualBox](https://www.virtualbox.org/wiki/Downloads) >= 4.3
+    - Tested with VirtualBox 4.3.10 on OS X 10.9.2
+  - [Vagrant](http://www.vagrantup.com/downloads.html) >= 1.5
+    - Tested with Vagrant 1.5.3 on OS X 10.9.2. 
+    - I strongly recommend downloading and install the latest version of Vagrant. 
+    - If your OS distribution provides Vagrant as a package, it will very likely be very out of date and not work. 
 
 ### Starting the development environment
 
