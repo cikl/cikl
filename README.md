@@ -56,8 +56,6 @@ vagrant halt
 vagrant destroy
 # Switch to your master branch
 git checkout master
-# Sync remote references from the main repository:
-git fetch origin
 # Pull any updatream changes into your master branch
 git pull origin master
 # Very important, update any submodules:
