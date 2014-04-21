@@ -48,7 +48,6 @@ the background. If you're done for the day, you can shut the VM down using:
 This is an actively developed project, so you'll want to keep things up to
 date. 
 
-- 
 ```
 # Stop your virtual machine:
 vagrant halt
