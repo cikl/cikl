@@ -6,20 +6,66 @@ The codebase will be evolved over time from Perl to Ruby (likely with an emphasi
 ## Documentation
 Currently? We haven't got much in the way of documentation. Please accept my appologies.
 
-## Setting up the development environment
+## Development Environment
+
+### Prerequisites 
+We use Vagrant, VirtualBox, and Puppet to manage our development environment. 
+Vagrant takes care of initializing the virtual machine, and hands things off
+to Puppet to handle the provisioning and setup. 
 
 - Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Install [Vagrant](http://www.vagrantup.com/downloads.html)
+
+### Starting the development environment
+
 - Clone and start up the Vagrant VM:
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
 git submodule update --init
+```
+- Bring up the virtual machine:
+```
 vagrant up
 ```
-- Open up http://localhost:8080/
-- When you're done playing around, shutdown the VM:
+- That's it! You should now be able to access the environment.
+
+### Accessing the development environment
+
+- [Cikl Kibana dashboard](http://localhost:8080/)
+- [Elasticsearch Head](http://localhost:8080/es/_plugin/head/)
+- For shell access, type ```vagrant ssh```, and you'll be dropped into the 
+  virtual machine as the 'vagrant' user. You'll notice that the base of the
+  git repository has been mounted at '/vagrant'. You should have full sudo 
+  privileges.
+
+### Shutting down the development environment
+With Vagrant, it's easy to forget that you've got a virtual machine running in 
+the background. If you're done for the day, you can shut the VM down using:
 ```vagrant halt```
+
+### Updating 
+This is an actively developed project, so you'll want to keep things up to
+date. 
+
+- 
+```
+# Stop your virtual machine:
+vagrant halt
+# OPTIONAL: Destroy the existing vagrant virtual machine. We only do this
+# when material changes have been made to Vagrantfile or the puppet/ directory.
+vagrant destroy
+# Switch to your master branch
+git checkout master
+# Sync remote references from the main repository:
+git fetch origin
+# Pull any updatream changes into your master branch
+git pull origin master
+# Very important, update any submodules:
+git submodule update --init
+# Recreate the vagrant virtual machine.
+vagrant up
+```
 
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
