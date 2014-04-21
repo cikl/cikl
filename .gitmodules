@@ -1,3 +1,6 @@
 [submodule "feeds"]
 	path = feeds
 	url = https://github.com/cikl/cikl-feeds.git
+[submodule "cikl-worker"]
+	path = cikl-worker
+	url = https://github.com/cikl/cikl-worker.git

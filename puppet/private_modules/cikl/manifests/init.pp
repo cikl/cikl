@@ -20,5 +20,6 @@ class cikl (
   include cikl::smrt::install
   include cikl::nginx::install
   include cikl::kibana::install
+  include cikl::worker::install
   
 }

@@ -1,13 +1,22 @@
 class cikl::logstash::install {
   include cikl::logstash::deps
 
+  file { 'disable-logstash-web':
+    path    => '/etc/init/logstash-web.override',
+    owner   => "root",
+    group   => "root",
+    mode    => '0644',
+    content => 'manual'
+  }
+
   class { '::logstash':
     manage_repo  => true,
     repo_version => '1.4',
     require =>  
-      Class[
-        'cikl::logstash::deps'
-      ]
+    [
+      Class['cikl::logstash::deps'],
+      File['disable-logstash-web']
+    ]
   }
 
   file { 'elasticsearch-cikl-template': 
@@ -34,10 +43,10 @@ class cikl::logstash::install {
     order   => 30
   }
 
-#logstash::configfile { 'output-resolve':
-#  content => template('cikl/logstash-output-resolve.conf.erb'),
-#  order   => 30
-#}
+  logstash::configfile { 'output-resolve':
+    content => template('cikl/logstash-output-resolve.conf.erb'),
+    order   => 40
+  }
 }
 
 
