@@ -15,6 +15,7 @@ to Puppet to handle the provisioning and setup.
 
 - Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Install [Vagrant](http://www.vagrantup.com/downloads.html)
+  - Note: I've only tested this on versions of Vagrant >= 1.5.3. I strongly recommend downloading and install the latest version of Vagrant.
 
 ### Starting the development environment
 
