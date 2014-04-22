@@ -15,12 +15,18 @@ class cikl (
   $kibana_base          = $cikl::params::kibana_base
   $kibana_dashboard     = $cikl::params::kibana_dashboard
 
-  include cikl::elasticsearch::install
-  include cikl::rabbitmq::install
-  include cikl::logstash::install
-  include cikl::smrt::install
-  include cikl::nginx::install
-  include cikl::kibana::install
+  class { 'cikl::rabbitmq': }
+  class { 'cikl::elasticsearch': }
+  class { 'cikl::logstash': }
   class { 'cikl::worker': }
-  
+
+  class { 'cikl::smrt': }
+  class { 'cikl::nginx': }
+  class { 'cikl::kibana': }
+
+  Class['cikl::rabbitmq'] -> Class['cikl::logstash']
+  Class['cikl::elasticsearch'] -> Class['cikl::logstash']
+
+  Class['cikl::rabbitmq'] -> Class['cikl::worker']
+  Class['cikl::logstash'] -> Class['cikl::worker']
 }

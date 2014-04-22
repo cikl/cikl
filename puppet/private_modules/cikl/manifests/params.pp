@@ -5,7 +5,7 @@ class cikl::params {
   $elasticsearch_port   = 9200
 
   $elasticsearch_cluster_name = 'vagrant_elasticsearch'
-  $elasticsearch_template = '/etc/logstash/elasticsearch-cikl-template.json'
+  $elasticsearch_template = '/etc/cikl-elasticsearch-template.json'
 
   $rabbitmq_host     = 'localhost'
   $rabbitmq_port     = 5672
