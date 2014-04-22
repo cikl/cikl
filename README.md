@@ -64,6 +64,20 @@ git submodule update --init
 vagrant up
 ```
 
+### FAQ:
+
+#### Why do I get prompted to select a network interface when I run 'vagrant up'? Why do you require bridged network access?
+Normally, virtual machine traffic would be handled by the VirtualBox NAT 
+process. However, I've found in testing that the Cikl's high-speed DNS resolver
+quickly overwhelms VirtualBox's NAT socket tracking. In order to get around 
+this hurdle, we've enabled bridged network access on the development VM. As a result,
+you will be prompted to select a network adapter with which to bridge. If you 
+see this message, select your primary network adapter.
+
+If you want to disable this behavior, add ```bridge_networking: true``` to your
+vagrantconfig_local.yaml, and run ```vagrant reload```
+
+
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 

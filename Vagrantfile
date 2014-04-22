@@ -20,6 +20,11 @@ VAGRANTFILE_API_VERSION = "2"
 
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # Route using the bridged network so that our DNS resolver doesn't nuke 
+  # the NAT tables. 
+  if CONF['bridge_networking'] == true
+    config.vm.network :public_network, :use_dhcp_assigned_default_route => true
+  end
   config.vm.network :private_network, :ip => CONF['ip_address']
 
   use_nfs = (CONF['nfs'] == true) && !  Vagrant::Util::Platform.windows?
