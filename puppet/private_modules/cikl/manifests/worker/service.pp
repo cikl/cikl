@@ -1,4 +1,3 @@
-
 class cikl::worker::service {
   service { 'cikl::worker::service': 
     name       => 'cikl-dns-worker',
@@ -6,6 +5,7 @@ class cikl::worker::service {
     provider   => 'upstart',
     hasstatus  => true,
     hasrestart => true,
-    pattern => 'dns_worker'
+    pattern    => 'dns_worker',
+    subscribe  => Class['cikl::worker::config']
   }
 }

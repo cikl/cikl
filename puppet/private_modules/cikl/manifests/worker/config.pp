@@ -1,4 +1,3 @@
-
 class cikl::worker::config {
   file { 'cikl::worker::config::conf': 
     path    => "/etc/cikl-dns-worker.yaml",

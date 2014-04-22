@@ -10,6 +10,8 @@ class cikl (
   $elasticsearch_host   = $cikl::params::elasticsearch_host,
   $elasticsearch_port   = $cikl::params::elasticsearch_port,
   $nginx_hostname       = $cikl::params::nginx_hostname,
+  $worker_user          = $cikl::params::worker_user,
+  $worker_group         = $cikl::params::worker_group,
 ) inherits cikl::params {
   $kibana_root          = $cikl::params::kibana_root
   $kibana_base          = $cikl::params::kibana_base
