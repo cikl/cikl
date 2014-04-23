@@ -7,8 +7,12 @@ _config = YAML.load(File.open(File.join(File.dirname(__FILE__),
 
 # Local-specific/not-git-managed config -- vagrantconfig_local.yaml
 begin
-  _config.merge!(YAML.load(File.open(File.join(File.dirname(__FILE__),
-                 "vagrantconfig_local.yaml"), File::RDONLY).read))
+  _local_config = YAML.load(File.open(File.join(File.dirname(__FILE__),
+                 "vagrantconfig_local.yaml"), File::RDONLY).read)
+  if _local_config
+    _config.merge!(_local_config)
+  end
+
 rescue Errno::ENOENT # No vagrantconfig_local.yaml found -- that's OK; just
                      # use the defaults.
 end
