@@ -27,3 +27,6 @@ class { 'fix_resolvconf':
 class { 'cikl':
   elasticsearch_cluster_name => "vagrant_logstash"
 }
+
+$network_interfaces = hiera('network_interfaces')
+create_resources ( cikl::net, $network_interfaces )
