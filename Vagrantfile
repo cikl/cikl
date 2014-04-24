@@ -48,7 +48,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     cikl.vm.provider "virtualbox" do |v|
-      v.gui = true
       v.customize ["modifyvm", :id, "--cpus", CONF['number_cpus']]
       v.customize ["modifyvm", :id, "--memory", CONF['memory_size']]
     end
