@@ -4,8 +4,6 @@
 :yaml:
   :datadir: hieradata
 :hierarchy:
-  - "%{::env}/%{::calling_module}"
-  - "%{::env}/common"
-  - "%{::calling_module}"
+  - "%{::hostname}"
   - common
 

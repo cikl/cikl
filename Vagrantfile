@@ -33,6 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Every Vagrant virtual environment requires a box to build off of.
     cikl.vm.box = CONF['virtual_box_name']
+    cikl.vm.hostname = "cikl"
 
     cikl.vm.network :private_network, 
       :ip      => CONF['eth1_ip_address'], 
@@ -62,10 +63,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       puppet.hiera_config_path  = "puppet/hiera.yaml"
       puppet.working_directory  = "/vagrant/puppet"
       puppet.facter = {
-        'network_eth2_enable' => (CONF['bridge_networking'] == true),
-        'network_eth1_ip' => CONF['eth1_ip_address'],
+        'env'                  => 'dev',
+        'network_eth2_enable'  => (CONF['bridge_networking'] == true),
+        'network_eth1_ip'      => CONF['eth1_ip_address'],
         'network_eth1_netmask' => CONF['eth1_netmask']
       }
+      if (use_nfs == true) 
+        puppet.synced_folder_type = 'nfs'
+      end
     end
   end
 end
