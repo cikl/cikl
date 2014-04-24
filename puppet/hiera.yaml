@@ -4,5 +4,8 @@
 :yaml:
   :datadir: hieradata
 :hierarchy:
-  - "network_interfaces"
+  - "%{::env}/%{::calling_module}"
+  - "%{::env}/common"
+  - "%{::calling_module}"
+  - common
 
