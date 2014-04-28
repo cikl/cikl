@@ -2,7 +2,7 @@ class cikl::elasticsearch::package {
   class { '::elasticsearch':
     manage_repo  => false,
     config => {
-      'cluster.name' => $cikl::elasticsearch_cluster_name,
+      'cluster.name' => $cikl::elasticsearch::cluster_name,
         'node.name' => $::ipaddress,
         'index' => {
           'number_of_replicas' => '0',

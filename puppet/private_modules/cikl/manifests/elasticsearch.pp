@@ -1,4 +1,7 @@
-class cikl::elasticsearch {
+class cikl::elasticsearch (
+  $cluster_name = 'cikl_cluster'
+)
+{
   contain cikl::elasticsearch::deps
   contain cikl::elasticsearch::package
 

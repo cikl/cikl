@@ -1,2 +1,12 @@
 ---
-cikl::elasticsearch_cluster_name: vagrant_cikl
+classes:
+  - cikl::rabbitmq
+  - cikl::elasticsearch
+  - cikl::logstash
+  - cikl::worker
+  - cikl::smrt
+  - cikl::nginx
+  - cikl::kibana
+
+cikl::elasticsearch::cluster_name: vagrant_cikl
+cikl::logstash::config::elasticsearch_cluster_name: "%{::cikl::elasticsearch::cluster_name}"

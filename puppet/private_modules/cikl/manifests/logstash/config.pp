@@ -1,6 +1,9 @@
-class cikl::logstash::config {
+class cikl::logstash::config (
+  $elasticsearch_template_path = '/etc/cikl-elasticsearch-template.json',
+  $elasticsearch_cluster_name = 'cikl_cluster',
+) {
   file { 'elasticsearch-cikl-template': 
-    path    => $cikl::elasticsearch_template,
+    path    => $elasticsearch_template_path,
     owner   => "root",
     group   => "root",
     mode    => '0644',

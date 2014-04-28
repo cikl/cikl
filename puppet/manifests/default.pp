@@ -29,3 +29,5 @@ class { 'cikl':
 
 $network_interfaces = hiera('network_interfaces')
 create_resources ( cikl::net, $network_interfaces )
+
+hiera_include('classes')

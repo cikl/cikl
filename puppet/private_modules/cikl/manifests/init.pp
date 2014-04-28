@@ -1,6 +1,4 @@
 class cikl (
-  $elasticsearch_cluster_name = $cikl::params::elasticsearch_cluster_name,
-  $elasticsearch_template = $cikl::params::elasticsearch_template,
   $rabbitmq_host     = $cikl::params::rabbitmq_host,
   $rabbitmq_port     = $cikl::params::rabbitmq_port,
   $rabbitmq_username = $cikl::params::rabbitmq_username, 
@@ -16,19 +14,4 @@ class cikl (
   $kibana_root          = $cikl::params::kibana_root
   $kibana_base          = $cikl::params::kibana_base
   $kibana_dashboard     = $cikl::params::kibana_dashboard
-
-  class { 'cikl::rabbitmq': }
-  class { 'cikl::elasticsearch': }
-  class { 'cikl::logstash': }
-  class { 'cikl::worker': }
-
-  class { 'cikl::smrt': }
-  class { 'cikl::nginx': }
-  class { 'cikl::kibana': }
-
-  Class['cikl::rabbitmq'] -> Class['cikl::logstash']
-  Class['cikl::elasticsearch'] -> Class['cikl::logstash']
-
-  Class['cikl::rabbitmq'] -> Class['cikl::worker']
-  Class['cikl::logstash'] -> Class['cikl::worker']
 }
