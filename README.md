@@ -77,6 +77,8 @@ You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 
 All issues are managed within the primary repository: [cikl/cikl/issues](https://github.com/cikl/cikl/issues). Pull requests should be sent to their respective reposirotires, referencing some issue within the main project repository.
 
+We use Huboard for managing our issues (to the extent that it can). [Our HuBoard!](https://huboard.com/cikl/cikl#/).
+
 ## Repositories
 
 Cikl consists of many different sub-projects. The main ones are:
