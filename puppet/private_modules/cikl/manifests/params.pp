@@ -1,8 +1,5 @@
 class cikl::params {
 
-  $worker_user          = 'cikl_worker'
-  $worker_group         = 'cikl_worker'
-
   $nginx_hostname   = $::fqdn
   $elasticsearch_host   = $::ipaddress
   $elasticsearch_port   = 9200

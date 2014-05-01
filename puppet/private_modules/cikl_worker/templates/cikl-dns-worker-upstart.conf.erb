@@ -6,8 +6,8 @@ stop on runlevel [06]
 
 respawn
 
-setuid <%= scope.lookupvar('cikl::worker_user') %>
-setgid <%= scope.lookupvar('cikl::worker_group') %>
+setuid <%= @user %>
+setgid <%= @group %>
 
 console log
 chdir /vagrant/cikl-worker
