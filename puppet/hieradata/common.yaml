@@ -1,12 +1,25 @@
 ---
 classes:
+  - elasticsearch
+  - logstash
+  - cikl::logstash
   - cikl::rabbitmq
-  - cikl::elasticsearch
-  - cikl_logstash
   - cikl_worker
   - cikl::smrt
   - cikl::nginx
   - cikl::kibana
+
+apt_sources:
+  rabbitmq:
+    location: 'http://www.rabbitmq.com/debian/'
+    release: testing
+    repos: main
+    include_src: false
+    key: 056E8E56
+    key_server: pgp.mit.edu
+
+install_packages:
+  - openjdk-7-jre-headless
 
 cikl::elasticsearch_cluster_name: vagrant_cikl
 cikl::rabbitmq_host: localhost
@@ -17,12 +30,12 @@ cikl::rabbitmq_vhost: '/'
 
 cikl::elasticsearch::cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
 
-cikl_logstash::config::elasticsearch_cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
-cikl_logstash::config::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
-cikl_logstash::config::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
-cikl_logstash::config::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
-cikl_logstash::config::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
-cikl_logstash::config::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
+cikl::logstash::elasticsearch_cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
+cikl::logstash::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
+cikl::logstash::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
+cikl::logstash::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
+cikl::logstash::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
+cikl::logstash::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
 
 cikl_worker::config::user: "cikl_worker"
 cikl_worker::config::group: "cikl_worker"
@@ -31,3 +44,17 @@ cikl_worker::config::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
 cikl_worker::config::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
 cikl_worker::config::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
 cikl_worker::config::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
+
+elasticsearch::manage_repo: true
+elasticsearch::repo_version: '1.0'
+elasticsearch::config: 
+  'cluster.name': "%{hiera('cikl::elasticsearch_cluster_name')}"
+  'node.name': "%{::ipaddress}"
+  index:
+    number_of_replicas: 0
+    number_of_shards: 1
+  network:
+    host: '0.0.0.0'
+
+logstash::manage_repo: true
+logstash::repo_version: '1.4'

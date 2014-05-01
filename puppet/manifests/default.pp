@@ -1,7 +1,7 @@
 stage { "init": before => Stage['main'] }
 
 
-class fix_resolvconf {
+class cikl::fix_resolvconf {
   exec { 'refresh resolvconf':
     command     => '/sbin/resolvconf -u',
     refreshonly => true
@@ -15,14 +15,20 @@ class fix_resolvconf {
   }
 }
 
-class { 'fix_resolvconf': 
-  stage  => 'init',
-}
-
 class { 'cikl':
 }
 
-$network_interfaces = hiera('network_interfaces')
-create_resources ( cikl::net, $network_interfaces )
+class cikl::configure_network {
+  $network_interfaces = hiera('network_interfaces')
+  create_resources ( cikl::net, $network_interfaces )
+}
 
+class cikl::install_packages {
+  $packages = hiera('install_packages')
+  ensure_packages($packages)
+}
+
+include cikl::fix_resolvconf
+include cikl::configure_network
+include cikl::install_packages
 hiera_include('classes')

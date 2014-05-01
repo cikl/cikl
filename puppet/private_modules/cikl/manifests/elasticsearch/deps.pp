@@ -1,3 +1,3 @@
 class cikl::elasticsearch::deps () {
-  require cikl::packages::java7
+  #require cikl::packages::java7
 }
