@@ -1,0 +1,17 @@
+output { 
+  if ([type] == 'event') {
+    if [address][fqdn] {
+      rabbitmq {
+        host => "<%= @rabbitmq_host %>"
+        port => <%= @rabbitmq_port %>
+        user => "<%= @rabbitmq_username %>"
+        password => "<%= @rabbitmq_password %>"
+        vhost => "<%= @rabbitmq_vhost %>"
+        exchange => ""
+        exchange_type => "topic"
+        key => "cikl.resolve_fqdn"
+      }
+    }
+  }
+}
+

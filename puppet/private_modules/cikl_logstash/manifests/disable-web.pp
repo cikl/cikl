@@ -1,5 +1,5 @@
-class cikl::logstash::disable-web {
-  file { 'cikl::logstash::disable-web':
+class cikl_logstash::disable-web {
+  file { 'cikl_logstash::disable-web':
     path    => '/etc/init/logstash-web.override',
     owner   => "root",
     group   => "root",

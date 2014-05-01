@@ -15,13 +15,8 @@ class fix_resolvconf {
   }
 }
 
-class { 'cikl::repositories': 
-  stage => 'init'
-}
-
 class { 'fix_resolvconf': 
   stage  => 'init',
-  before => Class['cikl::repositories']
 }
 
 class { 'cikl':

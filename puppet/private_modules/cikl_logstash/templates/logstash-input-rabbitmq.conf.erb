@@ -1,0 +1,28 @@
+input {
+  rabbitmq {
+    host => "<%= @rabbitmq_host %>"
+    port => <%= @rabbitmq_port %>
+    user => "<%= @rabbitmq_username %>"
+    password => "<%= @rabbitmq_password %>"
+    vhost => "<%= @rabbitmq_vhost %>"
+    queue => "cikl.event"
+    durable => true
+    add_field => {
+      'type' => 'event'
+    }
+  }
+
+  rabbitmq {
+    host => "<%= @rabbitmq_host %>"
+    port => <%= @rabbitmq_port %>
+    user => "<%= @rabbitmq_username %>"
+    password => "<%= @rabbitmq_password %>"
+    vhost => "<%= @rabbitmq_vhost %>"
+    queue => "cikl.dns_answer"
+    durable => true
+    add_field => {
+      'type' => 'dns_answer'
+    }
+  }
+}
+
