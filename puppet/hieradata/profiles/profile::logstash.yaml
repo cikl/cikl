@@ -1,0 +1,7 @@
+---
+profile::logstash::elasticsearch_cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
+profile::logstash::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
+profile::logstash::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
+profile::logstash::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
+profile::logstash::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
+profile::logstash::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"

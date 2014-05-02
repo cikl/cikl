@@ -1,4 +1,5 @@
 ---
+role: role::does_everything
 network_interfaces:
   eth0: 
     mode: dhcp
