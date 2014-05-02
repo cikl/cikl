@@ -2,7 +2,7 @@ define(['settings'],
 function (Settings) {
   return new Settings({
     elasticsearch: window.location.origin+"/es",
-  default_route     : '/dashboard/file/<%= scope.lookupvar('cikl::kibana_dashboard') %>',
+    default_route: '/dashboard/file/cikl.json',
     kibana_index: "kibana-int",
 
     panel_names: [

@@ -8,6 +8,14 @@ server {
 
   # Make site accessible from http://localhost/
 
+  location /config.js {
+    alias <%= @kibana_conf %>;
+  }
+
+  location /app/dashboards/ {
+    alias <%= @kibana_dashboards %>;
+  }
+
   location / {
     try_files $uri $uri/ /index.html;
   }

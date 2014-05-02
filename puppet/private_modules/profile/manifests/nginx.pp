@@ -1,7 +1,10 @@
 class profile::nginx (
-  $kibana_root = '/opt/kibana/current',
+  $kibana_root       = '/vagrant/cikl-kibana/kibana-src/src/',
+  $kibana_conf       = "/vagrant/cikl-kibana/config.js",
+  $kibana_dashboards = '/vagrant/cikl-kibana/dashboards/',
   $elasticsearch_url = 'http://127.0.0.1:9200'
 ) inherits profile::base {
+
   $config_file  = "/etc/nginx/sites-available/cikl.conf"
   $config_enabled_symlink = "/etc/nginx/sites-enabled/cikl.conf"
 

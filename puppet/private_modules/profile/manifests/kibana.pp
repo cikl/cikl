@@ -1,4 +1,4 @@
 class profile::kibana inherits profile::base {
-  include cikl::kibana
+  #  include cikl::kibana
 }
 
