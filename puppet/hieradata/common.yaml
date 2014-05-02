@@ -15,12 +15,3 @@ cikl::rabbitmq_username: guest
 cikl::rabbitmq_password: guest
 cikl::rabbitmq_vhost: '/'
 
-cikl_worker::config::user: "cikl_worker"
-cikl_worker::config::group: "cikl_worker"
-cikl_worker::config::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
-cikl_worker::config::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
-cikl_worker::config::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
-cikl_worker::config::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
-cikl_worker::config::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
-
-
