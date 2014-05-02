@@ -1,6 +1,0 @@
-class cikl::rabbitmq::deps () {
-}
-
-
-
-
