@@ -1,2 +1,2 @@
-$role = hiera('role')
-include $role
+$roles = hiera_array('roles', [])
+include $roles

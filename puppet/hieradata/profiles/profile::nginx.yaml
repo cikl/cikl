@@ -1,0 +1,3 @@
+---
+profile::nginx::kibana_root: "/opt/kibana/current"
+profile::nginx::elasticsearch_url: "%{hiera('cikl::elasticsearch_url')}"
