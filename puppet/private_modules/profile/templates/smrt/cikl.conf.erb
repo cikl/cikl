@@ -1,0 +1,12 @@
+[client]
+driver = Cikl::RabbitMQ
+host = <%= @rabbitmq_host %>
+port = <%= @rabbitmq_port %>
+username = <%= @rabbitmq_username %>
+password = <%= @rabbitmq_password %>
+vhost = <%= @rabbitmq_vhost %>
+
+[cikl_smrt]
+# Go back 3 days
+goback = 3
+
