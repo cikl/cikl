@@ -22,6 +22,7 @@ CONF = _config
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+require_relative 'vagrant/ubuntu_trusty'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -30,7 +31,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder ".", '/vagrant', :nfs => use_nfs
 
   config.vm.define "cikl" do |cikl|
-
     # Every Vagrant virtual environment requires a box to build off of.
     cikl.vm.box = CONF['virtual_box_name']
     cikl.vm.hostname = "cikl"
@@ -39,13 +39,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       :ip      => CONF['eth1_ip_address'], 
       :netmask => CONF['eth1_netmask'],
       :adapter => 2, 
-      :auto_config => false
+      :auto_config => true
 
 
     # Route using the bridged network so that our DNS resolver doesn't nuke 
     # the NAT tables. 
     if CONF['bridge_networking'] == true
-      cikl.vm.network :public_network, :adapter => 3, :auto_config => false
+      cikl.vm.network :public_network, :adapter => 3, :auto_config => true,
+        :use_dhcp_assigned_default_route => true
     end
 
     cikl.vm.provider "virtualbox" do |v|
@@ -64,9 +65,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       puppet.working_directory  = "/vagrant/puppet"
       puppet.facter = {
         'env'                  => 'dev',
-        'network_eth2_enable'  => (CONF['bridge_networking'] == true),
-        'network_eth1_ip'      => CONF['eth1_ip_address'],
-        'network_eth1_netmask' => CONF['eth1_netmask']
       }
       if (use_nfs == true) 
         puppet.synced_folder_type = 'nfs'

@@ -2,16 +2,3 @@
 roles: 
   - role::does_everything
   - role::web
-
-network_interfaces:
-  eth0: 
-    mode: dhcp
-    metric: 100
-  eth1:
-    mode: static
-    ip: "%{::network_eth1_ip}"
-    netmask: "%{::network_eth1_netmask}"
-  eth2:
-    enabled: "%{::network_eth2_enable}"
-    mode: dhcp
-    metric: 50
