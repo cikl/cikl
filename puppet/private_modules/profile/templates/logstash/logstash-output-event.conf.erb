@@ -1,0 +1,10 @@
+output { 
+  elasticsearch {
+    index   => "cikl-%{+YYYY.MM.dd}"
+    cluster => "<%= @elasticsearch_cluster_name %>"
+    template => "<%= @elasticsearch_template_path %>"
+    template_name => "cikl"
+    template_overwrite => true
+    index_type => "%{type}"
+  }
+}

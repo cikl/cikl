@@ -1,0 +1,14 @@
+description "Cikl DNS Worker"
+
+start on vagrant-mounted MOUNTPOINT=/vagrant
+
+stop on runlevel [06]
+
+respawn
+
+setuid <%= @user %>
+setgid <%= @group %>
+
+console log
+chdir /vagrant/cikl-worker
+exec bin/dns_worker.rb /etc/cikl-dns-worker.yaml

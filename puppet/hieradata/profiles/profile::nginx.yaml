@@ -1,0 +1,4 @@
+---
+profile::nginx::kibana_root: "/vagrant/cikl-kibana/kibana-src/src/"
+profile::nginx::kibana_dashboards: "/vagrant/cikl-kibana/dashboards/"
+profile::nginx::elasticsearch_url: "%{hiera('cikl::elasticsearch_url')}"

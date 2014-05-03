@@ -1,0 +1,12 @@
+# Default config for Vagrant
+#
+# Don't change this; use vagrantconfig_local.yaml to override these settings
+# instead.
+
+nfs: false
+bridge_networking: true
+eth1_ip_address: 192.168.233.10
+eth1_netmask: 255.255.255.0
+memory_size: 2048
+number_cpus: 2
+virtual_box_name: "ubuntu/trusty64"

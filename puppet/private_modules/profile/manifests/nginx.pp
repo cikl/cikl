@@ -1,0 +1,40 @@
+class profile::nginx (
+  $kibana_root       = '/vagrant/cikl-kibana/kibana-src/src/',
+  $kibana_conf       = "/vagrant/cikl-kibana/config.js",
+  $kibana_dashboards = '/vagrant/cikl-kibana/dashboards/',
+  $elasticsearch_url = 'http://127.0.0.1:9200'
+) inherits profile::base {
+
+  $config_file  = "/etc/nginx/sites-available/cikl.conf"
+  $config_enabled_symlink = "/etc/nginx/sites-enabled/cikl.conf"
+
+  validate_re($elasticsearch_url, '^https?://.*')
+
+  ensure_packages(['nginx'])
+
+  file { '/etc/nginx/sites-enabled/default':
+    ensure  => absent,
+    notify  => Service['nginx'],
+    require => Package['nginx']
+  } 
+
+  file { $config_file:
+    content => template('profile/nginx/nginx.conf.erb'),
+    notify => Service['nginx'],
+    require => Package['nginx']
+  } ->
+  file { $config_enabled_symlink:
+    ensure => $config_file,
+    notify => Service['nginx'],
+    require => Package['nginx']
+  }
+
+  service { 'nginx':
+    ensure     => 'running',
+    enable     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    pattern    => 'nginx',
+    require => Package['nginx']
+  }
+}

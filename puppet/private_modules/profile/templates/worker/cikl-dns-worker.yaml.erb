@@ -1,0 +1,10 @@
+---
+:jobs_routing_key: 'cikl.resolve_fqdn'
+:results_routing_key: 'cikl.dns_answer'
+:amqp:
+  :username: <%= @rabbitmq_username %>
+  :password: <%= @rabbitmq_password %>
+  :host: <%= @rabbitmq_host %>
+  :port: <%= @rabbitmq_port %>
+  :vhost: <%= @rabbitmq_vhost %>
+

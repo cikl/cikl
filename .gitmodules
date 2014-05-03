@@ -4,3 +4,6 @@
 [submodule "cikl-worker"]
 	path = cikl-worker
 	url = https://github.com/cikl/cikl-worker.git
+[submodule "cikl-kibana"]
+	path = cikl-kibana
+	url = https://github.com/cikl/cikl-kibana.git
