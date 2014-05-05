@@ -70,6 +70,17 @@ git submodule update --init --recursive
 vagrant up
 ```
 
+### Importing data via cikl_smrt
+
+Now that you've got everything up and running, maybe you want to process a 
+feed or two? 
+
+At the moment, importing data involves running cikl_smrt against one of the 
+feeds located in the 'feeds' directory. 
+
+For example: 
+```vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"```
+
 ### FAQ:
 
 #### Why do I get prompted to select a network interface when I run 'vagrant up'? Why do you require bridged network access?
