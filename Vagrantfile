@@ -1,5 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require 'yaml'
  
 # Load up our vagrant config files -- vagrantconfig.yaml first
 _config = YAML.load(File.open(File.join(File.dirname(__FILE__),
