@@ -79,7 +79,9 @@ At the moment, importing data involves running cikl_smrt against one of the
 feeds located in the 'feeds' directory. 
 
 For example: 
-```vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"```
+```
+vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
+```
 
 ### FAQ:
 
