@@ -1,0 +1,3 @@
+---
+profile::worker::local_path: "%{::path_cikl_worker}"
+
