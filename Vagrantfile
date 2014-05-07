@@ -1,24 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-require 'yaml'
  
-# Load up our vagrant config files -- vagrantconfig.yaml first
-_config = YAML.load(File.open(File.join(File.dirname(__FILE__),
-                    "vagrantconfig.yaml"), File::RDONLY).read)
-
-# Local-specific/not-git-managed config -- vagrantconfig_local.yaml
-begin
-  _local_config = YAML.load(File.open(File.join(File.dirname(__FILE__),
-                 "vagrantconfig_local.yaml"), File::RDONLY).read)
-  if _local_config
-    _config.merge!(_local_config)
-  end
-
-rescue Errno::ENOENT # No vagrantconfig_local.yaml found -- that's OK; just
-                     # use the defaults.
-end
-
-CONF = _config
+# Load up our vagrant config files -- vagrantconfig.yaml, and then 
+# vagrantconfig_local.yaml (if found)
+CONF = lambda do
+  require 'yaml'
+  require 'pathname'
+  my_dir = Pathname.new(__FILE__).expand_path.dirname
+  configfile = my_dir.join("vagrantconfig.yaml")
+  configfile_local = my_dir.join("vagrantconfig_local.yaml")
+  config = YAML.load(configfile.read)
+  config_local = YAML.load(configfile_local.read) rescue {}
+  config.merge(config_local)
+end.call()
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
