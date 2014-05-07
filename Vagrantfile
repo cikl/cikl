@@ -23,6 +23,9 @@ CONF = _config
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+# Vagrant 1.6.0 fixed issues with Ubuntu/debian's hostname setting properly
+Vagrant.require_version ">= 1.6.0" 
+
 require_relative 'vagrant/ubuntu_trusty'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -62,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "cikl" do |cikl|
     # Every Vagrant virtual environment requires a box to build off of.
     cikl.vm.box = CONF['virtual_box_name']
-    cikl.vm.hostname = "cikl"
+    cikl.vm.hostname = "cikl.private"
 
     cikl.vm.network :private_network, 
       :ip      => CONF['eth1_ip_address'], 
