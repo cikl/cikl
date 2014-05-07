@@ -29,7 +29,35 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   use_nfs = (CONF['nfs'] == true) && !  Vagrant::Util::Platform.windows?
 
-  config.vm.synced_folder ".", '/vagrant', :nfs => use_nfs
+  synced_folder_opts = {
+    :nfs => use_nfs,
+    :create => true
+  }
+
+  path_cikl_dev     = "/home/vagrant/cikl-dev"
+
+  path_cikl_kibana  = "#{path_cikl_dev}/cikl-kibana"
+  path_cikl_worker  = "#{path_cikl_dev}/cikl-worker"
+  path_cikl_feeds   = "#{path_cikl_dev}/cikl-feeds"
+  path_p5_cikl      = "#{path_cikl_dev}/p5-Cikl"
+  path_p5_cikl_rabbitmq   = "#{path_cikl_dev}/p5-Cikl-RabbitMQ"
+
+  config.vm.synced_folder ".",                  '/vagrant', synced_folder_opts
+  config.vm.synced_folder "./cikl-kibana",      path_cikl_kibana, synced_folder_opts
+  config.vm.synced_folder "./cikl-worker",      path_cikl_worker, synced_folder_opts
+  config.vm.synced_folder "./feeds",            path_cikl_feeds, synced_folder_opts
+  config.vm.synced_folder "./p5-Cikl",          path_p5_cikl, synced_folder_opts
+  config.vm.synced_folder "./p5-Cikl-RabbitMQ", path_p5_cikl_rabbitmq, synced_folder_opts
+
+  puppet_facts = {
+    :environment      => 'development',
+    :path_cikl_kibana => path_cikl_kibana,
+    :path_cikl_worker => path_cikl_worker,
+    :path_cikl_feeds  => path_cikl_feeds,
+    :path_p5_cikl     => path_p5_cikl,
+    :path_p5_cikl_rabbitmq  => path_p5_cikl_rabbitmq,
+
+  }
 
   config.vm.define "cikl" do |cikl|
     # Every Vagrant virtual environment requires a box to build off of.
@@ -64,9 +92,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       puppet.module_path        = ['puppet/private_modules', 'puppet/modules']
       puppet.hiera_config_path  = "puppet/hiera.yaml"
       puppet.working_directory  = "/vagrant/puppet"
-      puppet.facter = {
-        'env'                  => 'dev',
-      }
+      puppet.facter             = puppet_facts
       if (use_nfs == true) 
         puppet.synced_folder_type = 'nfs'
       end

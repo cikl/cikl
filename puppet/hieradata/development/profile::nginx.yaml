@@ -1,0 +1,5 @@
+---
+profile::nginx::kibana_root: "%{::path_cikl_kibana}/kibana-src/src/"
+profile::nginx::kibana_dashboards: "%{::path_cikl_kibana}/dashboards/"
+profile::nginx::kibana_conf: "%{::path_cikl_kibana}/config.js"
+profile::nginx::elasticsearch_url: "%{hiera('cikl::elasticsearch_url')}"

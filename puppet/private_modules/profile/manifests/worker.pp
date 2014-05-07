@@ -1,4 +1,5 @@
 class profile::worker (
+  $local_path,
   $root          = '/opt/worker',
   $user          = 'cikl_worker',
   $group         = 'cikl_worker',
@@ -17,11 +18,11 @@ class profile::worker (
   } ->
   exec { 'profile::worker::install':
     cwd         => $root,
-    command     => "/usr/bin/bundle install --path=${$gems} --gemfile=/vagrant/cikl-worker/Gemfile",
+    command     => "/usr/bin/bundle install --path=${$gems} --gemfile=$local_path/Gemfile",
     require => [
       Package['libunbound2', 'bundler']
     ],
-    unless => '/usr/bin/bundle check --gemfile=/vagrant/cikl-worker/Gemfile'
+    unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
 
@@ -41,7 +42,8 @@ class profile::worker (
     owner   => "root",
     group   => "root",
     mode    => '0644',
-    content => template('profile/worker/cikl-dns-worker.yaml.erb')
+    content => template('profile/worker/cikl-dns-worker.yaml.erb'),
+    notify  => Service['cikl_worker::service']
   }
 
   file { 'profile::worker::upstart': 
@@ -50,6 +52,7 @@ class profile::worker (
     group   => "root",
     mode    => '0644',
     content => template('profile/worker/cikl-dns-worker-upstart.conf.erb'),
+    notify  => Service['cikl_worker::service'],
     require => [
       User['profile::worker::user'],
       Group['profile::worker::group']
@@ -61,7 +64,7 @@ class profile::worker (
     ensure     => 'running',
     provider   => 'upstart',
     hasstatus  => true,
-    hasrestart => true,
+    hasrestart => false, # This gets upstart to properly reload things.
     pattern    => 'dns_worker',
     subscribe  => [
       File['profile::worker::upstart', 'profile::worker::config']

@@ -5,6 +5,8 @@
   :datadir: hieradata
 :hierarchy:
   - "%{::hostname}"
+  - "%{::environment}/%{calling_class}"
+  - "%{::environment}"
   - "profiles/%{calling_class}"
   - common
 

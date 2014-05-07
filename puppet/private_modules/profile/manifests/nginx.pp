@@ -1,7 +1,7 @@
 class profile::nginx (
-  $kibana_root       = '/vagrant/cikl-kibana/kibana-src/src/',
-  $kibana_conf       = "/vagrant/cikl-kibana/config.js",
-  $kibana_dashboards = '/vagrant/cikl-kibana/dashboards/',
+  $kibana_root,
+  $kibana_conf       = undef,
+  $kibana_dashboards = undef,
   $elasticsearch_url = 'http://127.0.0.1:9200'
 ) inherits profile::base {
 
