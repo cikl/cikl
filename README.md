@@ -83,6 +83,23 @@ For example:
 vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
 ```
 
+### Importing and exporting data via util/data_loader.sh
+
+This tool exists for development purposes, only, and is not to be seen as a
+means for actually backing up data within Cikl. 
+
+#### Dumping the contents of Cikl into an archive:
+```
+vagrant ssh -c "/vagrant/util/data_loader.sh dump /vagrant/my_dump.tgz"
+```
+
+
+#### Restoring Cikl from a dump
+NOTE: This will wipe out any data that is contained within Cikl!!! 
+```
+vagrant ssh -c "/vagrant/util/data_loader.sh restore /vagrant/my_dump.tgz"
+```
+
 ### FAQ:
 
 #### Why do I get prompted to select a network interface when I run 'vagrant up'? Why do you require bridged network access?
