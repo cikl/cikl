@@ -20,5 +20,9 @@ class profile::elasticsearch (
     },
     require => Package['openjdk-7-jre-headless']
   }
+
+  ::elasticsearch::plugin{'mobz/elasticsearch-head':
+    module_dir => 'head'
+  }
 }
 
