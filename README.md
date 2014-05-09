@@ -134,3 +134,7 @@ Cikl consists of many different sub-projects. The main ones are:
 ### p5-Cikl
 [cikl/p5-Cikl](https://github.com/cikl/p5-Cikl) - the current core of Cikl. This began as a fork of https://github.com/collectiveintel/cif-v1 and has evolved quite a bit over time. The code is available on CPAN as Cikl. 
 
+
+## License
+
+Copyright (c) 2014 Michael Ryan. See the LICENSE file for license rights and limitations (LGPLv3).
