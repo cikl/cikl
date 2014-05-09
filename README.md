@@ -117,7 +117,11 @@ vagrantconfig_local.yaml, and run ```vagrant reload```
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 
-## Issues and Pull Requests
+
+## Contributing and Issue Tracking
+
+Before you file a bug or submit a pull request, please review our 
+[contribution guidelines](https://github.com/cikl/cikl/wiki/Contributing].
 
 All issues are managed within the primary repository: [cikl/cikl/issues](https://github.com/cikl/cikl/issues). Pull requests should be sent to their respective reposirotires, referencing some issue within the main project repository.
 
