@@ -22,6 +22,7 @@ class profile::worker (
     require => [
       Package['libunbound2', 'bundler']
     ],
+    notify  => Service['cikl_worker::service'],
     unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
