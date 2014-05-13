@@ -1,9 +1,6 @@
 class profile::rabbitmq inherits profile::base {
   ensure_packages(['rabbitmq-server'])
 
-  if !defined(Class['apt']) {
-    class { 'apt': }
-  }
   apt::source { 'rabbitmq':
     key         => '056E8E56',
     location    => "http://www.rabbitmq.com/debian/",
