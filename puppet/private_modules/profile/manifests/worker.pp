@@ -22,7 +22,7 @@ class profile::worker (
     require => [
       Package['libunbound2', 'bundler']
     ],
-    notify  => Service['cikl_worker::service'],
+    notify  => Service['profile::worker::service'],
     unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
@@ -44,7 +44,7 @@ class profile::worker (
     group   => "root",
     mode    => '0644',
     content => template('profile/worker/cikl-dns-worker.yaml.erb'),
-    notify  => Service['cikl_worker::service']
+    notify  => Service['profile::worker::service']
   }
 
   file { 'profile::worker::upstart': 
@@ -53,14 +53,14 @@ class profile::worker (
     group   => "root",
     mode    => '0644',
     content => template('profile/worker/cikl-dns-worker-upstart.conf.erb'),
-    notify  => Service['cikl_worker::service'],
+    notify  => Service['profile::worker::service'],
     require => [
       User['profile::worker::user'],
       Group['profile::worker::group']
     ]
   }
 
-  service { 'cikl_worker::service': 
+  service { 'profile::worker::service': 
     name       => 'cikl-dns-worker',
     ensure     => 'running',
     provider   => 'upstart',
