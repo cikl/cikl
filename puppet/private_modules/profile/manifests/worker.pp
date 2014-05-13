@@ -18,7 +18,7 @@ class profile::worker (
   } ->
   exec { 'profile::worker::install':
     cwd         => $root,
-    command     => "/usr/bin/bundle install --path=${$gems} --gemfile=$local_path/Gemfile",
+    command     => "/usr/bin/bundle install --without development --path=${$gems} --gemfile=$local_path/Gemfile",
     require => [
       Package['libunbound2', 'bundler']
     ],
