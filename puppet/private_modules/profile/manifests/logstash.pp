@@ -22,7 +22,8 @@ inherits profile::base {
     group   => "root",
     mode    => '0644',
     content => template('profile/logstash/elasticsearch-cikl-template.json.erb'),
-    before  => Class['::logstash']
+    before  => Class['::logstash'],
+    notify  => Class['::logstash::service']
   }
 
   ::logstash::configfile { 'input-rabbitmq':
