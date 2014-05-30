@@ -2,14 +2,15 @@ class profile::api (
   $local_path,
   $root          = '/opt/cikl_api',
   $user          = 'cikl_api',
-  $group         = 'cikl_api',
-  $unicorn_config       = "/etc/cikl_api_unicorn.rb",
-  $unicorn_run_path     = '/var/run/unicorn_cikl_api',
-  $unicorn_log_path     = "/var/log/cikl_api"
+  $group         = 'cikl_api'
 ) inherits profile::base {
   $gems = "$root/gems"
-  $unicorn_pid_file     = "$unicorn_run_path/cikl_api.pid"
-  $unicorn_socket_path  = "$unicorn_run_path/socket"
+
+  $server_config       = "/etc/cikl_api.conf"
+  $server_run_path     = '/var/run/cikl_api'
+  $server_log_path     = "/var/log/cikl_api"
+  $server_pid_file     = "$server_run_path/cikl_api.pid"
+  $server_socket_path  = "$server_run_path/socket"
 
   ensure_packages(['bundler'])
 
@@ -38,9 +39,8 @@ class profile::api (
     shell   => '/usr/sbin/nologin'
   }
 
-  # Unicorn stuff
-  file { 'profile::api::unicorn_run_path':
-    path   => $unicorn_run_path,
+  file { 'profile::api::server_run_path':
+    path   => $server_run_path,
     ensure => "directory",
     owner  => $user,
     group  => $group,
@@ -50,8 +50,8 @@ class profile::api (
     ]
   }
 
-  file { 'profile::api::unicorn_log_path': 
-    path   => $unicorn_log_path,
+  file { 'profile::api::server_log_path': 
+    path   => $server_log_path,
     ensure => "directory",
     owner  => $user,
     group  => $group,
@@ -61,16 +61,16 @@ class profile::api (
     ]
   }
   # 
-  file { 'profile::api::unicorn_config': 
-    path    => $unicorn_config,
+  file { 'profile::api::server_config': 
+    path    => $server_config,
     owner   => "root",
     group   => "root",
     mode    => '0644',
-    content => template('profile/api/unicorn.conf.erb'),
+    content => template('profile/api/server.conf.erb'),
     notify  => Service['profile::api::service'],
     require => [
-      File['profile::api::unicorn_log_path'],
-      File['profile::api::unicorn_run_path']
+      File['profile::api::server_log_path'],
+      File['profile::api::server_run_path']
     ]
   }
 
@@ -84,9 +84,9 @@ class profile::api (
     require => [
       User['profile::api::user'],
       Group['profile::api::group'],
-      File['profile::api::unicorn_config'],
-      File['profile::api::unicorn_log_path'],
-      File['profile::api::unicorn_run_path']
+      File['profile::api::server_config'],
+      File['profile::api::server_log_path'],
+      File['profile::api::server_run_path']
     ]
   }
 
