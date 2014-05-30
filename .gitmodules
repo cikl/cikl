@@ -10,3 +10,6 @@
 [submodule "p5-Cikl-RabbitMQ"]
 	path = p5-Cikl-RabbitMQ
 	url = https://github.com/cikl/p5-Cikl-RabbitMQ.git
+[submodule "cikl-api"]
+	path = cikl-api
+	url = https://github.com/cikl/cikl-api.git

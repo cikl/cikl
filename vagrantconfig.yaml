@@ -11,6 +11,7 @@ memory_size: 2048
 number_cpus: 2
 virtual_box_name: "ubuntu/trusty64"
 worker_path: "./cikl-worker"
+api_path: "./cikl-api"
 feeds_path: "./feeds"
 smrt_path: "./p5-Cikl"
 smrt_rabbitmq_path: "./p5-Cikl-RabbitMQ"

@@ -1,0 +1,17 @@
+description "Cikl API"
+
+start on (started networking <%= "and vagrant-mounted MOUNTPOINT=#{@local_path}" if (@environment == 'development') %>)
+
+stop on runlevel [06]
+
+setuid <%= @user %>
+setgid <%= @group %>
+
+console log
+script
+  export APP_ROOT=<%= @local_path %>
+  export BUNDLE_GEMFILE=<%= @local_path %>/Gemfile
+  chdir <%= @unicorn_run_path %>
+  bundle exec unicorn -E production -c <%= @unicorn_config %>
+end script
+

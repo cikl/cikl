@@ -34,12 +34,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   path_cikl_dev     = "/home/vagrant/cikl-dev"
 
   path_cikl_worker  = "#{path_cikl_dev}/cikl-worker"
+  path_cikl_api     = "#{path_cikl_dev}/cikl-api"
   path_cikl_feeds   = "#{path_cikl_dev}/cikl-feeds"
   path_p5_cikl      = "#{path_cikl_dev}/p5-Cikl"
   path_p5_cikl_rabbitmq   = "#{path_cikl_dev}/p5-Cikl-RabbitMQ"
 
   config.vm.synced_folder ".",                  '/vagrant', synced_folder_opts
   config.vm.synced_folder CONF["worker_path"],   path_cikl_worker, synced_folder_opts
+  config.vm.synced_folder CONF["api_path"],      path_cikl_api, synced_folder_opts
   config.vm.synced_folder CONF["feeds_path"],    path_cikl_feeds, synced_folder_opts
   config.vm.synced_folder CONF["smrt_path"],          path_p5_cikl, synced_folder_opts
   config.vm.synced_folder CONF["smrt_rabbitmq_path"], path_p5_cikl_rabbitmq, synced_folder_opts
@@ -47,6 +49,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   puppet_facts = {
     :environment      => 'development',
     :path_cikl_worker => path_cikl_worker,
+    :path_cikl_api    => path_cikl_api,
     :path_cikl_feeds  => path_cikl_feeds,
     :path_p5_cikl     => path_p5_cikl,
     :path_p5_cikl_rabbitmq  => path_p5_cikl_rabbitmq,

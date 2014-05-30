@@ -1,0 +1,2 @@
+---
+profile::api::local_path: "%{::path_cikl_api}"
