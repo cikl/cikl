@@ -8,8 +8,6 @@ apt_sources:
     key: 056E8E56
     key_server: pgp.mit.edu
 
-#cikl::kibana_root: /opt/kibana/current
-cikl::kibana_root: /vagrant/cikl-kibana/src
 cikl::elasticsearch_cluster_name: vagrant_cikl
 cikl::elasticsearch_url: http://127.0.0.1:9200
 cikl::rabbitmq_host: localhost

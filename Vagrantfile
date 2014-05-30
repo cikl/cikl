@@ -33,14 +33,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   path_cikl_dev     = "/home/vagrant/cikl-dev"
 
-  path_cikl_kibana  = "#{path_cikl_dev}/cikl-kibana"
   path_cikl_worker  = "#{path_cikl_dev}/cikl-worker"
   path_cikl_feeds   = "#{path_cikl_dev}/cikl-feeds"
   path_p5_cikl      = "#{path_cikl_dev}/p5-Cikl"
   path_p5_cikl_rabbitmq   = "#{path_cikl_dev}/p5-Cikl-RabbitMQ"
 
   config.vm.synced_folder ".",                  '/vagrant', synced_folder_opts
-  config.vm.synced_folder CONF["kibana_path"],   path_cikl_kibana, synced_folder_opts
   config.vm.synced_folder CONF["worker_path"],   path_cikl_worker, synced_folder_opts
   config.vm.synced_folder CONF["feeds_path"],    path_cikl_feeds, synced_folder_opts
   config.vm.synced_folder CONF["smrt_path"],          path_p5_cikl, synced_folder_opts
@@ -48,7 +46,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   puppet_facts = {
     :environment      => 'development',
-    :path_cikl_kibana => path_cikl_kibana,
     :path_cikl_worker => path_cikl_worker,
     :path_cikl_feeds  => path_cikl_feeds,
     :path_p5_cikl     => path_p5_cikl,
@@ -81,7 +78,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     cikl.vm.network :forwarded_port, guest: 80, host: 8080 
-    #cikl.vm.network :forwarded_port, guest: 9200, host: 9200
+    cikl.vm.network :forwarded_port, guest: 9200, host: 9200
     
     cikl.vm.provision :puppet do |puppet|
       puppet.manifests_path     = "puppet/manifests"
