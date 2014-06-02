@@ -12,6 +12,6 @@ script
   export APP_ROOT=<%= @local_path %>
   export BUNDLE_GEMFILE=<%= @local_path %>/Gemfile
   chdir <%= @server_run_path %>
-  bundle exec puma -e production -C <%= @server_config %>
+  bundle exec puma -e <%= @environment %> -C <%= @server_config %>
 end script
 

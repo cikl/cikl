@@ -39,28 +39,6 @@ class profile::api (
     shell   => '/usr/sbin/nologin'
   }
 
-  file { 'profile::api::server_run_path':
-    path   => $server_run_path,
-    ensure => "directory",
-    owner  => $user,
-    group  => $group,
-    require => [
-      User['profile::api::user'],
-      Group['profile::api::group']
-    ]
-  }
-
-  file { 'profile::api::server_log_path': 
-    path   => $server_log_path,
-    ensure => "directory",
-    owner  => $user,
-    group  => $group,
-    require => [
-      User['profile::api::user'],
-      Group['profile::api::group']
-    ]
-  }
-  # 
   file { 'profile::api::server_config': 
     path    => $server_config,
     owner   => "root",
@@ -68,9 +46,18 @@ class profile::api (
     mode    => '0644',
     content => template('profile/api/server.conf.erb'),
     notify  => Service['profile::api::service'],
+  }
+
+  file { 'profile::api::upstart-pre': 
+    path    => "/etc/init/cikl-api-pre.conf",
+    owner   => "root",
+    group   => "root",
+    mode    => '0644',
+    content => template('profile/api/cikl-api-pre-upstart.conf.erb'),
+    notify  => Service['profile::api::service'],
     require => [
-      File['profile::api::server_log_path'],
-      File['profile::api::server_run_path']
+      User['profile::api::user'],
+      Group['profile::api::group'],
     ]
   }
 
@@ -85,8 +72,7 @@ class profile::api (
       User['profile::api::user'],
       Group['profile::api::group'],
       File['profile::api::server_config'],
-      File['profile::api::server_log_path'],
-      File['profile::api::server_run_path']
+      File['profile::api::upstart-pre'],
     ]
   }
 
