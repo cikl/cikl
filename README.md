@@ -38,6 +38,7 @@ vagrant up
 
 ### Accessing the development environment
 
+- [API Documentation](http://localhost:8080/api/doc/)
 - [Elasticsearch Head](http://localhost:9292/_plugin/head/)
 - For shell access, type ```vagrant ssh```, and you'll be dropped into the 
   virtual machine as the 'vagrant' user. You'll notice that the base of the
