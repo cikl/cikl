@@ -1,0 +1,4 @@
+---
+profile::api::root: "/opt/cikl_api"
+profile::api::user: "cikl_api"
+profile::api::group: "cikl_api"

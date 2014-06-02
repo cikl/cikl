@@ -1,0 +1,13 @@
+workers 2
+directory "<%= @local_path %>"
+
+# bind "unix://<%= @server_socket_path %>"
+bind "tcp://127.0.0.1:8080"
+
+worker_timeout 30
+
+pidfile "<%= @server_pid_file %>"
+
+stdout_redirect "<%= @server_log_path %>/server.stdout.log","<%= @server_log_path %>/server.stderr.log", true
+
+threads 0, 16

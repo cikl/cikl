@@ -1,41 +1,39 @@
+upstream cikl_api {
+  keepalive 10;
+  # fail_timeout=0 means we always retry an upstream even if it failed
+  # to return a good HTTP response (in case the Unicorn master nukes a
+  # single worker for timing out).
+
+  # for UNIX domain socket setups:
+  # server unix:/var/run/cikl_api/socket fail_timeout=0;
+
+  # for TCP setups, point these to your backend servers
+  server 127.0.0.1:8080 fail_timeout=0;
+}
 server {
   listen   80; ## listen for ipv4; this line is default and implied
   #listen   [::]:80 default ipv6only=on; ## listen for ipv6
 
-  root <%= @kibana_root %>;
+  root /usr/share/nginx/html/;
 
   index index.html index.htm;
-
-<% unless @kibana_conf.nil? %>
-  location /config.js {
-    alias <%= @kibana_conf %>;
-  }
-<% end %>
-<% unless @kibana_dashboards.nil? %>
-  location /app/dashboards/ {
-    alias <%= @kibana_dashboards %>;
-  }
-<% end %>
 
   location / {
     try_files $uri $uri/ /index.html;
   }
 
-  location /es {
-    # Deny access to Cluster API
-    #    if ($request_filename ~ "_cluster") {
-    #      return 403;
-    #      break;
-    #    }
+  location /api {
+    proxy_pass http://cikl_api;
 
-    # Pass requests to ElasticSearch
-    rewrite /es/(.*) /$1 break;
-    proxy_pass <%= @elasticsearch_url %>;
     proxy_redirect off;
 
     proxy_set_header  X-Real-IP  $remote_addr;
     proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header  Host $http_host;
-  }
+    # Allow for keepalives.
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
 
+
+  }
 }

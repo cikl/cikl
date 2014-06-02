@@ -10,8 +10,8 @@ eth1_netmask: 255.255.255.0
 memory_size: 2048
 number_cpus: 2
 virtual_box_name: "ubuntu/trusty64"
-kibana_path: "./cikl-kibana"
 worker_path: "./cikl-worker"
+api_path: "./cikl-api"
 feeds_path: "./feeds"
 smrt_path: "./p5-Cikl"
 smrt_rabbitmq_path: "./p5-Cikl-RabbitMQ"
