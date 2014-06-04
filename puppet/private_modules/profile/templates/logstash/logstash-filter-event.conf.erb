@@ -13,5 +13,12 @@ filter {
     mutate {
       remove_field => [ "detecttime" ]
     }
+
+    if ([type] == 'event') {
+      if [observables][fqdn][0] {
+        generate_dns_queries { }
+      }
+    }
+    
   }
 }
