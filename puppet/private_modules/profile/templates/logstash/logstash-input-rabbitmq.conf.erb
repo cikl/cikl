@@ -21,7 +21,7 @@ input {
     queue => "cikl.dns_answer"
     durable => true
     add_field => {
-      'type' => 'dns_answer'
+      'type' => 'event'
     }
   }
 }
