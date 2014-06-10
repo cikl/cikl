@@ -3,21 +3,25 @@ FORGE
   specs:
     elasticsearch/elasticsearch (0.3.0)
       puppetlabs/stdlib (>= 3.2.0)
-    elasticsearch/logstash (0.4.3)
+    elasticsearch/logstash (0.5.1)
       ispavailability/file_concat (>= 0.1.0)
       puppetlabs/stdlib (>= 3.2.0)
     ispavailability/file_concat (0.1.0)
     nanliu/staging (0.4.0)
     puppetlabs/apt (1.4.2)
       puppetlabs/stdlib (>= 2.2.1)
+    puppetlabs/mongodb (0.8.0)
+      puppetlabs/apt (>= 1.0.0)
+      puppetlabs/stdlib (>= 2.2.0)
     puppetlabs/stdlib (4.1.0)
     stahnma/epel (0.0.6)
 
 DEPENDENCIES
   elasticsearch/elasticsearch (= 0.3.0)
-  elasticsearch/logstash (= 0.4.3)
+  elasticsearch/logstash (= 0.5.1)
   nanliu/staging (= 0.4.0)
   puppetlabs/apt (= 1.4.2)
+  puppetlabs/mongodb (= 0.8.0)
   puppetlabs/stdlib (>= 0)
   stahnma/epel (= 0.0.6)
 

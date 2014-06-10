@@ -5,4 +5,5 @@ class role::does_everything {
   include profile::rabbitmq
   include profile::worker
   include profile::smrt
+  include profile::mongodb
 }

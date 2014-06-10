@@ -2,7 +2,8 @@ forge "http://forge.puppetlabs.com"
 
 mod 'puppetlabs/stdlib'
 mod 'puppetlabs/apt', '1.4.2'
+mod 'puppetlabs/mongodb', '0.8.0'
 mod 'elasticsearch/elasticsearch', '0.3.0'
-mod 'elasticsearch/logstash', '0.4.3'
+mod 'elasticsearch/logstash', '0.5.1'
 mod 'stahnma/epel', '0.0.6'
 mod 'nanliu/staging', '0.4.0'

@@ -18,6 +18,11 @@ filter {
       if [observables][fqdn][0] {
         generate_dns_queries { }
       }
+
+      cikl_mongodb {
+        database => 'cikl'
+        uri => 'mongodb://localhost:27017'
+      }
     }
     
   }
