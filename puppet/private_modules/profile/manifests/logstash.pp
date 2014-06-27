@@ -11,9 +11,12 @@ inherits profile::base {
   ensure_packages(['openjdk-7-jre-headless'])
 
   class { '::logstash': 
-    manage_repo  => true,
-    repo_version => '1.4',
-    require      => Package['openjdk-7-jre-headless']
+    manage_repo       => true,
+    repo_version      => '1.4',
+    require           => Package['openjdk-7-jre-headless'],
+    install_contrib   => true,
+    restart_on_change => true,
+    status            => enabled
   }
 
   file { 'elasticsearch-cikl-template': 

@@ -1,6 +1,7 @@
 {
   "template" : "cikl-*",
   "settings" : {
+    "index.mapper.dynamic" : "false",
     "index.refresh_interval" : "5s",
     "index.analysis.analyzer.lowercase_keyword.type" : "custom",
     "index.analysis.analyzer.lowercase_keyword.tokenizer" : "keyword",
@@ -22,7 +23,14 @@
       }
     },
     "event" : {
+      "_id": {
+        "path" : "event_id"
+      },
       "properties" : {
+        "event_id" : {
+          "type": "string",
+          "index": "not_analyzed"
+        },
         "source" : {
           "analyzer" : "lowercase_keyword",
           "type" : "string"
