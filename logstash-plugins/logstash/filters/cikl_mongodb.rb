@@ -41,29 +41,32 @@ class LogStash::Filters::CiklMongodb < LogStash::Filters::Base
     return unless event['type'] == 'event'
 
     document = event.to_hash.dup
-    parent_id = nil
+    existing_id = document['event_id']
+    doc_id = nil
     begin
-      if parent_id = document['event_id']
-        parent_id = BSON::ObjectId.from_string(parent_id)
+      unless existing_id.nil?
+        doc_id = BSON::ObjectId.from_string(existing_id)
       else 
-        parent_id = BSON::ObjectId.new(nil, event["@timestamp"])
+        doc_id = BSON::ObjectId.new(nil, event["@timestamp"])
       end
 
-      document['event_id'] = parent_id
+      document['_id'] = doc_id
+      document['event_id'] = doc_id
       @db.collection("event").update(
-        {:_id => parent_id},
+        {:_id => doc_id },
         document,
         {
           :upsert => true
         }
       )
+
+      #@db.collection("event").insert(document)
     rescue => e
       @logger.warn("Failed to send event to MongoDB", :event => event, :exception => e,
                    :backtrace => e.backtrace)
       sleep @retry_delay
       retry
     end
-    parent_id_s = parent_id.to_s
-    event["event_id"] = parent_id_s
+    event["event_id"] = doc_id.to_s if existing_id.nil?
   end # def receive
 end # class LogStash::Outputs::CiklMongodb
