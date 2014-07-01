@@ -28,7 +28,6 @@ to Puppet to handle the provisioning and setup.
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
-git submodule update --init --recursive
 ```
 - Bring up the virtual machine:
 ```
@@ -64,8 +63,6 @@ vagrant destroy
 git checkout master
 # Pull any updatream changes into your master branch
 git pull origin master
-# Very important, update any submodules:
-git submodule update --init --recursive
 # Recreate the vagrant virtual machine.
 vagrant up
 ```
