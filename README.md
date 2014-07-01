@@ -80,6 +80,11 @@ For example:
 vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
 ```
 
+### Clearing out existing data after an upgrade
+```
+vagrant ssh -c "/vagrant/util/drop_data.sh"
+```
+
 ### Importing and exporting data via util/data_loader.sh
 
 This tool exists for development purposes, only, and is not to be seen as a
