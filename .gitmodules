@@ -1,3 +1,0 @@
-[submodule "feeds"]
-	path = feeds
-	url = https://github.com/cikl/cikl-feeds.git
