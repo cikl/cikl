@@ -16,9 +16,6 @@
   "mappings" : {
     "_default_": {
       "properties" : {
-        "@timestamp" : {
-          "type" : "date"
-        },
         "@version": { "type": "string", "index": "not_analyzed" }
       }
     },
@@ -136,7 +133,10 @@
           "analyzer" : "lowercase_keyword",
           "type" : "string"
         },
-        "reporttime" : {
+        "detect_time" : {
+          "type" : "date"
+        },
+        "import_time" : {
           "type" : "date"
         },
         "alternativeid" : {
