@@ -28,7 +28,6 @@ to Puppet to handle the provisioning and setup.
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
-git submodule update --init --recursive
 ```
 - Bring up the virtual machine:
 ```
@@ -64,8 +63,6 @@ vagrant destroy
 git checkout master
 # Pull any updatream changes into your master branch
 git pull origin master
-# Very important, update any submodules:
-git submodule update --init --recursive
 # Recreate the vagrant virtual machine.
 vagrant up
 ```
@@ -81,6 +78,11 @@ feeds located in the 'feeds' directory.
 For example: 
 ```
 vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
+```
+
+### Clearing out existing data after an upgrade
+```
+vagrant ssh -c "/vagrant/util/drop_data.sh"
 ```
 
 ### Importing and exporting data via util/data_loader.sh
