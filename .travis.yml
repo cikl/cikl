@@ -1,5 +1,3 @@
-language: ruby
-
 services: rabbitmq
 
 env:
@@ -9,19 +7,23 @@ env:
 
 matrix:
   include:
-    - rvm: 1.9.3
+    - language: ruby
+      rvm: 1.9.3
       env: TEST_LANGUAGE=ruby
-    - rvm: 2.0.0
+    - language: ruby
+      rvm: 2.0.0
       env: TEST_LANGUAGE=ruby
-    - rvm: 2.1.0
+    - language: ruby
+      rvm: 2.1.0
       env: TEST_LANGUAGE=ruby
-    - rvm: jruby-19mode
-      env: TEST_LANGUAGE=ruby
-    - perl: 5.14
+    - language: perl
+      perl: 5.14
       env: TEST_LANGUAGE=perl
-    - perl: 5.16
+    - language: perl
+      perl: 5.16
       env: TEST_LANGUAGE=perl
-    - perl: 5.18
+    - language: perl
+      perl: 5.18
       env: TEST_LANGUAGE=perl
 
 before_install:
