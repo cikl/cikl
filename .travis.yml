@@ -30,3 +30,5 @@ before_install:
 install: 
   - travis/$TEST_LANGUAGE/install.sh
 
+script:
+  - travis/$TEST_LANGUAGE/script.sh
