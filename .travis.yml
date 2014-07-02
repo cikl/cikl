@@ -27,22 +27,13 @@ matrix:
       env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
     - language: perl
       perl: 5.14
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
+      env: TEST_LANGUAGE=perl
     - language: perl
       perl: 5.16
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
+      env: TEST_LANGUAGE=perl
     - language: perl
       perl: 5.18
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
-    - language: perl
-      perl: 5.14
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
-    - language: perl
-      perl: 5.16
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
-    - language: perl
-      perl: 5.18
-      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
+      env: TEST_LANGUAGE=perl
 
 before_install:
   - sudo apt-get update -qq
