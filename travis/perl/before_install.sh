@@ -1,2 +1,1 @@
-#!/bin/bash -x
-echo "PERL BEFORE INSTALL!"
+#!/bin/bash -x -e

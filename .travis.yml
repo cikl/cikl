@@ -5,6 +5,7 @@ services: rabbitmq
 env:
     global:
       - JRUBY_OPTS=--debug
+      - PERL5LIB=$TRAVIS_BUILD_DIR/p5-Cikl/lib:$TRAVIS_BUILD_DIR/p5-Cikl-RabbitMQ/lib
 
 matrix:
   include:
