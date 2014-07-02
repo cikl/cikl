@@ -1,2 +1,2 @@
 #!/bin/bash -x
-echo "PERL BEFORE INSTALL!"
+source $TRAVIS_BUILD_DIR/travis/error_handler.sh

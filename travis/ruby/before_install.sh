@@ -1,3 +1,3 @@
 #!/bin/bash -x
-echo "RUBY BEFORE INSTALL!"
+source $TRAVIS_BUILD_DIR/travis/error_handler.sh
 sudo apt-get install libunbound2 unbound

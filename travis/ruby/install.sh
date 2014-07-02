@@ -1,3 +1,5 @@
 #!/bin/bash -x
-echo "RUBY INSTALL!"
-
+source $TRAVIS_BUILD_DIR/travis/error_handler.sh
+pushd $PROJECT_DIR
+bundle install --without development
+popd
