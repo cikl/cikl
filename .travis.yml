@@ -8,17 +8,41 @@ env:
 matrix:
   include:
     - language: ruby
-      env: TEST_LANGUAGE=ruby
-      rvm: 
-        - 1.9.3
-        - 2.0.0
-        - 2.1.0
+      rvm: 1.9.3
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+    - language: ruby
+      rvm: 2.0.0
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+    - language: ruby
+      rvm: 2.1.0
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+    - language: ruby
+      rvm: 1.9.3
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
+    - language: ruby
+      rvm: 2.0.0
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
+    - language: ruby
+      rvm: 2.1.0
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
     - language: perl
-      env: TEST_LANGUAGE=perl
-      perl: 
-        - 5.14
-        - 5.16
-        - 5.18
+      perl: 5.14
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
+    - language: perl
+      perl: 5.16
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
+    - language: perl
+      perl: 5.18
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl/
+    - language: perl
+      perl: 5.14
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
+    - language: perl
+      perl: 5.16
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
+    - language: perl
+      perl: 5.18
+      env: TEST_LANGUAGE=perl PROJECT_DIR=p5-Cikl-RabbitMQ/
 
 before_install:
   - sudo apt-get update -qq
