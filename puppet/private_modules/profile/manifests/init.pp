@@ -8,5 +8,5 @@ class profile::base {
   }
 
   # Ensure that apt-get update is run prior to installing any packages via apt
-  Exec['cikl::apt-update'] -> Package <| provider == 'apt' |>
+  Exec['cikl::apt-update'] -> Package <| |>
 }
