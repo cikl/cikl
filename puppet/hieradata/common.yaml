@@ -16,3 +16,31 @@ cikl::rabbitmq_username: guest
 cikl::rabbitmq_password: guest
 cikl::rabbitmq_vhost: '/'
 
+profile::api::root: "/opt/cikl_api"
+profile::api::user: "cikl_api"
+profile::api::group: "cikl_api"
+
+profile::elasticsearch::cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
+profile::elasticsearch::node_name: "%{::ipaddress}"
+
+profile::logstash::elasticsearch_cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
+profile::logstash::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
+profile::logstash::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
+profile::logstash::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
+profile::logstash::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
+profile::logstash::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
+
+profile::smrt::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
+profile::smrt::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
+profile::smrt::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
+profile::smrt::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
+profile::smrt::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
+
+profile::worker::root: "/opt/worker"
+profile::worker::user: "cikl_worker"
+profile::worker::group: "cikl_worker"
+profile::worker::rabbitmq_host: "%{hiera('cikl::rabbitmq_host')}"
+profile::worker::rabbitmq_port: "%{hiera('cikl::rabbitmq_port')}"
+profile::worker::rabbitmq_username: "%{hiera('cikl::rabbitmq_username')}"
+profile::worker::rabbitmq_password: "%{hiera('cikl::rabbitmq_password')}"
+profile::worker::rabbitmq_vhost: "%{hiera('cikl::rabbitmq_vhost')}"
