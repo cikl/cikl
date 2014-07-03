@@ -84,7 +84,6 @@ module Cikl
 
         def run_query(query)
           query_opts = {
-            index: 'cikl-*',
             size: params[:per_page],
             from: params[:start] - 1,
             fields: [],
@@ -93,7 +92,7 @@ module Cikl
           if sort_field = SORT_MAP[params[:order_by]]
             query_opts[:sort] = "#{sort_field}:#{params[:order]}"
           end
-          elasticsearch_client.search(query_opts)
+          search_events(query_opts)
         end
 
         

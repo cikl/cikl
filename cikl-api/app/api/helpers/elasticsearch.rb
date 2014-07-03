@@ -7,15 +7,11 @@ module Cikl
   module API
     module Helpers
       module Elasticsearch
-        def elasticsearch_client
-          return env['elasticsearch']
+        def search_events(opts = {})
+          opts[:index] = Cikl::Config.elasticsearch_index
+          opts[:type] = 'event'
+          Cikl::ESClient.search(opts)
         end
-
-        def with_elasticsearch
-          yield(env['elasticsearch'])
-        end
-
-
       end
     end
   end

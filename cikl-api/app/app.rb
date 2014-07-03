@@ -1,6 +1,4 @@
 require 'api/root'
-require 'middleware/elasticsearch'
-require 'middleware/mongo'
 require 'middleware/request_start_time'
 
 module Cikl
@@ -30,9 +28,6 @@ module Cikl
             run lambda {|*|}
           end
         end
-
-        use Cikl::Middleware::Elasticsearch, {}
-        use Cikl::Middleware::Mongo, {}
 
         run Cikl::App.new
       end.to_app
