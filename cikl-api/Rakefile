@@ -18,3 +18,25 @@ else
     spec.pattern = FileList['spec/**/*_spec.rb']
   end
 end
+
+namespace :mongo do
+  desc 'Dump all events in MonboDB to a YAML file'
+  task :dump2yaml do
+    $:.unshift 'config'
+    require 'environment'
+
+    env = ENV['RACK_ENV']
+    filename = "mongo_#{env}.#{Time.now.to_f}.yaml"
+    puts "Writing mongo data for RACK_ENV '#{env}' to #{filename}"
+    count = 0
+    File.open(filename, "w") do |fio|
+      Cikl::MongoEventCollection.find({}).each do |event|
+        count += 1
+        model = Cikl::Models::Event.from_hash(event)
+        hash = Cikl::API::Entities::Event.represent(model, :serializable => true)
+        fio.write YAML.dump(hash)
+      end
+    end
+    puts "Wrote #{count} events to #{filename}"
+  end
+end
