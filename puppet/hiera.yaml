@@ -4,9 +4,7 @@
 :yaml:
   :datadir: hieradata
 :hierarchy:
-  - "%{::hostname}"
-  - "%{::environment}/%{calling_class}"
+  - "hosts/%{::hostname}"
   - "%{::environment}"
-  - "profiles/%{calling_class}"
   - common
 
