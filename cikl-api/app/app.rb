@@ -6,8 +6,8 @@ module Cikl
     def initialize()
     end
 
-    def self.instance
-      @instance ||= Rack::Builder.new do
+    def self.build
+      Rack::Builder.new do
         use Cikl::Middleware::RequestStartTime
 
         use Rack::Cors do
