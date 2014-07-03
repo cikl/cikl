@@ -6,6 +6,7 @@ class profile::logstash (
   $rabbitmq_username = 'guest',
   $rabbitmq_password = 'guest',
   $rabbitmq_vhost = '/',
+  $elasticsearch_template_source_path
 ) 
 inherits profile::base {
   ensure_packages(['openjdk-7-jre-headless'])
@@ -24,7 +25,7 @@ inherits profile::base {
     owner   => "root",
     group   => "root",
     mode    => '0644',
-    content => template('profile/logstash/elasticsearch-cikl-template.json.erb'),
+    source =>  $elasticsearch_template_source_path,
     before  => Class['::logstash'],
     notify  => Class['::logstash::service']
   }

@@ -10,3 +10,5 @@ profile::smrt::local_p5_cikl: "%{::path_p5_cikl}"
 profile::smrt::local_p5_cikl_rabbitmq: "%{::path_p5_cikl_rabbitmq}"
 
 profile::worker::local_path: "%{::path_cikl_worker}"
+
+profile::logstash::elasticsearch_template_source_path: "%{::path_cikl_api}/config/elasticsearch_template.json"
