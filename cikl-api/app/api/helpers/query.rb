@@ -74,6 +74,7 @@ module Cikl
             backend_finish: backend_finish,
             elasticsearch_internal_query: es_response["took"].to_i
           )
+          status 200
           present response, with: Cikl::API::Entities::Response, timing: params[:timing]
         end
 
