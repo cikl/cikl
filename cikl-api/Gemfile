@@ -20,12 +20,14 @@ gem 'oj', :platforms => 'ruby'
 gem 'jrjackson', :platforms => 'jruby'
 
 group :development do
+  gem 'rake'
   platforms :jruby do
     gem 'warbler'
   end
 end
 
 group :test do
+  gem 'rake'
   gem 'rspec'
   gem 'rack-test'
   gem 'simplecov'
