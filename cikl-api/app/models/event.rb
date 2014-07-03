@@ -8,7 +8,7 @@ module Cikl
       attribute :detect_time, DateTime
       attribute :source, String
       attribute :event_id, String
-      attribute :observables, Cikl::Models::Observables, default: lambda { Cikl::Models::Observables.new }
+      attribute :observables, Cikl::Models::Observables, default: lambda { |i, o| Cikl::Models::Observables.new }
 
       class << self
         alias_method :from_hash, :new

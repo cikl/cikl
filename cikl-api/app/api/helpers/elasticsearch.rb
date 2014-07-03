@@ -8,7 +8,7 @@ module Cikl
     module Helpers
       module Elasticsearch
         def search_events(opts = {})
-          opts[:index] = Cikl::Config.elasticsearch_index
+          opts[:index] = Cikl::Config.elasticsearch_index_pattern
           opts[:type] = 'event'
           Cikl::ESClient.search(opts)
         end
