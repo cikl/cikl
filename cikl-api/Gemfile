@@ -20,7 +20,6 @@ gem 'oj', :platforms => 'ruby'
 gem 'jrjackson', :platforms => 'jruby'
 
 group :development do
-  gem 'rake'
   platforms :jruby do
     gem 'warbler'
   end
