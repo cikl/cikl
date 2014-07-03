@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :test
+ENV['RACK_ENV'] = 'test'
 
 require 'rspec/core/ruby_project'
 RSpec::Core::RubyProject.add_to_load_path('config')
@@ -12,6 +13,7 @@ SimpleCov.start do
   add_filter project_root.join('spec').to_s
   add_filter project_root.join('.gem').to_s
   add_group 'app', project_root.join('app').to_s
+  add_group 'lib', project_root.join('app').to_s
 end 
 require 'rack/test'
 
