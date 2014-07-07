@@ -5,7 +5,7 @@ module Cikl
     include Virtus.model #(strict: true)
 
     attribute :mongo_uri, String, default: 'mongodb://localhost/cikl'
-    attribute :elasticsearch_uri, String, default: 'http://localhost:9200'
+    attribute :elasticsearch_hosts, Array[String], default: ['http://localhost:9200']
     attribute :elasticsearch_index, String, default: 'cikl'
     attribute :elasticsearch_index_pattern, String, default: lambda { |i, o|
       "#{i.elasticsearch_index}-*"

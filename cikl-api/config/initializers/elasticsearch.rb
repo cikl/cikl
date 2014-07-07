@@ -1,5 +1,5 @@
 require 'elasticsearch'
 
 module Cikl
-  ESClient = ::Elasticsearch::Client.new(url: Cikl::Config.elasticsearch_uri, log: false)
+  ESClient = ::Elasticsearch::Client.new(hosts: Cikl::Config.elasticsearch_hosts, log: false)
 end
