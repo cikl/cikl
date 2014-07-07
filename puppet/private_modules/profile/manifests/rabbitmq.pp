@@ -3,6 +3,7 @@ class profile::rabbitmq inherits profile::base {
 
   apt::source { 'rabbitmq':
     key         => '056E8E56',
+    key_server  => 'hkp://keyserver.ubuntu.com:80',
     location    => "http://www.rabbitmq.com/debian/",
     release     => 'testing',
     repos       => 'main',
