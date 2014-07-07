@@ -11,6 +11,7 @@ development:
 test:
   <<: *default
   mongo_uri: mongodb://localhost/cikl_test
+  elasticsearch_uri: http://localhost:9250/
   elasticsearch_index: cikl_test
 
 production:

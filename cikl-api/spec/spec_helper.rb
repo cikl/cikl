@@ -32,12 +32,5 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:suite) do
-    CiklSpec::Fixtures.destroy!
-    CiklSpec::Fixtures.load!
-  end
-  config.after(:suite) do
-    CiklSpec::Fixtures.destroy!
-  end
 end
 

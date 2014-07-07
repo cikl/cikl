@@ -7,6 +7,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
+    ansi (1.4.3)
     axiom-types (0.1.1)
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
@@ -27,6 +28,9 @@ GEM
       elasticsearch-transport (= 1.0.4)
     elasticsearch-api (1.0.4)
       multi_json
+    elasticsearch-extensions (0.0.15)
+      ansi
+      ruby-prof
     elasticsearch-transport (1.0.4)
       faraday
       multi_json
@@ -91,6 +95,7 @@ GEM
     rspec-mocks (3.0.2)
       rspec-support (~> 3.0.0)
     rspec-support (3.0.2)
+    ruby-prof (0.15.1)
     simplecov (0.8.2)
       docile (~> 1.1.0)
       multi_json
@@ -114,6 +119,7 @@ DEPENDENCIES
   bson_ext
   connection_pool
   elasticsearch
+  elasticsearch-extensions
   grape
   grape-entity (>= 0.4.3)
   grape-swagger

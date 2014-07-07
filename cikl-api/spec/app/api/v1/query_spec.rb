@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'rack/test'
 
-describe 'Cikl API v1 :query endpoint' do
+describe 'Cikl API v1 :query endpoint', :integration do
   include Rack::Test::Methods
 
   def app
