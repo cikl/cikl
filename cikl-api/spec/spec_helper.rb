@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler'
+require 'rspec/its'
 require 'pathname'
 Bundler.setup :default, :test
 ENV['RACK_ENV'] = 'test'

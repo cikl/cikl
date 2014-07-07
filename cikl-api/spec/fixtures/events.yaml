@@ -1,447 +1,12 @@
 ---
-:import_time: '2014-07-03T19:51:31+00:00'
+:import_time: '2014-07-07T21:52:42+00:00'
 :detect_time: 
 :source: alexa.com
 :observables:
   :fqdn:
   - :fqdn: google.com
 ---
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: facebook.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: youtube.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: yahoo.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: baidu.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: wikipedia.org
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: qq.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: twitter.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: taobao.com
----
-:import_time: '2014-07-03T19:51:31+00:00'
-:detect_time: 
-:source: alexa.com
-:observables:
-  :fqdn:
-  - :fqdn: amazon.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 176.32.98.166
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 205.251.242.54
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 72.21.194.212
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 72.21.215.232
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: amazon-smtp.amazon.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.p31.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.p31.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: pdns1.ultradns.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.p31.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: pdns6.ultradns.co.uk
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: amazon.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.p31.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: facebook.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: a.ns.facebook.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: facebook.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: b.ns.facebook.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: a.ns.facebook.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 69.171.239.12
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: b.ns.facebook.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 69.171.255.12
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: facebook.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.252.110.27
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: facebook.com
-    :rr_class: IN
-    :rr_type: AAAA
-    :section: answer
-    :ipv6: 2a03:2880:2110:df07:face:b00c::1
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: facebook.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: msgin.t.facebook.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt1.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt2.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt4.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt3.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: alt1.aspmx.l.google.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 173.194.76.26
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: alt2.aspmx.l.google.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 74.125.131.26
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: aspmx.l.google.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 74.125.142.26
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: alt4.aspmx.l.google.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 74.125.136.26
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: alt3.aspmx.l.google.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 173.194.78.26
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: google.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -453,43 +18,43 @@
     :section: answer
     :fqdn: ns1.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns2.google.com
+    :name: google.com
     :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 216.239.34.10
+    :rr_type: NS
+    :section: answer
+    :fqdn: ns2.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns3.google.com
+    :name: google.com
     :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 216.239.36.10
+    :rr_type: NS
+    :section: answer
+    :fqdn: ns3.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns4.google.com
+    :name: google.com
     :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 216.239.38.10
+    :rr_type: NS
+    :section: answer
+    :fqdn: ns4.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -501,7 +66,43 @@
     :section: additional
     :ipv4: 216.239.32.10
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
+:detect_time: 
+:source: cikl-worker
+:observables:
+  :dns_answer:
+  - :resolver: cikl
+    :name: ns2.google.com
+    :rr_class: IN
+    :rr_type: A
+    :section: additional
+    :ipv4: 216.239.34.10
+---
+:import_time: '2014-07-07T21:52:43+00:00'
+:detect_time: 
+:source: cikl-worker
+:observables:
+  :dns_answer:
+  - :resolver: cikl
+    :name: ns3.google.com
+    :rr_class: IN
+    :rr_type: A
+    :section: additional
+    :ipv4: 216.239.36.10
+---
+:import_time: '2014-07-07T21:52:43+00:00'
+:detect_time: 
+:source: cikl-worker
+:observables:
+  :dns_answer:
+  - :resolver: cikl
+    :name: ns4.google.com
+    :rr_class: IN
+    :rr_type: A
+    :section: additional
+    :ipv4: 216.239.38.10
+---
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -511,9 +112,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.73
+    :ipv4: 173.194.46.6
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -523,9 +124,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.72
+    :ipv4: 173.194.46.3
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -535,9 +136,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.78
+    :ipv4: 173.194.46.7
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -547,9 +148,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.70
+    :ipv4: 173.194.46.5
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -559,9 +160,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.67
+    :ipv4: 173.194.46.14
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -571,9 +172,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.69
+    :ipv4: 173.194.46.0
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -583,9 +184,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.71
+    :ipv4: 173.194.46.9
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -595,9 +196,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.66
+    :ipv4: 173.194.46.8
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -607,9 +208,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.68
+    :ipv4: 173.194.46.2
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -619,9 +220,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.64
+    :ipv4: 173.194.46.4
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -631,9 +232,9 @@
     :rr_class: IN
     :rr_type: A
     :section: answer
-    :ipv4: 173.194.46.65
+    :ipv4: 173.194.46.1
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
@@ -643,1204 +244,124 @@
     :rr_class: IN
     :rr_type: AAAA
     :section: answer
-    :ipv6: 2607:f8b0:4009:805::1004
+    :ipv6: 2607:f8b0:4000:803::1003
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
+    :name: google.com
     :rr_class: IN
     :rr_type: MX
     :section: answer
     :fqdn: alt3.aspmx.l.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt1.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt4.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: alt2.aspmx.l.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.google.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: AAAA
-    :section: answer
-    :ipv6: 2607:f8b0:4009:805::1003
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.70
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.72
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.69
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.73
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.68
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.65
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.64
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.66
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.67
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.71
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: youtube.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 173.194.46.78
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 199.16.156.198
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 199.16.156.102
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 199.16.156.230
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 199.16.156.38
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: aspmx2.googlemail.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
+    :name: google.com
     :rr_class: IN
     :rr_type: MX
     :section: answer
     :fqdn: aspmx.l.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: aspmx3.googlemail.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
+    :name: google.com
     :rr_class: IN
     :rr_type: MX
     :section: answer
     :fqdn: alt1.aspmx.l.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: twitter.com
+    :name: google.com
     :rr_class: IN
     :rr_type: MX
     :section: answer
     :fqdn: alt2.aspmx.l.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.p34.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.p34.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.p34.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: twitter.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.p34.dynect.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
+    :name: google.com
     :rr_class: IN
     :rr_type: MX
     :section: answer
-    :fqdn: mta6.am0.yahoodns.net
+    :fqdn: alt4.aspmx.l.google.com
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mta7.am0.yahoodns.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mta5.am0.yahoodns.net
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 206.190.36.45
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 98.139.183.24
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 98.138.253.109
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns6.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns5.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: yahoo.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.yahoo.com
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns1.yahoo.com
+    :name: alt3.aspmx.l.google.com
     :rr_class: IN
     :rr_type: A
     :section: additional
-    :ipv4: 68.180.131.16
+    :ipv4: 173.194.75.26
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns2.yahoo.com
+    :name: aspmx.l.google.com
     :rr_class: IN
     :rr_type: A
     :section: additional
-    :ipv4: 68.142.255.16
+    :ipv4: 173.194.77.26
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns3.yahoo.com
+    :name: alt1.aspmx.l.google.com
     :rr_class: IN
     :rr_type: A
     :section: additional
-    :ipv4: 203.84.221.53
+    :ipv4: 74.125.137.26
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns4.yahoo.com
+    :name: alt2.aspmx.l.google.com
     :rr_class: IN
     :rr_type: A
     :section: additional
-    :ipv4: 98.138.11.157
+    :ipv4: 74.125.29.26
 ---
-:import_time: '2014-07-03T19:51:32+00:00'
+:import_time: '2014-07-07T21:52:43+00:00'
 :detect_time: 
 :source: cikl-worker
 :observables:
   :dns_answer:
   - :resolver: cikl
-    :name: ns5.yahoo.com
+    :name: alt4.aspmx.l.google.com
     :rr_class: IN
     :rr_type: A
     :section: additional
-    :ipv4: 119.160.247.124
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns6.yahoo.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 121.101.144.139
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns6.yahoo.com
-    :rr_class: IN
-    :rr_type: AAAA
-    :section: additional
-    :ipv6: 2406:2000:108:4::1006
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: AAAA
-    :section: answer
-    :ipv6: 2620:0:861:ed1a::1
----
-:import_time: '2014-07-03T19:51:32+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 208.80.154.224
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: polonium.wikimedia.org
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: lead.wikimedia.org
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.wikimedia.org
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns0.wikimedia.org
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: wikipedia.org
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.wikimedia.org
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 42.120.194.11
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns5.taobao.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.taobao.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns6.taobao.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns7.taobao.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns4.taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 42.120.250.211
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns4.taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 115.124.17.157
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns5.taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 110.75.38.29
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns6.taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 110.75.20.29
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns7.taobao.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 110.75.29.29
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: taobao.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx1.alibaba-inc.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: jpmx.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx50.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx.mailcdn.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx1.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: mx1.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 61.135.163.61
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: jpmx.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 61.208.132.13
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: mx50.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 220.181.50.208
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 123.125.114.144
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 220.181.111.85
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 220.181.111.86
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: dns.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns7.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: baidu.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.baidu.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: dns.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 202.108.22.220
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns2.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 61.135.165.235
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns3.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 220.181.37.10
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns4.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 220.181.38.10
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: ns7.baidu.com
-    :rr_class: IN
-    :rr_type: A
-    :section: additional
-    :ipv4: 119.75.219.82
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx3.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx2.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: MX
-    :section: answer
-    :fqdn: mx1.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns1.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns2.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns3.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: NS
-    :section: answer
-    :fqdn: ns4.qq.com
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 125.39.240.113
----
-:import_time: '2014-07-03T19:51:33+00:00'
-:detect_time: 
-:source: cikl-worker
-:observables:
-  :dns_answer:
-  - :resolver: cikl
-    :name: qq.com
-    :rr_class: IN
-    :rr_type: A
-    :section: answer
-    :ipv4: 163.177.65.160
+    :ipv4: 173.194.67.26

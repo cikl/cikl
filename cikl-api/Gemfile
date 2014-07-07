@@ -28,6 +28,7 @@ end
 group :test do
   gem 'rake'
   gem 'rspec'
+  gem 'rspec-its'
   gem 'rack-test'
   gem 'simplecov'
   gem 'elasticsearch-extensions'

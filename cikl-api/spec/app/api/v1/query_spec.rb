@@ -1,18 +1,12 @@
 require 'spec_helper'
-require 'rack/test'
 
-describe 'Cikl API v1 :query endpoint', :integration do
-  include Rack::Test::Methods
+describe 'Cikl API v1 query/fqdn endpoint', :integration, :app do
+  let(:query_proc) { 
+    lambda do |fqdn, opts = {} |
+      query_opts = opts.merge({ fqdn: fqdn })
+      post '/api/v1/query/fqdn', query_opts
+    end
+  }
 
-  def app
-    Cikl::App.build
-  end
-
-  it "returns stuff" do
-    post '/api/v1/query/fqdn', {
-      fqdn: 'google.com'
-    }
-    expect(last_response).to be_ok
-    expect(last_response.content_type).to eq('application/json')
-  end
+  it_should_behave_like 'an FQDN query endpoint'
 end

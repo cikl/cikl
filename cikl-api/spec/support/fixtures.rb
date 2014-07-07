@@ -22,8 +22,17 @@ module CiklSpec
           else 
             event_id = BSON::ObjectId.new
           end
+
+          event_hash['_id'] = event_id
           event_hash['event_id'] = event_id
-          Cikl::MongoEventCollection.insert(event_hash)
+          Cikl::MongoEventCollection.update(
+            {:_id => event_id },
+            event_hash,
+            {
+              :upsert => true
+            }
+          )
+
           event_hash['event_id'] = event_id.to_s
 
           Cikl::ESClient.index(
@@ -33,6 +42,8 @@ module CiklSpec
           )
         end
       end
+      # Wait for inserted data to refresh.
+      Cikl::ESClient.indices.refresh()
     end
 
     def self.destroy!
