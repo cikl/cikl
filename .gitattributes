@@ -1,0 +1,2 @@
+# Always use linefeeds, even on windows.
+* text eol=lf
