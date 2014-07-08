@@ -22,6 +22,7 @@ end
 
 require 'environment'
 
+require 'timecop'
 require 'rack/test'
 Dir["#{SPEC_ROOT.to_s}/support/**/*.rb"].sort.each { |f| require f }
 

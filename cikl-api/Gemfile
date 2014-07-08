@@ -33,4 +33,5 @@ group :test do
   gem 'simplecov'
   gem 'elasticsearch-extensions'
   gem 'fabrication'
+  gem 'timecop'
 end

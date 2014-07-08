@@ -106,6 +106,7 @@ GEM
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
     thread_safe (0.3.4)
+    timecop (0.7.1)
     typhoeus (0.6.8)
       ethon (>= 0.7.0)
     tzinfo (1.2.1)
@@ -140,6 +141,7 @@ DEPENDENCIES
   rspec
   rspec-its
   simplecov
+  timecop
   typhoeus
   virtus
   warbler

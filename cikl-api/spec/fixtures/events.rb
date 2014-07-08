@@ -4,12 +4,29 @@ module Fixtures
     @events ||= _build_events()
   end
 
+  def self.now
+    @now ||= DateTime.now
+  end
+
   private
 
   def self._build_events
     ret = []
     ret.concat(_fqdn_tests)
     ret.concat(_ipv4_tests)
+    ret.concat(_import_time_tests)
+    ret
+  end
+
+  def self._import_time_tests
+    ret = []
+    [60,31,30,29,7, 1,0].each do |days_ago|
+      event = Fabricate(:event, source: 'import_time_tests',
+                        import_time: self.now - days_ago)
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: "#{days_ago}.import-time-tests.com")
+      ret << event
+    end
+
     ret
   end
 
