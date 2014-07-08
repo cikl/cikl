@@ -133,4 +133,65 @@ describe 'Cikl API v1 query', :integration, :app do
     end
   end
 
+  describe "order_by: 'import_time'" do
+    let(:query) { 
+      {
+        fqdn: 'import-time-tests.com',
+        order_by: 'import_time'
+      } 
+    }
+
+    shared_examples_for "descending order" do
+      before :each do
+        Timecop.freeze(Fixtures.now) do
+          post '/api/v1/query/fqdn', query
+        end
+      end
+      specify 'the events should be in descending order' do
+        result = MultiJson.load(last_response.body)
+        expect(result["events"]).to match(
+          [
+            an_event_with_observable('fqdn', 'fqdn' => '0.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '1.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '7.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '29.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '30.import-time-tests.com')
+          ]
+        )
+      end
+    end
+
+    describe 'by default' do
+      it_should_behave_like "descending order"
+    end
+
+    describe "order: 'desc'" do
+      before :each do
+        query[:order] = 'desc'
+      end
+      it_should_behave_like "descending order"
+    end
+
+    describe "order: 'asc'" do
+      before :each do
+        query[:order] = 'asc'
+        Timecop.freeze(Fixtures.now) do
+          post '/api/v1/query/fqdn', query
+        end
+      end
+      specify 'the events should be in descending order' do
+        result = MultiJson.load(last_response.body)
+        expect(result["events"]).to match(
+          [
+            an_event_with_observable('fqdn', 'fqdn' => '30.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '29.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '7.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '1.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '0.import-time-tests.com')
+          ]
+        )
+      end
+    end
+  end
+
 end
