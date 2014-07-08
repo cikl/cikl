@@ -5,7 +5,7 @@ module Cikl
     module Entities
       module Observable
         class Ipv4 < Grape::Entity
-          expose :ipv4
+          expose :ipv4, format_with: lambda {|v| v.to_s unless v.nil? }
         end
       end
     end

@@ -10,8 +10,8 @@ module Cikl
           expose :rr_class
           expose :rr_type
           expose :section
-          expose :ipv4, unless: lambda { |e,o| e.ipv4.nil? }
-          expose :ipv6, unless: lambda { |e,o| e.ipv6.nil? }
+          expose :ipv4, unless: lambda { |e,o| e.ipv4.nil? }, format_with: lambda { |v| v.to_s }
+          expose :ipv6, unless: lambda { |e,o| e.ipv6.nil? }, format_with: lambda { |v| v.to_s }
           expose :fqdn, unless: lambda { |e,o| e.fqdn.nil? }
         end
       end

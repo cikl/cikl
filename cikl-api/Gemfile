@@ -32,4 +32,5 @@ group :test do
   gem 'rack-test'
   gem 'simplecov'
   gem 'elasticsearch-extensions'
+  gem 'fabrication'
 end

@@ -24,13 +24,13 @@ RSpec.shared_context "integration tests", :integration do
         end
 
         # Unnescessary?
-        CiklSpec::Fixtures.destroy!
-        CiklSpec::Fixtures.load!
+        Fixtures::Loader.destroy!
+        Fixtures::Loader.load!
       end
 
       config.after(:suite) do
         ## Unnescessary?
-        #CiklSpec::Fixtures.destroy!
+        #Fixtures::Loader.destroy!
       end
     end
     __integration_setup = true
