@@ -1,6 +1,5 @@
 require 'elasticsearch'
 require 'models/event'
-require 'yaml'
 require 'multi_json'
 require 'fixtures/events'
 
@@ -47,16 +46,6 @@ module Fixtures
       )
     end
 
-    def self.load_from_yaml
-      filename = File.expand_path('../../fixtures/events.yaml', __FILE__)
-      File.open(filename, 'r') do |fio|
-        YAML.load_documents(fio) do |event_hash|
-          model = Cikl::Models::Event.from_hash(event_hash)
-          insert_event(model)
-        end
-      end
-    end
-
     def self.load_fixtures
       Fixtures.events.each do |event|
         insert_event(event)
@@ -67,7 +56,6 @@ module Fixtures
 
     def self.load!
       install_es_template
-      #load_from_yaml
       load_fixtures
       # Refresh data
       Cikl::ESClient.indices.refresh()

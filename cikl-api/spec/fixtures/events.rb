@@ -15,31 +15,30 @@ module Fixtures
 
   def self._fqdn_tests_names(domain)
     [
-      domain,
-      "sub1.#{domain}",
-      "sub2.#{domain}",
-      "deep.sub1.#{domain}",
-      "deep.sub2.#{domain}"
+      "sub.#{domain}",
+      "deep1.sub.#{domain}",
+      "deep2.sub.#{domain}",
+      "really.really.really.deep.sub.#{domain}"
     ]
   end
 
   def self._fqdn_tests
     ret = []
-    _fqdn_tests_names('fqdn.fqdn_tests.com').each do |fqdn|
+    _fqdn_tests_names('fqdn.fqdn-tests.com').each do |fqdn|
       event = Fabricate(:event, source: 'fqdn_tests')
-      event.observables.dns_answer << Fabricate(:dns_answer_a, name: name)
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: fqdn)
       ret << event
     end
 
-    _fqdn_tests_names('dns_name.fqdn_tests.com').each do |fqdn|
+    _fqdn_tests_names('dns-name.fqdn-tests.com').each do |fqdn|
       event = Fabricate(:event, source: 'fqdn_tests')
       event.observables.dns_answer << Fabricate(:dns_answer_ns, name: fqdn)
       ret << event
     end
 
-    _fqdn_tests_names('dns_fqdn.fqdn_tests.com').each do |fqdn|
+    _fqdn_tests_names('dns-fqdn.fqdn-tests.com').each do |fqdn|
       event = Fabricate(:event, source: 'fqdn_tests')
-      event.observables.dns_answer << Fabricate(:dns_answer_ns, fqdn: "ns1.#{fqdn}")
+      event.observables.dns_answer << Fabricate(:dns_answer_ns, fqdn: fqdn)
       ret << event
     end
 
