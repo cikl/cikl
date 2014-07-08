@@ -1,7 +1,4 @@
 RSpec.shared_examples_for 'an IPv4 query endpoint' do
-  it "should match against ipv4.ipv4"
-  it "should match against dns_answer.ipv4"
-
   it_should_behave_like 'a proper API endpoint when matching 0 events' do
     before :each do
       query_proc.call('255.100.1.1')
