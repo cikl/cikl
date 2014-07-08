@@ -48,15 +48,26 @@ module Fixtures
 
   def self._ipv4_tests
     ret = []
-    IPAddr.new("100.1.1.0/24").to_range.each do |ip|
+
+    IPAddr.new("100.1.1.0/24").to_range.each do |ipv4_only_ip|
       event = Fabricate(:event, source: 'ipv4_tests')
-      event.observables.ipv4 << Fabricate(:ipv4, ipv4: ip)
+      event.observables.ipv4 << Fabricate(:ipv4, ipv4: ipv4_only_ip)
       ret << event
     end
 
-    IPAddr.new("101.1.1.0/24").to_range.each do |ip|
+    IPAddr.new("100.1.2.0/24").to_range.each do |shared_ip|
       event = Fabricate(:event, source: 'ipv4_tests')
-      event.observables.dns_answer << Fabricate(:dns_answer_a, ipv4: ip)
+      event.observables.ipv4 << Fabricate(:ipv4, ipv4: shared_ip)
+      ret << event
+
+      event = Fabricate(:event, source: 'ipv4_tests')
+      event.observables.dns_answer << Fabricate(:dns_answer_a, ipv4: shared_ip)
+      ret << event
+    end
+
+    IPAddr.new("100.1.3.0/24").to_range.each do |dns_ipv4_only_ip|
+      event = Fabricate(:event, source: 'ipv4_tests')
+      event.observables.dns_answer << Fabricate(:dns_answer_a, ipv4: dns_ipv4_only_ip)
       ret << event
     end
 

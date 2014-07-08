@@ -67,8 +67,8 @@ module Fixtures
 
     def self.load!
       install_es_template
-      load_from_yaml
-      #load_fixtures
+      #load_from_yaml
+      load_fixtures
       # Refresh data
       Cikl::ESClient.indices.refresh()
     end

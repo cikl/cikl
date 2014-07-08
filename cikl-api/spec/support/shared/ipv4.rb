@@ -1,31 +1,90 @@
-
 RSpec.shared_examples_for 'an IPv4 query endpoint' do
-  describe "a query for '173.194.67.26'" do
+  it "should match against ipv4.ipv4"
+  it "should match against dns_answer.ipv4"
+
+  it_should_behave_like 'a proper API endpoint when matching 0 events' do
     before :each do
-      query_proc.call('173.194.67.26', import_time_min: '2000-01-01T00:00:00+00:00' )
+      query_proc.call('255.100.1.1')
+    end
+  end
+
+  context "matching against ipv4.ipv4" do
+    before :each do
+      query_proc.call('100.1.1.1')
     end
 
-    describe 'the response' do
-      let(:response) { last_response }
-      it_should_behave_like 'a json API response'
-    end
-    describe 'the result hash' do
+    it_should_behave_like 'a proper API endpoint when matching 1 or more events'
+
+    describe 'the response data' do
       let(:result) { MultiJson.load(last_response.body) }
-      let(:events) { result['events'] }
-      subject { result } 
-      its(['total_events']) { is_expected.to eq(1) }
-      its(['count']) { is_expected.to eq(1) }
-      describe 'the events' do
-        it "should have 1 event with an dns_answer observable for '173.194.67.26'" do
-          dns_answers = events.find_all { |e| e['observables'].has_key?('dns_answer') && !(e['observables']['dns_answer'].empty?) }
-          expect(dns_answers.count).to eq(1)
-          dns_answer = dns_answers.first()['observables']['dns_answer'][0]
-          expect(dns_answer['ipv4']).to eq('173.194.67.26')
+      it "should only have the matching events" do
+        expect(result['total_events']).to eq(1)
+        expect(result['count']).to eq(1)
+        expect(result['events'].length).to eq(1)
+        event = result['events'].first
+
+        expect(event['observables']).to eq(
+          {
+            'ipv4' => [
+              {
+                'ipv4' => '100.1.1.1'
+              }
+            ]
+          }
+        )
+      end
+    end
+
+  end
+
+  context "matching against dns_answer.ipv4" do
+    before :each do
+      query_proc.call('100.1.3.1')
+    end
+
+    it_should_behave_like 'a proper API endpoint when matching 1 or more events'
+
+    describe 'the response data' do
+      let(:result) { MultiJson.load(last_response.body) }
+      it "should only have the matching events" do
+        expect(result['total_events']).to eq(1)
+        expect(result['count']).to eq(1)
+        expect(result['events'].length).to eq(1)
+        event = result['events'].first
+        expect(event['observables'].count).to eq(1)
+        dns_answer = event['observables']['dns_answer'][0]
+        expect(dns_answer['ipv4']).to eq('100.1.3.1')
+      end
+    end
+  end
+
+  context "matching against ipv4.ipv4 and dns_answer.ipv4 at the same time" do
+    before :each do
+      query_proc.call('100.1.2.1')
+    end
+
+    it_should_behave_like 'a proper API endpoint when matching 1 or more events'
+
+    describe 'the response data' do
+      let(:result) { MultiJson.load(last_response.body) }
+      it "should only have the matching events" do
+        expect(result['total_events']).to eq(2)
+        expect(result['count']).to eq(2)
+        expect(result['events'].length).to eq(2)
+        event1 = result['events'][0]
+        event2 = result['events'][1]
+        dns_answer = ipv4 = nil
+
+        if event1['observables']['dns_answer']
+          dns_answer = event1['observables']['dns_answer'][0]
+          ipv4 = event2['observables']['ipv4'][0]
+        else 
+          dns_answer = event2['observables']['dns_answer'][0]
+          ipv4 = event1['observables']['ipv4'][0]
         end
+        expect(dns_answer['ipv4']).to eq('100.1.2.1')
+        expect(ipv4['ipv4']).to eq('100.1.2.1')
       end
     end
   end
 end
-
-
-
