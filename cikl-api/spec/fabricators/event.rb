@@ -6,7 +6,7 @@ Fabricator(:event, class_name: Cikl::Models::Event) do
   source          "generated"
   import_time     { |attrs| DateTime.now }
   # 10 days ago
-  detect_time     { |attrs| DateTime.now - 10 }
+  #detect_time     { |attrs| DateTime.now - 10 }
   event_id        { |attrs| BSON::ObjectId.new().to_s }
   observables     fabricator: :observables
 end
