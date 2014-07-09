@@ -58,22 +58,39 @@ module Cikl
           expose :import_time_min,
             documentation: {
               type: DateTime,
-              default: lambda { DateTime.now - 30 } # 30 days ago 
+              default: lambda { DateTime.now - 30 }, # 30 days ago,
+              desc: "The earliest import_time to filter upon. Defaults to 30 days ago."
             }
 
           expose :import_time_max,
             documentation: {
-              type: DateTime
+              type: DateTime,
+              desc: "The latest import_time to filter upon."
             }
 
           expose :detect_time_min,
             documentation: {
-              type: DateTime
+              type: DateTime,
+              desc: "The earliest detect_time to filter upon."
             }
 
           expose :detect_time_max,
             documentation: {
-              type: DateTime
+              type: DateTime,
+              desc: "The latest detect_time to filter upon."
+            }
+
+          expose :ipv4,
+            documentation: {
+              type: String, 
+              regexp: /^(\d{1,3}\.){3}(\d{1,3})$/,
+              desc: "An IPv4 Address upon which to filter the query"
+            }
+
+          expose :fqdn,
+            documentation: {
+              type: String,
+              desc: "A fully-qualified domain name upon which to filter the query"
             }
         end
       end
