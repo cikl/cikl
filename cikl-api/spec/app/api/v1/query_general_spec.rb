@@ -90,6 +90,28 @@ describe 'Cikl API v1 query', :integration, :app do
           )
         )
       end
+
+      it "should return all events when set to nil" do
+        Timecop.freeze(Fixtures.now) do
+          post '/api/v1/query', {
+            fqdn: 'import-time-tests.com', 
+            import_time_min: nil
+          }
+        end
+        result = MultiJson.load(last_response.body)
+
+        expect(result["events"]).to match(
+          a_collection_containing_exactly(
+            an_event_with_observable('fqdn', 'fqdn' => '0.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '1.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '7.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '29.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '30.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '31.import-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '60.import-time-tests.com')
+          )
+        )
+      end
     end
 
     describe :import_time_max do
