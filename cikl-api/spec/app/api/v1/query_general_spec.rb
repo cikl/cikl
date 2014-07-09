@@ -179,7 +179,7 @@ describe 'Cikl API v1 query', :integration, :app do
           post '/api/v1/query/fqdn', query
         end
       end
-      specify 'the events should be in descending order' do
+      specify 'the events should be in ascending order' do
         result = MultiJson.load(last_response.body)
         expect(result["events"]).to match(
           [
@@ -192,147 +192,214 @@ describe 'Cikl API v1 query', :integration, :app do
         )
       end
     end
+  end
 
-    describe "not specifying detect_time_min or detect_time_max" do
-      it "should include any event with or without a detect_time" do
+  describe "order_by: 'detect_time'" do
+    let(:query) { 
+      {
+        fqdn: 'detect-time-tests.com',
+        order_by: 'detect_time'
+      } 
+    }
+
+    shared_examples_for "descending order" do
+      before :each do
         Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com'
-          }
+          post '/api/v1/query/fqdn', query
         end
+      end
+      specify 'the events should be in descending order, but with null entries after everything else' do
         result = MultiJson.load(last_response.body)
-
         expect(result["events"]).to match(
-          a_collection_containing_exactly(
-            an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
+          [
             an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
-          )
+            an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com')
+          ]
         )
       end
     end
 
-    describe :detect_time_max do
-      it "should include events with an detect_time less than or equal to the time specified" do
-        seven_days_ago = Fixtures.now - 7
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_max: seven_days_ago.to_s
-          }
-        end
-        result = MultiJson.load(last_response.body)
+    describe 'by default' do
+      it_should_behave_like "descending order"
+    end
 
+    describe "order: 'desc'" do
+      before :each do
+        query[:order] = 'desc'
+      end
+      it_should_behave_like "descending order"
+    end
+
+    describe "order: 'asc'" do
+      before :each do
+        query[:order] = 'asc'
+        Timecop.freeze(Fixtures.now) do
+          post '/api/v1/query/fqdn', query
+        end
+      end
+      specify 'the events should be in ascending order, but with null entries after everything else' do
+        result = MultiJson.load(last_response.body)
         expect(result["events"]).to match(
-          a_collection_containing_exactly(
+          [
+            an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
             an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
-          )
-        )
-      end
-
-      it "should not include any events with an null detect_time when detect_time_max is set" do
-        seven_days_ago = Fixtures.now - 7
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_max: seven_days_ago.to_s
-          }
-        end
-        result = MultiJson.load(last_response.body)
-
-        expect(result["events"]).not_to match(
-          a_collection_including(
-            an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
-          )
-        )
-      end
-
-      it "should have 1 second precision" do
-        one_second = 1.0 / (24 * 60 * 60)
-        seven_days_ago = (Fixtures.now - 7)
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_max: (seven_days_ago - one_second)
-          }
-        end
-        result = MultiJson.load(last_response.body)
-
-        expect(result["events"]).to match(
-          a_collection_containing_exactly(
-            an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
-          )
+            an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
+            an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com')
+          ]
         )
       end
     end
+  end
 
-    describe :detect_time_min do
-      it "should include events with an detect_time greater than or equal to the time specified" do
-        seven_days_ago = Fixtures.now - 7
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_min: seven_days_ago.to_s
-          }
-        end
-        result = MultiJson.load(last_response.body)
-
-        expect(result["events"]).to match(
-          a_collection_containing_exactly(
-            an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com')
-          )
-        )
+  describe "not specifying detect_time_min or detect_time_max" do
+    it "should include any event with or without a detect_time" do
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com'
+        }
       end
+      result = MultiJson.load(last_response.body)
 
-      it "should not include any events with an null detect_time when detect_time_min is set" do
-        seven_days_ago = Fixtures.now - 7
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_min: seven_days_ago.to_s
-          }
-        end
-        result = MultiJson.load(last_response.body)
-
-        expect(result["events"]).not_to match(
-          a_collection_including(
-            an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
-          )
+      expect(result["events"]).to match(
+        a_collection_containing_exactly(
+          an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
         )
+      )
+    end
+  end
+
+  describe :detect_time_max do
+    it "should include events with an detect_time less than or equal to the time specified" do
+      seven_days_ago = Fixtures.now - 7
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_max: seven_days_ago.to_s
+        }
       end
+      result = MultiJson.load(last_response.body)
 
-      it "should have 1 second precision" do
-        one_second = 1.0 / (24 * 60 * 60)
-        seven_days_ago = (Fixtures.now - 7)
-        Timecop.freeze(Fixtures.now) do
-          post '/api/v1/query/fqdn', {
-            fqdn: 'detect-time-tests.com', 
-            detect_time_min: (seven_days_ago + one_second)
-          }
-        end
-        result = MultiJson.load(last_response.body)
-
-        expect(result["events"]).to match(
-          a_collection_containing_exactly(
-            an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
-            an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com')
-          )
+      expect(result["events"]).to match(
+        a_collection_containing_exactly(
+          an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
         )
+      )
+    end
+
+    it "should not include any events with an null detect_time when detect_time_max is set" do
+      seven_days_ago = Fixtures.now - 7
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_max: seven_days_ago.to_s
+        }
       end
+      result = MultiJson.load(last_response.body)
+
+      expect(result["events"]).not_to match(
+        a_collection_including(
+          an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
+        )
+      )
+    end
+
+    it "should have 1 second precision" do
+      one_second = 1.0 / (24 * 60 * 60)
+      seven_days_ago = (Fixtures.now - 7)
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_max: (seven_days_ago - one_second)
+        }
+      end
+      result = MultiJson.load(last_response.body)
+
+      expect(result["events"]).to match(
+        a_collection_containing_exactly(
+          an_event_with_observable('fqdn', 'fqdn' => '29.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '30.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '31.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '60.detect-time-tests.com')
+        )
+      )
+    end
+  end
+
+  describe :detect_time_min do
+    it "should include events with an detect_time greater than or equal to the time specified" do
+      seven_days_ago = Fixtures.now - 7
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_min: seven_days_ago.to_s
+        }
+      end
+      result = MultiJson.load(last_response.body)
+
+      expect(result["events"]).to match(
+        a_collection_containing_exactly(
+          an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '7.detect-time-tests.com')
+        )
+      )
+    end
+
+    it "should not include any events with an null detect_time when detect_time_min is set" do
+      seven_days_ago = Fixtures.now - 7
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_min: seven_days_ago.to_s
+        }
+      end
+      result = MultiJson.load(last_response.body)
+
+      expect(result["events"]).not_to match(
+        a_collection_including(
+          an_event_with_observable('fqdn', 'fqdn' => 'nil.detect-time-tests.com'),
+        )
+      )
+    end
+
+    it "should have 1 second precision" do
+      one_second = 1.0 / (24 * 60 * 60)
+      seven_days_ago = (Fixtures.now - 7)
+      Timecop.freeze(Fixtures.now) do
+        post '/api/v1/query/fqdn', {
+          fqdn: 'detect-time-tests.com', 
+          detect_time_min: (seven_days_ago + one_second)
+        }
+      end
+      result = MultiJson.load(last_response.body)
+
+      expect(result["events"]).to match(
+        a_collection_containing_exactly(
+          an_event_with_observable('fqdn', 'fqdn' => '0.detect-time-tests.com'),
+          an_event_with_observable('fqdn', 'fqdn' => '1.detect-time-tests.com')
+        )
+      )
     end
   end
 end
