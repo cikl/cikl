@@ -6,8 +6,6 @@ default: &default
 
 development:
   <<: *default
-  mongo_uri: mongodb://localhost/cikl_dev
-  elasticsearch_index: cikl_dev
 
 test:
   <<: *default
