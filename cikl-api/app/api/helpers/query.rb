@@ -12,10 +12,25 @@ module Cikl
     module Helpers
       module Query
         def es_timestamp_query(z)
-          z.range do |z|
-            z.set!("import_time") do |z|
-              z.gte params.import_time_min.iso8601
-              z.lte params.import_time_max.iso8601 if params.import_time_max?
+          if params.import_time_min? or params.import_time_max?
+            z.child! do
+              z.range do |z|
+                z.set!("import_time") do |z|
+                  z.gte params.import_time_min.iso8601 if params.import_time_min?
+                  z.lte params.import_time_max.iso8601 if params.import_time_max?
+                end
+              end
+            end
+          end
+
+          if params.detect_time_min? or params.detect_time_max?
+            z.child! do
+              z.range do |z|
+                z.set!("detect_time") do |z|
+                  z.gte params.detect_time_min.iso8601 if params.detect_time_min?
+                  z.lte params.detect_time_max.iso8601 if params.detect_time_max?
+                end
+              end
             end
           end
         end
@@ -45,9 +60,7 @@ module Cikl
                     end
                   end
 
-                  z.child! do
-                    es_timestamp_query(z)
-                  end
+                  es_timestamp_query(z)
                 end # must
               end
             end

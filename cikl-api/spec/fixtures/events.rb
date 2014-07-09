@@ -15,6 +15,7 @@ module Fixtures
     ret.concat(_fqdn_tests)
     ret.concat(_ipv4_tests)
     ret.concat(_import_time_tests)
+    ret.concat(_detect_time_tests)
     ret
   end
 
@@ -29,6 +30,22 @@ module Fixtures
 
     ret
   end
+
+  def self._detect_time_tests
+    ret = []
+    [60,31,30,29,7, 1,0].each do |days_ago|
+      event = Fabricate(:event, source: 'detect_time_tests',
+                        detect_time: self.now - days_ago)
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: "#{days_ago}.detect-time-tests.com")
+      ret << event
+    end
+    event = Fabricate(:event, source: 'detect_time_tests')
+    event.observables.fqdn << Fabricate(:fqdn, fqdn: "nil.detect-time-tests.com")
+    ret << event
+
+    ret
+  end
+
 
   def self._fqdn_tests_names(domain)
     [
