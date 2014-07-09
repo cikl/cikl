@@ -1,0 +1,18 @@
+default: &default
+  mongo_uri: mongodb://localhost/cikl
+  elasticsearch_hosts: 
+    - http://localhost:9200/
+  elasticsearch_index: cikl
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  mongo_uri: mongodb://localhost/cikl_test
+  elasticsearch_hosts: 
+    - http://localhost:9250/
+  elasticsearch_index: cikl_test
+
+production:
+  <<: *default

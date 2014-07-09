@@ -15,6 +15,9 @@ module Cikl
       attribute :import_time_max, DateTime
       attribute :detect_time_min, DateTime
       attribute :detect_time_max, DateTime
+
+      attribute :ipv4, String
+      attribute :fqdn, String
     end
   end
 end
