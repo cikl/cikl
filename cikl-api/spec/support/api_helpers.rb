@@ -12,3 +12,7 @@ module APIHelpers
     )
   end
 end
+
+RSpec.configure do |c|
+  c.include APIHelpers, :app
+end

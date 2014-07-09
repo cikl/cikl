@@ -11,72 +11,90 @@ module Cikl
   module API
     module Helpers
       module Query
-        def es_timestamp_query(z)
-          if params.import_time_min? or params.import_time_max?
-            z.child! do
-              z.range do |z|
-                z.set!("import_time") do |z|
-                  z.gte params.import_time_min.iso8601 if params.import_time_min?
-                  z.lte params.import_time_max.iso8601 if params.import_time_max?
+        IPV4_QUERY = [
+          ["observables.ipv4", ["observables.ipv4.ipv4"]],
+          ["observables.dns_answer", ["observables.dns_answer.ipv4"]],
+        ]
+        FQDN_QUERY = [
+          ["observables.fqdn", ["observables.fqdn.fqdn"]],
+          ["observables.dns_answer", ["observables.dns_answer.name", "observables.dns_answer.fqdn"]],
+        ]
+
+        def es_time_range(field, min, max)
+          range = {}
+          range[:gte] = min.iso8601 unless min.nil? 
+          range[:lte] = max.iso8601 unless max.nil? 
+          return nil if range.empty?
+          return { range: { field => range } }
+        end
+
+        def es_nested_any(path, query, fields = [])
+          { 
+            nested: {
+              path: path,
+              query: {
+                multi_match: {
+                  query: query,
+                  fields: fields
+                }
+              }
+            }
+          }
+        end
+
+        def run_standard_query(query_params)
+          musts = []
+          shoulds = []
+
+          if q = es_time_range(:import_time, query_params.import_time_min, query_params.import_time_max)
+            musts << q
+          end
+
+          if q = es_time_range(:detect_time, query_params.detect_time_min, query_params.detect_time_max)
+            musts << q
+          end
+
+          if query_params.ipv4?
+            IPV4_QUERY.each do |path, fields|
+              shoulds << es_nested_any(path, query_params.ipv4, fields)
+            end
+          end
+
+          if query_params.fqdn?
+            FQDN_QUERY.each do |path, fields|
+              shoulds << es_nested_any(path, query_params.fqdn, fields)
+            end
+          end
+
+          if musts.empty? && shoulds.empty?
+            musts << { match_all: {} }
+          end
+
+          query = Jbuilder.encode do |json|
+            json.query do
+              json.bool do
+                json.must musts unless musts.empty?
+
+                unless shoulds.empty?
+                  json.minimum_should_match 1
+                  json.should shoulds
                 end
+
               end
             end
           end
 
-          if params.detect_time_min? or params.detect_time_max?
-            z.child! do
-              z.range do |z|
-                z.set!("detect_time") do |z|
-                  z.gte params.detect_time_min.iso8601 if params.detect_time_min?
-                  z.lte params.detect_time_max.iso8601 if params.detect_time_max?
-                end
-              end
-            end
-          end
+          run_query_and_return(query, query_params)
         end
 
-        def es_nested_any(z, path, query, fields = [])
-          z.nested do 
-            z.path path
-            z.query do
-              z.multi_match do |z|
-                z.query query
-                z.fields fields 
-              end # multi_match
-            end
-          end
-        end
-
-        def run_standard_query
-          query = Jbuilder.encode do |z|
-            z.query do
-              z.bool do
-
-                z.must do
-                  # Allow for caller to customize query.
-                  z.child! do
-                    z.bool do
-                      yield(z)
-                    end
-                  end
-
-                  es_timestamp_query(z)
-                end # must
-              end
-            end
-          end
-
-          run_query_and_return(query)
-        end
-
-        def run_query_and_return(query)
+        def run_query_and_return(query, query_params)
           orig_start = get_request_start_time()
           query_start = es_query_start = Time.now
-          es_response = run_query(query)
+          es_response = run_query(query, query_params)
           es_query_finish = Time.now
 
           backend_start = Time.now
-          response = build_response(es_response)
+          response = build_response(es_response, query_params)
           backend_finish = Time.now
           response.timing = Cikl::Models::Timing.new(
             request_start: orig_start,
@@ -88,7 +106,7 @@ module Cikl
             elasticsearch_internal_query: es_response["took"].to_i
           )
           status 200
-          present response, with: Cikl::API::Entities::Response, timing: params[:timing]
+          present response, with: Cikl::API::Entities::Response, timing: query_params[:timing]
         end
 
         SORT_MAP = {
@@ -96,24 +114,24 @@ module Cikl
           :import_time => :import_time,
         }
 
-        def run_query(query)
+        def run_query(query, query_params)
           query_opts = {
-            size: params[:per_page],
-            from: params[:start] - 1,
+            size: query_params[:per_page],
+            from: query_params[:start] - 1,
             fields: [],
             body: query
           }
-          if sort_field = SORT_MAP[params[:order_by]]
-            query_opts[:sort] = "#{sort_field}:#{params[:order]}"
+          if sort_field = SORT_MAP[query_params[:order_by]]
+            query_opts[:sort] = "#{sort_field}:#{query_params[:order]}"
           end
           search_events(query_opts)
         end
 
         
-        def build_response(es_response)
+        def build_response(es_response, query_params)
           return Cikl::Models::Response.new(
             total_events: es_response["hits"]["total"],
-            query: params,
+            query: query_params,
             events: hits_to_events(es_response["hits"]["hits"]).to_a
           )
         end

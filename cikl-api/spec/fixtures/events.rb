@@ -4,6 +4,10 @@ module Fixtures
     @events ||= _build_events()
   end
 
+  def self.event_count
+    self.events.count
+  end
+
   def self.now
     @now ||= DateTime.now
   end
