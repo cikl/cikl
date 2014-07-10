@@ -20,6 +20,9 @@ sub test_required_args : Test(3) {
 
   my %working_args = (
     assessment => "malware",
+    source     => 'cikl_smrt',
+    feed_name  => 'test_feed',
+    feed_provider => 'test_provider'
   );
 
   lives_and { isa_ok(Cikl::Models::Event->new(%working_args), "Cikl::Models::Event") };
@@ -37,17 +40,23 @@ sub test_no_observables : Test(2) {
   my $now = time();
   my $event = Cikl::Models::Event->new({
       assessment => $assessment,
-      import_time => $now,
-      detect_time => $now
+      import_time => 1405018319,
+      detect_time => 1405018318,
+      source     => 'cikl_smrt',
+      feed_name  => 'test_feed',
+      feed_provider => 'test_provider'
     });
   isa_ok($event, "Cikl::Models::Event", "it's an event");
 
   cmp_deeply($event->to_hash(), 
     {
       assessment => $assessment,
-      import_time => $now,
-      detect_time => $now,
-      observables => {}
+      import_time => '2014-07-10T18:51:59+00:00',
+      detect_time => '2014-07-10T18:51:58+00:00',
+      observables => {},
+      source     => 'cikl_smrt',
+      feed_name  => 'test_feed',
+      feed_provider => 'test_provider'
     },
     "to_hash generates the right data");
 }
@@ -59,8 +68,10 @@ sub test_with_observables : Test(2) {
   my $now = time();
   my $event = Cikl::Models::Event->new({
       assessment => $assessment,
-      import_time => $now,
-      detect_time => $now
+      import_time => 1405018319,
+      source     => 'cikl_smrt',
+      feed_name  => 'test_feed',
+      feed_provider => 'test_provider'
     });
   isa_ok($event, "Cikl::Models::Event", "it's an event");
 
@@ -74,8 +85,10 @@ sub test_with_observables : Test(2) {
   cmp_deeply($event->to_hash(), 
     {
       assessment => $assessment,
-      import_time => $now,
-      detect_time => $now,
+      import_time => '2014-07-10T18:51:59+00:00',
+      source     => 'cikl_smrt',
+      feed_name  => 'test_feed',
+      feed_provider => 'test_provider',
       observables => {
         ipv4 => [
           {

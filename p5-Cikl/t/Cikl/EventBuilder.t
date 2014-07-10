@@ -27,12 +27,15 @@ sub test_normalize_empty_hash : Test(4) {
   cmp_deeply($r->{observables}, [], "it has an empty 'observables' array");
 }
 
-sub test_build_basic : Test(6) {
+sub test_build_basic : Test(9) {
   my $self = shift;
   my $builder = $self->{builder};
 
   my $data = {
-    assessment => 'whitelist'
+    assessment => 'whitelist',
+    source     => 'cikl_smrt',
+    feed_name  => 'test_feed',
+    feed_provider => 'test_provider'
   };
   my $before = time();
   my $e = $builder->build_event($data);
@@ -42,16 +45,24 @@ sub test_build_basic : Test(6) {
   cmp_ok($e->import_time(), '<=', $after, "it's import_time is correct");
   is($e->detect_time(), undef, "it an undefined 'detect_time'");
   is($e->assessment(), "whitelist", "it has the provided assessment");
+
+  is($e->source(), "cikl_smrt", "it has the proper source");
+  is($e->feed_name(), "test_feed", "it has the proper feed_name");
+  is($e->feed_provider(), "test_provider", "it has the proper feed_provider");
+
   ok($e->observables()->is_empty(), "it has no observables");
 }
 
-sub test_build_basic_ipv4 : Test(8) {
+sub test_build_basic_ipv4 : Test(11) {
   my $self = shift;
   my $builder = $self->{builder};
 
   my $data = {
     assessment => 'whitelist',
-    ipv4 => '1.2.3.4'
+    ipv4 => '1.2.3.4',
+    source     => 'cikl_smrt',
+    feed_name  => 'test_feed',
+    feed_provider => 'test_provider'
   };
 
   my $before = time();
@@ -63,6 +74,10 @@ sub test_build_basic_ipv4 : Test(8) {
   is($e->detect_time(), undef, "it has a default 'detect_time'");
   is($e->assessment(), "whitelist", "it has the provided assessment");
   is($e->observables()->count(), 1, "it has one observable");
+  is($e->source(), "cikl_smrt", "it has the proper source");
+  is($e->feed_name(), "test_feed", "it has the proper feed_name");
+  is($e->feed_provider(), "test_provider", "it has the proper feed_provider");
+
 
   isa_ok($e->observables()->ipv4()->[0], 'Cikl::Models::Observables::ipv4', "the address is an ipv4");
   is($e->observables()->ipv4()->[0]->value(), '1.2.3.4', "the address 1.2.3.4");

@@ -12,6 +12,8 @@ module Cikl
           expose :detect_time
         end
         expose :source
+        expose :feed_name
+        expose :feed_provider
         expose :observables, using: Cikl::API::Entities::Observables
       end
     end

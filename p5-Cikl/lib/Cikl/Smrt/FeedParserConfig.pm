@@ -97,7 +97,9 @@ sub new {
 
   bless($self,$class);
 
-  $config_data->{source} = $self->{source};
+  $config_data->{source} = 'cikl_smrt';
+  $config_data->{feed_provider} = $self->{source};
+  $config_data->{feed_name} = $feed_name;
   # The remaining fields will act as defaults for events, when they are created.
   $self->{event_fields} = $config_data;
 

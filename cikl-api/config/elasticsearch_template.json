@@ -32,6 +32,14 @@
           "analyzer" : "lowercase_keyword",
           "type" : "string"
         },
+        "feed_provider" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "feed_name" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
         "restriction" : {
           "analyzer" : "lowercase_keyword",
           "type" : "string"

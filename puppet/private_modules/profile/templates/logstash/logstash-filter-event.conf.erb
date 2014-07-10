@@ -2,14 +2,14 @@ filter {
   if ([type] == 'event') {
     if ([detect_time]) {
       date {
-        match => [ "detect_time", "UNIX", "ISO8601" ]
+        match => [ "detect_time", "ISO8601" ]
         target => "detect_time"
         timezone => "UTC"
       }
     }
     if ([import_time]) {
       date {
-        match => [ "import_time", "UNIX", "ISO8601" ]
+        match => [ "import_time", "ISO8601" ]
         target => "import_time"
         timezone => "UTC"
       }

@@ -9,6 +9,7 @@ use Cikl::DataTypes::PortList;
 use Cikl::Models::Observable;
 use Cikl::Models::Observables;
 use Cikl::ObservableBuilder qw/create_observable/;
+use POSIX qw(strftime);
 use namespace::autoclean;
 
 has 'assessment' => (
@@ -18,7 +19,20 @@ has 'assessment' => (
   coerce => 1
 );
 
-has 'source' => (is => 'rw');
+has 'source' => (
+  is => 'rw',
+  required => 1
+);
+
+has 'feed_provider' => (
+  is => 'rw',
+  required => 1
+);
+
+has 'feed_name' => (
+  is => 'rw',
+  required => 1
+);
 
 has 'observables' => (
   is => 'ro',
@@ -59,8 +73,18 @@ has 'restriction' => (is => 'rw');
 has 'cc' => (is => 'rw');
 has 'rir' => (is => 'rw');
 
+use constant ISO8601_FORMAT => "%Y-%m-%dT%H:%M:%S+00:00";
 sub to_hash {
-  my $ret = { %{$_[0]} };
+  my $self = shift;
+  my $ret = { %{$self} };
+  my $import_time = $self->import_time();
+  my $detect_time = $self->detect_time();
+  if (defined($import_time)) {
+    $ret->{import_time} = strftime(ISO8601_FORMAT, gmtime($import_time));
+  }
+  if (defined($detect_time)) {
+    $ret->{detect_time} = strftime(ISO8601_FORMAT, gmtime($detect_time));
+  }
   $ret->{observables} = $ret->{observables}->to_hash();
   return $ret;
 }

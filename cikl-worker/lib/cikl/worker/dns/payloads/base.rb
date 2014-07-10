@@ -44,6 +44,8 @@ module Cikl
           # @return [Hash] a hash version of the payload.
           def to_hash
             ret = super()
+            ret[:feed_provider] = 'cikl-dns-worker'
+            ret[:feed_name] = 'dns-resolver'
             o = ret[:observables] ||= {}
             a = o[:dns_answer] ||= []
             a << self.dns_answer()

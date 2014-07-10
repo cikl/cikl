@@ -200,8 +200,8 @@ describe Cikl::Worker::AMQP do
           expected_payload = {
             "source" => "cikl-worker",
             "value" => "processed: " + payload,
-            "@timestamp" => kind_of(String)
-
+            "import_time" => kind_of(String),
+            "detect_time" => kind_of(String)
           }
           expected_payloads << expected_payload
         end
@@ -227,7 +227,8 @@ describe Cikl::Worker::AMQP do
           expected_payload = {
             "source" => "cikl-worker",
             "value" => "processed: " + payload,
-            "@timestamp" => kind_of(String)
+            "import_time" => kind_of(String),
+            "detect_time" => kind_of(String)
           }
           expected_payloads << expected_payload
         end
