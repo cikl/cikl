@@ -3,6 +3,7 @@ require 'grape-entity'
 require 'api/entities/query_params'
 require 'api/entities/event'
 require 'api/entities/timing'
+require 'api/entities/facets'
 
 module Cikl
   module API
@@ -41,6 +42,13 @@ module Cikl
           documentation:
           {
             desc: 'Timing data for the query and rendering of results'
+          }
+
+        expose :facets,
+          using: Cikl::API::Entities::Facets,
+          documentation: 
+          {
+            desc: 'Faceting information'
           }
 
       end

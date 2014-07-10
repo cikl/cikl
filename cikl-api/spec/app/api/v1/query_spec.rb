@@ -447,4 +447,193 @@ describe 'Cikl API v1 query endpoint', :integration, :app do
       )
     end
   end
+
+  describe :facets do
+    describe :min_detect_time do
+      it "should contain the earliest detect_time" do
+        post '/api/v1/query', { fqdn: 'detect-time-tests.com', }
+        result = MultiJson.load(last_response.body)
+        min_detect_time = result["facets"]["min_detect_time"]
+        expect(min_detect_time).to eq((Fixtures.now - 60).iso8601)
+      end
+
+      it "should be null if there are no detect times" do
+        post '/api/v1/query', { fqdn: 'import-time-tests.com', }
+        result = MultiJson.load(last_response.body)
+        expect(result["facets"]["min_detect_time"]).to be_nil
+      end
+
+      it "should be null if there are no events" do
+        post '/api/v1/query', { fqdn: 'non-existent-domain.com' }
+        result = MultiJson.load(last_response.body)
+        expect(result["count"]).to eq(0)
+        min_detect_time = result["facets"]["min_detect_time"]
+        expect(min_detect_time).to be_nil
+      end
+    end
+
+    describe :max_detect_time do
+      it "should contain the latest detect_time" do
+        post '/api/v1/query', { fqdn: 'detect-time-tests.com', }
+        result = MultiJson.load(last_response.body)
+        max_detect_time = result["facets"]["max_detect_time"]
+        expect(max_detect_time).to eq(Fixtures.now.iso8601)
+      end
+
+      it "should be null if there are no events" do
+        post '/api/v1/query', { fqdn: 'non-existent-domain.com', }
+        result = MultiJson.load(last_response.body)
+        expect(result["count"]).to eq(0)
+        max_detect_time = result["facets"]["max_detect_time"]
+        expect(max_detect_time).to be_nil
+      end
+    end
+
+    describe :min_import_time do
+      it "should contain the earliest import_time" do
+        Timecop.freeze(Fixtures.now) do
+          post '/api/v1/query', { fqdn: 'import-time-tests.com', }
+        end
+        result = MultiJson.load(last_response.body)
+        min_import_time = result["facets"]["min_import_time"]
+        expect(min_import_time).to eq((Fixtures.now - 30).iso8601)
+      end
+
+      it "should be null if there are no events" do
+        post '/api/v1/query', { fqdn: 'non-existent-domain.com', }
+        result = MultiJson.load(last_response.body)
+        expect(result["count"]).to eq(0)
+        min_import_time = result["facets"]["min_import_time"]
+        expect(min_import_time).to be_nil
+      end
+    end
+
+    describe :max_import_time do
+      it "should contain the latest import_time" do
+        post '/api/v1/query', { fqdn: 'import-time-tests.com', }
+        result = MultiJson.load(last_response.body)
+        max_import_time = result["facets"]["max_import_time"]
+        expect(max_import_time).to eq(Fixtures.now.iso8601)
+      end
+
+      it "should be null if there are no events" do
+        post '/api/v1/query', { fqdn: 'non-existent-domain.com', }
+        result = MultiJson.load(last_response.body)
+        expect(result["count"]).to eq(0)
+        max_import_time = result["facets"]["max_import_time"]
+        expect(max_import_time).to be_nil
+      end
+    end
+
+    describe :sources do
+      it "should contain the top 20 sources grouped by the number of events" do
+        post '/api/v1/query', { fqdn: 'source-tests.com' }
+        result = MultiJson.load(last_response.body)
+        sources = result["facets"]["sources"]
+        expect(sources.length).to eq(20)
+        expect(sources[0..4]).to match(a_collection_containing_exactly(
+          ['source_test_25', 5],
+          ['source_test_24', 5],
+          ['source_test_23', 5],
+          ['source_test_22', 5],
+          ['source_test_21', 5],
+        ))
+        expect(sources[5..9]).to match(a_collection_containing_exactly(
+          ['source_test_20', 4],
+          ['source_test_19', 4],
+          ['source_test_18', 4],
+          ['source_test_17', 4],
+          ['source_test_16', 4],
+        ))
+        expect(sources[10..14]).to match(a_collection_containing_exactly(
+          ['source_test_15', 3],
+          ['source_test_14', 3],
+          ['source_test_13', 3],
+          ['source_test_12', 3],
+          ['source_test_11', 3],
+        ))
+        expect(sources[15..19]).to match(a_collection_containing_exactly(
+          ['source_test_10', 2],
+          ['source_test_9', 2],
+          ['source_test_8', 2],
+          ['source_test_7', 2],
+          ['source_test_6', 2],
+        ))
+      end
+    end
+
+    describe :feed_providers do
+      it "should contain the top 20 feed_providers grouped by the number of events" do
+        post '/api/v1/query', { fqdn: 'feed-provider-tests.com' }
+        result = MultiJson.load(last_response.body)
+        feed_providers = result["facets"]["feed_providers"]
+        expect(feed_providers.length).to eq(20)
+        expect(feed_providers[0..4]).to match(a_collection_containing_exactly(
+          ['feed_provider_test_25', 5],
+          ['feed_provider_test_24', 5],
+          ['feed_provider_test_23', 5],
+          ['feed_provider_test_22', 5],
+          ['feed_provider_test_21', 5],
+        ))
+        expect(feed_providers[5..9]).to match(a_collection_containing_exactly(
+          ['feed_provider_test_20', 4],
+          ['feed_provider_test_19', 4],
+          ['feed_provider_test_18', 4],
+          ['feed_provider_test_17', 4],
+          ['feed_provider_test_16', 4],
+        ))
+        expect(feed_providers[10..14]).to match(a_collection_containing_exactly(
+          ['feed_provider_test_15', 3],
+          ['feed_provider_test_14', 3],
+          ['feed_provider_test_13', 3],
+          ['feed_provider_test_12', 3],
+          ['feed_provider_test_11', 3],
+        ))
+        expect(feed_providers[15..19]).to match(a_collection_containing_exactly(
+          ['feed_provider_test_10', 2],
+          ['feed_provider_test_9', 2],
+          ['feed_provider_test_8', 2],
+          ['feed_provider_test_7', 2],
+          ['feed_provider_test_6', 2],
+        ))
+      end
+    end
+
+    describe :feed_names do
+      it "should contain the top 20 feed_names grouped by the number of events" do
+        post '/api/v1/query', { fqdn: 'feed-name-tests.com' }
+        result = MultiJson.load(last_response.body)
+        feed_names = result["facets"]["feed_names"]
+        expect(feed_names.length).to eq(20)
+        expect(feed_names[0..4]).to match(a_collection_containing_exactly(
+          ['feed_name_test_25', 5],
+          ['feed_name_test_24', 5],
+          ['feed_name_test_23', 5],
+          ['feed_name_test_22', 5],
+          ['feed_name_test_21', 5],
+        ))
+        expect(feed_names[5..9]).to match(a_collection_containing_exactly(
+          ['feed_name_test_20', 4],
+          ['feed_name_test_19', 4],
+          ['feed_name_test_18', 4],
+          ['feed_name_test_17', 4],
+          ['feed_name_test_16', 4],
+        ))
+        expect(feed_names[10..14]).to match(a_collection_containing_exactly(
+          ['feed_name_test_15', 3],
+          ['feed_name_test_14', 3],
+          ['feed_name_test_13', 3],
+          ['feed_name_test_12', 3],
+          ['feed_name_test_11', 3],
+        ))
+        expect(feed_names[15..19]).to match(a_collection_containing_exactly(
+          ['feed_name_test_10', 2],
+          ['feed_name_test_9', 2],
+          ['feed_name_test_8', 2],
+          ['feed_name_test_7', 2],
+          ['feed_name_test_6', 2],
+        ))
+      end
+    end
+  end
 end
