@@ -20,7 +20,6 @@ RSpec.shared_examples_for 'an FQDN query endpoint' do
 
         describe 'the events' do
           let(:events) { result['events'] }
-          its(:count) { is_expected.to eq(4) }
 
           it "should include an event where #{observable_type}.#{observable_field} equals 'sub.#{parent_fqdn}'" do
             expect(events).to include(

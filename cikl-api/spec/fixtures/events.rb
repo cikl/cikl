@@ -20,6 +20,9 @@ module Fixtures
     ret.concat(_ipv4_tests)
     ret.concat(_import_time_tests)
     ret.concat(_detect_time_tests)
+    ret.concat(_source_tests)
+    ret.concat(_feed_provider_tests)
+    ret.concat(_feed_name_tests)
     ret
   end
 
@@ -34,6 +37,59 @@ module Fixtures
 
     ret
   end
+  
+
+  def self._source_tests
+    gen_event = lambda do |i,j|
+      event = Fabricate(:event, source: "source_test_#{i}")
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: "#{i}-#{j}.source-tests.com")
+      event
+    end
+    ret = []
+
+    25.downto(21) { |i| 5.times { |j| ret << gen_event.call(i,j) } }
+    20.downto(16) { |i| 4.times { |j| ret << gen_event.call(i,j) } }
+    15.downto(11) { |i| 3.times { |j| ret << gen_event.call(i,j) } }
+    10.downto(6) { |i| 2.times { |j| ret << gen_event.call(i,j) } }
+    5.downto(1) { |i| 1.times { |j| ret << gen_event.call(i,j) } }
+
+    ret
+  end
+
+  def self._feed_provider_tests
+    gen_event = lambda do |i,j|
+      event = Fabricate(:event, feed_provider: "feed_provider_test_#{i}")
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: "#{i}-#{j}.feed-provider-tests.com")
+      event
+    end
+    ret = []
+
+    25.downto(21) { |i| 5.times { |j| ret << gen_event.call(i,j) } }
+    20.downto(16) { |i| 4.times { |j| ret << gen_event.call(i,j) } }
+    15.downto(11) { |i| 3.times { |j| ret << gen_event.call(i,j) } }
+    10.downto(6) { |i| 2.times { |j| ret << gen_event.call(i,j) } }
+    5.downto(1) { |i| 1.times { |j| ret << gen_event.call(i,j) } }
+
+    ret
+  end
+
+  def self._feed_name_tests
+    gen_event = lambda do |i,j|
+      event = Fabricate(:event, feed_name: "feed_name_test_#{i}")
+      event.observables.fqdn << Fabricate(:fqdn, fqdn: "#{i}-#{j}.feed-name-tests.com")
+      event
+    end
+    ret = []
+
+    25.downto(21) { |i| 5.times { |j| ret << gen_event.call(i,j) } }
+    20.downto(16) { |i| 4.times { |j| ret << gen_event.call(i,j) } }
+    15.downto(11) { |i| 3.times { |j| ret << gen_event.call(i,j) } }
+    10.downto(6) { |i| 2.times { |j| ret << gen_event.call(i,j) } }
+    5.downto(1) { |i| 1.times { |j| ret << gen_event.call(i,j) } }
+
+    ret
+  end
+
 
   def self._detect_time_tests
     ret = []

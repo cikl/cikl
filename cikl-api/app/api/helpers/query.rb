@@ -42,6 +42,51 @@ module Cikl
           }
         end
 
+        def es_aggs
+          aggs = {}
+          aggs[:max_detect_time] =  {
+            max: {
+              field: :'event.detect_time'
+            }
+          }
+          aggs[:min_detect_time] =  {
+            min: {
+              field: :'event.detect_time'
+            }
+          }
+          aggs[:max_import_time] = {
+            max: {
+              field: :'event.import_time'
+            }
+          }
+          aggs[:min_import_time] = {
+            min: {
+              field: :'event.import_time'
+            }
+          }
+          aggs[:sources_top20] = {
+            terms: {
+              field: :'event.source',
+              size: 20
+            }
+          }
+          aggs[:feed_providers_top20] = {
+            terms: {
+              field: :'event.feed_provider',
+              size: 20
+            }
+          }
+
+          # TODO: Improve this by storing provider/name in elasticsearch.
+          aggs[:feed_names_top20] = {
+            terms: {
+              field: :'event.feed_name',
+              size: 20
+            }
+          }
+          aggs
+        end
+
         def run_standard_query(query_params)
           musts = []
           shoulds = []
@@ -82,6 +127,7 @@ module Cikl
 
               end
             end
+            json.aggs es_aggs
           end
 
           run_query_and_return(query, query_params)
@@ -127,12 +173,39 @@ module Cikl
           search_events(query_opts)
         end
 
+        def build_facets(es_response) 
+          aggs = es_response["aggregations"]
+          sources = aggs["sources_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }
+          feed_providers = aggs["feed_providers_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }
+          feed_names = aggs["feed_names_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }
+
+          opts = {
+            sources: sources,
+            feed_providers: feed_providers,
+            feed_names: feed_names
+          }
+          if min_detect_time = aggs["min_detect_time"]["value"]
+            opts[:min_detect_time] = Time.at(min_detect_time / 1000.0).to_datetime
+          end
+          if max_detect_time = aggs["max_detect_time"]["value"]
+            opts[:max_detect_time] = Time.at(max_detect_time/1000.0).to_datetime
+          end
+          if min_import_time = aggs["min_import_time"]["value"]
+            opts[:min_import_time] = Time.at(min_import_time/1000.0).to_datetime
+          end
+          if max_import_time = aggs["max_import_time"]["value"]
+            opts[:max_import_time] = Time.at(max_import_time/1000.0).to_datetime
+          end
+
+          Cikl::Models::Facets.new(opts)
+        end
         
         def build_response(es_response, query_params)
           return Cikl::Models::Response.new(
             total_events: es_response["hits"]["total"],
             query: query_params,
-            events: hits_to_events(es_response["hits"]["hits"]).to_a
+            events: hits_to_events(es_response["hits"]["hits"]).to_a,
+            facets: build_facets(es_response)
           )
         end
 
