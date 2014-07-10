@@ -13,7 +13,8 @@ module Cikl
         def to_hash
           ret = {}
           ret[:source] = "cikl-worker"
-          ret[:@timestamp] = @time.iso8601 unless @time.nil?
+          ret[:import_time] = @time.iso8601 unless @time.nil?
+          ret[:detect_time] = @time.iso8601 unless @time.nil?
           ret
         end
 

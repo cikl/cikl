@@ -48,6 +48,7 @@ shared_examples_for "a payload" do
   context "#to_hash" do
     subject {payload.to_hash}
     its([:source]) { should == "cikl-worker" }
-    its([:@timestamp]) { should == timestamp.iso8601 }
+    its([:detect_time]) { should == timestamp.iso8601 }
+    its([:import_time]) { should == timestamp.iso8601 }
   end
 end

@@ -4,6 +4,8 @@ require 'date'
 require 'bson'
 Fabricator(:event, class_name: Cikl::Models::Event) do
   source          "generated"
+  feed_provider   "test_provider"
+  feed_name       "test_feed_name"
   import_time     { |attrs| DateTime.now }
   # 10 days ago
   #detect_time     { |attrs| DateTime.now - 10 }
