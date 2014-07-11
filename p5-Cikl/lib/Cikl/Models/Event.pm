@@ -77,6 +77,7 @@ use constant ISO8601_FORMAT => "%Y-%m-%dT%H:%M:%S+00:00";
 sub to_hash {
   my $self = shift;
   my $ret = { %{$self} };
+  $ret->{tags} = [ delete($ret->{assessment}) ];
   my $import_time = $self->import_time();
   my $detect_time = $self->detect_time();
   if (defined($import_time)) {

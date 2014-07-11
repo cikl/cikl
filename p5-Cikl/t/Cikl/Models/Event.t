@@ -50,7 +50,7 @@ sub test_no_observables : Test(2) {
 
   cmp_deeply($event->to_hash(), 
     {
-      assessment => $assessment,
+      tags => [ $assessment ],
       import_time => '2014-07-10T18:51:59+00:00',
       detect_time => '2014-07-10T18:51:58+00:00',
       observables => {},
@@ -84,7 +84,7 @@ sub test_with_observables : Test(2) {
 
   cmp_deeply($event->to_hash(), 
     {
-      assessment => $assessment,
+      tags => [ $assessment ],
       import_time => '2014-07-10T18:51:59+00:00',
       source     => 'cikl_smrt',
       feed_name  => 'test_feed',
