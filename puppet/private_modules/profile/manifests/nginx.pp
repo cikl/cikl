@@ -1,4 +1,5 @@
 class profile::nginx (
+  $ui_path
 ) inherits profile::base {
 
   $config_file  = "/etc/nginx/sites-available/cikl.conf"

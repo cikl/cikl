@@ -1,7 +1,7 @@
 ---
 profile::api::local_path: "%{::path_cikl_api}"
 
-profile::nginx::elasticsearch_url: "%{hiera('cikl::elasticsearch_url')}"
+profile::nginx::ui_path: "%{::path_ui}"
 
 profile::smrt::local_p5_cikl: "%{::path_p5_cikl}"
 profile::smrt::local_p5_cikl_rabbitmq: "%{::path_p5_cikl_rabbitmq}"
