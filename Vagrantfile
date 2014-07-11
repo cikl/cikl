@@ -36,6 +36,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   path_cikl_worker  = "#{path_cikl_dev}/cikl-worker"
   path_cikl_api     = "#{path_cikl_dev}/cikl-api"
   path_cikl_feeds   = "#{path_cikl_dev}/cikl-feeds"
+  path_ui           = "#{path_cikl_dev}/ui"
   path_p5_cikl      = "#{path_cikl_dev}/p5-Cikl"
   path_p5_cikl_rabbitmq   = "#{path_cikl_dev}/p5-Cikl-RabbitMQ"
 
@@ -43,6 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder './cikl-worker',   path_cikl_worker, synced_folder_opts
   config.vm.synced_folder './cikl-api',      path_cikl_api, synced_folder_opts
   config.vm.synced_folder './feeds',    path_cikl_feeds, synced_folder_opts
+  config.vm.synced_folder './ui',       path_ui, synced_folder_opts
   config.vm.synced_folder './p5-Cikl',          path_p5_cikl, synced_folder_opts
   config.vm.synced_folder './p5-Cikl-RabbitMQ', path_p5_cikl_rabbitmq, synced_folder_opts
 
@@ -51,6 +53,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     :path_cikl_worker => path_cikl_worker,
     :path_cikl_api    => path_cikl_api,
     :path_cikl_feeds  => path_cikl_feeds,
+    :path_ui          => path_ui,
     :path_p5_cikl     => path_p5_cikl,
     :path_p5_cikl_rabbitmq  => path_p5_cikl_rabbitmq,
 
