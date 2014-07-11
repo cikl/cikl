@@ -1,6 +1,6 @@
 description "Cikl DNS Worker"
 
-start on (started networking <%= "and vagrant-mounted MOUNTPOINT=#{@local_path}" if (@environment == 'development') %>)
+start on (started networking <%= "and vagrant-mounted MOUNTPOINT=/vagrant" if (@environment == 'development') %>)
 
 stop on runlevel [06]
 
