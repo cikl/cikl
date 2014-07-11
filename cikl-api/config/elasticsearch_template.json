@@ -137,9 +137,10 @@
           "analyzer" : "lowercase_keyword",
           "type" : "string"
         },
-        "assessment" : {
+        "tags" : {
           "analyzer" : "lowercase_keyword",
-          "type" : "string"
+          "type" : "string",
+          "index_name" : "tag"
         },
         "detect_time" : {
           "type" : "date"

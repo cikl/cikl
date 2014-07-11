@@ -14,6 +14,7 @@ module Cikl
         expose :source
         expose :feed_name
         expose :feed_provider
+        expose :tags
         expose :observables, using: Cikl::API::Entities::Observables
       end
     end
