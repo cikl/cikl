@@ -20,8 +20,6 @@ app.controller("SearchCtrl", function($scope, $http) {
   $scope.import_min.setDate($scope.import_min.getDate() -30);
 
 
-
-
   DetectMinTimeCtrl = function ($scope) {
     $scope.open = function($event) {
       $event.preventDefault();
@@ -115,6 +113,21 @@ app.controller("SearchCtrl", function($scope, $http) {
     $scope.update();
   };
 
+  // Update artifacts for search
+  $scope.updateFqdn = function(fqdn) {
+    $scope.type = 'fqdn';
+    $scope.term = fqdn;
+    document.getElementById("search-type").value = 'fqdn';
+    document.getElementById("search-term").value = fqdn;
+  }
+
+  $scope.updateIpv4 = function(ipv4) {
+    $scope.type = 'ipv4';
+    $scope.term = ipv4;
+    document.getElementById("search-type").value = 'ipv4';
+    document.getElementById("search-term").value = ipv4;
+  }
+
   // Sort button functions
   $scope.sortDetect = function() {
     if ($scope.orderBy === 'detect_time') {
@@ -177,10 +190,15 @@ app.controller("SearchCtrl", function($scope, $http) {
   });
 
 
+  $scope.$watch ('term', function () {
+    $scope.update();
+  });
+
+
   // API requests Function
   $scope.update = function () {
 
-    if ($scope.type === 'ip-address') {
+    if ($scope.type === 'ipv4') {
       $http.post('http://localhost:8080/api/v1/query.json',
           {
             start: 1 + ( ($scope.currentPage-1) * 10),
@@ -200,7 +218,7 @@ app.controller("SearchCtrl", function($scope, $http) {
 
           });
     }
-    else if ($scope.type === 'dns') {
+    else if ($scope.type === 'fqdn') {
       $http.post('http://localhost:8080/api/v1/query.json',
           {
             start: 1 + ( ($scope.currentPage-1) * 10),
