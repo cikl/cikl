@@ -308,28 +308,34 @@
                         </thead>
                         <tbody ng-repeat="event in query.events">
                         <tr class="info">
-                            <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href="#">{{event.source}}</a></strong></small></td>
-                            <td></td><td></td>
+                            <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.source}}</a></strong></small></td>
+                            <td><small><strong>provider:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_provider}}</a></strong></small></td>
+                            <td><small><strong>feed:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_name}}</a></strong></small></td>
                         </tr>
                         <tr>
                             <td><small><strong>detect time:</strong></small></td><td><small>{{event.detect_time}}</small></td>
                             <td><small><strong>import time:</strong></small></td><td><small>{{event.import_time}}</small></td>
+                            <td><small><strong>tags:</strong></small></td><td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
                         </tr>
                         <tr ng-repeat="domain in event.observables.fqdn">
-                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><strong><a href=# ng-click="updateFqdn(domain.fqdn)">{{domain.fqdn}}</a></strong></small></td>
+                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><strong><a href='#' ng-click="updateFqdn(domain.fqdn)">{{domain.fqdn}}</a></strong></small></td>
+                            <td></td><td></td>
                             <td></td><td></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
                             <td><small><strong>resolver:</strong></small></td><td><small>{{answer.resolver}}</small></td>
-                            <td><small><strong>name:</strong></small></td><td><small class="text-danger"><strong><a href=# ng-click="updateFqdn(answer.name)">{{answer.name}}</a></strong></small></td>
+                            <td><small><strong>section:</strong></small></td><td><small>{{answer.section}}</small></td>
+                            <td><small><strong>name:</strong></small></td><td><small class="text-danger"><strong><a href='#' ng-click="updateFqdn(answer.name)">{{answer.name}}</a></strong></small></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
                             <td><small><strong>rr_class:</strong></small></td><td><small>{{answer.rr_class}}</small></td>
                             <td><small><strong>rr_type:</strong></small></td><td><small>{{answer.rr_type}}</small></td>
+                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><a href='#' ng-click="updateFqdn(answer.fqdn)"><strong>{{answer.fqdn}}</strong></a></small></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
-                            <td><small><strong>section:</strong></small></td><td><small>{{answer.section}}</small></td>
-                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><a href=# ng-click="updateFqdn(answer.fqdn)"><strong>{{answer.fqdn}}</strong></a></small></td>
+                            <td><small><strong>ipv4:</strong></small></td><td><small class="text-danger"><a href='#' ng-click="updateIpv4(answer.ipv4)"><strong>{{answer.ipv4}}</strong></a></small></td>
+                            <td><small><strong>ipv6:</strong></small></td><td><small>{{answer.ipv6}}</small></td>
+                            <td></td><td></td>
                         </tr>
                         </tbody>
                     </table>
