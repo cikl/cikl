@@ -121,25 +121,20 @@
 
 
             <div ng-show="searched" class="row placeholders ng-hide">
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>First Detected</h4>
-                    <h1 class="lead text-info"><strong>{{query.facets.min_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Minimum Detect Time</span>
-                </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>Last Detected</h4>
-                    <h1 class="lead text-info"><strong>{{query.facets.max_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Maximum Detect Time</span>
-                </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>First Imported</h4>
+                <div class="col-xs-6 col-sm-4 placeholder">
+                    <h4>First Seen</h4>
                     <h1 class="lead text-info"><strong>{{query.facets.min_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Minimum Import Time</span>
+                    <span class="text-muted">Detect {{query.facets.min_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</span>
                 </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>Last Imported</h4>
+                <div class="col-xs-6 col-sm-4 placeholder">
+                    <h4>Last Seen</h4>
                     <h1 class="lead text-info"><strong>{{query.facets.max_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Maximum Import Time</span>
+                    <span class="text-muted">Detect {{query.facets.max_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</span>
+                </div>
+                <div class="col-xs-6 col-sm-4 placeholder">
+                    <h4>Feed Hits</h4>
+                    <h1 class="lead text-info"><strong>{{query.facets.feed_names.length}}</strong></h1>
+                    <span class="text-muted"># of feed names</span>
                 </div>
 
                 <!--
@@ -242,7 +237,7 @@
                             </button>
                         </span>
                             </div>
-                            <pre class="alert-sm alert-default">Min: {{m.filter_import_min | date:'HH:mm:ss' }}</pre>
+                            <pre class="alert-sm alert-default">Min: {{m.filter_import_min | date:'HH:mm:ss Z' }}</pre>
                         </div>
                         <div class="col-xs-6 col-sm-6 col-md-3 text-center" ng-controller="ImportMinDateCtrl">
                             <div class="input-group date">
@@ -262,7 +257,7 @@
                             </button>
                         </span>
                             </div>
-                            <pre class="alert-sm alert-default">Max: {{m.filter_import_max | date:'HH:mm:ss' }}</pre>
+                            <pre class="alert-sm alert-default">Max: {{m.filter_import_max | date:'HH:mm:ss Z' }}</pre>
                         </div>
                         <div class="col-xs-6 col-sm-6 col-md-3 text-center" ng-controller="ImportMaxDateCtrl">
                             <div class="input-group date">
@@ -308,28 +303,34 @@
                         </thead>
                         <tbody ng-repeat="event in query.events">
                         <tr class="info">
-                            <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href="#">{{event.source}}</a></strong></small></td>
-                            <td></td><td></td>
+                            <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.source}}</a></strong></small></td>
+                            <td><small><strong>provider:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_provider}}</a></strong></small></td>
+                            <td><small><strong>feed:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_name}}</a></strong></small></td>
                         </tr>
                         <tr>
                             <td><small><strong>detect time:</strong></small></td><td><small>{{event.detect_time}}</small></td>
                             <td><small><strong>import time:</strong></small></td><td><small>{{event.import_time}}</small></td>
+                            <td><small><strong>tags:</strong></small></td><td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
                         </tr>
                         <tr ng-repeat="domain in event.observables.fqdn">
-                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><strong><a href=# ng-click="updateFqdn(domain.fqdn)">{{domain.fqdn}}</a></strong></small></td>
+                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><strong><a href='#' ng-click="updateFqdn(domain.fqdn)">{{domain.fqdn}}</a></strong></small></td>
+                            <td></td><td></td>
                             <td></td><td></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
                             <td><small><strong>resolver:</strong></small></td><td><small>{{answer.resolver}}</small></td>
-                            <td><small><strong>name:</strong></small></td><td><small class="text-danger"><strong><a href=# ng-click="updateFqdn(answer.name)">{{answer.name}}</a></strong></small></td>
+                            <td><small><strong>section:</strong></small></td><td><small>{{answer.section}}</small></td>
+                            <td><small><strong>name:</strong></small></td><td><small class="text-danger"><strong><a href='#' ng-click="updateFqdn(answer.name)">{{answer.name}}</a></strong></small></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
                             <td><small><strong>rr_class:</strong></small></td><td><small>{{answer.rr_class}}</small></td>
                             <td><small><strong>rr_type:</strong></small></td><td><small>{{answer.rr_type}}</small></td>
+                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><a href='#' ng-click="updateFqdn(answer.fqdn)"><strong>{{answer.fqdn}}</strong></a></small></td>
                         </tr>
                         <tr ng-repeat="answer in event.observables.dns_answer">
-                            <td><small><strong>section:</strong></small></td><td><small>{{answer.section}}</small></td>
-                            <td><small><strong>fqdn:</strong></small></td><td><small class="text-danger"><a href=# ng-click="updateFqdn(answer.fqdn)"><strong>{{answer.fqdn}}</strong></a></small></td>
+                            <td><small><strong>ipv4:</strong></small></td><td><small class="text-danger"><a href='#' ng-click="updateIpv4(answer.ipv4)"><strong>{{answer.ipv4}}</strong></a></small></td>
+                            <td><small><strong>ipv6:</strong></small></td><td><small>{{answer.ipv6}}</small></td>
+                            <td></td><td></td>
                         </tr>
                         </tbody>
                     </table>
