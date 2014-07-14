@@ -319,56 +319,34 @@ app.controller("MainCtrl", function($scope, $http) {
 
   // API request function
   $scope.update = function () {
+    var api_endpoint = window.location.origin + '/api/v1/query.json';
+
+    var query_params = {
+      start: 1 + ( ($scope.currentPage-1) * 10),
+      per_page: $scope.itemsPerPage,
+      order_by: $scope.orderBy,
+      order: $scope.order,
+      timing: 1,
+      import_time_min: $scope.import_min,
+      import_time_max: $scope.import_max,
+      detect_time_min: $scope.detect_min,
+      detect_time_max: $scope.detect_max
+    };
 
     if ($scope.type === 'ipv4') {
-      $http.post('http://localhost:8080/api/v1/query.json',
-          {
-            start: 1 + ( ($scope.currentPage-1) * 10),
-            per_page: $scope.itemsPerPage,
-            order_by: $scope.orderBy,
-            order: $scope.order,
-            timing: 1,
-            import_time_min: $scope.import_min,
-            import_time_max: $scope.import_max,
-            detect_time_min: $scope.detect_min,
-            detect_time_max: $scope.detect_max,
-            ipv4: $scope.term
-          }).
-          success(function (data) {
-            $scope.query = data;
-
-            // Pagination total items
-            $scope.totalItems = parseInt($scope.query.total_events);
-          }).
-          then(function() {
-
-          });
+      query_params["ipv4"] = $scope.term;
     }
     else if ($scope.type === 'fqdn') {
-      $http.post('http://localhost:8080/api/v1/query.json',
-          {
-            start: 1 + ( ($scope.currentPage-1) * 10),
-            per_page: $scope.itemsPerPage,
-            order_by: $scope.orderBy,
-            order: $scope.order,
-            timing: 1,
-            import_time_min: $scope.import_min,
-            import_time_max: $scope.import_max,
-            detect_time_min: $scope.detect_min,
-            detect_time_max: $scope.detect_max,
-            fqdn: $scope.term
-          }).
-          success(function (data) {
-            $scope.query = data;
-
-            // Pagination total items
-            $scope.totalItems = parseInt($scope.query.total_events);
-          }).
-          then(function() {
-
-          }
-      );
+      query_params["fqdn"] = $scope.term;
     }
+
+    $http.post(api_endpoint, query_params).success(function (data) {
+      $scope.query = data;
+      // Pagination total items
+      $scope.totalItems = parseInt($scope.query.total_events);
+    }).then(function() {
+
+    });
   };
 
 
