@@ -1,2 +1,9 @@
 # Always use linefeeds, even on windows.
-* text eol=lf
+* text=auto eol=lf
+
+# Leave test data alone.
+/p5-Cikl/test-rules/data/**/* binary
+
+*.gz binary
+*.zip binary
+*.png binary
