@@ -1,10 +1,16 @@
 // Detect Min Time
-function DetectMinTimeCtrl ($scope) {
-  $scope.open = function($event) {
+function DetectMinTimeCtrl (DateTime) {
+  var dmintime = this;
+
+  dmintime.open = function($event) {
     $event.preventDefault();
     $event.stopPropagation();
 
-    $scope.opened = true;
+    dmintime.opened = true;
+  };
+
+  dmintime.getDetectMin = function() {
+    return DateTime.getDetectMin();
   };
 }
 angular
@@ -12,24 +18,26 @@ angular
     .controller('DetectMinTimeCtrl', DetectMinTimeCtrl);
 
 // Detect Min Date
-function DetectMinDateCtrl ($scope) {
-  $scope.today = function() {
-    m.filter_detect_min = new Date();
+function DetectMinDateCtrl (DateTime) {
+  var dmindate = this;
+
+  dmindate.today = function() {
+    DateTime.newDetectMin();
   };
 
-  $scope.open = function($event) {
+  dmindate.open = function($event) {
     $event.preventDefault();
     $event.stopPropagation();
 
-    $scope.opened = true;
+    dmindate.opened = true;
   };
 
-  $scope.dateOptions = {
+  dmindate.dateOptions = {
     formatYear: 'yy',
     startingDay: 1
   };
 
-  $scope.format = 'MMMM dd, yyyy';
+  dmindate.format = 'MMMM dd, yyyy';
 }
 angular
     .module('app')

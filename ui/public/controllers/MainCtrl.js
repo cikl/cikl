@@ -2,6 +2,22 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
 
   var m = this;
 
+
+  $scope.totalItems = 64;
+  $scope.currentPage = 4;
+
+  $scope.setPage = function (pageNo) {
+    $scope.currentPage = pageNo;
+  };
+
+  $scope.pageChanged = function() {
+    console.log('Page changed to: ' + $scope.currentPage);
+  };
+
+  m.max_size = 10;
+  $scope.bigTotalItems = 175;
+  $scope.bigCurrentPage = 1;
+
   m.route = $route;
   m.location = $location;
   m.routeParams = $routeParams;
@@ -38,7 +54,6 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     return CiklApi.getTerm();
   };
 
-
   m.getCurrentPage = function () {
     return Pagination.getCurrentPage();
   };
@@ -46,14 +61,12 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     return Pagination.getItemsPerPage();
   };
 
-
-  m.getOrderBy = function () {
-    return CiklApi.getOrderBy();
-  };
   m.getOrder = function () {
     return CiklApi.getOrder();
   };
-
+  m.getOrderBy = function () {
+    return CiklApi.getOrderBy();
+  };
 
   m.getImportMin = function () {
     return DateTime.getImportMin();
@@ -68,24 +81,22 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     return DateTime.getDetectMax();
   };
 
+
   m.removeImportMin = function() {
     DateTime.clearImportMin();
 
     m.search();
   };
-
   m.removeImportMax = function() {
     DateTime.clearImportMax();
 
     m.search();
   };
-
   m.removeDetectMin = function() {
     DateTime.clearDetectMin();
 
     m.search();
   };
-
   m.removeDetectMax = function() {
     DateTime.clearDetectMax();
 
