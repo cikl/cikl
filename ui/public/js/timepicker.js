@@ -305,7 +305,7 @@ angular.module('sy.bootstrap.timepicker',
     controller:'syTimepickerController',
     replace: true,
     scope: {},
-    templateUrl: 'template/syTimepicker/timepicker.html',
+    templateUrl: 'template/syTimepicker/timepicker.views',
     link: function(sscope, element, attrs, ctrls) {
       var syTimepickerCtrl = ctrls[0], ngModel = ctrls[1];
 
@@ -494,7 +494,7 @@ function ($compile, $parse, $document, $position, dateFilter, syTimepickerPopupC
     restrict:'EA',
     replace: true,
     transclude: true,
-    templateUrl: 'template/syTimepicker/popup.html',
+    templateUrl: 'template/syTimepicker/popup.views',
     link:function (scope, element, attrs) {
       element.bind('click', function(event) {
         event.preventDefault();
