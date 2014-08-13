@@ -1,31 +1,15 @@
-function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, Pagination) {
+function MainCtrl ($route, $routeParams, $location, CiklApi, DateTime, Page, UrlBuilder) {
 
   var m = this;
-
-
-  $scope.totalItems = 64;
-  $scope.currentPage = 4;
-
-  $scope.setPage = function (pageNo) {
-    $scope.currentPage = pageNo;
-  };
-
-  $scope.pageChanged = function() {
-    console.log('Page changed to: ' + $scope.currentPage);
-  };
-
-  m.max_size = 10;
-  $scope.bigTotalItems = 175;
-  $scope.bigCurrentPage = 1;
 
   m.route = $route;
   m.location = $location;
   m.routeParams = $routeParams;
 
-  m.total_items = Pagination.total_items;
-  m.current_page = Pagination.current_page;
-  m.items_per_page = Pagination.items_per_page;
-  m.max_size = Pagination.max_size;
+  m.total_items = Page.total_items;
+  m.current_page = Page.current_page;
+  m.items_per_page = Page.items_per_page;
+  m.max_size = Page.max_size;
 
   m.type = CiklApi.type;
   m.term = CiklApi.term;
@@ -37,14 +21,33 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
   m.detect_min = DateTime.detect_min;
   m.detect_max = DateTime.detect_max;
 
-  m.url_root = window.location.origin;
-
   m.query = CiklApi.getQuery();
 
 
   // Set Date & Time filters to start collapsed
   m.collapsedImport = false;
   m.collapsedDetect = false;
+
+
+  m.getLink = function (type, term) {
+    return UrlBuilder.getLink(type, term);
+  };
+  m.getPage = function (page) {
+    return UrlBuilder.getPage(page);
+  };
+
+  m.getFirstPage = function () {
+    return Page.getFirstPage();
+  };
+  m.getPrevPage = function () {
+    return Page.getPrevPage();
+  };
+  m.getNextPage = function () {
+    return Page.getNextPage();
+  };
+  m.getLastPage = function () {
+    return Page.getLastPage();
+  };
 
 
   m.getType = function () {
@@ -55,10 +58,10 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
   };
 
   m.getCurrentPage = function () {
-    return Pagination.getCurrentPage();
+    return Page.getCurrentPage();
   };
   m.getItemsPerPage = function () {
-    return Pagination.getItemsPerPage();
+    return Page.getItemsPerPage();
   };
 
   m.getOrder = function () {
@@ -142,7 +145,7 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
 
   };
 
-  // Filter import date/time
+  // Filter import date & time asc/desc
   m.filterImport = function() {
     if (DateTime.getImportMinFilter()) {
       DateTime.setImportMinFilter(true);
@@ -161,7 +164,7 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     m.search();
   };
 
-  // Filter detect date/time
+  // Filter detect date & time asc/desc
   m.filterDetect = function() {
     if (DateTime.getDetectMinFilter()) {
       DateTime.setDetectMinFilter(true);
@@ -186,8 +189,8 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     $location.path( '/'
             + CiklApi.getType() + '/'
             + CiklApi.getTerm() + '/'
-            + Pagination.getCurrentPage() + '/'
-            + Pagination.getItemsPerPage() + '/'
+            + Page.getCurrentPage() + '/'
+            + Page.getItemsPerPage() + '/'
             + CiklApi.getOrder() + '/'
             + CiklApi.getOrderBy() + '/'
             + DateTime.getImportMinEpoch() + '/'
@@ -204,75 +207,29 @@ function MainCtrl ($scope, $route, $routeParams, $location, CiklApi, DateTime, P
     m.search();
   };
 
-  m.updateFqdn = function(fqdn) {
-    CiklApi.setType('fqdn');
-    CiklApi.setTerm(fqdn);
-
-    m.search();
-  };
-
-  m.updateIpv4 = function(ipv4) {
-    CiklApi.setType('ipv4');
-    CiklApi.setTerm(ipv4);
-
-    m.search();
-  };
-
-
-
-  // Pagination
-  m.getCurrentPage = function () {
-    return Pagination.getCurrentPage();
-  };
+  // Page
   m.getTotalItems = function () {
-    return Pagination.getTotalItems();
-  };
-  m.getItemsPerPage = function () {
-    return Pagination.getItemsPerPage();
+    return Page.getTotalItems();
   };
   m.setCurrentPage = function () {
-    Pagination.setCurrentPage(m.current_page);
+    Page.setCurrentPage(m.current_page);
   };
-
-  m.setPage = function (pageNo) {
-    m.current_page = pageNo;
-    Pagination.setCurrentPage(m.current_page);
-  };
-
-  m.pageChanged = function() {
-    console.log('Page changed to: ' + m.current_page);
-  };
-
-//  $scope.$watch ('m.current_page', function () {
-//    Pagination.setCurrentPage(m.current_page);
-//    console.log('Current Page: ' + Pagination.getCurrentPage());
-//    m.update();
-//  });
-
-  //  // Sort watch functions
-  //  this.$watch ('orderBy', function () {
-  //    this.update();
-  //  });
-  //
-  //  this.$watch ('order', function () {
-  //    this.update();
-  //  });
 
 }
-// create the resolved property
+// Resolve url params prior to page loading and update services variables
 MainCtrl.resolve = {
-  // /:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax
+  // Url params  /:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax
   setType: function($route, CiklApi) {
     return CiklApi.setType($route.current.params.type);
   },
   setTerm: function($route, CiklApi) {
     return CiklApi.setTerm($route.current.params.term);
   },
-  setCurrentPage: function($route, Pagination) {
-    return Pagination.setCurrentPage($route.current.params.page);
+  setCurrentPage: function($route, Page) {
+    return Page.setCurrentPage($route.current.params.page);
   },
-  setItemsPerPage: function($route, Pagination) {
-    return Pagination.setItemsPerPage($route.current.params.numItems);
+  setItemsPerPage: function($route, Page) {
+    return Page.setItemsPerPage($route.current.params.numItems);
   },
   setOrder: function($route, CiklApi) {
     return CiklApi.setOrder($route.current.params.order);

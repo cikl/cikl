@@ -1,4 +1,4 @@
-function CiklApi ($q, $http, DateTime, Pagination) {
+function CiklApi ($q, $http, DateTime, Page) {
 
   var CiklApi = {};
 
@@ -50,12 +50,9 @@ function CiklApi ($q, $http, DateTime, Pagination) {
     var api_endpoint = window.location.origin + '/api/v1/query.json';
 
 
-
-
-
     var query_params = {
-      start: 1 + ( (Pagination.getCurrentPage()-1) * 10),
-      per_page: Pagination.getItemsPerPage(),
+      start: 1 + ( (Page.getCurrentPage()-1) * Page.getItemsPerPage()),
+      per_page: Page.getItemsPerPage(),
       order_by: CiklApi.order_by,
       order: CiklApi.order,
       timing: 1
@@ -89,8 +86,9 @@ function CiklApi ($q, $http, DateTime, Pagination) {
       $http.post(api_endpoint, query_params).success(function (data) {
         CiklApi.query = data;
 
-        // Pagination total items
-        Pagination.setTotalItems(parseInt(CiklApi.query.total_events));
+        // Page total items
+        Page.setTotalItems(parseInt(CiklApi.query.total_events));
+        Page.updatePage(Page.getCurrentPage());
 
         deferred.resolve(CiklApi.query);
 

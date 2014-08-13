@@ -1,4 +1,4 @@
-function IntroCtrl ($location, CiklApi, DateTime, Pagination) {
+function IntroCtrl ($location, CiklApi, DateTime, Page) {
 
   var intro = this;
 
@@ -8,8 +8,8 @@ function IntroCtrl ($location, CiklApi, DateTime, Pagination) {
     CiklApi.setType(artifact.type);
     CiklApi.setTerm(artifact.term);
 
-    Pagination.setCurrentPage(1);
-    Pagination.setItemsPerPage(20);
+    Page.setCurrentPage(1);
+    Page.setItemsPerPage(20);
 
     CiklApi.setOrder('desc');
     CiklApi.setOrderBy('import_time');
@@ -23,8 +23,8 @@ function IntroCtrl ($location, CiklApi, DateTime, Pagination) {
     $location.path( '/'
             + CiklApi.getType() + '/'
             + CiklApi.getTerm() + '/'
-            + Pagination.getCurrentPage() + '/'
-            + Pagination.getItemsPerPage() + '/'
+            + Page.getCurrentPage() + '/'
+            + Page.getItemsPerPage() + '/'
             + CiklApi.getOrder() + '/'
             + CiklApi.getOrderBy() + '/'
             + DateTime.getImportMinEpoch() + '/'
