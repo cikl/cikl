@@ -1,4 +1,4 @@
-function MainCtrl ($route, $routeParams, $location, CiklApi, DateTime, Page, UrlBuilder) {
+function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime, Page, UrlBuilder) {
 
   var m = this;
 
@@ -21,7 +21,11 @@ function MainCtrl ($route, $routeParams, $location, CiklApi, DateTime, Page, Url
   m.detect_min = DateTime.detect_min;
   m.detect_max = DateTime.detect_max;
 
-  m.query = CiklApi.getQuery();
+  $timeout(function () {
+    m.query = CiklApi.getQuery();
+  }, 200);
+
+
 
 
   // Set Date & Time filters to start collapsed
