@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
 
-        <div class="col-sm-12 col-md-12">
+    <div class="col-sm-12 col-md-12">
             <small class="text-info"><strong>Sort by: </strong></small><small class="text-danger">{{m.getOrderBy()}}</small>
             <small class="text-info"><strong>Order: </strong></small><small class="text-danger">{{m.getOrder()}}</small>
             <small class="text-info"><strong>Type: </strong></small><small class="text-danger">{{m.getType()}}</small>
@@ -109,9 +109,8 @@
 
 
 
-
             <div class="container-fluid">
-                <div class="row">
+                <div class="row repeat">
                     <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                         <a href="#"><span class="badge alert-default">All Events ({{m.query.total_events}})</span></a>
                         <span ng-repeat="source in m.query.facets.sources">
@@ -132,13 +131,14 @@
                     <div page-selector></div>
                 </div>
 
+
                 <div class="row">
-                    <div class="table-responsive">
-                        <table class="table table-condensed table-hover">
+                    <div class="table-responsive test">
+                        <table class="table table-condensed table-hover ">
                             <thead>
                             </thead>
                             <tbody ng-repeat="event in m.query.events">
-                            <tr class="info">
+                            <tr>
                                 <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.source}}</a></strong></small></td>
                                 <td><small><strong>provider:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_provider}}</a></strong></small></td>
                                 <td><small><strong>feed:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_name}}</a></strong></small></td>

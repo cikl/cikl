@@ -1,6 +1,7 @@
 (function () {
   angular.module('app', [
     'ngRoute',
+    'ngAnimate',
     'ui.bootstrap',
     'sy.bootstrap.timepicker',
     'template/syTimepicker/timepicker.html',
