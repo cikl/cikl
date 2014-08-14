@@ -1,0 +1,29 @@
+<ul class="pagination">
+    <li ng-if="m.getFirstPage()">
+        <a ng-href="{{m.getPage(m.getFirstPage())}}">First</a>
+    </li>
+    <li ng-if="!m.getFirstPage()" class="disabled">
+        <a>First</a>
+    </li>
+    <li ng-if="m.getPrevPage()">
+        <a ng-href="{{m.getPage(m.getPrevPage())}}">Prev</a>
+    </li>
+    <li ng-if="!m.getPrevPage()" class="disabled">
+        <a>Prev</a>
+    </li>
+    <li ng-if="m.getCurrentPage()" class="disabled">
+        <a ng-href="{{m.getPage(m.getCurrentPage())}}">{{m.getCurrentPage()}}</a>
+    </li>
+    <li ng-if="m.getNextPage()">
+        <a ng-href="{{m.getPage(m.getNextPage())}}">Next</a>
+    </li>
+    <li ng-if="!m.getNextPage()" class="disabled">
+        <a>Next</a>
+    </li>
+    <li ng-if="m.getLastPage()">
+        <a ng-href="{{m.getPage(m.getLastPage())}}">Last</a>
+    </li>
+    <li ng-if="!m.getLastPage()" class="disabled">
+        <a>Last</a>
+    </li>
+</ul>

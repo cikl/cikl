@@ -1,0 +1,38 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 main">
+
+            <h1 class="page-header text-center">Search</h1>
+
+            <form novalidate class="form-inline text-center lead" role="form">
+                <div class="form-group">
+                    <select ng-model="artifact.type" class="input input-lg" name="search-type" id="search-type">
+                        <option value>- select type -</option>
+                        <option value="ipv4"> ipv4 </option>
+                        <!--<option value="ip-range"> IP Range </option>-->
+                        <!--<option value="email"> Email Address </option>-->
+                        <option value="fqdn"> fqdn </option>
+                        <!--<option value="asn"> ASN </option>-->
+                        <!--<option value="md5-hash"> MD5 </option>-->
+                        <!--<option value="sha256-hash"> SHA256 </option>-->
+                    </select>
+                    <input ng-model="artifact.term" class="input input-lg form-control" type="text" name="search-term" id="search-term" placeholder="artifact...">
+                    <button class="btn btn-default btn-lg" ng-click="intro.search(artifact)"><span class="glyphicon glyphicon-search"></span></button>
+                </div>
+            </form>
+            <br />
+            <br />
+
+            <p class="text-info text-center lead">
+                Welcome to cikl search!
+            </p>
+            <p class="text-info text-center lead">
+                Please select the type of record you are searching for and enter a corresponding search term to get started.
+            </p>
+
+
+
+
+        </div>
+    </div>
+</div>

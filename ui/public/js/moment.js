@@ -49,7 +49,7 @@
         aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
         aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/,
 
-        // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
+        // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.views
         // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
         isoDurationRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/,
 
