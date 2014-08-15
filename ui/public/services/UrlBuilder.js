@@ -13,7 +13,7 @@ function UrlBuilder (CiklApi, DateTime, Page) {
     link = link + UrlBuilder.url_root + '/#/';
     link = link + type + '/';
     link = link + term + '/';
-    link = link + Page.getCurrentPage() + '/';
+    link = link + '1/';
     link = link + Page.getItemsPerPage() + '/';
     link = link + CiklApi.getOrder() + '/';
     link = link + CiklApi.getOrderBy() + '/';
