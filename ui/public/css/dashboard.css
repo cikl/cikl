@@ -17,6 +17,10 @@ body {
     border-bottom: 1px solid #eee;
 }
 
+table.data {
+    width: 100%;
+}
+
 
 /*
  * Sidebar
@@ -80,35 +84,37 @@ body {
  * Angular animate
  */
 
-div.repeat div span.ng-enter {
-    transition: 0s ease-in all;
-    opacity: 0;
-}
-div.repeat div span.ng-enter-stagger {
-    transition-delay: 0.2s;
-    transition-duration: 0s;
-}
-div.repeat div span.ng-enter.ng-enter-active {
-    opacity: 1;
-}
-
-
-
-div.test table tbody {
-
-}
-
-div.test table tbody.ng-enter {
+div.badges div span.ng-enter {
     -webkit-transition:0.2s ease-in all;
     -moz-transition:0.2s ease-in all;
     -o-transition:0.2s ease-in all;
     transition: 0.2s ease-in all;
     opacity: 0;
 }
-div.test table tbody.ng-enter-stagger {
+div.badges div span.ng-enter-stagger {
     transition-delay: 0.2s;
 }
-div.test table tbody.ng-enter.ng-enter-active {
+div.badges div span.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+
+
+
+table.data tbody {
+
+}
+
+table.data tbody.ng-enter {
+    -webkit-transition:0.1s ease-in all;
+    -moz-transition:0.1s ease-in all;
+    -o-transition:0.1s ease-in all;
+    transition: 0.1s ease-in all;
+    opacity: 0;
+}
+table.data tbody.ng-enter-stagger {
+    transition-delay: 0.1s;
+}
+table.data tbody.ng-enter.ng-enter-active {
     opacity: 1;
 }
 
