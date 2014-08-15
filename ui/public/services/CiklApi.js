@@ -88,7 +88,14 @@ function CiklApi ($q, $http, DateTime, Page) {
 
         // Page total items
         Page.setTotalItems(parseInt(CiklApi.query.total_events));
-        Page.updatePage(Page.getCurrentPage());
+        if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
+          Page.updatePage(Page.getCurrentPage());
+        }
+        else {
+          Page.updatePage(1);
+          CiklApi.queryApi();
+        }
+
 
         deferred.resolve(CiklApi.query);
 
