@@ -44,6 +44,51 @@ function CiklApi ($q, $http, DateTime, Page) {
   };
 
 
+  CiklApi.isAsc = function () {
+    return (CiklApi.order == 'asc');
+  };
+  CiklApi.isDesc = function () {
+    return (CiklApi.order == 'desc');
+  };
+
+  CiklApi.isImport = function () {
+    return (CiklApi.order_by == 'import_time');
+  };
+  CiklApi.isDetect = function () {
+    return (CiklApi.order_by == 'detect_time');
+  };
+
+  CiklApi.sortDetect = function() {
+    if (CiklApi.getOrderBy() === 'detect_time') {
+      if (CiklApi.getOrder() === 'desc') {
+        CiklApi.setOrder('asc');
+      }
+      else {
+        CiklApi.setOrder('desc');
+      }
+    }
+    else {
+      CiklApi.setOrder('desc');
+      CiklApi.setOrderBy('detect_time');
+    }
+  };
+
+  CiklApi.sortImport = function() {
+    if (CiklApi.getOrderBy() === 'import_time') {
+      if (CiklApi.getOrder() === 'desc') {
+        CiklApi.setOrder('asc');
+      }
+      else {
+        CiklApi.setOrder('desc');
+      }
+    }
+    else {
+      CiklApi.setOrder('desc');
+      CiklApi.setOrderBy('import_time');
+    }
+  };
+
+
   // Cikl API request function
   CiklApi.queryApi = function () {
 
@@ -88,7 +133,14 @@ function CiklApi ($q, $http, DateTime, Page) {
 
         // Page total items
         Page.setTotalItems(parseInt(CiklApi.query.total_events));
-        Page.updatePage(Page.getCurrentPage());
+        if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
+          Page.updatePage(Page.getCurrentPage());
+        }
+        else {
+          Page.updatePage(1);
+          CiklApi.queryApi();
+        }
+
 
         deferred.resolve(CiklApi.query);
 
