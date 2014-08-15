@@ -52,6 +52,15 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getLastPage = function () {
     return Page.getLastPage();
   };
+  m.getPages = function () {
+    return Page.getPages();
+  };
+  m.checkCurrentPage = function (page) {
+    return Page.checkCurrentPage(page);
+  };
+  m.isVisible = function (page) {
+    return Page.isVisible(page);
+  };
 
 
   m.getType = function () {
@@ -193,7 +202,7 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     $location.path( '/'
             + CiklApi.getType() + '/'
             + CiklApi.getTerm() + '/'
-            + Page.getCurrentPage() + '/'
+            + '1/'
             + Page.getItemsPerPage() + '/'
             + CiklApi.getOrder() + '/'
             + CiklApi.getOrderBy() + '/'

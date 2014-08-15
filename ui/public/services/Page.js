@@ -51,6 +51,48 @@ function Page () {
     Page.max_size = max_size;
   };
 
+  // Return true if page is current page else false
+  Page.checkCurrentPage = function (page) {
+    return (parseInt(page) == Page.current_page);
+  };
+
+  // Create Pages array for pagination directive
+  Page.getPages = function () {
+    var pages = new Array;
+
+    for (var i = 1; i <= ( Math.floor( ( (parseInt(Page.total_items) - 1) + parseInt(Page.items_per_page) ) / parseInt(Page.items_per_page) )); i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
+  // Shows pagination links for 5 pages before and 5 pages after Page.current_page
+  Page.isVisible = function (page) {
+    if (parseInt(Page.current_page) <= 5) {
+      if (page <= 11) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if (parseInt(Page.current_page) >= ((Math.floor( (Page.total_items - 1) / Page.items_per_page ) + 1) -5)) {
+      if (page >= ((Math.floor( (Page.total_items - 1) / Page.items_per_page ) + 1) -10)){
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if ((parseInt(Page.current_page) - 5) <= page && page <= (parseInt(Page.current_page) + 5)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
+  // Update Page variables after API call
   Page.updatePage = function (page) {
 
     // Set first page
@@ -90,7 +132,6 @@ function Page () {
     else {
       Page.last_page = null;
     }
-
   };
 
   return Page;
