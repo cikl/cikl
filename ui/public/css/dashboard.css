@@ -4,7 +4,7 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
-    padding-top: 50px;
+    padding-top: 80px;
 }
 
 
@@ -15,6 +15,10 @@ body {
 .sub-header {
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
+}
+
+table.data {
+    width: 77.5%;
 }
 
 
@@ -80,35 +84,32 @@ body {
  * Angular animate
  */
 
-div.repeat div span.ng-enter {
-    transition: 0s ease-in all;
+div.placeholder span.ng-enter {
+    -webkit-transition:0.1s ease-in all;
+    -moz-transition:0.1s ease-in all;
+    -o-transition:0.1s ease-in all;
+    transition: 0.1s ease-in all;
     opacity: 0;
 }
-div.repeat div span.ng-enter-stagger {
-    transition-delay: 0.2s;
-    transition-duration: 0s;
+div.placeholder span.ng-enter-stagger {
+    transition-delay: 0.1s;
 }
-div.repeat div span.ng-enter.ng-enter-active {
+div.placeholder span.ng-enter.ng-enter-active {
     opacity: 1;
 }
 
 
-
-div.test table tbody {
-
-}
-
-div.test table tbody.ng-enter {
-    -webkit-transition:0.2s ease-in all;
-    -moz-transition:0.2s ease-in all;
-    -o-transition:0.2s ease-in all;
-    transition: 0.2s ease-in all;
+table.table tbody.ng-enter {
+    -webkit-transition:0.1s ease-in all;
+    -moz-transition:0.1s ease-in all;
+    -o-transition:0.1s ease-in all;
+    transition: 0.1s ease-in all;
     opacity: 0;
 }
-div.test table tbody.ng-enter-stagger {
-    transition-delay: 0.2s;
+table.table tbody.ng-enter-stagger {
+    transition-delay: 0.1s;
 }
-div.test table tbody.ng-enter.ng-enter-active {
+table.table tbody.ng-enter.ng-enter-active {
     opacity: 1;
 }
 

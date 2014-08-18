@@ -1,40 +1,36 @@
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><strong>cikl</strong></a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <p class="navbar-text navbar-right">
+                <strong class="text-primary">Type: </strong><span>{{m.getType()}}</span>
+                <strong class="text-primary">Term: </strong><span>{{m.getTerm()}}</span>
+                <strong class="text-primary">Order by: </strong><span>{{m.getOrderBy()}}</span>
+                <strong class="text-primary">Order: </strong><span>{{m.getOrder()}}</span>
+            </p>
+            <!--
+            <form novalidate class="navbar-form navbar-right">
+                <input ng-model="user.email" class="input-sm form-control" type="email" placeholder="Email">
+                <input ng-model="user.password" class="input-sm form-control" type="password" placeholder="Password">
+                <button class="btn-sm btn-inverse" ng-click="login(user)"><strong>Log In</strong></button>
+            </form>
+            -->
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="row">
-
-    <div class="col-sm-12 col-md-12">
-            <small class="text-info"><strong>Sort by: </strong></small><small class="text-danger">{{m.getOrderBy()}}</small>
-            <small class="text-info"><strong>Order: </strong></small><small class="text-danger">{{m.getOrder()}}</small>
-            <small class="text-info"><strong>Type: </strong></small><small class="text-danger">{{m.getType()}}</small>
-            <small class="text-info"><strong>Term: </strong></small><small class="text-danger">{{m.getTerm()}}</small>
-
-            <div ng-if="m.getImportMin()">
-                <small class="text-info"><strong>Filter Import Min: </strong></small>
-                <small class="text-danger">{{m.getImportMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
-                <button ng-click="m.removeImportMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove"></span></button>
-            </div>
-            <div ng-if="m.getImportMax()">
-                <small class="text-info"><strong>Filter Import Max: </strong></small>
-                <small class="text-danger">{{m.getImportMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
-                <button ng-click="m.removeImportMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove"></span></button>
-
-            </div>
-            <div ng-if="m.getDetectMin()">
-                <small class="text-info"><strong>Filter Detect Min: </strong></small>
-                <small class="text-danger">{{m.getDetectMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
-                <button ng-click="m.removeDetectMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove"></span></button>
-            </div>
-            <div ng-if="m.getDetectMax()">
-                <small class="text-info"><strong>Filter Detect Max: </strong></small>
-                <small class="text-danger">{{m.getDetectMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
-                <button ng-click="m.removeDetectMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove"></span></button>
-            </div>
-        </div>
-
-        <div class="col-sm-12 col-md-12 main">
-
-            <h1 class="page-header text-center">Search</h1>
-
-            <form novalidate class="form-inline text-center lead" role="form">
+        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+            <form novalidate class="form-inline lead" role="form">
                 <div class="form-group">
                     <select ng-model="artifact.type" class="input input-lg" name="search-type" id="search-type">
                         <option value>- select type -</option>
@@ -52,168 +48,259 @@
                     <button class="btn btn-default btn-lg" ng-click="m.formSearch(artifact)"><span class="glyphicon glyphicon-search"></span></button>
                 </div>
             </form>
-
-
-
-            <div class="row placeholders">
-                <div class="col-xs-6 col-sm-4 placeholder">
-                    <h4>First Seen</h4>
-                    <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Detect {{m.query.facets.min_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</span>
-                </div>
-                <div class="col-xs-6 col-sm-4 placeholder">
-                    <h4>Last Seen</h4>
-                    <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-                    <span class="text-muted">Detect {{m.query.facets.max_detect_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</span>
-                </div>
-                <div class="col-xs-6 col-sm-4 placeholder">
-                    <h4>Feed Hits</h4>
-                    <h1 class="lead text-info"><strong>{{m.query.facets.feed_names.length}}</strong></h1>
-                    <span class="text-muted"># of feed names</span>
-                </div>
-
-                <!--
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>Hit Rate</h4>
-                    <h1 class="lead text-info"><strong>5/20 for 25%</strong></h1>
-                    <span class="text-muted">% of feeds with a hit</span>
-                </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
-                    <h4>Search Count</h4>
-                    <h1 class="lead text-info"><strong>41</strong></h1>
-                    <span class="text-muted">number of times searched</span>
-                </div>
-                -->
-            </div>
-
-
-            <!--<h2 class="sub-header">Section title</h2>-->
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-6">
-                    <button type="button" class="btn btn-default" disabled="disabled"><span class="glyphicon glyphicon-sort"></span>source</button>
-                    <button type="button" class="btn btn-default" ng-click="m.sortDetect()"><span class="glyphicon glyphicon-sort"></span>detect time</button>
-                    <button type="button" class="btn btn-default" ng-click="m.sortImport()"><span class="glyphicon glyphicon-sort"></span>import time</button>
-
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-6">
-                    <button type="button" class="btn btn-default" disabled="disabled"><span class="glyphicon glyphicon-filter"></span>source</button>
-                    <button type="button" class="btn btn-default" ng-click="m.collapsedDetect = !m.collapsedDetect"><span class="glyphicon glyphicon-filter"></span>detect time</button>
-                    <button type="button" class="btn btn-default" ng-click="m.collapsedImport = !m.collapsedImport"><span class="glyphicon glyphicon-filter"></span>import time</button>
-                </div>
-            </div>
-
-            <p></p>
-
-
-
-
-
-
-            <div class="container-fluid">
-                <div class="row repeat">
-                    <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                        <a href="#"><span class="badge alert-default">All Events ({{m.query.total_events}})</span></a>
-                        <span ng-repeat="source in m.query.facets.sources">
-                            <a href="#"><span class="badge alert-info">{{source[0]}} ({{source[1]}})</span></a>
-                        </span>
-                        <span ng-repeat="provider in m.query.facets.feed_providers">
-                            <a href="#"><span class="badge alert-warning">{{provider[0]}} ({{provider[1]}})</span></a>
-                        </span>
-                        <span ng-repeat="name in m.query.facets.feed_names">
-                            <a href="#"><span class="badge alert-danger">{{name[0]}} ({{name[1]}})</span></a>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="container-fluid">
-                <div class="row">
-                    <div page-selector></div>
-                </div>
-
-
-                <div class="row">
-                    <div class="table-responsive test">
-                        <table class="table table-condensed table-hover ">
-                            <thead>
-                            </thead>
-                            <tbody ng-repeat="event in m.query.events">
-                            <tr>
-                                <td><small><strong>source:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.source}}</a></strong></small></td>
-                                <td><small><strong>provider:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_provider}}</a></strong></small></td>
-                                <td><small><strong>feed:</strong></small></td><td><small class="text-danger"><strong><a href='#'>{{event.feed_name}}</a></strong></small></td>
-                            </tr>
-                            <tr>
-                                <td><small><strong>detect time:</strong></small></td><td><small>{{event.detect_time}}</small></td>
-                                <td><small><strong>import time:</strong></small></td><td><small>{{event.import_time}}</small></td>
-                                <td><small><strong>tags:</strong></small></td><td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
-                            </tr>
-                            <tr ng-repeat="domain in event.observables.fqdn">
-                                <td><small><strong>fqdn:</strong></small></td>
-                                <td>
-                                    <small class="text-danger">
-                                        <strong>
-                                            <a ng-href="{{m.getLink('fqdn', domain.fqdn)}}">{{domain.fqdn}}</a>
-                                        </strong>
-                                    </small>
-                                </td>
-                                <td></td><td></td>
-                                <td></td><td></td>
-                            </tr>
-                            <tr ng-repeat="answer in event.observables.dns_answer">
-                                <td><small><strong>resolver:</strong></small></td><td><small>{{answer.resolver}}</small></td>
-                                <td><small><strong>section:</strong></small></td><td><small>{{answer.section}}</small></td>
-                                <td><small><strong>name:</strong></small></td>
-                                <td>
-                                    <small class="text-danger">
-                                        <strong>
-                                            <a ng-href="{{m.getLink('fqdn', answer.name)}}">{{answer.name}}</a>
-                                        </strong>
-                                    </small>
-                                </td>
-                            </tr>
-                            <tr ng-repeat="answer in event.observables.dns_answer">
-                                <td><small><strong>rr_class:</strong></small></td><td><small>{{answer.rr_class}}</small></td>
-                                <td><small><strong>rr_type:</strong></small></td><td><small>{{answer.rr_type}}</small></td>
-                                <td><small><strong>fqdn:</strong></small></td>
-                                <td>
-                                    <small class="text-danger">
-                                        <strong>
-                                            <a ng-href="{{m.getLink('fqdn', answer.fqdn)}}">{{answer.fqdn}}</a>
-                                        </strong>
-                                    </small>
-                                </td>
-                            </tr>
-                            <tr ng-repeat="answer in event.observables.dns_answer">
-                                <td><small><strong>ipv4:</strong></small></td>
-                                <td>
-                                    <small class="text-danger">
-                                        <strong>
-                                            <a ng-href="{{m.getLink('ipv4', answer.ipv4)}}">{{answer.ipv4}}</a>
-                                        </strong>
-                                    </small>
-                                </td>
-                                <td><small><strong>ipv6:</strong></small></td>
-                                <td>
-                                    <small class="text-danger">
-                                        <strong>
-                                            <a ng-href="{{m.getLink('ipv6', answer.ipv6)}}">{{answer.ipv6}}</a>
-                                        </strong>
-                                    </small>
-                                </td>
-                                <td></td><td></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div page-selector></div>
-                </div>
-            </div>
-
-
         </div>
     </div>
+
+    <div class="row placeholders">
+        <div class="col-xs-4 col-sm-3 placeholder">
+            <h4 class="text-primary">First Seen</h4>
+            <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
+            <span class="text-muted">Detect Min {{m.query.facets.min_detect_time | date: 'Z'}}</span>
+        </div>
+        <div class="col-xs-4 col-sm-3 placeholder">
+            <h4 class="text-primary">Last Seen</h4>
+            <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
+            <span class="text-muted">Detect Max {{m.query.facets.max_detect_time | date: 'Z'}}</span>
+        </div>
+        <div class="col-xs-4 col-sm-3 placeholder">
+            <h4 class="text-primary">Hit Types</h4>
+            <br />
+            <span ng-repeat="source in m.query.facets.sources">
+                <a href="#"><span class="badge alert-info">{{source[0]}} ({{source[1]}})</span></a>
+            </span>
+            <span ng-repeat="provider in m.query.facets.feed_providers">
+                <a href="#"><span class="badge alert-warning">{{provider[0]}} ({{provider[1]}})</span></a>
+            </span>
+            <span ng-repeat="name in m.query.facets.feed_names">
+                <a href="#"><span class="badge alert-danger">{{name[0]}} ({{name[1]}})</span></a>
+            </span>
+            <br />
+            <br />
+            <span class="text-muted">Total Events ({{m.query.total_events}})</span>
+        </div>
+        <div class="col-xs-4 col-sm-3 placeholder">
+            <h4 class="text-primary">Feed Hits</h4>
+            <h1 class="lead text-info"><strong>{{m.query.facets.feed_names.length}}</strong></h1>
+            <span class="text-muted"># of feed names</span>
+        </div>
+
+        <!--
+        <div class="col-xs-6 col-sm-3 placeholder">
+            <h4>Search Count</h4>
+            <h1 class="lead text-info"><strong>41</strong></h1>
+            <span class="text-muted">number of times searched</span>
+        </div>
+        -->
+    </div>
+
+    <!--
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6">
+            <button type="button" class="btn btn-default" disabled="disabled"><span class="glyphicon glyphicon-filter"></span>source</button>
+            <button type="button" class="btn btn-default" ng-click="m.collapsedDetect = !m.collapsedDetect"><span class="glyphicon glyphicon-filter"></span>detect time</button>
+            <button type="button" class="btn btn-default" ng-click="m.collapsedImport = !m.collapsedImport"><span class="glyphicon glyphicon-filter"></span>import time</button>
+        </div>
+    </div>
+    -->
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <div class="text-center" page-selector></div>
+
+            <small ng-if="m.getImportMin()" class="text-primary"><strong>Import Min: </strong></small>
+            <small ng-if="m.getImportMin()" class="text-info">{{m.getImportMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <button ng-if="m.getImportMin()" ng-click="m.removeImportMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+
+            <small ng-if="m.getImportMax()" class="text-primary"><strong>Import Max: </strong></small>
+            <small ng-if="m.getImportMax()" class="text-info">{{m.getImportMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <button ng-if="m.getImportMax()" ng-click="m.removeImportMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+
+            <small ng-if="m.getDetectMin()" class="text-primary"><strong>Detect Min: </strong></small>
+            <small ng-if="m.getDetectMin()" class="text-info">{{m.getDetectMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <button ng-if="m.getDetectMin()" ng-click="m.removeDetectMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+
+            <small ng-if="m.getDetectMax()" class="text-primary"><strong>Detect Max: </strong></small>
+            <small ng-if="m.getDetectMax()" class="text-info">{{m.getDetectMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <button ng-if="m.getDetectMax()" ng-click="m.removeDetectMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+
+            <div class="panel panel-info">
+                <table class="table table-condensed table-hover table-striped">
+                    <thead>
+                    <tr class="text-center">
+                        <th>
+                            <strong class="text-primary">Source</strong>
+                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
+                                <span ng-if="!m.isSource()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isSource()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+                        <th>
+                            <strong class="text-primary">Provider</strong>
+                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortProvider()">
+                                <span ng-if="!m.isProvider()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isProvider()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+                        <th>
+                            <strong class="text-primary">Feed</strong>
+                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortFeed()">
+                                <span ng-if="!m.isFeed()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isFeed()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+                        <th>
+                            <strong class="text-primary">Detect Time</strong>
+                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortDetect()">
+                                <span ng-if="!m.isDetect()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isDetect()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-order-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-order text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+                        <th>
+                            <strong class="text-primary">Import Time</strong>
+                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortImport()">
+                                <span ng-if="!m.isImport()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isImport()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-order-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-order text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+                        <th>
+                            <strong class="text-primary">Tags</strong>
+                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortTags()">
+                                <span ng-if="!m.isTags()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isTags()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
+                        </span>
+                            </button>
+                        </th>
+
+                        <th><strong></strong></th>
+                    </tr>
+                    </thead>
+                    <tbody ng-repeat="event in m.query.events">
+                    <tr>
+                        <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
+                        <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
+                        <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
+                        <td><small>{{event.detect_time}}</small></td>
+                        <td><small>{{event.import_time}}</small></td>
+                        <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
+                        <td>
+                            <button class="btn btn-default btn-link" ng-click="$index = !$index">
+                                <span ng-if="$index"><strong><span class="glyphicon glyphicon-plus text-info"></span></strong></span>
+                                <span ng-if="!$index"><strong><span class="glyphicon glyphicon-remove text-danger"></span></strong></span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr ng-hide="$index">
+                        <td colspan='7' ng-repeat="domain in event.observables.fqdn">
+                            <small><strong>fqdn: </strong></small>
+                            <small class="text-danger">
+                                <strong>
+                                    <a ng-href="{{m.getLink('fqdn', domain.fqdn)}}">{{domain.fqdn}}</a>
+                                </strong>
+                            </small>
+                        </td>
+                    </tr>
+                    <tr  ng-hide="$index">
+                        <td colspan='7' ng-repeat="answer in event.observables.dns_answer">
+                            <table class="data">
+                                <tr>
+                                    <td>
+                                        <small><strong>name: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small class="text-danger">
+                                            <strong>
+                                                <a ng-href="{{m.getLink('fqdn', answer.name)}}">{{answer.name}}</a>
+                                            </strong>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small><strong>fqdn: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small class="text-danger">
+                                            <strong>
+                                                <a ng-href="{{m.getLink('fqdn', answer.fqdn)}}">{{answer.fqdn}}</a>
+                                            </strong>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small><strong>ipv4: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small class="text-danger">
+                                            <strong>
+                                                <a ng-href="{{m.getLink('ipv4', answer.ipv4)}}">{{answer.ipv4}}</a>
+                                            </strong>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small><strong>ipv6: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small class="text-danger">
+                                            <strong>
+                                                <a ng-href="{{m.getLink('ipv6', answer.ipv6)}}">{{answer.ipv6}}</a>
+                                            </strong>
+                                        </small>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <small><strong>resolver: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small>{{answer.resolver}}</small>
+                                    </td>
+                                    <td>
+                                        <small><strong>section: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small>{{answer.section}}</small>
+                                    </td>
+                                    <td>
+                                        <small><strong>rr_class: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small>{{answer.rr_class}}</small>
+                                    </td>
+                                    <td>
+                                        <small><strong>rr_type: </strong></small>
+                                    </td>
+                                    <td>
+                                        <small>{{answer.rr_type}}</small>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center" page-selector></div>
+        </div>
+    </div>
+
 </div>

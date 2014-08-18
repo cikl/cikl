@@ -21,6 +21,7 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.detect_min = DateTime.detect_min;
   m.detect_max = DateTime.detect_max;
 
+  // Animation timeout delay
   $timeout(function () {
     m.query = CiklApi.getQuery();
   }, 200);
@@ -32,7 +33,7 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.collapsedImport = false;
   m.collapsedDetect = false;
 
-
+  // UrlBuilder functions
   m.getLink = function (type, term) {
     return UrlBuilder.getLink(type, term);
   };
@@ -40,6 +41,7 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     return UrlBuilder.getPage(page);
   };
 
+  // Pagination functions
   m.getFirstPage = function () {
     return Page.getFirstPage();
   };
@@ -52,29 +54,41 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getLastPage = function () {
     return Page.getLastPage();
   };
+  m.getPages = function () {
+    return Page.getPages();
+  };
+  m.checkCurrentPage = function (page) {
+    return Page.checkCurrentPage(page);
+  };
+  m.isVisible = function (page) {
+    return Page.isVisible(page);
+  };
+  m.getTotalItems = function () {
+    return Page.getTotalItems();
+  };
+  m.setCurrentPage = function () {
+    Page.setCurrentPage(m.current_page);
+  };
 
-
+  // API settings getter functions
   m.getType = function () {
     return CiklApi.getType();
   };
   m.getTerm = function () {
     return CiklApi.getTerm();
   };
-
   m.getCurrentPage = function () {
     return Page.getCurrentPage();
   };
   m.getItemsPerPage = function () {
     return Page.getItemsPerPage();
   };
-
   m.getOrder = function () {
     return CiklApi.getOrder();
   };
   m.getOrderBy = function () {
     return CiklApi.getOrderBy();
   };
-
   m.getImportMin = function () {
     return DateTime.getImportMin();
   };
@@ -88,7 +102,21 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     return DateTime.getDetectMax();
   };
 
+  // Sort true/false functions
+  m.isAsc = function () {
+    return CiklApi.isAsc();
+  };
+  m.isDesc = function () {
+    return CiklApi.isDesc();
+  };
+  m.isImport = function () {
+    return CiklApi.isImport();
+  };
+  m.isDetect = function () {
+    return CiklApi.isDetect();
+  };
 
+  // Remove filter functions
   m.removeImportMin = function() {
     DateTime.clearImportMin();
 
@@ -112,111 +140,43 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
 
   // Sort button functions
   m.sortDetect = function() {
-    if (CiklApi.getOrderBy() === 'detect_time') {
-      if (CiklApi.getOrder() === 'desc') {
-        CiklApi.setOrder('asc');
-      }
-      else {
-        CiklApi.setOrder('desc');
-      }
-    }
-    else {
-      CiklApi.setOrder('desc');
-      CiklApi.setOrderBy('detect_time');
-    }
-
+    CiklApi.sortDetect();
     m.search();
   };
-
   m.sortImport = function() {
-    if (CiklApi.getOrderBy() === 'import_time') {
-      if (CiklApi.getOrder() === 'desc') {
-        CiklApi.setOrder('asc');
-      }
-      else {
-        CiklApi.setOrder('desc');
-      }
-    }
-    else {
-      CiklApi.setOrder('desc');
-      CiklApi.setOrderBy('import_time');
-    }
-
+    CiklApi.sortImport();
     m.search();
   };
-
   m.sortSource = function() {
-
+    CiklApi.sortSource();
+    m.search();
   };
-
-  // Filter import date & time asc/desc
-  m.filterImport = function() {
-    if (DateTime.getImportMinFilter()) {
-      DateTime.setImportMinFilter(true);
-    }
-    else {
-      DateTime.setImportMinFilter(false);
-    }
-
-    if (DateTime.getImportMaxFilter()) {
-      DateTime.setImportMaxFilter(true);
-    }
-    else {
-      DateTime.setImportMaxFilter(false);
-    }
-
+  m.sortProvider = function() {
+    CiklApi.sortProvider();
+    m.search();
+  };
+  m.sortFeed = function() {
+    CiklApi.sortFeed();
+    m.search();
+  };
+  m.sortTags = function() {
+    CiklApi.sortTags();
     m.search();
   };
 
-  // Filter detect date & time asc/desc
-  m.filterDetect = function() {
-    if (DateTime.getDetectMinFilter()) {
-      DateTime.setDetectMinFilter(true);
-    }
-    else {
-      DateTime.setDetectMinFilter(false);
-    }
 
-    if (DateTime.getDetectMaxFilter()) {
-      DateTime.setDetectMaxFilter(true);
-    }
-    else {
-      DateTime.setDetectMaxFilter(false);
-    }
-
-    m.search();
-  };
 
   // Cikl Api Query
   m.search = function() {
-    // /:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax
-    $location.path( '/'
-            + CiklApi.getType() + '/'
-            + CiklApi.getTerm() + '/'
-            + Page.getCurrentPage() + '/'
-            + Page.getItemsPerPage() + '/'
-            + CiklApi.getOrder() + '/'
-            + CiklApi.getOrderBy() + '/'
-            + DateTime.getImportMinEpoch() + '/'
-            + DateTime.getImportMaxEpoch() + '/'
-            + DateTime.getDetectMinEpoch() + '/'
-            + DateTime.getDetectMaxEpoch()
-    );
+    $location.path(UrlBuilder.getSearch());
   };
 
+  // Search form
   m.formSearch = function(artifact) {
     CiklApi.setType(artifact.type);
     CiklApi.setTerm(artifact.term);
 
     m.search();
-  };
-
-  // Page
-  m.getTotalItems = function () {
-    return Page.getTotalItems();
-  };
-  m.setCurrentPage = function () {
-    Page.setCurrentPage(m.current_page);
   };
 
 }

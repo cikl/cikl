@@ -13,7 +13,7 @@ function UrlBuilder (CiklApi, DateTime, Page) {
     link = link + UrlBuilder.url_root + '/#/';
     link = link + type + '/';
     link = link + term + '/';
-    link = link + Page.getCurrentPage() + '/';
+    link = link + '1/';
     link = link + Page.getItemsPerPage() + '/';
     link = link + CiklApi.getOrder() + '/';
     link = link + CiklApi.getOrderBy() + '/';
@@ -41,6 +41,25 @@ function UrlBuilder (CiklApi, DateTime, Page) {
     link = link + DateTime.getDetectMaxEpoch();
 
     return link;
+  };
+
+  UrlBuilder.getSearch = function () {
+    var link = '';
+
+    link = link + '/';
+    link = link + CiklApi.getType() + '/';
+    link = link + CiklApi.getTerm() + '/';
+    link = link + '1/';
+    link = link + Page.getItemsPerPage() + '/';
+    link = link + CiklApi.getOrder() + '/';
+    link = link + CiklApi.getOrderBy() + '/';
+    link = link + DateTime.getImportMinEpoch() + '/';
+    link = link + DateTime.getImportMaxEpoch() + '/';
+    link = link + DateTime.getDetectMinEpoch() + '/';
+    link = link + DateTime.getDetectMaxEpoch();
+
+    return link;
+
   };
 
 

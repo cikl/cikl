@@ -1,4 +1,4 @@
-<ul class="pagination">
+<ul class="pagination pagination-sm">
     <li ng-if="m.getFirstPage()">
         <a ng-href="{{m.getPage(m.getFirstPage())}}">First</a>
     </li>
@@ -11,8 +11,8 @@
     <li ng-if="!m.getPrevPage()" class="disabled">
         <a>Prev</a>
     </li>
-    <li ng-if="m.getCurrentPage()" class="disabled">
-        <a ng-href="{{m.getPage(m.getCurrentPage())}}">{{m.getCurrentPage()}}</a>
+    <li ng-repeat="i in m.getPages()" ng-class="m.checkCurrentPage(i) ? 'disabled' : ''" ng-if="m.isVisible(i)">
+        <a ng-href="{{m.getPage(i)}}">{{i}}</a>
     </li>
     <li ng-if="m.getNextPage()">
         <a ng-href="{{m.getPage(m.getNextPage())}}">Next</a>
