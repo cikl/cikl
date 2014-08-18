@@ -8,3 +8,4 @@ Next
 * Added animation for result data in the UI. - [@dsweet04](https://github.com/dsweet04)
 * Simplified and enhanced functionality in UI. - [@dsweet04](https://github.com/dsweet04)
 * Rolled back data display to show all attributes. - [@dsweet04](https://github.com/dsweet04)
+* Updated and enhanced ui date and times to use moment.js. - [@dsweet04](https://github.com/dsweet04)

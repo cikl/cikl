@@ -2,10 +2,7 @@
   angular.module('app', [
     'ngRoute',
     'ngAnimate',
-    'ui.bootstrap',
-    'sy.bootstrap.timepicker',
-    'template/syTimepicker/timepicker.html',
-    'template/syTimepicker/popup.html'
+    'ui.bootstrap'
   ]);
 
 })();

@@ -7,48 +7,42 @@ function DateTime () {
   DateTime.detect_min = null;
   DateTime.detect_max = null;
 
-  DateTime.import_min_filter = null;
-  DateTime.import_max_filter = null;
-  DateTime.detect_min_filter = null;
-  DateTime.detect_max_filter = null;
-
-  // Date & Time filter collapse variables
-  DateTime.collapsed_import = null;
-  DateTime.collapsed_detect = null;
+  // Date & Time filter collapse
+  DateTime.new_filter = null;
 
 
   // Date and Time get function
   DateTime.getImportMin = function () {
-    return DateTime.import_min;
+    if (DateTime.import_min) {
+      return DateTime.import_min.utc().format();
+    }
+    else {
+      return null;
+    }
   };
   DateTime.getImportMax = function () {
-    return DateTime.import_max;
+    if (DateTime.import_max) {
+      return DateTime.import_max.utc().format();
+    }
+    else {
+      return null;
+    }
   };
   DateTime.getDetectMin = function () {
-    return DateTime.detect_min;
+    if (DateTime.detect_min) {
+      return DateTime.detect_min.utc().format();
+    }
+    else {
+      return null;
+    }
   };
   DateTime.getDetectMax = function () {
-    return DateTime.detect_max;
-  };
-
-  DateTime.getImportMinFilter = function () {
-    return DateTime.import_min_filter;
-  };
-  DateTime.getImportMaxFilter = function () {
-    return DateTime.import_min_filter;
-  };
-  DateTime.getDetectMinFilter = function () {
-    return DateTime.detect_min_filter;
-  };
-  DateTime.getDetectMaxFilter = function () {
-    return DateTime.detect_max_filter;
-  };
-
-  DateTime.getCollapsedImport = function() {
-    return DateTime.collapsed_import;
-  };
-  DateTime.getCollapsedDetect = function() {
-    return DateTime.collapsed_detect;
+    if (DateTime.detect_max) {
+      return DateTime.detect_max.utc().format();
+    }
+    else {
+      return null;
+    }
   };
 
 
@@ -66,18 +60,104 @@ function DateTime () {
     DateTime.detect_max = detect_max;
   };
 
-  // Filter true/false set functions
-  DateTime.setImportMinFilter = function (import_min_filter) {
-    DateTime.import_min_filter = import_min_filter;
+  // Filter functions
+  DateTime.newDateFilter = function () {
+    DateTime.new_filter = true;
   };
-  DateTime.setImportMaxFilter = function (import_max_filter) {
-    DateTime.import_max_filter = import_max_filter;
+  DateTime.checkDateFilter = function () {
+    return DateTime.new_filter;
   };
-  DateTime.setDetectMinFilter = function (detect_min_filter) {
-    DateTime.detect_min_filter = detect_min_filter;
+  DateTime.clearDateFilter = function () {
+    DateTime.new_filter = false;
   };
-  DateTime.setDetectMaxFilter = function (detect_max_filter) {
-    DateTime.detect_max_filter = detect_max_filter;
+
+  DateTime.getDateNow = function () {
+    return moment().utc().format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.getDateMinusHour = function () {
+    return moment().utc().subtract(1, 'hours').format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.getDateMinusDay = function () {
+    return moment().utc().subtract(1, 'days').format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.getDateMinusWeek = function () {
+    return moment().utc().subtract(1, 'weeks').format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.getDateMinusMonth = function () {
+    return moment().utc().subtract(1, 'months').format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.getDateMinusYear = function () {
+    return moment().utc().subtract(1, 'years').format('MM-DD-YYYYTHH:mm:ss');
+  };
+  DateTime.addDateFilter = function (filter) {
+    if (filter) {
+      if (filter.type) {
+        var filter_date = moment().utc();
+
+
+        if (filter.datetime) {
+          // Strip out everything excepts numbers
+          var date = filter.datetime.replace(/\D/g, '');
+
+          // Parse out the day, month, and year
+          if (date.length == 14) {
+            var month = parseInt(date[0] + date[1]) - 1;
+            var day = parseInt(date[2] + date[3]);
+            var year = parseInt(date[4] + date[5] + date[6] + date[7]);
+            var hours = parseInt(date[8] + date[9]);
+            var minutes = parseInt(date[10] + date[11]);
+            var seconds = parseInt(date[12] + date[13]);
+
+            if (day < 32 && day > 0) {
+              filter_date.utc().date(day);
+            }
+            if (month < 13 && month > 0) {
+              filter_date.utc().month(month);
+            }
+            if (year <= filter_date.year() && year > 1900) {
+              filter_date.utc().year(year);
+            }
+            if (hours < 24 && hours >= 0) {
+              filter_date.utc().hours(hours);
+            }
+            if (minutes < 60 && minutes >= 0) {
+              filter_date.utc().minutes(minutes);
+            }
+            if (seconds < 60 && seconds >= 0) {
+              filter_date.utc().seconds(seconds);
+            }
+
+            if (filter.type === 'import_min') {
+              DateTime.setImportMin(filter_date);
+              DateTime.clearDateFilter();
+            }
+            else if (filter.type === 'import_max') {
+              DateTime.setImportMax(filter_date);
+              DateTime.clearDateFilter();
+            }
+            else if (filter.type === 'detect_min') {
+              DateTime.setDetectMin(filter_date);
+              DateTime.clearDateFilter();
+            }
+            else if (filter.type === 'detect_max') {
+              DateTime.setDetectMax(filter_date);
+              DateTime.clearDateFilter();
+            }
+            else {
+              console.log('Filter type invalid!');
+            }
+          }
+          else {
+            console.log('Filter datetime is null!');
+          }
+        }
+
+      }// END if (filter.type)
+      else {
+        console.log('Filter is null!');
+      }
+    }// END if (filter)
+
   };
 
   // Get epoch times for URL encoding
@@ -86,7 +166,7 @@ function DateTime () {
       return 'none';
     }
     else {
-      return DateTime.import_min.getTime();
+      return (DateTime.import_min.utc());
     }
   };
   DateTime.getImportMaxEpoch = function() {
@@ -94,7 +174,7 @@ function DateTime () {
       return 'none';
     }
     else {
-      return DateTime.import_max.getTime();
+      return (DateTime.import_max.utc());
     }
   };
   DateTime.getDetectMinEpoch = function() {
@@ -102,7 +182,7 @@ function DateTime () {
       return 'none';
     }
     else {
-      return DateTime.detect_min.getTime();
+      return (DateTime.detect_min.utc());
     }
   };
   DateTime.getDetectMaxEpoch = function() {
@@ -110,7 +190,7 @@ function DateTime () {
       return 'none';
     }
     else {
-      return DateTime.detect_max.getTime();
+      return (DateTime.detect_max.utc());
     }
   };
 
@@ -120,8 +200,8 @@ function DateTime () {
       DateTime.import_min = null;
     }
     else {
-      var d = new Date(parseInt(date));
-      DateTime.import_min = d;
+      var new_date = moment.utc(parseInt(date));
+      DateTime.setImportMin(new_date);
     }
   };
   DateTime.setImportMaxFromEpoch = function(date) {
@@ -129,8 +209,8 @@ function DateTime () {
       DateTime.import_max = null;
     }
     else {
-      var d = new Date(parseInt(date));
-      DateTime.import_max = d;
+      var new_date = moment.utc(parseInt(date));
+      DateTime.setImportMax(new_date);
     }
   };
   DateTime.setDetectMinFromEpoch = function(date) {
@@ -138,8 +218,8 @@ function DateTime () {
       DateTime.detect_min = null;
     }
     else {
-      var d = new Date(parseInt(date));
-      DateTime.detect_min = d;
+      var new_date = moment.utc(parseInt(date));
+      DateTime.setDetectMin(new_date);
     }
   };
   DateTime.setDetectMaxFromEpoch = function(date) {
@@ -147,8 +227,8 @@ function DateTime () {
       DateTime.detect_max = null;
     }
     else {
-      var d = new Date(parseInt(date));
-      DateTime.detect_max = d;
+      var new_date = moment.utc(parseInt(date));
+      DateTime.setDetectMax(new_date);
     }
   };
 
@@ -168,64 +248,25 @@ function DateTime () {
 
   // Set Date and Time filters to new Date()
   DateTime.newImportMin = function () {
-    DateTime.import_min = new Date();
+    DateTime.import_min = moment().utc();
   };
   DateTime.newImportMax = function () {
-    DateTime.import_max = new Date();
+    DateTime.import_max = moment().utc();
   };
   DateTime.newDetectMin = function () {
-    DateTime.detect_min = new Date();
+    DateTime.detect_min = moment().utc();
   };
   DateTime.newDetectMax = function () {
-    DateTime.detect_max = new Date();
+    DateTime.detect_max = moment().utc();
   };
 
   // Initialize filter min dates to end of previous month
   DateTime.initialImportMin = function () {
-    DateTime.import_min.setUTCDate(0);
+    DateTime.import_min.utc().subtract(30, 'days');
   };
   DateTime.initialDetectMin = function () {
-    DateTime.detect_min.setUTCDate(0);
+    DateTime.detect_min.utc().subtract(30, 'days');
   };
-
-  // Create new date
-  DateTime.newImportMin = function () {
-    DateTime.import_min = new Date();
-  };
-  DateTime.newImportMax = function () {
-    DateTime.import_max = new Date();
-  };
-  DateTime.newDetectMin = function () {
-    DateTime.detect_min = new Date();
-  };
-  DateTime.newDetectMax = function () {
-    DateTime.detect_max = new Date();
-  };
-
-
-
-  DateTime.checkImport = function() {
-    if ( (DateTime.getImportMin() === null) && (DateTime.collapsed_import === false) ) {
-      DateTime.newImportMin();
-      DateTime.initialImportMin();
-    }
-
-    if ( (DateTime.getImportMax() === null) && (DateTime.collapsed_import === false) ) {
-      DateTime.newImportMax();
-    }
-  };
-
-  DateTime.checkDetect = function() {
-    if ( (DateTime.getDetectMin() === null) && (DateTime.collapsed_detect === false) ) {
-      DateTime.newDetectMin();
-      DateTime.initialDetectMin();
-    }
-
-    if ( (DateTime.getDetectMax() === null) && (DateTime.collapsed_detect === false) ) {
-      DateTime.newDetectMax();
-    }
-  };
-
 
   return DateTime;
 }

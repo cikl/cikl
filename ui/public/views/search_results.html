@@ -54,13 +54,13 @@
     <div class="row placeholders">
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">First Seen</h4>
-            <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-            <span class="text-muted">Detect Min {{m.query.facets.min_detect_time | date: 'Z'}}</span>
+            <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time}}</strong></h1>
+            <span class="text-muted">Import Min</span>
         </div>
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">Last Seen</h4>
-            <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-            <span class="text-muted">Detect Max {{m.query.facets.max_detect_time | date: 'Z'}}</span>
+            <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time}}</strong></h1>
+            <span class="text-muted">Import Max</span>
         </div>
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">Hit Types</h4>
@@ -93,35 +93,66 @@
         -->
     </div>
 
-    <!--
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-6">
-            <button type="button" class="btn btn-default" disabled="disabled"><span class="glyphicon glyphicon-filter"></span>source</button>
-            <button type="button" class="btn btn-default" ng-click="m.collapsedDetect = !m.collapsedDetect"><span class="glyphicon glyphicon-filter"></span>detect time</button>
-            <button type="button" class="btn btn-default" ng-click="m.collapsedImport = !m.collapsedImport"><span class="glyphicon glyphicon-filter"></span>import time</button>
-        </div>
-    </div>
-    -->
-
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="text-center" page-selector></div>
 
-            <small ng-if="m.getImportMin()" class="text-primary"><strong>Import Min: </strong></small>
-            <small ng-if="m.getImportMin()" class="text-info">{{m.getImportMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <small class="text-primary"><strong>Filters: </strong></small>
+
+            <small ng-if="m.getImportMin()" class="text-muted">import min {{m.getImportMin()}}</small>
+            <small ng-if="m.getImportMin()" class="text-info"></small>
             <button ng-if="m.getImportMin()" ng-click="m.removeImportMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
 
-            <small ng-if="m.getImportMax()" class="text-primary"><strong>Import Max: </strong></small>
-            <small ng-if="m.getImportMax()" class="text-info">{{m.getImportMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <small ng-if="m.getImportMax()" class="text-muted">import max {{m.getImportMax()}}</small>
+            <small ng-if="m.getImportMax()" class="text-info"></small>
             <button ng-if="m.getImportMax()" ng-click="m.removeImportMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
 
-            <small ng-if="m.getDetectMin()" class="text-primary"><strong>Detect Min: </strong></small>
-            <small ng-if="m.getDetectMin()" class="text-info">{{m.getDetectMin() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <small ng-if="m.getDetectMin()" class="text-muted">detect min {{m.getDetectMin()}}</small>
+            <small ng-if="m.getDetectMin()" class="text-info"></small>
             <button ng-if="m.getDetectMin()" ng-click="m.removeDetectMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
 
-            <small ng-if="m.getDetectMax()" class="text-primary"><strong>Detect Max: </strong></small>
-            <small ng-if="m.getDetectMax()" class="text-info">{{m.getDetectMax() | date: 'MM-dd-yyyy HH:mm:ss Z'}}</small>
+            <small ng-if="m.getDetectMax()" class="text-muted">detect max {{m.getDetectMax()}}</small>
+            <small ng-if="m.getDetectMax()" class="text-info"></small>
             <button ng-if="m.getDetectMax()" ng-click="m.removeDetectMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+
+            <button ng-if="!m.checkDateFilter()" ng-click="m.newDateFilter()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-plus text-primary"></span><strong class="text-primary"> (new)</strong></button>
+            <button ng-if="m.checkDateFilter()" ng-click="m.clearDateFilter()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-minus text-danger"></span><strong class="text-danger"> (cancel)</strong></button>
+
+            <form ng-if="m.checkDateFilter()" class="form-inline well well-sm" role="form">
+                <div class="form-group form-inline">
+                    <select ng-model="filter.type" class="input input-sm form-control" name="search-type" id="filter-type">
+                        <option value>- select type -</option>
+                        <option value="import_min"> import min </option>
+                        <option value="import_max"> import max </option>
+                        <option value="detect_min"> detect min </option>
+                        <option value="detect_max"> detect max </option>
+                    </select>
+                    <input
+                            class="input input-sm form-control"
+                            type="text"
+                            name="filter-datetime"
+                            id="filter-datetime"
+                            ng-model="filter.datetime"
+                            ng-required="true"
+                            ng-minlength="14"
+                            ng-maxlength="19"
+                            ng-change="m.getFilter()"
+                            ng-trim="true"
+                            placeholder="mm-dd-yyyy hh:mm:ss"
+                            maxlength="19"
+                            size="20">
+                    <button class="btn btn-default btn-sm" ng-click="m.addDateFilter(filter)"><span class="glyphicon glyphicon-plus"></span></button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateNow()">now</button>
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusHour()">hour ago</button>
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusDay()">day ago</button>
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusWeek()">week ago</button>
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusMonth()">month ago</button>
+                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusYear()">year ago</button>
+                    <button class="btn btn-danger btn-sm" ng-click="filter.datetime = ''">clear</button>
+                </div>
+            </form>
+
 
             <div class="panel panel-info">
                 <table class="table table-condensed table-hover">
