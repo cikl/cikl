@@ -55,12 +55,12 @@
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">First Seen</h4>
             <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-            <span class="text-muted">Detect Min {{m.query.facets.min_detect_time | date: 'Z'}}</span>
+            <span class="text-muted">Import Min {{m.query.facets.min_import_time | date: 'Z'}}</span>
         </div>
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">Last Seen</h4>
             <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time | date: 'MMMM dd, yyyy HH:mm:ss'}}</strong></h1>
-            <span class="text-muted">Detect Max {{m.query.facets.max_detect_time | date: 'Z'}}</span>
+            <span class="text-muted">Import Max {{m.query.facets.max_import_time | date: 'Z'}}</span>
         </div>
         <div class="col-xs-4 col-sm-3 placeholder">
             <h4 class="text-primary">Hit Types</h4>
@@ -124,9 +124,9 @@
             <button ng-if="m.getDetectMax()" ng-click="m.removeDetectMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
 
             <div class="panel panel-info">
-                <table class="table table-condensed table-hover table-striped">
+                <table class="table table-condensed table-hover">
                     <thead>
-                    <tr class="text-center">
+                    <tr class="active">
                         <th>
                             <strong class="text-primary">Source</strong>
                             <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
@@ -187,27 +187,19 @@
                         </span>
                             </button>
                         </th>
-
-                        <th><strong></strong></th>
                     </tr>
                     </thead>
                     <tbody ng-repeat="event in m.query.events">
-                    <tr>
+                    <tr class="info">
                         <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
                         <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
                         <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
                         <td><small>{{event.detect_time}}</small></td>
                         <td><small>{{event.import_time}}</small></td>
                         <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
-                        <td>
-                            <button class="btn btn-default btn-link" ng-click="$index = !$index">
-                                <span ng-if="$index"><strong><span class="glyphicon glyphicon-plus text-info"></span></strong></span>
-                                <span ng-if="!$index"><strong><span class="glyphicon glyphicon-remove text-danger"></span></strong></span>
-                            </button>
-                        </td>
                     </tr>
-                    <tr ng-hide="$index">
-                        <td colspan='7' ng-repeat="domain in event.observables.fqdn">
+                    <tr>
+                        <td colspan='6' ng-repeat="domain in event.observables.fqdn">
                             <small><strong>fqdn: </strong></small>
                             <small class="text-danger">
                                 <strong>
@@ -216,8 +208,8 @@
                             </small>
                         </td>
                     </tr>
-                    <tr  ng-hide="$index">
-                        <td colspan='7' ng-repeat="answer in event.observables.dns_answer">
+                    <tr>
+                        <td colspan='6' ng-repeat="answer in event.observables.dns_answer">
                             <table class="data">
                                 <tr>
                                     <td>
