@@ -7,3 +7,4 @@ Next
 * Refactored the ui to meet angular style guide norms. - [@dsweet04](https://github.com/dsweet04)
 * Added animation for result data in the UI. - [@dsweet04](https://github.com/dsweet04)
 * Simplified and enhanced functionality in UI. - [@dsweet04](https://github.com/dsweet04)
+* Rolled back data display to show all attributes. - [@dsweet04](https://github.com/dsweet04)
