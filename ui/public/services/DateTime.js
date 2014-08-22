@@ -2,16 +2,16 @@ function DateTime () {
 
   var DateTime = {};
 
+  // Filters
   DateTime.import_min = null;
   DateTime.import_max = null;
   DateTime.detect_min = null;
   DateTime.detect_max = null;
 
-  // Date & Time filter collapse
+  // Filter collapse
   DateTime.new_filter = null;
 
-
-  // Date and Time get function
+  // Formatted getter functions
   DateTime.getImportMin = function () {
     if (DateTime.import_min) {
       return DateTime.import_min.utc().format();
@@ -45,8 +45,7 @@ function DateTime () {
     }
   };
 
-
-  // Date and Time set function
+  // Setter functions
   DateTime.setImportMin = function (import_min) {
     DateTime.import_min = import_min;
   };
@@ -70,7 +69,6 @@ function DateTime () {
   DateTime.clearDateFilter = function () {
     DateTime.new_filter = false;
   };
-
   DateTime.getDateNow = function () {
     return moment().utc().format('MM-DD-YYYYTHH:mm:ss');
   };
@@ -129,19 +127,15 @@ function DateTime () {
 
             if (filter.type === 'import_min') {
               DateTime.setImportMin(filter_date);
-              DateTime.clearDateFilter();
             }
             else if (filter.type === 'import_max') {
               DateTime.setImportMax(filter_date);
-              DateTime.clearDateFilter();
             }
             else if (filter.type === 'detect_min') {
               DateTime.setDetectMin(filter_date);
-              DateTime.clearDateFilter();
             }
             else if (filter.type === 'detect_max') {
               DateTime.setDetectMax(filter_date);
-              DateTime.clearDateFilter();
             }
             else {
               console.log('Filter type invalid!');
@@ -194,7 +188,7 @@ function DateTime () {
     }
   };
 
-  // Parse URL epoch times back to dates
+  // Parse URL epoch times back to moments
   DateTime.setImportMinFromEpoch = function(date) {
     if (date === 'none') {
       DateTime.import_min = null;
@@ -232,7 +226,7 @@ function DateTime () {
     }
   };
 
-  // Clear Date and Time filters
+  // Filter clear functions
   DateTime.clearImportMin = function () {
     DateTime.import_min = null;
   };
@@ -246,7 +240,7 @@ function DateTime () {
     DateTime.detect_max = null;
   };
 
-  // Set Date and Time filters to new Date()
+  // Set filters to new moments in utc
   DateTime.newImportMin = function () {
     DateTime.import_min = moment().utc();
   };
@@ -260,7 +254,7 @@ function DateTime () {
     DateTime.detect_max = moment().utc();
   };
 
-  // Initialize filter min dates to end of previous month
+  // Initialize filter min dates to minus 30 days
   DateTime.initialImportMin = function () {
     DateTime.import_min.utc().subtract(30, 'days');
   };
