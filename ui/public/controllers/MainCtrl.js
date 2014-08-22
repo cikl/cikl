@@ -16,22 +16,11 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.order = CiklApi.order;
   m.order_by = CiklApi.order_by;
 
-  m.import_min = DateTime.import_min;
-  m.import_max = DateTime.import_max;
-  m.detect_min = DateTime.detect_min;
-  m.detect_max = DateTime.detect_max;
-
   // Animation timeout delay
   $timeout(function () {
     m.query = CiklApi.getQuery();
   }, 200);
 
-
-
-
-  // Set Date & Time filters to start collapsed
-  m.collapsedImport = false;
-  m.collapsedDetect = false;
 
   // UrlBuilder functions
   m.getLink = function (type, term) {
@@ -102,6 +91,10 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     return DateTime.getDetectMax();
   };
 
+  m.getUTCImportMin = function () {
+    return DateTime.getUTCImportMin();
+  };
+
   // Sort true/false functions
   m.isAsc = function () {
     return CiklApi.isAsc();
@@ -114,6 +107,46 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
   m.isDetect = function () {
     return CiklApi.isDetect();
+  };
+
+  // Filter functions
+  m.newDateFilter = function () {
+    DateTime.newDateFilter();
+  };
+  m.checkDateFilter = function () {
+    return DateTime.checkDateFilter();
+
+  };
+  m.clearDateFilter = function () {
+    DateTime.clearDateFilter();
+  };
+
+  m.getFilter = function () {
+    return m.filter;
+  };
+
+  m.getDateNow = function () {
+    return DateTime.getDateNow();
+  };
+  m.getDateMinusHour = function () {
+    return DateTime.getDateMinusHour();
+  };
+  m.getDateMinusDay = function () {
+    return DateTime.getDateMinusDay();
+  };
+  m.getDateMinusWeek = function () {
+    return DateTime.getDateMinusWeek();
+  };
+  m.getDateMinusMonth = function () {
+    return DateTime.getDateMinusMonth();
+  };
+  m.getDateMinusYear = function () {
+    return DateTime.getDateMinusYear();
+  };
+  m.addDateFilter = function (filter) {
+    DateTime.addDateFilter(filter);
+
+    m.search();
   };
 
   // Remove filter functions

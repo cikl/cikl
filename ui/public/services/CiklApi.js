@@ -110,17 +110,17 @@ function CiklApi ($q, $http, DateTime, Page) {
       query_params["fqdn"] = CiklApi.term;
     }
 
-    if (DateTime.getImportMinFilter() === true) {
+    if (DateTime.getImportMin() !== null) {
       query_params["import_time_min"] = DateTime.getImportMin();
     }
-    if (DateTime.getImportMaxFilter() === true) {
+    if (DateTime.getImportMax() !== null) {
       query_params["import_time_max"] = DateTime.getImportMax();
     }
 
-    if (DateTime.getDetectMinFilter() === true) {
+    if (DateTime.getDetectMin() !== null) {
       query_params["detect_time_min"] = DateTime.getDetectMin();
     }
-    if (DateTime.getDetectMaxFilter() === true) {
+    if (DateTime.getDetectMax() !== null) {
       query_params["detect_time_max"] = DateTime.getDetectMax();
     }
 
