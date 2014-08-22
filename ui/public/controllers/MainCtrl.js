@@ -6,21 +6,10 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.location = $location;
   m.routeParams = $routeParams;
 
-  m.total_items = Page.total_items;
-  m.current_page = Page.current_page;
-  m.items_per_page = Page.items_per_page;
-  m.max_size = Page.max_size;
-
-  m.type = CiklApi.type;
-  m.term = CiklApi.term;
-  m.order = CiklApi.order;
-  m.order_by = CiklApi.order_by;
-
   // Animation timeout delay
   $timeout(function () {
     m.query = CiklApi.getQuery();
-  }, 200);
-
+  }, 300);
 
   // UrlBuilder functions
   m.getLink = function (type, term) {
@@ -55,9 +44,6 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getTotalItems = function () {
     return Page.getTotalItems();
   };
-  m.setCurrentPage = function () {
-    Page.setCurrentPage(m.current_page);
-  };
 
   // API settings getter functions
   m.getType = function () {
@@ -91,10 +77,6 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     return DateTime.getDetectMax();
   };
 
-  m.getUTCImportMin = function () {
-    return DateTime.getUTCImportMin();
-  };
-
   // Sort true/false functions
   m.isAsc = function () {
     return CiklApi.isAsc();
@@ -115,16 +97,10 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
   m.checkDateFilter = function () {
     return DateTime.checkDateFilter();
-
   };
   m.clearDateFilter = function () {
     DateTime.clearDateFilter();
   };
-
-  m.getFilter = function () {
-    return m.filter;
-  };
-
   m.getDateNow = function () {
     return DateTime.getDateNow();
   };
@@ -196,8 +172,6 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     CiklApi.sortTags();
     m.search();
   };
-
-
 
   // Cikl Api Query
   m.search = function() {
