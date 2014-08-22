@@ -1,7 +1,7 @@
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -30,9 +30,9 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-            <form novalidate class="form-inline lead" role="form">
+            <form class="form-inline lead" role="form">
                 <div class="form-group">
-                    <select ng-model="artifact.type" class="input input-lg" name="search-type" id="search-type">
+                    <select class="input input-lg form-control" ng-model="artifact.type" name="search-type" id="search-type">
                         <option value>- select type -</option>
                         <option value="ipv4"> ipv4 </option>
                         <!--<option value="ipv4-range"> ipv4 range </option>-->
@@ -44,7 +44,7 @@
                         <!--<option value="md5"> md5 </option>-->
                         <!--<option value="sha256"> sha256 </option>-->
                     </select>
-                    <input ng-model="artifact.term" class="input input-lg form-control" type="text" name="search-term" id="search-term" placeholder="artifact...">
+                    <input class="input input-lg form-control" ng-model="artifact.term" type="text" name="search-term" id="search-term" placeholder="artifact...">
                     <button class="btn btn-default btn-lg" ng-click="m.formSearch(artifact)"><span class="glyphicon glyphicon-search"></span></button>
                 </div>
             </form>
@@ -101,22 +101,34 @@
 
             <small ng-if="m.getImportMin()" class="text-muted">import min {{m.getImportMin()}}</small>
             <small ng-if="m.getImportMin()" class="text-info"></small>
-            <button ng-if="m.getImportMin()" ng-click="m.removeImportMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+            <button ng-if="m.getImportMin()" class="btn btn-xs btn-link" ng-click="m.removeImportMin()">
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            </button>
 
             <small ng-if="m.getImportMax()" class="text-muted">import max {{m.getImportMax()}}</small>
             <small ng-if="m.getImportMax()" class="text-info"></small>
-            <button ng-if="m.getImportMax()" ng-click="m.removeImportMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+            <button ng-if="m.getImportMax()" class="btn btn-xs btn-link" ng-click="m.removeImportMax()">
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            </button>
 
             <small ng-if="m.getDetectMin()" class="text-muted">detect min {{m.getDetectMin()}}</small>
             <small ng-if="m.getDetectMin()" class="text-info"></small>
-            <button ng-if="m.getDetectMin()" ng-click="m.removeDetectMin()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+            <button ng-if="m.getDetectMin()" class="btn btn-xs btn-link" ng-click="m.removeDetectMin()">
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            </button>
 
             <small ng-if="m.getDetectMax()" class="text-muted">detect max {{m.getDetectMax()}}</small>
             <small ng-if="m.getDetectMax()" class="text-info"></small>
-            <button ng-if="m.getDetectMax()" ng-click="m.removeDetectMax()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-remove text-danger"></span></button>
+            <button ng-if="m.getDetectMax()" class="btn btn-xs btn-link" ng-click="m.removeDetectMax()">
+                <span class="glyphicon glyphicon-remove text-danger"></span>
+            </button>
 
-            <button ng-if="!m.checkDateFilter()" ng-click="m.newDateFilter()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-plus text-primary"></span><strong class="text-primary"> (new)</strong></button>
-            <button ng-if="m.checkDateFilter()" ng-click="m.clearDateFilter()" class="btn btn-xs btn-link"><span class="glyphicon glyphicon-minus text-danger"></span><strong class="text-danger"> (cancel)</strong></button>
+            <button ng-if="!m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.newDateFilter()">
+                <span class="glyphicon glyphicon-plus text-primary"></span><strong class="text-primary"> (new)</strong>
+            </button>
+            <button ng-if="m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.clearDateFilter()">
+                <span class="glyphicon glyphicon-minus text-danger"></span><strong class="text-danger"> (cancel)</strong>
+            </button>
 
             <form ng-if="m.checkDateFilter()" class="form-inline well well-sm" role="form">
                 <div class="form-group form-inline">
@@ -136,7 +148,6 @@
                             ng-required="true"
                             ng-minlength="14"
                             ng-maxlength="19"
-                            ng-change="m.getFilter()"
                             ng-trim="true"
                             placeholder="mm-dd-yyyy hh:mm:ss"
                             maxlength="19"
