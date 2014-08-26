@@ -232,103 +232,18 @@
                     </tr>
                     </thead>
                     <tbody ng-repeat="event in m.query.events">
-                    <tr class="info">
-                        <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
-                        <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
-                        <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
-                        <td><small>{{event.detect_time}}</small></td>
-                        <td><small>{{event.import_time}}</small></td>
-                        <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
-                    </tr>
-                    <tr>
-                        <td colspan='6' ng-repeat="domain in event.observables.fqdn">
-                            <small><strong>fqdn: </strong></small>
-                            <small class="text-danger">
-                                <strong>
-                                    <a ng-href="{{m.getLink('fqdn', domain.fqdn)}}">{{domain.fqdn}}</a>
-                                </strong>
-                            </small>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan='6' ng-repeat="answer in event.observables.dns_answer">
-                            <table class="data">
-                                <tr>
-                                    <td>
-                                        <small><strong>name: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-danger">
-                                            <strong>
-                                                <a ng-href="{{m.getLink('fqdn', answer.name)}}">{{answer.name}}</a>
-                                            </strong>
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <small><strong>fqdn: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-danger">
-                                            <strong>
-                                                <a ng-href="{{m.getLink('fqdn', answer.fqdn)}}">{{answer.fqdn}}</a>
-                                            </strong>
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <small><strong>ipv4: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-danger">
-                                            <strong>
-                                                <a ng-href="{{m.getLink('ipv4', answer.ipv4)}}">{{answer.ipv4}}</a>
-                                            </strong>
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <small><strong>ipv6: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-danger">
-                                            <strong>
-                                                <a ng-href="{{m.getLink('ipv6', answer.ipv6)}}">{{answer.ipv6}}</a>
-                                            </strong>
-                                        </small>
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <small><strong>resolver: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small>{{answer.resolver}}</small>
-                                    </td>
-                                    <td>
-                                        <small><strong>section: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small>{{answer.section}}</small>
-                                    </td>
-                                    <td>
-                                        <small><strong>rr_class: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small>{{answer.rr_class}}</small>
-                                    </td>
-                                    <td>
-                                        <small><strong>rr_type: </strong></small>
-                                    </td>
-                                    <td>
-                                        <small>{{answer.rr_type}}</small>
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                        <tr class="info">
+                            <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
+                            <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
+                            <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
+                            <td><small>{{event.detect_time}}</small></td>
+                            <td><small>{{event.import_time}}</small></td>
+                            <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
+                        </tr>
+                        <tr observables-fqdn>
+                        </tr>
+                        <tr observables-dns-answer>
+                        </tr>
                     </tbody>
                 </table>
             </div>
