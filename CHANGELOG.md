@@ -11,3 +11,4 @@ Next
 * Updated and enhanced ui date and times to use moment.js. - [@dsweet04](https://github.com/dsweet04)
 * Cleaned up code and fixed a few minor bugs. - [@dsweet04](https://github.com/dsweet04)
 * Extracted observable html into directives. - [@dsweet04](https://github.com/dsweet04)
+* Enhanced ui results display features. - [@dsweet04](https://github.com/dsweet04)
