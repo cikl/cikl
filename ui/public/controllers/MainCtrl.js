@@ -44,6 +44,12 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getTotalItems = function () {
     return Page.getTotalItems();
   };
+  m.getShowingStart = function () {
+    return Page.getShowingStart();
+  };
+  m.getShowingEnd = function () {
+    return Page.getShowingEnd();
+  };
 
   // API settings getter functions
   m.getType = function () {

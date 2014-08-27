@@ -10,6 +10,8 @@ function Page () {
   Page.total_items = null;
   Page.items_per_page = null;
   Page.max_size = 10;
+  Page.start = null;
+  Page.end = null;
 
   // Page Get functions
   Page.getFirstPage = function () {
@@ -36,6 +38,13 @@ function Page () {
   Page.getMaxSize = function () {
     return Page.max_size;
   };
+  Page.getShowingStart = function () {
+    return Page.start;
+  };
+  Page.getShowingEnd = function () {
+    return Page.end;
+  };
+
 
   // Page Set functions
   Page.setCurrentPage = function (page_number) {
@@ -49,6 +58,12 @@ function Page () {
   };
   Page.setMaxSize = function (max_size) {
     Page.max_size = max_size;
+  };
+  Page.setShowingStart = function (start) {
+    Page.start = start;
+  };
+  Page.setShowingEnd = function (end) {
+    Page.end = end;
   };
 
   // Return true if page is current page else false
