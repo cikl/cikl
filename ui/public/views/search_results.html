@@ -137,7 +137,18 @@
                     </button>
                 </div>
                 <div class="col-xs-3 text-primary text-right">
-                    <small>Showing {{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}}</small>
+
+                    <form class="form-inline" role="form">
+                        <div class="form-group form-inline">
+                            <small>Showing {{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}}</small>
+                            <select class="input input-sm form-control" ng-model="showing.items" ng-change="m.setItemsPerPage(showing.items)" name="showing-items" id="showing-items">
+                                <option ng-selected="m.isShowingSelected(10)" value="10"> 10 </option>
+                                <option ng-selected="m.isShowingSelected(20)" value="20"> 20 </option>
+                                <option ng-selected="m.isShowingSelected(50)" value="50"> 50 </option>
+                                <option ng-selected="m.isShowingSelected(100)" value="100"> 100 </option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
             </div>
 

@@ -46,6 +46,7 @@ function Page () {
   };
 
 
+
   // Page Set functions
   Page.setCurrentPage = function (page_number) {
     Page.current_page = page_number;
@@ -54,7 +55,7 @@ function Page () {
     Page.total_items = total_items;
   };
   Page.setItemsPerPage = function (items_per_page) {
-    Page.items_per_page = items_per_page;
+    Page.items_per_page = parseInt(items_per_page);
   };
   Page.setMaxSize = function (max_size) {
     Page.max_size = max_size;
@@ -69,6 +70,11 @@ function Page () {
   // Return true if page is current page else false
   Page.checkCurrentPage = function (page) {
     return (parseInt(page) == Page.current_page);
+  };
+
+  // Return true if sowing selected number is current per_page else false
+  Page.isShowingSelected = function (num) {
+    return (parseInt(num) == Page.items_per_page);
   };
 
   // Create Pages array for pagination directive
