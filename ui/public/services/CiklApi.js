@@ -133,6 +133,8 @@ function CiklApi ($q, $http, DateTime, Page) {
 
         // Page total items
         Page.setTotalItems(parseInt(CiklApi.query.total_events));
+        Page.setShowingStart(CiklApi.query.query.start);
+        Page.setShowingEnd(parseInt(CiklApi.query.query.start) + parseInt(CiklApi.query.query.per_page));
         if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
           Page.updatePage(Page.getCurrentPage());
         }
@@ -140,8 +142,6 @@ function CiklApi ($q, $http, DateTime, Page) {
           Page.updatePage(1);
           CiklApi.queryApi();
         }
-
-
         deferred.resolve(CiklApi.query);
 
       }).then(function() {

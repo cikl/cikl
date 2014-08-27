@@ -95,160 +95,193 @@
 
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
-            <div class="text-center" page-selector></div>
-
-            <small class="text-primary"><strong>Filters: </strong></small>
-
-            <small ng-if="m.getImportMin()" class="text-muted">import min {{m.getImportMin()}}</small>
-            <small ng-if="m.getImportMin()" class="text-info"></small>
-            <button ng-if="m.getImportMin()" class="btn btn-xs btn-link" ng-click="m.removeImportMin()">
-                <span class="glyphicon glyphicon-remove text-danger"></span>
-            </button>
-
-            <small ng-if="m.getImportMax()" class="text-muted">import max {{m.getImportMax()}}</small>
-            <small ng-if="m.getImportMax()" class="text-info"></small>
-            <button ng-if="m.getImportMax()" class="btn btn-xs btn-link" ng-click="m.removeImportMax()">
-                <span class="glyphicon glyphicon-remove text-danger"></span>
-            </button>
-
-            <small ng-if="m.getDetectMin()" class="text-muted">detect min {{m.getDetectMin()}}</small>
-            <small ng-if="m.getDetectMin()" class="text-info"></small>
-            <button ng-if="m.getDetectMin()" class="btn btn-xs btn-link" ng-click="m.removeDetectMin()">
-                <span class="glyphicon glyphicon-remove text-danger"></span>
-            </button>
-
-            <small ng-if="m.getDetectMax()" class="text-muted">detect max {{m.getDetectMax()}}</small>
-            <small ng-if="m.getDetectMax()" class="text-info"></small>
-            <button ng-if="m.getDetectMax()" class="btn btn-xs btn-link" ng-click="m.removeDetectMax()">
-                <span class="glyphicon glyphicon-remove text-danger"></span>
-            </button>
-
-            <button ng-if="!m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.newDateFilter()">
-                <span class="glyphicon glyphicon-plus text-primary"></span><strong class="text-primary"> (new)</strong>
-            </button>
-            <button ng-if="m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.clearDateFilter()">
-                <span class="glyphicon glyphicon-minus text-danger"></span><strong class="text-danger"> (cancel)</strong>
-            </button>
-
-            <form ng-if="m.checkDateFilter()" class="form-inline well well-sm" role="form">
-                <div class="form-group form-inline">
-                    <select ng-model="filter.type" class="input input-sm form-control" name="search-type" id="filter-type">
-                        <option value>- select type -</option>
-                        <option value="import_min"> import min </option>
-                        <option value="import_max"> import max </option>
-                        <option value="detect_min"> detect min </option>
-                        <option value="detect_max"> detect max </option>
-                    </select>
-                    <input
-                            class="input input-sm form-control"
-                            type="text"
-                            name="filter-datetime"
-                            id="filter-datetime"
-                            ng-model="filter.datetime"
-                            ng-required="true"
-                            ng-minlength="14"
-                            ng-maxlength="19"
-                            ng-trim="true"
-                            placeholder="mm-dd-yyyy hh:mm:ss"
-                            maxlength="19"
-                            size="20">
-                    <button class="btn btn-default btn-sm" ng-click="m.addDateFilter(filter)"><span class="glyphicon glyphicon-plus"></span></button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateNow()">now</button>
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusHour()">hour ago</button>
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusDay()">day ago</button>
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusWeek()">week ago</button>
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusMonth()">month ago</button>
-                    <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusYear()">year ago</button>
-                    <button class="btn btn-danger btn-sm" ng-click="filter.datetime = ''">clear</button>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="text-center" page-selector></div>
                 </div>
-            </form>
-
-
-            <div class="panel panel-info">
-                <table class="table table-condensed table-hover">
-                    <thead>
-                    <tr class="text-center active">
-                        <th>
-                            <strong class="text-primary">Source</strong>
-                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
-                                <span ng-if="!m.isSource()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isSource()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                        <th>
-                            <strong class="text-primary">Provider</strong>
-                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortProvider()">
-                                <span ng-if="!m.isProvider()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isProvider()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                        <th>
-                            <strong class="text-primary">Feed</strong>
-                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortFeed()">
-                                <span ng-if="!m.isFeed()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isFeed()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                        <th>
-                            <strong class="text-primary">Detect Time</strong>
-                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortDetect()">
-                                <span ng-if="!m.isDetect()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isDetect()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-order-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-order text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                        <th>
-                            <strong class="text-primary">Import Time</strong>
-                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortImport()">
-                                <span ng-if="!m.isImport()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isImport()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-order-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-order text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                        <th>
-                            <strong class="text-primary">Tags</strong>
-                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortTags()">
-                                <span ng-if="!m.isTags()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isTags()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-sort-by-alphabet-alt text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-sort-by-alphabet text-info"></span>
-                        </span>
-                            </button>
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody ng-repeat="event in m.query.events">
-                        <tr class="info">
-                            <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
-                            <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
-                            <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
-                            <td><small>{{event.detect_time}}</small></td>
-                            <td><small>{{event.import_time}}</small></td>
-                            <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
-                        </tr>
-                        <tr observables-fqdn>
-                        </tr>
-                        <tr observables-dns-answer>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
 
-            <div class="text-center" page-selector></div>
+            <div class="row">
+                <div class="col-xs-9">
+                    <small class="text-primary"><strong>Filters: </strong></small>
+
+                    <small ng-if="m.getImportMin()" class="text-muted">import min {{m.getImportMin()}}</small>
+                    <small ng-if="m.getImportMin()" class="text-info"></small>
+                    <button ng-if="m.getImportMin()" class="btn btn-xs btn-link" ng-click="m.removeImportMin()">
+                        <span class="glyphicon glyphicon-remove text-danger"></span>
+                    </button>
+
+                    <small ng-if="m.getImportMax()" class="text-muted">import max {{m.getImportMax()}}</small>
+                    <small ng-if="m.getImportMax()" class="text-info"></small>
+                    <button ng-if="m.getImportMax()" class="btn btn-xs btn-link" ng-click="m.removeImportMax()">
+                        <span class="glyphicon glyphicon-remove text-danger"></span>
+                    </button>
+
+                    <small ng-if="m.getDetectMin()" class="text-muted">detect min {{m.getDetectMin()}}</small>
+                    <small ng-if="m.getDetectMin()" class="text-info"></small>
+                    <button ng-if="m.getDetectMin()" class="btn btn-xs btn-link" ng-click="m.removeDetectMin()">
+                        <span class="glyphicon glyphicon-remove text-danger"></span>
+                    </button>
+
+                    <small ng-if="m.getDetectMax()" class="text-muted">detect max {{m.getDetectMax()}}</small>
+                    <small ng-if="m.getDetectMax()" class="text-info"></small>
+                    <button ng-if="m.getDetectMax()" class="btn btn-xs btn-link" ng-click="m.removeDetectMax()">
+                        <span class="glyphicon glyphicon-remove text-danger"></span>
+                    </button>
+
+                    <button ng-if="!m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.newDateFilter()">
+                        <span class="glyphicon glyphicon-plus text-primary"></span><strong class="text-primary"> (new)</strong>
+                    </button>
+                    <button ng-if="m.checkDateFilter()" class="btn btn-xs btn-link" ng-click="m.clearDateFilter()">
+                        <span class="glyphicon glyphicon-minus text-danger"></span><strong class="text-danger"> (cancel)</strong>
+                    </button>
+                </div>
+                <div class="col-xs-3 text-primary text-right">
+
+                    <form class="form-inline" role="form">
+                        <div class="form-group form-inline">
+                            <small>Showing {{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}}</small>
+                            <select class="input input-sm form-control" ng-model="showing.items" ng-change="m.setItemsPerPage(showing.items)" name="showing-items" id="showing-items">
+                                <option ng-selected="m.isShowingSelected(10)" value="10"> 10 </option>
+                                <option ng-selected="m.isShowingSelected(20)" value="20"> 20 </option>
+                                <option ng-selected="m.isShowingSelected(50)" value="50"> 50 </option>
+                                <option ng-selected="m.isShowingSelected(100)" value="100"> 100 </option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div ng-if="m.checkDateFilter()" class="row filter">
+                <div class="col-sm-12">
+                    <form class="form-inline well well-sm" role="form">
+                        <div class="form-group form-inline">
+                            <select ng-model="filter.type" class="input input-sm form-control" name="search-type" id="filter-type">
+                                <option value>- select type -</option>
+                                <option value="import_min"> import min </option>
+                                <option value="import_max"> import max </option>
+                                <option value="detect_min"> detect min </option>
+                                <option value="detect_max"> detect max </option>
+                            </select>
+                            <input
+                                    class="input input-sm form-control"
+                                    type="text"
+                                    name="filter-datetime"
+                                    id="filter-datetime"
+                                    ng-model="filter.datetime"
+                                    ng-required="true"
+                                    ng-minlength="14"
+                                    ng-maxlength="19"
+                                    ng-trim="true"
+                                    placeholder="mm-dd-yyyy hh:mm:ss"
+                                    maxlength="19"
+                                    size="20">
+                            <button class="btn btn-default btn-sm" ng-click="m.addDateFilter(filter)"><span class="glyphicon glyphicon-plus"></span></button>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateNow()">now</button>
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusHour()">hour ago</button>
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusDay()">day ago</button>
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusWeek()">week ago</button>
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusMonth()">month ago</button>
+                            <button class="btn btn-primary btn-sm" ng-click="filter.datetime = m.getDateMinusYear()">year ago</button>
+                            <button class="btn btn-danger btn-sm" ng-click="filter.datetime = ''">clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-info">
+                        <table class="table table-condensed table-hover">
+                            <thead>
+                            <tr class="text-center active">
+                                <th>
+                                    <strong class="text-primary">Source</strong>
+                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
+                                        <span ng-if="!m.isSource()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isSource()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                                <th>
+                                    <strong class="text-primary">Provider</strong>
+                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortProvider()">
+                                        <span ng-if="!m.isProvider()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isProvider()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                                <th>
+                                    <strong class="text-primary">Feed</strong>
+                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortFeed()">
+                                        <span ng-if="!m.isFeed()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isFeed()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                                <th>
+                                    <strong class="text-primary">Detect Time</strong>
+                                    <button type="button" class="btn btn-default btn-link" ng-click="m.sortDetect()">
+                                        <span ng-if="!m.isDetect()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isDetect()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                                <th>
+                                    <strong class="text-primary">Import Time</strong>
+                                    <button type="button" class="btn btn-default btn-link" ng-click="m.sortImport()">
+                                        <span ng-if="!m.isImport()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isImport()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                                <th>
+                                    <strong class="text-primary">Tags</strong>
+                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortTags()">
+                                        <span ng-if="!m.isTags()" class="glyphicon glyphicon-sort text-info"></span>
+                        <span ng-if="m.isTags()">
+                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                        </span>
+                                    </button>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody ng-repeat="event in m.query.events">
+                            <tr class="info">
+                                <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
+                                <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
+                                <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
+                                <td><small>{{event.detect_time}}</small></td>
+                                <td><small>{{event.import_time}}</small></td>
+                                <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
+                            </tr>
+                            <tr observables-fqdn>
+                            </tr>
+                            <tr observables-dns-answer>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="text-center" page-selector></div>
+                </div>
+            </div>
         </div>
     </div>
 

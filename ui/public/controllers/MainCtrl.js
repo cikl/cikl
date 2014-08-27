@@ -44,6 +44,15 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getTotalItems = function () {
     return Page.getTotalItems();
   };
+  m.getShowingStart = function () {
+    return Page.getShowingStart();
+  };
+  m.getShowingEnd = function () {
+    return Page.getShowingEnd();
+  };
+  m.isShowingSelected = function (num) {
+    return Page.isShowingSelected(num);
+  };
 
   // API settings getter functions
   m.getType = function () {
@@ -121,6 +130,11 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
   m.addDateFilter = function (filter) {
     DateTime.addDateFilter(filter);
+
+    m.search();
+  };
+  m.setItemsPerPage = function (num) {
+    Page.setItemsPerPage(num);
 
     m.search();
   };
