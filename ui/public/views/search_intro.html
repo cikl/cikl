@@ -1,7 +1,7 @@
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -10,6 +10,9 @@
             <a class="navbar-brand" href="/"><strong>cikl</strong></a>
         </div>
         <div class="navbar-collapse collapse">
+            <p class="navbar-text navbar-right">
+
+            </p>
             <!--
             <form novalidate class="navbar-form navbar-right">
                 <input ng-model="user.email" class="input-sm form-control" type="email" placeholder="Email">
@@ -23,26 +26,28 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-12 col-md-12 main">
+        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+            <h1 class="page-header text-center text-muted">Search</h1>
 
-            <h1 class="page-header text-center">Search</h1>
-
-            <form novalidate class="form-inline text-center lead" role="form">
+            <form class="form-inline lead text-muted" role="form">
                 <div class="form-group">
-                    <select ng-model="artifact.type" class="input input-lg" name="search-type" id="search-type">
-                        <option value>- select type -</option>
-                        <option value="ipv4"> ipv4 </option>
-                        <!--<option value="ip-range"> IP Range </option>-->
-                        <!--<option value="email"> Email Address </option>-->
-                        <option value="fqdn"> fqdn </option>
-                        <!--<option value="asn"> ASN </option>-->
-                        <!--<option value="md5-hash"> MD5 </option>-->
-                        <!--<option value="sha256-hash"> SHA256 </option>-->
-                    </select>
-                    <input ng-model="artifact.term" class="input input-lg form-control" type="text" name="search-term" id="search-term" placeholder="artifact...">
-                    <button class="btn btn-default btn-lg" ng-click="intro.search(artifact)"><span class="glyphicon glyphicon-search"></span></button>
+                    <div class="form-group">
+                        <select ng-model="artifact.type" class="input input-lg form-control text-muted" name="search-type" id="search-type">
+                            <option class="text-muted text-center" value>- select type -</option>
+                            <option class="text-muted text-center" value="ipv4"> ipv4 </option>
+                            <!--<option class="text-muted text-center" value="ip-range"> IP Range </option>-->
+                            <!--<option class="text-muted text-center" value="email"> Email Address </option>-->
+                            <option class="text-muted text-center" value="fqdn"> fqdn </option>
+                            <!--<option class="text-muted text-center" value="asn"> ASN </option>-->
+                            <!--<option class="text-muted text-center" value="md5-hash"> MD5 </option>-->
+                            <!--<option class="text-muted text-center" value="sha256-hash"> SHA256 </option>-->
+                        </select>
+                        <input ng-model="artifact.term" class="input input-lg form-control text-muted" type="text" name="search-term" id="search-term" placeholder="artifact...">
+                        <button class="btn btn-default btn-lg" ng-click="intro.search(artifact)"><span class="glyphicon glyphicon-search text-muted"></span></button>
+                    </div>
                 </div>
             </form>
+
             <br />
             <br />
 
@@ -52,9 +57,6 @@
             <p class="text-info text-center lead">
                 Please select the type of record you are searching for and enter a corresponding search term to get started.
             </p>
-
-
-
 
         </div>
     </div>

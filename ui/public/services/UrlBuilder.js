@@ -43,6 +43,24 @@ function UrlBuilder (CiklApi, DateTime, Page) {
     return link;
   };
 
+  UrlBuilder.getItems = function (items) {
+    var link = '';
+
+    link = link + UrlBuilder.url_root + '/#/';
+    link = link + CiklApi.getType() + '/';
+    link = link + CiklApi.getTerm() + '/';
+    link = link + Page.getCurrentPage() + '/';
+    link = link + items + '/';
+    link = link + CiklApi.getOrder() + '/';
+    link = link + CiklApi.getOrderBy() + '/';
+    link = link + DateTime.getImportMinEpoch() + '/';
+    link = link + DateTime.getImportMaxEpoch() + '/';
+    link = link + DateTime.getDetectMinEpoch() + '/';
+    link = link + DateTime.getDetectMaxEpoch();
+
+    return link;
+  };
+
   UrlBuilder.getSearch = function () {
     var link = '';
 
@@ -50,6 +68,25 @@ function UrlBuilder (CiklApi, DateTime, Page) {
     link = link + CiklApi.getType() + '/';
     link = link + CiklApi.getTerm() + '/';
     link = link + '1/';
+    link = link + Page.getItemsPerPage() + '/';
+    link = link + CiklApi.getOrder() + '/';
+    link = link + CiklApi.getOrderBy() + '/';
+    link = link + DateTime.getImportMinEpoch() + '/';
+    link = link + DateTime.getImportMaxEpoch() + '/';
+    link = link + DateTime.getDetectMinEpoch() + '/';
+    link = link + DateTime.getDetectMaxEpoch();
+
+    return link;
+
+  };
+
+  UrlBuilder.update = function () {
+    var link = '';
+
+    link = link + '/';
+    link = link + CiklApi.getType() + '/';
+    link = link + CiklApi.getTerm() + '/';
+    link = link + Page.getCurrentPage() + '/';
     link = link + Page.getItemsPerPage() + '/';
     link = link + CiklApi.getOrder() + '/';
     link = link + CiklApi.getOrderBy() + '/';
