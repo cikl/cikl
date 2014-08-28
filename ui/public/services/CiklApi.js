@@ -7,6 +7,9 @@ function CiklApi ($q, $http, DateTime, Page) {
   CiklApi.order = null;
   CiklApi.term = null;
   CiklApi.type = null;
+  CiklApi.first = null;
+  CiklApi.last = null;
+  CiklApi.feeds = null;
 
   CiklApi.query = null;
 
@@ -22,6 +25,15 @@ function CiklApi ($q, $http, DateTime, Page) {
   };
   CiklApi.getType = function () {
     return CiklApi.type;
+  };
+  CiklApi.getFirst = function (){
+    return CiklApi.first;
+  };
+  CiklApi.getLast = function (){
+    return CiklApi.last;
+  };
+  CiklApi.getFeeds = function (){
+    return CiklApi.feeds;
   };
   CiklApi.getQuery = function () {
     return CiklApi.query;
@@ -41,6 +53,15 @@ function CiklApi ($q, $http, DateTime, Page) {
   };
   CiklApi.setType = function (type) {
     CiklApi.type = type;
+  };
+  CiklApi.setFirst = function (first){
+    CiklApi.first = first;
+  };
+  CiklApi.setLast = function (last){
+    CiklApi.last = last;
+  };
+  CiklApi.setFeeds = function (feeds){
+    CiklApi.feeds = feeds;
   };
 
 
@@ -131,10 +152,13 @@ function CiklApi ($q, $http, DateTime, Page) {
       $http.post(api_endpoint, query_params).success(function (data) {
         CiklApi.query = data;
 
-        // Page total items
+        // Setter functions from results
         Page.setTotalItems(parseInt(CiklApi.query.total_events));
         Page.setShowingStart(CiklApi.query.query.start);
         Page.setShowingEnd(parseInt(CiklApi.query.query.start) + parseInt(CiklApi.query.query.per_page));
+        CiklApi.setFirst(CiklApi.query.facets.min_import_time);
+        CiklApi.setLast(CiklApi.query.facets.max_import_time);
+        CiklApi.setFeeds(CiklApi.query.facets.feed_names.length);
         if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
           Page.updatePage(Page.getCurrentPage());
         }
