@@ -5,6 +5,7 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
     padding-top: 80px;
+    padding-bottom: 80px;
 }
 
 
@@ -21,82 +22,26 @@ table.data {
     width: 100%;
 }
 
-/*
- * Sidebar
- */
-
-/* Hide for mobile, show later */
-.sidebar {
-    display: none;
+a {
+    text-decoration: none !important;
 }
-@media (min-width: 768px) {
-    .sidebar {
-        position: fixed;
-        top: 51px;
-        bottom: 0;
-        left: 0;
-        z-index: 1000;
-        display: block;
-        padding: 20px;
-        overflow-x: hidden;
-        overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-        background-color: #f5f5f5;
-        border-right: 1px solid #eee;
-    }
+.btn {
+    text-decoration: none !important;
 }
 
-/* Sidebar navigation */
-.nav-sidebar {
-    margin-right: -21px; /* 20px padding + 1px border */
-    margin-bottom: 20px;
-    margin-left: -20px;
-}
-.nav-sidebar > li > a {
-    padding-right: 20px;
-    padding-left: 20px;
-}
-.nav-sidebar > .active > a {
-    color: #fff;
-    background-color: #428bca;
+.widgets {
+    margin-top: 40px;
+    margin-bottom: 60px;
 }
 
-
-/*
- * Main content
- */
-
-.main {
-    padding: 20px;
+.navs {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
-@media (min-width: 768px) {
-    .main {
-        padding-right: 40px;
-        padding-left: 40px;
-    }
-}
-.main .page-header {
-    margin-top: 0;
-}
-
 
 /*
  * Angular animate
  */
-
-div.placeholder span.ng-enter {
-    -webkit-transition:0.1s ease-in all;
-    -moz-transition:0.1s ease-in all;
-    -o-transition:0.1s ease-in all;
-    transition: 0.1s ease-in all;
-    opacity: 0;
-}
-div.placeholder span.ng-enter-stagger {
-    transition-delay: 0.1s;
-}
-div.placeholder span.ng-enter.ng-enter-active {
-    opacity: 1;
-}
-
 
 table.table tbody.ng-enter {
     -webkit-transition:0.1s ease-in all;
@@ -133,29 +78,3 @@ div.filter.ng-leave {
 div.filter.ng-leave.ng-leave-active {
     opacity: 0;
 }
-
-
-
-
-
-/*
- * Placeholder dashboard ideas
- */
-
-.placeholders {
-    margin-bottom: 30px;
-    text-align: center;
-}
-.placeholders h4 {
-    margin-bottom: 0;
-}
-.placeholder {
-    margin-bottom: 20px;
-}
-.placeholder img {
-    display: inline-block;
-    border-radius: 50%;
-}
-
-
-.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }

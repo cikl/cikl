@@ -7,7 +7,3 @@ function pageSelector () {
 angular
     .module('app')
     .directive('pageSelector', pageSelector);
-
-
-
-
