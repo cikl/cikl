@@ -63,6 +63,7 @@ inherits profile::base {
   file_line { 'add-plugins':
     path    => '/etc/default/logstash',
     line    => "LS_OPTS='--pluginpath /vagrant/logstash-plugins'",
-    notify => Class['::logstash::service']
+    notify  => Class['::logstash::service'],
+    require => Class['::logstash::package']
   }
 }
