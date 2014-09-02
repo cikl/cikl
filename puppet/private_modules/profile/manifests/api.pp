@@ -12,19 +12,19 @@ class profile::api (
   $server_pid_file     = "$server_run_path/cikl_api.pid"
   $server_socket_path  = "$server_run_path/socket"
 
-  ensure_packages(['bundler'])
+  include profile::bundler
 
   file { $root: 
     ensure => "directory"
   } ->
   exec { 'profile::api::install':
     cwd         => $root,
-    command     => "/usr/bin/bundle install --without development --path=${$gems} --gemfile=$local_path/Gemfile",
+    command     => "/usr/local/bin/bundle install --jobs=7 --without development --path=${$gems} --gemfile=$local_path/Gemfile",
     require => [
       Package['bundler']
     ],
     notify  => Service['profile::api::service'],
-    unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
+    unless => "/usr/local/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
 
