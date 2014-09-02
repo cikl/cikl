@@ -1,7 +1,4 @@
-require 'models/event'
-require 'models/observable/dns_answer'
-require 'models/observable/fqdn'
-require 'models/observable/ipv4'
+require 'cikl/event'
 
 module Cikl
   module API

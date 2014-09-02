@@ -1,8 +1,8 @@
 require 'fabrication'
-require 'models/event'
+require 'cikl/event'
 require 'date'
 require 'bson'
-Fabricator(:event, class_name: Cikl::Models::Event) do
+Fabricator(:event, class_name: Cikl::Event) do
   source          "generated"
   feed_provider   "test_provider"
   feed_name       "test_feed_name"
@@ -13,19 +13,19 @@ Fabricator(:event, class_name: Cikl::Models::Event) do
   observables     fabricator: :observables
 end
 
-Fabricator(:observables, class_name: Cikl::Models::Observables) do
+Fabricator(:observables, class_name: Cikl::Observables) do
 end
 
 
-Fabricator(:ipv4, class_name: Cikl::Models::Observable::Ipv4) do
+Fabricator(:ipv4, class_name: Cikl::Observable::Ipv4) do
   ipv4    '127.0.0.1'
 end
 
-Fabricator(:fqdn, class_name: Cikl::Models::Observable::Fqdn) do
+Fabricator(:fqdn, class_name: Cikl::Observable::Fqdn) do
   fqdn    'fqdn.somedomain.com'
 end
 
-Fabricator(:dns_answer, class_name: Cikl::Models::Observable::DnsAnswer) do
+Fabricator(:dns_answer, class_name: Cikl::Observable::DnsAnswer) do
   resolver 'cikl'
   rr_class 'IN'
   section  'answer'
