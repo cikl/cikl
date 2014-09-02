@@ -5,3 +5,4 @@ res/
 .gem
 coverage
 pkg/
+Gemfile.lock

@@ -31,8 +31,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     :create => true
   }
 
-  path_cikl_worker  = "/vagrant/cikl-worker"
-  path_cikl_api     = "/vagrant/cikl-api"
+  path_cikl_worker  = "/vagrant/src/ruby/cikl-worker"
+  path_cikl_api     = "/vagrant/src/ruby/cikl-api"
   path_cikl_feeds   = "/vagrant/cikl-feeds"
   path_ui           = "/vagrant/ui"
   path_p5_cikl      = "/vagrant/p5-Cikl"

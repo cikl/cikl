@@ -1,5 +1,6 @@
 require 'api/root'
 require 'middleware/request_start_time'
+require 'rack/cors'
 
 module Cikl
   class App

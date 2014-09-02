@@ -11,19 +11,20 @@ class profile::worker (
 ) inherits profile::base {
   $gems = "$root/gems"
 
-  ensure_packages(['bundler', 'libunbound2'])
+  include profile::bundler
+  ensure_packages(['libunbound2'])
 
   file { $root: 
     ensure => "directory"
   } ->
   exec { 'profile::worker::install':
     cwd         => $root,
-    command     => "/usr/bin/bundle install --without development --path=${$gems} --gemfile=$local_path/Gemfile",
+    command     => "/usr/local/bin/bundle install --jobs=7 --without development --path=${$gems} --gemfile=$local_path/Gemfile",
     require => [
       Package['libunbound2', 'bundler']
     ],
     notify  => Service['profile::worker::service'],
-    unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
+    unless => "/usr/local/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
 

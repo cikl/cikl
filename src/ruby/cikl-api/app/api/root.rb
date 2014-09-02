@@ -1,5 +1,6 @@
 require 'grape'
 require 'api/v1/root'
+require 'grape-swagger'
 
 module Cikl
   module API

@@ -12,22 +12,22 @@ matrix:
   include:
     - language: ruby
       rvm: 1.9.3
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
     - language: ruby
       rvm: 2.0.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
     - language: ruby
       rvm: 2.1.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-api/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
     - language: ruby
       rvm: 1.9.3
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
     - language: ruby
       rvm: 2.0.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
     - language: ruby
       rvm: 2.1.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=cikl-worker/
+      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
     - language: perl
       perl: 5.14
       env: TEST_LANGUAGE=perl
