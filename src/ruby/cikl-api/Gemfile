@@ -6,3 +6,7 @@ if ENV['TRAVIS']
 end
 
 gemspec gemspec_opts
+
+if File.exists? File.expand_path("../../cikl-event/cikl-event.gemspec", __FILE__)
+  gem 'cikl-event', :path => File.expand_path("../../cikl-event", __FILE__), :require => false
+end

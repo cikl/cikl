@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
 
+  s.add_runtime_dependency('cikl-event', ">= 0")
   s.add_runtime_dependency('puma', ">= 2.8.2")
   s.add_runtime_dependency('elasticsearch', "~> 1.0.0")
   s.add_runtime_dependency('connection_pool', "~> 2.0.0")

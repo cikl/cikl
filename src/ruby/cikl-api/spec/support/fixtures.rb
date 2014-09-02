@@ -1,5 +1,4 @@
 require 'elasticsearch'
-require 'models/event'
 require 'multi_json'
 require 'fixtures/events'
 

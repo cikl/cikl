@@ -1,10 +1,6 @@
 require 'jbuilder'
 require 'models/response'
-require 'models/event'
-require 'models/observables'
-require 'models/observable/ipv4'
-require 'models/observable/fqdn'
-require 'models/observable/dns_answer'
+require 'cikl/event'
 require 'api/entities/response'
 
 module Cikl
@@ -213,7 +209,7 @@ module Cikl
           return enum_for(:hits_to_events_es, hits) unless block_given?
 
           hits.each do |hit|
-            yield Cikl::Models::Event.from_hash(hit["_source"])
+            yield Cikl::Event.from_hash(hit["_source"])
           end
         end
 
@@ -222,7 +218,7 @@ module Cikl
           ids = hits.map { |hit| hit["_id"] }
 
           mongo_each_event(ids) do |obj|
-            yield Cikl::Models::Event.from_hash(obj)
+            yield Cikl::Event.from_hash(obj)
           end
         end
 
