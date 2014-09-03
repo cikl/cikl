@@ -1,0 +1,16 @@
+<form class="form form-inline" role="form">
+    <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setItemsPerPage(10)" ng-disabled="m.isShowingSelected(10)">
+            <span class="text-primary">10</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setItemsPerPage(20)" ng-disabled="m.isShowingSelected(20)">
+            <span class="text-primary">20</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setItemsPerPage(50)" ng-disabled="m.isShowingSelected(50)">
+            <span class="text-primary">50</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setItemsPerPage(100)" ng-disabled="m.isShowingSelected(100)">
+            <span class="text-primary">100</span>
+        </button>
+    </div>
+</form>

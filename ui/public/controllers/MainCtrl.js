@@ -11,12 +11,26 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     m.query = CiklApi.getQuery();
   }, 300);
 
+  // Top display functions
+  m.getFirst = function () {
+    return CiklApi.getFirst();
+  };
+  m.getLast = function () {
+    return CiklApi.getLast();
+  };
+  m.getFeeds = function () {
+    return CiklApi.getFeeds();
+  };
+
   // UrlBuilder functions
   m.getLink = function (type, term) {
     return UrlBuilder.getLink(type, term);
   };
   m.getPage = function (page) {
     return UrlBuilder.getPage(page);
+  };
+  m.getItems = function (items) {
+    return UrlBuilder.getItems(items);
   };
 
   // Pagination functions
@@ -52,6 +66,11 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
   m.isShowingSelected = function (num) {
     return Page.isShowingSelected(num);
+  };
+  m.setCurrentPage = function (page) {
+    Page.updatePage(page);
+
+    m.update();
   };
 
   // API settings getter functions
@@ -190,6 +209,9 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   // Cikl Api Query
   m.search = function() {
     $location.path(UrlBuilder.getSearch());
+  };
+  m.update = function() {
+    $location.path(UrlBuilder.update());
   };
 
   // Search form
