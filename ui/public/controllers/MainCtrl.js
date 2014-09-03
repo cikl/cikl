@@ -18,6 +18,9 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.getPage = function (page) {
     return UrlBuilder.getPage(page);
   };
+  m.getItems = function (items) {
+    return UrlBuilder.getItems(items);
+  };
 
   // Pagination functions
   m.getFirstPage = function () {
@@ -52,6 +55,11 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
   m.isShowingSelected = function (num) {
     return Page.isShowingSelected(num);
+  };
+  m.setCurrentPage = function (page) {
+    Page.updatePage(page);
+
+    m.update();
   };
 
   // API settings getter functions
@@ -198,6 +206,9 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     CiklApi.setTerm(artifact.term);
 
     m.search();
+  };
+  m.update = function() {
+    $location.path(UrlBuilder.update());
   };
 
 }
