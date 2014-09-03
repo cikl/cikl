@@ -49,7 +49,7 @@ namespace :mongo do
     File.open(filename, "w") do |fio|
       Cikl::MongoEventCollection.find({}).each do |event|
         count += 1
-        model = Cikl::Event.from_hash(event)
+        model = Cikl::Event.new(event)
         hash = Cikl::API::Entities::Event.represent(model, :serializable => true)
         fio.write YAML.dump(hash)
       end

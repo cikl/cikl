@@ -1,8 +1,8 @@
-require 'virtus'
 require 'cikl/observables'
+require 'cikl/base_model'
+require 'equalizer'
 module Cikl
-  class Event
-    include Virtus.model
+  class Event < Cikl::BaseModel
     attribute :import_time, DateTime
     attribute :detect_time, DateTime
     attribute :source, String
@@ -16,8 +16,12 @@ module Cikl
       Cikl::Observables.new 
     }
 
-    class << self
-      alias_method :from_hash, :new
+    def to_serializable_hash
+      ret = super
+      ret[:observables] = self.observables.to_serializable_hash
+      ret
     end
+
+    include Equalizer.new(*attribute_set.map(&:name))
   end
 end

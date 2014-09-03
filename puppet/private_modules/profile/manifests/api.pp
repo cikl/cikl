@@ -1,32 +1,25 @@
 class profile::api (
   $local_path,
-  $root          = '/opt/cikl_api',
+  $gem_root      = '/opt/cikl/api/gems',
   $user          = 'cikl_api',
-  $group         = 'cikl_api'
-) inherits profile::base {
-  $gems = "$root/gems"
-
-  $server_config       = "/etc/cikl_api.conf"
-  $server_run_path     = '/var/run/cikl_api'
+  $group         = 'cikl_api',
+  $server_config       = "/etc/cikl_api.conf",
+  $server_run_path     = '/var/run/cikl_api',
   $server_log_path     = "/var/log/cikl_api"
+) inherits profile::base {
   $server_pid_file     = "$server_run_path/cikl_api.pid"
   $server_socket_path  = "$server_run_path/socket"
 
-  include profile::bundler
+  ensure_packages(['libxml2-dev', 'libssl-dev'])
 
-  file { $root: 
-    ensure => "directory"
-  } ->
-  exec { 'profile::api::install':
-    cwd         => $root,
-    command     => "/usr/local/bin/bundle install --jobs=7 --without development --path=${$gems} --gemfile=$local_path/Gemfile",
+  bundler::install { "api":
+    source_path => $local_path,
+    gem_root    => $gem_root,
+    notify      => Service['profile::api::service'],
     require => [
-      Package['bundler']
+      Package['libxml2-dev', 'libssl-dev']
     ],
-    notify  => Service['profile::api::service'],
-    unless => "/usr/local/bin/bundle check --gemfile=$local_path/Gemfile"
   }
-
 
   group { 'profile::api::group':
     name => $group,

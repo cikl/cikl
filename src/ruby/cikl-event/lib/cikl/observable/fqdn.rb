@@ -1,15 +1,12 @@
-require 'virtus'
+require 'cikl/base_model'
+require 'equalizer'
 
 module Cikl
   module Observable
 
-    class Fqdn 
-      include Virtus.model
+    class Fqdn < Cikl::BaseModel
       attribute :fqdn, String
-
-      class << self
-        alias_method :from_hash, :new
-      end
+      include Equalizer.new(*attribute_set.map(&:name))
     end
 
   end

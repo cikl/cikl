@@ -1,15 +1,12 @@
-require 'virtus'
+require 'cikl/base_model'
+require 'equalizer'
 
 module Cikl
   module Observable
 
-    class Ipv4
-      include Virtus.model
+    class Ipv4 < Cikl::BaseModel
       attribute :ipv4
-
-      class << self
-        alias_method :from_hash, :new
-      end
+      include Equalizer.new(*attribute_set.map(&:name))
     end
 
   end

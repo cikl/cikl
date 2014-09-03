@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gem 'threatinator'
+
+gem 'cikl-event',               :path => File.expand_path("../../cikl-event", __FILE__),                :require => false
+gem 'threatinator-output-cikl', :path => File.expand_path("../../threatinator-output-cikl", __FILE__),  :require => false

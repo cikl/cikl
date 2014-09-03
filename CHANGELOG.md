@@ -5,6 +5,7 @@ Next
 * Updated UI based on wireframe design. - [@dsweet04](https://github.com/dsweet04)
 * Fixed defect for events displayed numbers. - [@dsweet04](https://github.com/dsweet04)
 * Refactored UI pagination code. - [@dsweet04](https://github.com/dsweet04)
+* Remove Smrt, add Threatinator. - [@justfalter](https://github.com/justfalter)
 * Fix logstash provisioning. [#143](https://github.com/cikl/cikl/issues/143) - [@justfalter](https://github.com/justfalter)
 * Add a changelog and version file - [@justfalter](https://github.com/justfalter)
 * Refactored the ui to meet angular style guide norms. - [@dsweet04](https://github.com/dsweet04)
