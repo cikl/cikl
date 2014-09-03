@@ -61,10 +61,20 @@ function Page () {
     Page.max_size = max_size;
   };
   Page.setShowingStart = function (start) {
-    Page.start = start;
+    if (Page.getTotalItems() === 0){
+      Page.start = 0;
+    } else {
+      Page.start = start;
+    }
   };
-  Page.setShowingEnd = function (end) {
-    Page.end = end;
+  Page.setShowingEnd = function () {
+    if (Page.getLastPage() === null) {
+      Page.end = Page.getTotalItems();
+    } else if (Page.getCurrentPage() === Page.getLastPage()) {
+      Page.end = Page.getTotalItems();
+    } else {
+      Page.end = (Page.getShowingStart() + Page.getItemsPerPage() - 1);
+    }
   };
 
   // Return true if page is current page else false
