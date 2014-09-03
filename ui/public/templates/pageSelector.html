@@ -1,29 +1,21 @@
-<ul class="pagination pagination-sm">
-    <li ng-if="m.getFirstPage()">
-        <a ng-href="{{m.getPage(m.getFirstPage())}}">First</a>
-    </li>
-    <li ng-if="!m.getFirstPage()" class="disabled">
-        <a>First</a>
-    </li>
-    <li ng-if="m.getPrevPage()">
-        <a ng-href="{{m.getPage(m.getPrevPage())}}">Prev</a>
-    </li>
-    <li ng-if="!m.getPrevPage()" class="disabled">
-        <a>Prev</a>
-    </li>
-    <li ng-repeat="i in m.getPages()" ng-class="m.checkCurrentPage(i) ? 'disabled' : ''" ng-if="m.isVisible(i)">
-        <a ng-href="{{m.getPage(i)}}">{{i}}</a>
-    </li>
-    <li ng-if="m.getNextPage()">
-        <a ng-href="{{m.getPage(m.getNextPage())}}">Next</a>
-    </li>
-    <li ng-if="!m.getNextPage()" class="disabled">
-        <a>Next</a>
-    </li>
-    <li ng-if="m.getLastPage()">
-        <a ng-href="{{m.getPage(m.getLastPage())}}">Last</a>
-    </li>
-    <li ng-if="!m.getLastPage()" class="disabled">
-        <a>Last</a>
-    </li>
-</ul>
+<form class="form form-inline" role="form">
+    <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getFirstPage())" ng-disabled="!m.getFirstPage()">
+            <span class="text-primary">First</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getPrevPage())" ng-disabled="!m.getPrevPage()">
+            <span class="text-primary">Prev</span>
+        </button>
+
+        <button ng-repeat="i in m.getPages()" ng-if="m.isVisible(i)" type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(i)" ng-disabled="m.checkCurrentPage(i)">
+            <span class="text-primary">{{i}}</span>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getNextPage())" ng-disabled="!m.getNextPage()">
+            <span class="text-primary">Next</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getLastPage())" ng-disabled="!m.getLastPage()">
+            <span class="text-primary">Last</span>
+        </button>
+    </div>
+</form>

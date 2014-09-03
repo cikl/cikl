@@ -2,6 +2,7 @@ Next
 ====
 
 * Add your message and a link to your github account right below this line.
+* Refactored UI pagination code. - [@dsweet04](https://github.com/dsweet04)
 * Fix logstash provisioning. [#143](https://github.com/cikl/cikl/issues/143) - [@justfalter](https://github.com/justfalter)
 * Add a changelog and version file - [@justfalter](https://github.com/justfalter)
 * Refactored the ui to meet angular style guide norms. - [@dsweet04](https://github.com/dsweet04)
