@@ -32,7 +32,9 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="col-sm-3 col-md-2">
+        </div>
+        <div class="col-sm-9 col-md-10">
             <div class="row">
                 <div class="col-sm-2 text-left">
                     <div class="text-primary">{{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}} events</div>
@@ -119,97 +121,158 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3 col-md-2">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Sources</span></h3>
+                    </div>
+                    <div class="panel-body">
 
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="panel panel-info">
-                        <table class="table table-condensed table-hover">
-                            <thead>
-                            <tr class="text-center active">
-                                <th>
-                                    <strong class="text-primary">Source</strong>
-                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
-                                        <span ng-if="!m.isSource()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isSource()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                                <th>
-                                    <strong class="text-primary">Provider</strong>
-                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortProvider()">
-                                        <span ng-if="!m.isProvider()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isProvider()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                                <th>
-                                    <strong class="text-primary">Feed</strong>
-                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortFeed()">
-                                        <span ng-if="!m.isFeed()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isFeed()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                                <th>
-                                    <strong class="text-primary">Detect Time</strong>
-                                    <button type="button" class="btn btn-default btn-link" ng-click="m.sortDetect()">
-                                        <span ng-if="!m.isDetect()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isDetect()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                                <th>
-                                    <strong class="text-primary">Import Time</strong>
-                                    <button type="button" class="btn btn-default btn-link" ng-click="m.sortImport()">
-                                        <span ng-if="!m.isImport()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isImport()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                                <th>
-                                    <strong class="text-primary">Tags</strong>
-                                    <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortTags()">
-                                        <span ng-if="!m.isTags()" class="glyphicon glyphicon-sort text-info"></span>
-                        <span ng-if="m.isTags()">
-                            <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
-                            <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
-                        </span>
-                                    </button>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody ng-repeat="event in m.query.events">
-                            <tr class="info">
-                                <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
-                                <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
-                                <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
-                                <td><small>{{event.detect_time}}</small></td>
-                                <td><small>{{event.import_time}}</small></td>
-                                <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
-                            </tr>
-                            <tr observables-fqdn>
-                            </tr>
-                            <tr observables-dns-answer>
-                            </tr>
-                            </tbody>
-                        </table>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Providers</span></h3>
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Feeds</span></h3>
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Detect Time</span></h3>
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Import Time</span></h3>
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <h3 class="panel-title"><span class="text-muted">Tags</span></h3>
+                    </div>
+                    <div class="panel-body">
+
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div class="col-sm-9 col-md-10">
             <div class="row">
-                <div class="col-sm-12">
-                    <div class="text-center" page-selector></div>
+                <div class="col-xs-12 col-sm-12 col-md-12">
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-info">
+                                <table class="table table-condensed table-hover">
+                                    <thead>
+                                    <tr class="text-center active">
+                                        <th>
+                                            <strong class="text-primary">Source</strong>
+                                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortSource()">
+                                                <span ng-if="!m.isSource()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isSource()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <strong class="text-primary">Provider</strong>
+                                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortProvider()">
+                                                <span ng-if="!m.isProvider()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isProvider()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <strong class="text-primary">Feed</strong>
+                                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortFeed()">
+                                                <span ng-if="!m.isFeed()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isFeed()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <strong class="text-primary">Detect Time</strong>
+                                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortDetect()">
+                                                <span ng-if="!m.isDetect()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isDetect()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <strong class="text-primary">Import Time</strong>
+                                            <button type="button" class="btn btn-default btn-link" ng-click="m.sortImport()">
+                                                <span ng-if="!m.isImport()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isImport()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <strong class="text-primary">Tags</strong>
+                                            <button type="button" class="btn btn-default btn-link disabled" ng-click="m.sortTags()">
+                                                <span ng-if="!m.isTags()" class="glyphicon glyphicon-sort text-info"></span>
+                                                <span ng-if="m.isTags()">
+                                                    <span ng-if="m.isAsc()" class="glyphicon glyphicon-arrow-up text-info"></span>
+                                                    <span ng-if="m.isDesc()" class="glyphicon glyphicon-arrow-down text-info"></span>
+                                                </span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody ng-repeat="event in m.query.events">
+                                    <tr class="info">
+                                        <td><small class="text-danger"><strong><a class="text-info" href='#'>{{event.source}}</a></strong></small></td>
+                                        <td><small class="text-danger"><strong><a class="text-warning" href='#'>{{event.feed_provider}}</a></strong></small></td>
+                                        <td><small class="text-danger"><strong><a class="text-danger" href='#'>{{event.feed_name}}</a></strong></small></td>
+                                        <td><small>{{event.detect_time}}</small></td>
+                                        <td><small>{{event.import_time}}</small></td>
+                                        <td><small ng-repeat="tag in event.tags">{{tag}} </small></td>
+                                    </tr>
+                                    <tr observables-fqdn>
+                                    </tr>
+                                    <tr observables-dns-answer>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="text-center" page-selector></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
