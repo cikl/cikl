@@ -10,12 +10,15 @@
             <a class="navbar-brand" href="/"><strong>cikl</strong></a>
         </div>
         <div class="navbar-collapse collapse">
-            <p class="navbar-text navbar-right">
-                <strong class="text-primary">Type: </strong><span>{{m.getType()}}</span>
-                <strong class="text-primary">Term: </strong><span>{{m.getTerm()}}</span>
-                <strong class="text-primary">Order by: </strong><span>{{m.getOrderBy()}}</span>
-                <strong class="text-primary">Order: </strong><span>{{m.getOrder()}}</span>
-            </p>
+            <form class="navbar-form navbar-right" role="search">
+                <div class="form-group">
+                    <select class="input form-control" ng-model="m.artifact.type" ng-options="type for type in m.types" name="search-type" id="search-type">
+                        <option value>- select type -</option>
+                    </select>
+                    <input class="input form-control" ng-model="m.artifact.term" type="text" name="search-term" id="search-term" placeholder="artifact...">
+                </div>
+                <button class="btn btn-default" ng-click="m.formSearch(m.artifact)"><span class="glyphicon glyphicon-search"></span></button>
+            </form>
             <!--
             <form novalidate class="navbar-form navbar-right">
                 <input ng-model="user.email" class="input-sm form-control" type="email" placeholder="Email">
@@ -28,20 +31,6 @@
 </div>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-            <form class="form-inline lead" role="form">
-                <div class="form-group">
-                    <select class="input input-lg form-control" ng-model="m.artifact.type" ng-options="type for type in m.types" name="search-type" id="search-type">
-                        <option value>- select type -</option>
-                    </select>
-                    <input class="input input-lg form-control" ng-model="m.artifact.term" type="text" name="search-term" id="search-term" placeholder="artifact...">
-                    <button class="btn btn-default btn-lg" ng-click="m.formSearch(m.artifact)"><span class="glyphicon glyphicon-search"></span></button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="row">
