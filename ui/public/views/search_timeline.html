@@ -60,7 +60,12 @@
                         <h3 class="panel-title"><span class="text-muted">Sources</span></h3>
                     </div>
                     <div class="panel-body">
-
+                        <div class="checkbox" ng-repeat="source in m.query.facets.sources">
+                            <label>
+                                <input type="checkbox">
+                                <a href="#"><span class="badge alert-info">{{source[0]}} ({{source[1]}})</span></a>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="panel panel-default">
@@ -68,7 +73,12 @@
                         <h3 class="panel-title"><span class="text-muted">Providers</span></h3>
                     </div>
                     <div class="panel-body">
-
+                        <div class="checkbox" ng-repeat="provider in m.query.facets.feed_providers">
+                            <label>
+                                <input type="checkbox">
+                                <a href="#"><span class="badge alert-warning">{{provider[0]}} ({{provider[1]}})</span></a>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="panel panel-default">
@@ -76,7 +86,12 @@
                         <h3 class="panel-title"><span class="text-muted">Feeds</span></h3>
                     </div>
                     <div class="panel-body">
-
+                        <div class="checkbox" ng-repeat="name in m.query.facets.feed_names">
+                            <label>
+                                <input type="checkbox">
+                                <a href="#"><span class="badge alert-danger">{{name[0]}} ({{name[1]}})</span></a>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="panel panel-default">
@@ -113,7 +128,6 @@
                     <div class="panel-heading text-center">
                         <h3 class="panel-title">
                             <span class="text-muted">Import Time</span>
-
                         </h3>
                     </div>
                     <div class="panel-body">
