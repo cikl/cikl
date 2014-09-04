@@ -32,20 +32,11 @@
         <div class="col-xs-12 col-sm-12 col-md-12 text-center">
             <form class="form-inline lead" role="form">
                 <div class="form-group">
-                    <select class="input input-lg form-control" ng-model="artifact.type" name="search-type" id="search-type">
+                    <select class="input input-lg form-control" ng-model="m.artifact.type" ng-options="type for type in m.types" name="search-type" id="search-type">
                         <option value>- select type -</option>
-                        <option value="ipv4"> ipv4 </option>
-                        <!--<option value="ipv4-range"> ipv4 range </option>-->
-                        <!--<option value="ipv6"> ipv6 </option>-->
-                        <!--<option value="ipv6-range"> ipv6 range </option>-->
-                        <!--<option value="email"> email address </option>-->
-                        <option value="fqdn"> fqdn </option>
-                        <!--<option value="asn"> asn </option>-->
-                        <!--<option value="md5"> md5 </option>-->
-                        <!--<option value="sha256"> sha256 </option>-->
                     </select>
-                    <input class="input input-lg form-control" ng-model="artifact.term" type="text" name="search-term" id="search-term" placeholder="artifact...">
-                    <button class="btn btn-default btn-lg" ng-click="m.formSearch(artifact)"><span class="glyphicon glyphicon-search"></span></button>
+                    <input class="input input-lg form-control" ng-model="m.artifact.term" type="text" name="search-term" id="search-term" placeholder="artifact...">
+                    <button class="btn btn-default btn-lg" ng-click="m.formSearch(m.artifact)"><span class="glyphicon glyphicon-search"></span></button>
                 </div>
             </form>
         </div>
