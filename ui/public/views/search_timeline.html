@@ -1,4 +1,4 @@
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
             <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
@@ -38,7 +38,7 @@
 
         <div class="col-sm-9 col-md-10">
 
-            <div class="row">
+            <div class="row page-nav">
                 <div class="col-sm-2 text-left">
                     <div class="text-primary">{{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}} events</div>
                 </div>
@@ -307,9 +307,15 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="text-center" page-selector></div>
+                    <div class="row page-nav">
+                        <div class="col-sm-2 text-left">
+                            <div class="text-primary">{{m.getShowingStart()}}-{{m.getShowingEnd()}} of {{m.getTotalItems()}} events</div>
+                        </div>
+                        <div class="col-sm-8 text-center">
+                            <div page-selector></div>
+                        </div>
+                        <div class="col-sm-2 text-right">
+                            <div items-per-page-selector></div>
                         </div>
                     </div>
                 </div>
