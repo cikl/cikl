@@ -51,48 +51,6 @@
         </div>
     </div>
 
-    <div class="row placeholders">
-        <div class="col-xs-4 col-sm-3 placeholder">
-            <h4 class="text-primary">First Seen</h4>
-            <h1 class="lead text-info"><strong>{{m.query.facets.min_import_time}}</strong></h1>
-            <span class="text-muted">Import Min</span>
-        </div>
-        <div class="col-xs-4 col-sm-3 placeholder">
-            <h4 class="text-primary">Last Seen</h4>
-            <h1 class="lead text-info"><strong>{{m.query.facets.max_import_time}}</strong></h1>
-            <span class="text-muted">Import Max</span>
-        </div>
-        <div class="col-xs-4 col-sm-3 placeholder">
-            <h4 class="text-primary">Hit Types</h4>
-            <br />
-            <span ng-repeat="source in m.query.facets.sources">
-                <a href="#"><span class="badge alert-info">{{source[0]}} ({{source[1]}})</span></a>
-            </span>
-            <span ng-repeat="provider in m.query.facets.feed_providers">
-                <a href="#"><span class="badge alert-warning">{{provider[0]}} ({{provider[1]}})</span></a>
-            </span>
-            <span ng-repeat="name in m.query.facets.feed_names">
-                <a href="#"><span class="badge alert-danger">{{name[0]}} ({{name[1]}})</span></a>
-            </span>
-            <br />
-            <br />
-            <span class="text-muted">Total Events ({{m.query.total_events}})</span>
-        </div>
-        <div class="col-xs-4 col-sm-3 placeholder">
-            <h4 class="text-primary">Feed Hits</h4>
-            <h1 class="lead text-info"><strong>{{m.query.facets.feed_names.length}}</strong></h1>
-            <span class="text-muted"># of feed names</span>
-        </div>
-
-        <!--
-        <div class="col-xs-6 col-sm-3 placeholder">
-            <h4>Search Count</h4>
-            <h1 class="lead text-info"><strong>41</strong></h1>
-            <span class="text-muted">number of times searched</span>
-        </div>
-        -->
-    </div>
-
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="row">
