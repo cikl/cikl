@@ -2,6 +2,7 @@ Next
 ====
 
 * Add your message and a link to your github account right below this line.
+* Switched to using Threatinator for feed fetching and parsing. - [@justfalter](https://github.com/justfalter)
 * Updated UI based on wireframe design. - [@dsweet04](https://github.com/dsweet04)
 * Fixed defect for events displayed numbers. - [@dsweet04](https://github.com/dsweet04)
 * Refactored UI pagination code. - [@dsweet04](https://github.com/dsweet04)
