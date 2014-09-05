@@ -1,0 +1,77 @@
+<td colspan='6' ng-repeat="answer in event.observables.dns_answer">
+    <table class="data">
+        <tr>
+            <td>
+                <small><strong>name: </strong></small>
+            </td>
+            <td>
+                <small class="text-danger">
+                    <strong>
+                        <a ng-href="{{m.getLink('fqdn', answer.name)}}">{{answer.name}}</a>
+                    </strong>
+                </small>
+            </td>
+            <td>
+                <small><strong>fqdn: </strong></small>
+            </td>
+            <td>
+                <small class="text-danger">
+                    <strong>
+                        <a ng-href="{{m.getLink('fqdn', answer.fqdn)}}">{{answer.fqdn}}</a>
+                    </strong>
+                </small>
+            </td>
+            <td>
+                <small><strong>ipv4: </strong></small>
+            </td>
+            <td>
+                <small class="text-danger">
+                    <strong>
+                        <a ng-href="{{m.getLink('ipv4', answer.ipv4)}}">{{answer.ipv4}}</a>
+                    </strong>
+                </small>
+            </td>
+            <td>
+                <small><strong>ipv6: </strong></small>
+            </td>
+            <td>
+                <small class="text-danger">
+                    <strong>
+                        <a ng-href="{{m.getLink('ipv6', answer.ipv6)}}">{{answer.ipv6}}</a>
+                    </strong>
+                </small>
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <small><strong>resolver: </strong></small>
+            </td>
+            <td>
+                <small>{{answer.resolver}}</small>
+            </td>
+            <td>
+                <small><strong>section: </strong></small>
+            </td>
+            <td>
+                <small>{{answer.section}}</small>
+            </td>
+            <td>
+                <small><strong>rr_class: </strong></small>
+            </td>
+            <td>
+                <small>{{answer.rr_class}}</small>
+            </td>
+            <td>
+                <small><strong>rr_type: </strong></small>
+            </td>
+            <td>
+                <small>{{answer.rr_type}}</small>
+            </td>
+            <td></td>
+            <td></td>
+
+        </tr>
+    </table>
+</td>

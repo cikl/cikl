@@ -1,6 +1,6 @@
 description "Cikl DNS Worker"
 
-start on (started networking <%= "and vagrant-mounted MOUNTPOINT=#{@local_path}" if (@environment == 'development') %>)
+start on (started networking <%= "and vagrant-mounted MOUNTPOINT=/vagrant" if (@environment == 'development') %>)
 
 stop on runlevel [06]
 
@@ -10,5 +10,6 @@ setuid <%= @user %>
 setgid <%= @group %>
 
 console log
-chdir <%= @local_path %>
-exec bin/dns_worker.rb /etc/cikl-dns-worker.yaml
+env BUNDLE_GEMFILE=<%= @local_path %>/Gemfile
+chdir <%= @server_run_path %>
+exec <%= @local_path %>/bin/dns_worker.rb <%= @server_config %>

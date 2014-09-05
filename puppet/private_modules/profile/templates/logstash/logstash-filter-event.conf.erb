@@ -1,17 +1,30 @@
 filter {
   if ([type] == 'event') {
-    date {
-      match => [ "detecttime", "UNIX" ]
-        target => "@timestamp"
+    if ([detect_time]) {
+      date {
+        match => [ "detect_time", "ISO8601" ]
+        target => "detect_time"
         timezone => "UTC"
+      }
     }
-    date {
-      match => [ "reporttime", "UNIX" ]
-        target => "reporttime"
+    if ([import_time]) {
+      date {
+        match => [ "import_time", "ISO8601" ]
+        target => "import_time"
         timezone => "UTC"
+      }
     }
-    mutate {
-      remove_field => [ "detecttime" ]
+
+    if ([type] == 'event') {
+      cikl_event_normalize { }
+
+      generate_dns_queries { }
+
+      cikl_mongodb {
+        database => 'cikl'
+        uri => 'mongodb://localhost:27017'
+      }
     }
+    
   }
 }

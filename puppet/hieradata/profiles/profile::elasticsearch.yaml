@@ -1,3 +1,0 @@
----
-profile::elasticsearch::cluster_name: "%{hiera('cikl::elasticsearch_cluster_name')}"
-profile::elasticsearch::node_name: "%{::ipaddress}"

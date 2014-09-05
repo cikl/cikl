@@ -1,0 +1,38 @@
+require 'rubygems'
+require 'bundler'
+begin
+  Bundler.setup(:default, :development, :test)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+require 'rake'
+
+begin
+  require 'rspec/core'
+  require 'rspec/core/rake_task'
+rescue LoadError
+else
+  namespace(:spec) do
+    desc "Run RSpec unit tests"
+    RSpec::Core::RakeTask.new(:unit) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = "--tag ~integration"
+    end
+
+    desc "Run RSpec integration tests. Requires MongoDB and Elasticsearch."
+    RSpec::Core::RakeTask.new(:integration) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = "--tag integration"
+    end
+
+    desc "Run all RSpec unit and integration tests."
+    RSpec::Core::RakeTask.new(:all) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = ""
+    end
+  end
+end
+
+task :default => ["spec:unit"]

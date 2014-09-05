@@ -4,5 +4,6 @@ class role::does_everything {
   include profile::elasticsearch
   include profile::rabbitmq
   include profile::worker
-  include profile::smrt
+  include profile::mongodb
+  include profile::threatinator
 }

@@ -1,0 +1,9 @@
+*.swp
+*.swo
+.bundle
+.gem
+*.war
+/coverage/
+/coverage.vim
+Gemfile.lock
+pkg/

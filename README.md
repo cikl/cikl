@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cikl/cikl.svg)](https://travis-ci.org/cikl/cikl)
+
 # Cikl
 Cikl is a cyber threat intelligence management system. It is a fork of the [Collective Intelligence Framework (CIF)](https://code.google.com/p/collective-intelligence-framework/), which aims for the same goal. The primary goals of this (currently experimental) fork is to improve speed, scalability, functionality, and ease of installation. 
 
@@ -28,7 +30,6 @@ to Puppet to handle the provisioning and setup.
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
-git submodule update --init --recursive
 ```
 - Bring up the virtual machine:
 ```
@@ -38,8 +39,9 @@ vagrant up
 
 ### Accessing the development environment
 
-- [Cikl Kibana dashboard](http://localhost:8080/)
-- [Elasticsearch Head](http://localhost:8080/es/_plugin/head/)
+- [Cikl UI](http://localhost:8080/)
+- [API Documentation](http://localhost:8080/api/doc/)
+- [Elasticsearch Head](http://localhost:9292/_plugin/head/)
 - For shell access, type ```vagrant ssh```, and you'll be dropped into the 
   virtual machine as the 'vagrant' user. You'll notice that the base of the
   git repository has been mounted at '/vagrant'. You should have full sudo 
@@ -64,23 +66,34 @@ vagrant destroy
 git checkout master
 # Pull any updatream changes into your master branch
 git pull origin master
-# Very important, update any submodules:
-git submodule update --init --recursive
 # Recreate the vagrant virtual machine.
 vagrant up
 ```
 
-### Importing data via cikl_smrt
+### Importing data
 
 Now that you've got everything up and running, maybe you want to process a 
 feed or two? 
 
-At the moment, importing data involves running cikl_smrt against one of the 
-feeds located in the 'feeds' directory. 
+Cikl uses [Threatinator](https://github.com/cikl/threatinator) for all of its
+threat data feed fetching and parsing needs. You can find details on 
+Threatinators usage on its project page.
+
+To see all threatinator feeds that are currently available:
+```
+vagrant ssh -c "threatinator list"
+```
+
+When importing data into Cikl, you must specify that the 'cikl' output be used. 
 
 For example: 
 ```
-vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
+vagrant ssh -c "threatinator run --run.output.format=cikl mirc domain_reputation"
+```
+
+### Clearing out existing data after an upgrade
+```
+vagrant ssh -c "/vagrant/util/drop_data.sh"
 ```
 
 ### FAQ:
@@ -100,16 +113,16 @@ vagrantconfig_local.yaml, and run ```vagrant reload```
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 
-## Issues and Pull Requests
+
+## Contributing and Issue Tracking
+
+Before you file a bug or submit a pull request, please review our 
+[contribution guidelines](https://github.com/cikl/cikl/wiki/Contributing).
 
 All issues are managed within the primary repository: [cikl/cikl/issues](https://github.com/cikl/cikl/issues). Pull requests should be sent to their respective reposirotires, referencing some issue within the main project repository.
 
 We use Huboard for managing our issues (to the extent that it can). [Our HuBoard!](https://huboard.com/cikl/cikl#/).
 
-## Repositories
+## License
 
-Cikl consists of many different sub-projects. The main ones are:
-
-### p5-Cikl
-[cikl/p5-Cikl](https://github.com/cikl/p5-Cikl) - the current core of Cikl. This began as a fork of https://github.com/collectiveintel/cif-v1 and has evolved quite a bit over time. The code is available on CPAN as Cikl. 
-
+Copyright (c) 2014 Michael Ryan. See the LICENSE file for license rights and limitations (LGPLv3).

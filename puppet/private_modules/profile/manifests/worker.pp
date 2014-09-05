@@ -1,6 +1,7 @@
 class profile::worker (
   $local_path,
-  $root          = '/opt/worker',
+  $root          = '/opt/cikl/worker',
+  $gem_root      = '/opt/cikl/worker/gems',
   $user          = 'cikl_worker',
   $group         = 'cikl_worker',
   $rabbitmq_host = 'localhost',
@@ -8,23 +9,24 @@ class profile::worker (
   $rabbitmq_username = 'guest',
   $rabbitmq_password = 'guest',
   $rabbitmq_vhost = '/',
+  $server_config       = "/etc/cikl-dns-worker.yaml",
+  $server_run_path     = '/var/run/cikl-dns-worker',
 ) inherits profile::base {
-  $gems = "$root/gems"
 
-  ensure_packages(['bundler', 'libunbound2'])
+  ensure_packages(['libxml2-dev', 'libunbound2'])
 
   file { $root: 
     ensure => "directory"
-  } ->
-  exec { 'profile::worker::install':
-    cwd         => $root,
-    command     => "/usr/bin/bundle install --path=${$gems} --gemfile=$local_path/Gemfile",
-    require => [
-      Package['libunbound2', 'bundler']
-    ],
-    unless => "/usr/bin/bundle check --gemfile=$local_path/Gemfile"
   }
 
+  bundler::install { "worker":
+    source_path => $local_path,
+    gem_root    => $gem_root,
+    notify      => Service['profile::worker::service'],
+    require => [
+      Package['libunbound2', 'libxml2-dev']
+    ],
+  }
 
   group { 'profile::worker::group':
     name => $group,
@@ -35,15 +37,28 @@ class profile::worker (
     ensure  => 'present',
     gid     => $group,
     shell   => '/usr/sbin/nologin'
-  }
+  } -> 
 
   file { 'profile::worker::config': 
-    path    => "/etc/cikl-dns-worker.yaml",
+    path    => $server_config,
     owner   => "root",
     group   => "root",
     mode    => '0644',
     content => template('profile/worker/cikl-dns-worker.yaml.erb'),
-    notify  => Service['cikl_worker::service']
+    notify  => Service['profile::worker::service']
+  }
+
+  file { 'profile::worker::upstart-pre': 
+    path    => "/etc/init/cikl-dns-worker-pre.conf",
+    owner   => "root",
+    group   => "root",
+    mode    => '0644',
+    content => template('profile/worker/cikl-dns-worker-pre-upstart.conf.erb'),
+    notify  => Service['profile::worker::service'],
+    require => [
+      User['profile::worker::user'],
+      Group['profile::worker::group'],
+    ]
   }
 
   file { 'profile::worker::upstart': 
@@ -52,14 +67,16 @@ class profile::worker (
     group   => "root",
     mode    => '0644',
     content => template('profile/worker/cikl-dns-worker-upstart.conf.erb'),
-    notify  => Service['cikl_worker::service'],
+    notify  => Service['profile::worker::service'],
     require => [
       User['profile::worker::user'],
-      Group['profile::worker::group']
+      Group['profile::worker::group'],
+      File['profile::worker::config'],
+      File['profile::worker::upstart-pre']
     ]
   }
 
-  service { 'cikl_worker::service': 
+  service { 'profile::worker::service': 
     name       => 'cikl-dns-worker',
     ensure     => 'running',
     provider   => 'upstart',

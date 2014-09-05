@@ -6,7 +6,7 @@ class profile::elasticsearch (
   ensure_packages(['openjdk-7-jre-headless'])
   class { '::elasticsearch': 
     manage_repo            => true,
-    repo_version           => '1.0',
+    repo_version           => '1.2',
     config                 => {
       'cluster.name'       => $cluster_name,
       'node.name'          => $node_name,
@@ -24,5 +24,6 @@ class profile::elasticsearch (
   ::elasticsearch::plugin{'mobz/elasticsearch-head':
     module_dir => 'head'
   }
+
 }
 

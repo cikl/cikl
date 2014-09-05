@@ -1,0 +1,166 @@
+{
+  "template" : "cikl-*",
+  "settings" : {
+    "index.mapper.dynamic" : "false",
+    "index.refresh_interval" : "5s",
+    "index.analysis.analyzer.lowercase_keyword.type" : "custom",
+    "index.analysis.analyzer.lowercase_keyword.tokenizer" : "keyword",
+    "index.analysis.analyzer.lowercase_keyword.filter.0" : "lowercase",
+    "index.analysis.analyzer.fqdn_analyzer.tokenizer" : "fqdn_tokenizer",
+    "index.analysis.analyzer.fqdn_analyzer.filter.0" : "lowercase",
+    "index.analysis.analyzer.fqdn_analyzer.type" : "custom",
+    "index.analysis.tokenizer.fqdn_tokenizer.reverse" : "true",
+    "index.analysis.tokenizer.fqdn_tokenizer.type" : "path_hierarchy",
+    "index.analysis.tokenizer.fqdn_tokenizer.delimiter" : "."
+  },
+  "mappings" : {
+    "_default_": {
+      "properties" : {
+        "@version": { "type": "string", "index": "not_analyzed" }
+      }
+    },
+    "event" : {
+      "_id": {
+        "path" : "event_id"
+      },
+      "properties" : {
+        "event_id" : {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "source" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "feed_provider" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "feed_name" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "restriction" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "alternativeid_restriction" : {
+          "index" : "not_analyzed",
+          "type" : "string"
+        },
+        "observables" : {
+          "type": "object",
+          "properties": {
+            "ipv4" : {
+              "type": "nested",
+              "properties": {
+                "ipv4" : {
+                  "type" : "ip"
+                }
+              }
+            },
+            "asn" : {
+              "type" : "nested",
+              "properties": {
+                "asn" : {
+                  "type" : "integer"
+                }
+              }
+            },
+            "fqdn": {
+              "type": "nested",
+              "properties": {
+                "fqdn" : {
+                  "type" : "string",
+                  "index_analyzer" : "fqdn_analyzer",
+                  "search_analyzer" : "lowercase_keyword",
+                  "fields" : {
+                    "exact" : {
+                      "analyzer" : "lowercase_keyword",
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            },
+            "dns_answer": {
+              "type": "nested",
+              "properties": {
+                "resolver" : {
+                  "analyzer" : "lowercase_keyword",
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string",
+                  "index_analyzer" : "fqdn_analyzer",
+                  "search_analyzer" : "lowercase_keyword",
+                  "fields" : {
+                    "exact" : {
+                      "analyzer" : "lowercase_keyword",
+                      "type" : "string"
+                    }
+                  }
+                },
+                "rr_type": { "type": "string", "analyzer": "lowercase_keyword" },
+                "rr_class": { "type": "string", "analyzer": "lowercase_keyword" },
+                "section": { "type": "string", "analyzer": "lowercase_keyword" },
+                "fqdn" : {
+                  "type" : "string",
+                  "index_analyzer" : "fqdn_analyzer",
+                  "search_analyzer" : "lowercase_keyword",
+                  "fields" : {
+                    "exact" : {
+                      "analyzer" : "lowercase_keyword",
+                      "type" : "string"
+                    }
+                  }
+                },
+                "ipv4" : {
+                  "type" : "ip"
+                },
+                "ipv6" : {
+                  "type" : "string",
+                  "analyzer" : "lowercase_keyword"
+                }
+              }
+            }
+          }
+        },
+        "description" : {
+          "index" : "analyzed",
+          "type" : "string"
+        },
+        "confidence" : {
+          "type" : "integer"
+        },
+        "group" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string"
+        },
+        "tags" : {
+          "analyzer" : "lowercase_keyword",
+          "type" : "string",
+          "index_name" : "tag"
+        },
+        "detect_time" : {
+          "type" : "date"
+        },
+        "import_time" : {
+          "type" : "date"
+        },
+        "alternativeid" : {
+          "analyzer" : "keyword",
+          "type" : "string"
+        },
+        "geoip"  : {
+          "type" : "object",
+          "dynamic": true,
+          "path": "full",
+          "properties" : {
+            "location" : { "type" : "geo_point" }
+          }
+        }
+      }
+    }
+  }
+}

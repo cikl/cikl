@@ -1,0 +1,21 @@
+<form class="form form-inline" role="form">
+    <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getFirstPage())" ng-disabled="!m.getFirstPage()">
+            <span class="text-primary">First</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getPrevPage())" ng-disabled="!m.getPrevPage()">
+            <span class="text-primary">Prev</span>
+        </button>
+
+        <button ng-repeat="i in m.getPages()" ng-if="m.isVisible(i)" type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(i)" ng-disabled="m.checkCurrentPage(i)">
+            <span class="text-primary">{{i}}</span>
+        </button>
+
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getNextPage())" ng-disabled="!m.getNextPage()">
+            <span class="text-primary">Next</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-default text-center" ng-click="m.setCurrentPage(m.getLastPage())" ng-disabled="!m.getLastPage()">
+            <span class="text-primary">Last</span>
+        </button>
+    </div>
+</form>

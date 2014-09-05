@@ -1,0 +1,10 @@
+---
+profile::threatinator::local_path: "%{::path_threatinator}"
+
+profile::api::local_path: "%{::path_cikl_api}"
+
+profile::nginx::ui_path: "%{::path_ui}"
+
+profile::worker::local_path: "%{::path_cikl_worker}"
+
+profile::logstash::elasticsearch_template_source_path: "%{::path_cikl_api}/config/elasticsearch_template.json"

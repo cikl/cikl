@@ -1,0 +1,61 @@
+require 'rubygems'
+require 'bundler'
+begin
+  Bundler.setup(:default, :development, :test)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+require 'rake'
+
+begin
+  require 'rspec/core'
+  require 'rspec/core/rake_task'
+rescue LoadError
+else
+  namespace(:spec) do
+    desc "Run RSpec unit tests"
+    RSpec::Core::RakeTask.new(:unit) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = "--tag ~integration"
+    end
+
+    desc "Run RSpec integration tests. Requires MongoDB and Elasticsearch."
+    RSpec::Core::RakeTask.new(:integration) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = "--tag integration"
+    end
+
+    desc "Run all RSpec unit and integration tests."
+    RSpec::Core::RakeTask.new(:all) do |spec|
+      spec.pattern = 'spec/**/*_spec.rb'
+      spec.rspec_opts = ""
+    end
+  end
+end
+
+namespace :mongo do
+  desc 'Dump all events in MonboDB to a YAML file'
+  task :dump2yaml do
+    $:.unshift 'config'
+    require 'environment'
+    require 'cikl/event'
+
+    env = ENV['RACK_ENV']
+    filename = "mongo_#{env}.#{Time.now.to_f}.yaml"
+    puts "Writing mongo data for RACK_ENV '#{env}' to #{filename}"
+    count = 0
+    File.open(filename, "w") do |fio|
+      Cikl::MongoEventCollection.find({}).each do |event|
+        count += 1
+        model = Cikl::Event.new(event)
+        hash = Cikl::API::Entities::Event.represent(model, :serializable => true)
+        fio.write YAML.dump(hash)
+      end
+    end
+    puts "Wrote #{count} events to #{filename}"
+  end
+end
+
+task :default => ["spec:unit"]

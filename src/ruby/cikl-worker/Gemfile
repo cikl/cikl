@@ -1,0 +1,8 @@
+source "https://rubygems.org"
+
+gemspec_opts = {}
+if ENV['TRAVIS']
+  gemspec_opts[:development_group] = :test
+end
+
+gemspec gemspec_opts

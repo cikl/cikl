@@ -1,3 +1,0 @@
----
-profile::smrt::local_p5_cikl: "%{::path_p5_cikl}"
-profile::smrt::local_p5_cikl_rabbitmq: "%{::path_p5_cikl_rabbitmq}"

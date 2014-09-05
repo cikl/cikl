@@ -1,0 +1,8 @@
+<td colspan='6' ng-repeat="domain in event.observables.fqdn">
+    <small><strong>fqdn: </strong></small>
+    <small class="text-danger">
+        <strong>
+            <a ng-href="{{m.getLink('fqdn', domain.fqdn)}}">{{domain.fqdn}}</a>
+        </strong>
+    </small>
+</td>

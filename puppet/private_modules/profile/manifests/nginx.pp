@@ -1,14 +1,9 @@
 class profile::nginx (
-  $kibana_root,
-  $kibana_conf       = undef,
-  $kibana_dashboards = undef,
-  $elasticsearch_url = 'http://127.0.0.1:9200'
+  $ui_path
 ) inherits profile::base {
 
   $config_file  = "/etc/nginx/sites-available/cikl.conf"
   $config_enabled_symlink = "/etc/nginx/sites-enabled/cikl.conf"
-
-  validate_re($elasticsearch_url, '^https?://.*')
 
   ensure_packages(['nginx'])
 

@@ -6,14 +6,18 @@ class profile::logstash (
   $rabbitmq_username = 'guest',
   $rabbitmq_password = 'guest',
   $rabbitmq_vhost = '/',
+  $elasticsearch_template_source_path
 ) 
 inherits profile::base {
   ensure_packages(['openjdk-7-jre-headless'])
 
   class { '::logstash': 
-    manage_repo  => true,
-    repo_version => '1.4',
-    require      => Package['openjdk-7-jre-headless']
+    manage_repo       => true,
+    repo_version      => '1.4',
+    require           => Package['openjdk-7-jre-headless'],
+    install_contrib   => true,
+    restart_on_change => true,
+    status            => enabled
   }
 
   file { 'elasticsearch-cikl-template': 
@@ -21,8 +25,9 @@ inherits profile::base {
     owner   => "root",
     group   => "root",
     mode    => '0644',
-    content => template('profile/logstash/elasticsearch-cikl-template.json.erb'),
-    before  => Class['::logstash']
+    source =>  $elasticsearch_template_source_path,
+    before  => Class['::logstash'],
+    notify  => Class['::logstash::service']
   }
 
   ::logstash::configfile { 'input-rabbitmq':
@@ -53,5 +58,12 @@ inherits profile::base {
     mode    => '0644',
     content => 'manual',
     before  => Class['::logstash']
+  }
+
+  file_line { 'add-plugins':
+    path    => '/etc/default/logstash',
+    line    => "LS_OPTS='--pluginpath /vagrant/logstash-plugins'",
+    notify  => Class['::logstash::service'],
+    require => Class['::logstash::package']
   }
 }

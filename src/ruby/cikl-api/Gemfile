@@ -1,0 +1,12 @@
+source "https://rubygems.org"
+
+gemspec_opts = {}
+if ENV['TRAVIS']
+  gemspec_opts[:development_group] = :test
+end
+
+gemspec gemspec_opts
+
+if File.exists? File.expand_path("../../cikl-event/cikl-event.gemspec", __FILE__)
+  gem 'cikl-event', :path => File.expand_path("../../cikl-event", __FILE__), :require => false
+end
