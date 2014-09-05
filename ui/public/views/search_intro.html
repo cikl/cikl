@@ -1,35 +1,12 @@
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/"><strong>cikl</strong></a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <!--
-            <form novalidate class="navbar-form navbar-right">
-                <input ng-model="user.email" class="input-sm form-control" type="email" placeholder="Email">
-                <input ng-model="user.password" class="input-sm form-control" type="password" placeholder="Password">
-                <button class="btn-sm btn-inverse" ng-click="login(user)"><strong>Log In</strong></button>
-            </form>
-            -->
-        </div>
-    </div>
-</div>
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12 col-md-12 main">
 
-            <h1 class="page-header text-center">Search</h1>
+            <div class="text-muted text-center intro"><strong>cikl</strong></div>
 
             <form novalidate class="form-inline text-center lead" role="form">
                 <div class="form-group">
-                    <select ng-model="artifact.type" class="input input-lg" name="search-type" id="search-type">
+                    <select ng-model="artifact.type" class="input input-lg form-control" name="search-type" id="search-type">
                         <option value>- select type -</option>
                         <option value="ipv4"> ipv4 </option>
                         <!--<option value="ip-range"> IP Range </option>-->
