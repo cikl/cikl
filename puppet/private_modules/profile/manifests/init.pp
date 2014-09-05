@@ -1,4 +1,6 @@
 class profile::base {
+  include profile::common
+
   if !defined(Class['apt']) {
     class { 'apt': }
   }

@@ -209,7 +209,7 @@ module Cikl
           return enum_for(:hits_to_events_es, hits) unless block_given?
 
           hits.each do |hit|
-            yield Cikl::Event.from_hash(hit["_source"])
+            yield Cikl::Event.new(hit["_source"])
           end
         end
 
@@ -218,7 +218,7 @@ module Cikl
           ids = hits.map { |hit| hit["_id"] }
 
           mongo_each_event(ids) do |obj|
-            yield Cikl::Event.from_hash(obj)
+            yield Cikl::Event.new(obj)
           end
         end
 

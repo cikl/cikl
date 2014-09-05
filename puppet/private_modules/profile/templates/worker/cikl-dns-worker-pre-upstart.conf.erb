@@ -1,0 +1,13 @@
+description "Cikl DNS Worker Pre-start"
+
+# Creates required directories before starting up our service.
+
+start on starting cikl-dns-worker
+
+task
+
+script
+  mkdir -p <%= @server_run_path %>
+  chown <%= @user %>:<%= @group %> <%= @server_run_path %>
+end script
+

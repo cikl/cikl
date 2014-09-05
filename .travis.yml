@@ -1,3 +1,10 @@
+language: ruby
+
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1.0
+
 services: 
   - rabbitmq
   - mongodb
@@ -5,46 +12,16 @@ services:
 env:
     global:
       - JRUBY_OPTS=--debug
-      - PERL5LIB=$TRAVIS_BUILD_DIR/p5-Cikl/lib:$TRAVIS_BUILD_DIR/p5-Cikl-RabbitMQ/lib
       - TEST_CLUSTER_COMMAND=/tmp/elasticsearch-1.2.1/bin/elasticsearch
-
-matrix:
-  include:
-    - language: ruby
-      rvm: 1.9.3
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
-    - language: ruby
-      rvm: 2.0.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
-    - language: ruby
-      rvm: 2.1.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-api/
-    - language: ruby
-      rvm: 1.9.3
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
-    - language: ruby
-      rvm: 2.0.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
-    - language: ruby
-      rvm: 2.1.0
-      env: TEST_LANGUAGE=ruby PROJECT_DIR=src/ruby/cikl-worker/
-    - language: perl
-      perl: 5.14
-      env: TEST_LANGUAGE=perl
-    - language: perl
-      perl: 5.16
-      env: TEST_LANGUAGE=perl
-    - language: perl
-      perl: 5.18
-      env: TEST_LANGUAGE=perl
+      - NOKOGIRI_USE_SYSTEM_LIBRARIES=1
 
 before_install:
   - travis_retry sudo apt-get update -qq
   - travis_retry curl -# https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.tar.gz | tar xz -C /tmp || true
-  - travis_retry travis/$TEST_LANGUAGE/before_install.sh
+  - travis_retry travis/ruby/before_install.sh
 
 install: 
-  - travis_retry travis/$TEST_LANGUAGE/install.sh
+  - travis_retry travis/ruby/install.sh
 
 script:
-  - travis_retry travis/$TEST_LANGUAGE/script.sh
+  - travis_retry travis/ruby/script.sh

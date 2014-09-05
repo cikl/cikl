@@ -39,6 +39,7 @@ vagrant up
 
 ### Accessing the development environment
 
+- [Cikl UI](http://localhost:8080/)
 - [API Documentation](http://localhost:8080/api/doc/)
 - [Elasticsearch Head](http://localhost:9292/_plugin/head/)
 - For shell access, type ```vagrant ssh```, and you'll be dropped into the 
@@ -69,39 +70,30 @@ git pull origin master
 vagrant up
 ```
 
-### Importing data via cikl_smrt
+### Importing data
 
 Now that you've got everything up and running, maybe you want to process a 
 feed or two? 
 
-At the moment, importing data involves running cikl_smrt against one of the 
-feeds located in the 'feeds' directory. 
+Cikl uses [Threatinator](https://github.com/cikl/threatinator) for all of its
+threat data feed fetching and parsing needs. You can find details on 
+Threatinators usage on its project page.
+
+To see all threatinator feeds that are currently available:
+```
+vagrant ssh -c "threatinator list"
+```
+
+When importing data into Cikl, you must specify that the 'cikl' output be used. 
 
 For example: 
 ```
-vagrant ssh -c "cikl_smrt -C /etc/cikl.conf -r /vagrant/feeds/etc/00_alexa_whitelist.cfg -f top1000 -v5 -d"
+vagrant ssh -c "threatinator run --run.output.format=cikl mirc domain_reputation"
 ```
 
 ### Clearing out existing data after an upgrade
 ```
 vagrant ssh -c "/vagrant/util/drop_data.sh"
-```
-
-### Importing and exporting data via util/data_loader.sh
-
-This tool exists for development purposes, only, and is not to be seen as a
-means for actually backing up data within Cikl. 
-
-#### Dumping the contents of Cikl into an archive:
-```
-vagrant ssh -c "/vagrant/util/data_loader.sh dump /vagrant/my_dump.tgz"
-```
-
-
-#### Restoring Cikl from a dump
-NOTE: This will wipe out any data that is contained within Cikl!!! 
-```
-vagrant ssh -c "/vagrant/util/data_loader.sh restore /vagrant/my_dump.tgz"
 ```
 
 ### FAQ:
@@ -130,14 +122,6 @@ Before you file a bug or submit a pull request, please review our
 All issues are managed within the primary repository: [cikl/cikl/issues](https://github.com/cikl/cikl/issues). Pull requests should be sent to their respective reposirotires, referencing some issue within the main project repository.
 
 We use Huboard for managing our issues (to the extent that it can). [Our HuBoard!](https://huboard.com/cikl/cikl#/).
-
-## Repositories
-
-Cikl consists of many different sub-projects. The main ones are:
-
-### p5-Cikl
-[cikl/p5-Cikl](https://github.com/cikl/p5-Cikl) - the current core of Cikl. This began as a fork of https://github.com/collectiveintel/cif-v1 and has evolved quite a bit over time. The code is available on CPAN as Cikl. 
-
 
 ## License
 

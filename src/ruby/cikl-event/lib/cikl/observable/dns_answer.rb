@@ -1,11 +1,10 @@
-require 'virtus'
+require 'cikl/base_model'
+require 'equalizer'
 
 module Cikl
   module Observable
 
-    class DnsAnswer
-      include Virtus.model
-
+    class DnsAnswer < Cikl::BaseModel
       attribute :resolver, String
       attribute :name, String
       attribute :rr_class, String
@@ -15,9 +14,7 @@ module Cikl
       attribute :ipv6, String
       attribute :fqdn, String
 
-      class << self
-        alias_method :from_hash, :new
-      end
+      include Equalizer.new(*attribute_set.map(&:name))
     end
 
   end
