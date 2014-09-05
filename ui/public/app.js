@@ -17,7 +17,7 @@ function config ($routeProvider, $locationProvider) {
     })
     .when('/:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax',
     {
-      templateUrl: 'views/search_results.html',
+      templateUrl: 'views/search_timeline.html',
       controller: 'MainCtrl',
       controllerAs: 'm',
       resolve: MainCtrl.resolve

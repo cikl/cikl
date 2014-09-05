@@ -6,6 +6,12 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.location = $location;
   m.routeParams = $routeParams;
 
+  // Search form bindings and selector values
+  m.artifact = {};
+  m.artifact.type = CiklApi.getType();
+  m.artifact.term = CiklApi.getTerm();
+  m.types = ['fqdn','ipv4'];
+
   // Animation timeout delay
   $timeout(function () {
     m.query = CiklApi.getQuery();
@@ -199,6 +205,9 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   m.search = function() {
     $location.path(UrlBuilder.getSearch());
   };
+  m.update = function() {
+    $location.path(UrlBuilder.update());
+  };
 
   // Search form
   m.formSearch = function(artifact) {
@@ -206,9 +215,6 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
     CiklApi.setTerm(artifact.term);
 
     m.search();
-  };
-  m.update = function() {
-    $location.path(UrlBuilder.update());
   };
 
 }
