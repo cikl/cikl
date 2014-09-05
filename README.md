@@ -96,23 +96,6 @@ vagrant ssh -c "threatinator run --run.output.format=cikl mirc domain_reputation
 vagrant ssh -c "/vagrant/util/drop_data.sh"
 ```
 
-### Importing and exporting data via util/data_loader.sh
-
-This tool exists for development purposes, only, and is not to be seen as a
-means for actually backing up data within Cikl. 
-
-#### Dumping the contents of Cikl into an archive:
-```
-vagrant ssh -c "/vagrant/util/data_loader.sh dump /vagrant/my_dump.tgz"
-```
-
-
-#### Restoring Cikl from a dump
-NOTE: This will wipe out any data that is contained within Cikl!!! 
-```
-vagrant ssh -c "/vagrant/util/data_loader.sh restore /vagrant/my_dump.tgz"
-```
-
 ### FAQ:
 
 #### Why do I get prompted to select a network interface when I run 'vagrant up'? Why do you require bridged network access?
