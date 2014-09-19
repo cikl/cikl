@@ -157,7 +157,7 @@ function DateTime () {
   // Get epoch times for URL encoding
   DateTime.getImportMinEpoch = function() {
     if (DateTime.import_min === null) {
-      return 'none';
+      return null;
     }
     else {
       return (DateTime.import_min.utc());
@@ -165,7 +165,7 @@ function DateTime () {
   };
   DateTime.getImportMaxEpoch = function() {
     if (DateTime.import_max === null) {
-      return 'none';
+      return null;
     }
     else {
       return (DateTime.import_max.utc());
@@ -173,7 +173,7 @@ function DateTime () {
   };
   DateTime.getDetectMinEpoch = function() {
     if (DateTime.detect_min === null) {
-      return 'none';
+      return null;
     }
     else {
       return (DateTime.detect_min.utc());
@@ -181,7 +181,7 @@ function DateTime () {
   };
   DateTime.getDetectMaxEpoch = function() {
     if (DateTime.detect_max === null) {
-      return 'none';
+      return null;
     }
     else {
       return (DateTime.detect_max.utc());
@@ -190,38 +190,38 @@ function DateTime () {
 
   // Parse URL epoch times back to moments
   DateTime.setImportMinFromEpoch = function(date) {
-    if (date === 'none') {
+    if (date === null) {
       DateTime.import_min = null;
     }
     else {
-      var new_date = moment.utc(parseInt(date));
+      var new_date = moment.utc(date);
       DateTime.setImportMin(new_date);
     }
   };
   DateTime.setImportMaxFromEpoch = function(date) {
-    if (date === 'none') {
+    if (date === null) {
       DateTime.import_max = null;
     }
     else {
-      var new_date = moment.utc(parseInt(date));
+      var new_date = moment.utc(date);
       DateTime.setImportMax(new_date);
     }
   };
   DateTime.setDetectMinFromEpoch = function(date) {
-    if (date === 'none') {
+    if (date === null) {
       DateTime.detect_min = null;
     }
     else {
-      var new_date = moment.utc(parseInt(date));
+      var new_date = moment.utc(date);
       DateTime.setDetectMin(new_date);
     }
   };
   DateTime.setDetectMaxFromEpoch = function(date) {
-    if (date === 'none') {
+    if (date === null) {
       DateTime.detect_max = null;
     }
     else {
-      var new_date = moment.utc(parseInt(date));
+      var new_date = moment.utc(date);
       DateTime.setDetectMax(new_date);
     }
   };

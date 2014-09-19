@@ -124,7 +124,6 @@ function CiklApi ($q, $http, DateTime, Page) {
       query_params["detect_time_max"] = DateTime.getDetectMax();
     }
 
-
     var deferred = $q.defer();
 
     try{
@@ -134,7 +133,10 @@ function CiklApi ($q, $http, DateTime, Page) {
         // Set page values
         Page.setTotalItems(parseInt(CiklApi.query.total_events));
 
-        if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
+        if (Page.getTotalItems() === 0) {
+          Page.updatePage(1);
+        }
+        else if ( Page.getCurrentPage() <= ( Math.floor( ( (Page.getTotalItems() -1) + Page.getItemsPerPage() ) / Page.getItemsPerPage() ))) {
           Page.updatePage(Page.getCurrentPage());
         }
         else {

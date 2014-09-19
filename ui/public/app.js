@@ -15,14 +15,14 @@ function config ($routeProvider, $locationProvider) {
       controller: 'IntroCtrl',
       controllerAs: 'intro'
     })
-    .when('/:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax',
+    .when('/search',
     {
       templateUrl: 'views/search_timeline.html',
       controller: 'MainCtrl',
       controllerAs: 'm',
       resolve: MainCtrl.resolve
     })
-    .when('/manual.html',
+    .when('/manual',
     {
       templateUrl: 'views/manual.html',
       controller: 'ManualCtrl',

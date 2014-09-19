@@ -1,4 +1,4 @@
-function IntroCtrl ($location, CiklApi, DateTime, Page) {
+function IntroCtrl (UrlBuilder, CiklApi, DateTime, Page) {
 
   var intro = this;
 
@@ -18,20 +18,8 @@ function IntroCtrl ($location, CiklApi, DateTime, Page) {
     DateTime.newImportMax();
     DateTime.initialImportMin();
 
-    // Set url
-    // /:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax
-    $location.path( '/'
-            + CiklApi.getType() + '/'
-            + CiklApi.getTerm() + '/'
-            + Page.getCurrentPage() + '/'
-            + Page.getItemsPerPage() + '/'
-            + CiklApi.getOrder() + '/'
-            + CiklApi.getOrderBy() + '/'
-            + DateTime.getImportMinEpoch() + '/'
-            + DateTime.getImportMaxEpoch() + '/'
-            + DateTime.getDetectMinEpoch() + '/'
-            + DateTime.getDetectMaxEpoch()
-    );
+    // Set url and redirect to /search view
+    UrlBuilder.update();
   };
 
 }
