@@ -1,0 +1,8 @@
+<td colspan='6' ng-repeat="ip in event.observables.ipv4">
+    <small><strong>ipv4: </strong></small>
+    <small class="text-danger">
+        <strong>
+            <a ng-href="{{m.getLink('ipv4', ip.ipv4)}}">{{ip.ipv4}}</a>
+        </strong>
+    </small>
+</td>
