@@ -203,10 +203,11 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
 
   // Cikl Api Query
   m.search = function() {
-    $location.path(UrlBuilder.getSearch());
+    Page.setCurrentPage(1);
+    UrlBuilder.update();
   };
   m.update = function() {
-    $location.path(UrlBuilder.update());
+    UrlBuilder.update();
   };
 
   // Search form
@@ -218,39 +219,59 @@ function MainCtrl ($timeout, $route, $routeParams, $location, CiklApi, DateTime,
   };
 
 }
-// Resolve url params prior to page loading and update services variables
+// Resolve url params prior to page loading and update service variables
 MainCtrl.resolve = {
-  // Url params  /:type/:term/:page/:numItems/:order/:orderBy/:importMin/:importMax/:detectMin/:detectMax
-  setType: function($route, CiklApi) {
-    return CiklApi.setType($route.current.params.type);
+  // Set url search params
+  setType: function($location, CiklApi) {
+    if($location.search().type) {
+      return CiklApi.setType($location.search().type);
+    }
   },
-  setTerm: function($route, CiklApi) {
-    return CiklApi.setTerm($route.current.params.term);
+  setTerm: function($location, CiklApi) {
+    if ($location.search().term) {
+      return CiklApi.setTerm($location.search().term);
+    }
   },
-  setCurrentPage: function($route, Page) {
-    return Page.setCurrentPage($route.current.params.page);
+  setCurrentPage: function($location, Page) {
+    if ($location.search().page) {
+      return Page.setCurrentPage($location.search().page);
+    }
   },
-  setItemsPerPage: function($route, Page) {
-    return Page.setItemsPerPage($route.current.params.numItems);
+  setItemsPerPage: function($location, Page) {
+    if ($location.search().items) {
+      return Page.setItemsPerPage($location.search().items);
+    }
   },
-  setOrder: function($route, CiklApi) {
-    return CiklApi.setOrder($route.current.params.order);
+  setOrder: function($location, CiklApi) {
+    if ($location.search().order) {
+      return CiklApi.setOrder($location.search().order);
+    }
   },
-  setOrderBy: function($route, CiklApi) {
-    return CiklApi.setOrderBy($route.current.params.orderBy);
+  setOrderBy: function($location, CiklApi) {
+    if ($location.search().by) {
+      return CiklApi.setOrderBy($location.search().by);
+    }
   },
 
-  setImportMinFromEpoch: function($route, DateTime) {
-    return DateTime.setImportMinFromEpoch($route.current.params.importMin);
+  setImportMinFromEpoch: function($location, DateTime) {
+    if ($location.search().importMin) {
+      return DateTime.setImportMinFromEpoch($location.search().importMin);
+    }
   },
-  setImportMaxFromEpoch: function($route, DateTime) {
-    return DateTime.setImportMaxFromEpoch($route.current.params.importMax);
+  setImportMaxFromEpoch: function($location, DateTime) {
+    if ($location.search().importMax) {
+      return DateTime.setImportMaxFromEpoch($location.search().importMax);
+    }
   },
-  setDetectMinFromEpoch: function($route, DateTime) {
-    return DateTime.setDetectMinFromEpoch($route.current.params.detectMin);
+  setDetectMinFromEpoch: function($location, DateTime) {
+    if ($location.search().detectMin) {
+      return DateTime.setDetectMinFromEpoch($location.search().detectMin);
+    }
   },
-  setDetectMaxFromEpoch: function($route, DateTime) {
-    return DateTime.setDetectMaxFromEpoch($route.current.params.detectMax);
+  setDetectMaxFromEpoch: function($location, DateTime) {
+    if ($location.search().detectMax) {
+      return DateTime.setDetectMaxFromEpoch($location.search().detectMax);
+    }
   },
 
   queryApi: function (CiklApi) {

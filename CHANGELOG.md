@@ -2,6 +2,7 @@ Next
 ====
 
 * Add your message and a link to your github account right below this line.
+* Created URL query parameters and added URI encoding. - [@dsweet04](https://github.com/dsweet04)
 
 0.7.0
 ====
