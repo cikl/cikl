@@ -8,7 +8,7 @@ describe Threatinator::Plugins::Output::Cikl do
   before :each do
     allow(::Bunny).to receive(:new).and_return(bunny)
     allow(bunny).to receive(:start)
-    allow(bunny).to receive_message_chain("default_channel.default_exchange").and_return(exchange)
+    allow(bunny).to receive_message_chain("create_channel.default_exchange").and_return(exchange)
   end
 
   describe ".initialize(config)" do
@@ -40,7 +40,7 @@ describe Threatinator::Plugins::Output::Cikl do
     end
 
     it "should request the default exchange from the instance of bunny" do
-      expect(bunny).to receive_message_chain('default_channel.default_exchange')
+      expect(bunny).to receive_message_chain('create_channel.default_exchange')
       described_class.new(config)
     end
   end

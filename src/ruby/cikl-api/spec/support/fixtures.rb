@@ -39,7 +39,7 @@ module Fixtures
     end
 
     def load_fixtures
-      @mongo_bulk = Cikl::MongoEventCollection.initialize_unordered_bulk_op
+      @mongo_bulk = Cikl.mongo_event_collection.initialize_unordered_bulk_op
       orig_start = Time.now
       start = Time.now
       events = Fixtures.events
@@ -72,7 +72,7 @@ module Fixtures
     end
 
     def self.destroy!
-      Cikl::Mongo.drop_database(Cikl::Mongo.db.name)
+      Cikl.mongo_client.drop_database(Cikl.mongo_client.db.name)
       Cikl::ESClient.indices.delete(index: Cikl::Config.elasticsearch_index_pattern)
     end
   end

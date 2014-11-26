@@ -1,12 +1,4 @@
 require 'rubygems'
-require 'bundler'
-begin
-  Bundler.setup(:default, :development, :test)
-rescue Bundler::BundlerError => e
-  $stderr.puts e.message
-  $stderr.puts "Run `bundle install` to install missing gems"
-  exit e.status_code
-end
 require 'rake'
 
 begin
@@ -47,7 +39,7 @@ namespace :mongo do
     puts "Writing mongo data for RACK_ENV '#{env}' to #{filename}"
     count = 0
     File.open(filename, "w") do |fio|
-      Cikl::MongoEventCollection.find({}).each do |event|
+      Cikl.mongo_event_collection.find({}).each do |event|
         count += 1
         model = Cikl::Event.new(event)
         hash = Cikl::API::Entities::Event.represent(model, :serializable => true)

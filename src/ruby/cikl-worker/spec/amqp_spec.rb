@@ -65,7 +65,7 @@ module AMQPSpec
   end
 end
 
-describe Cikl::Worker::AMQP do
+describe Cikl::Worker::AMQP, :integration do
   include WorkerHelper
 
   let(:config) {
@@ -95,7 +95,7 @@ describe Cikl::Worker::AMQP do
 
   context "when failing to connect" do
     before :each do
-      config[:amqp][:port] = config[:amqp][:port] + 1
+      config[:amqp][:url] = "amqp://guest:guest@localhost:9933/"
     end
 
     context "with recover_from_connection_close set to false" do
@@ -137,7 +137,7 @@ describe Cikl::Worker::AMQP do
 
   describe "when started" do
     before :each do
-      @bunny = Bunny.new(config[:amqp])
+      @bunny = Bunny.new(config[:amqp][:url], :automatically_recover => false)
       @bunny.start
       @channel = @bunny.create_channel
       @results_queue = @channel.queue(config[:results_routing_key], :auto_delete => true)
@@ -175,9 +175,9 @@ describe Cikl::Worker::AMQP do
     end
     describe "#register_consumer" do
       it "should create a queue named for :jobs_routing_key and subscribe to it" do
-        expect(@bunny.queue_exists?(config[:jobs_routing_key])).to be_false
+        expect(@bunny.queue_exists?(config[:jobs_routing_key])).to be false
         amqp.register_consumer(consumer)
-        expect(@bunny.queue_exists?(config[:jobs_routing_key])).to be_true
+        expect(@bunny.queue_exists?(config[:jobs_routing_key])).to be true
         queue = @channel.queue(config[:jobs_routing_key], :passive => true)
         expect(queue.status[:consumer_count]).to eq(1)
       end
@@ -211,7 +211,7 @@ describe Cikl::Worker::AMQP do
           delivery_info, properties, payload = @results_queue.pop
           actual_payloads << MultiJson.decode(payload)
         end
-        expect(expected_payloads).to eq(actual_payloads)
+        expect(actual_payloads).to match(expected_payloads)
       end
 
       it "should nack payloads when an error occurs while building a job" do
@@ -242,7 +242,7 @@ describe Cikl::Worker::AMQP do
           delivery_info, properties, payload = @results_queue.pop
           actual_payloads << MultiJson.decode(payload)
         end
-        expect(expected_payloads).to eq(actual_payloads)
+        expect(actual_payloads).to match(expected_payloads)
       end
 
     end

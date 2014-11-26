@@ -20,11 +20,11 @@ describe Cikl::Worker::DNS::Resolver do
 
   describe "#running?" do
     it "should be false if not started" do
-      expect(@resolver.running?).to be_false
+      expect(@resolver.running?).to be false
     end
     it "should be true if started" do
       @resolver.start
-      expect(@resolver.running?).to be_true
+      expect(@resolver.running?).to be true
     end
   end
 

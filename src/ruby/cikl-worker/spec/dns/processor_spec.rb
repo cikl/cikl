@@ -9,15 +9,15 @@ describe Cikl::Worker::DNS::Processor do
   include WorkerHelper
   let(:resolver) { 
     ret = double("resolver") 
-    ret.stub(:start)
-    ret.stub(:cancel_query)
-    ret.stub(:stop)
-    ret.stub(:send_query)
+    allow(ret).to receive(:start)
+    allow(ret).to receive(:cancel_query)
+    allow(ret).to receive(:stop)
+    allow(ret).to receive(:send_query)
     ret
   }
   let(:job_result_handler) { 
     ret = double("job_result_handler") 
-    ret.stub(:handle_job_result)
+    allow(ret).to receive(:handle_job_result)
     ret
   }
   let(:job) {

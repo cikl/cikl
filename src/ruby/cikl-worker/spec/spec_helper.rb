@@ -1,6 +1,5 @@
 require 'rubygems'
-require 'bundler'
-Bundler.setup :default, :test
+require 'rspec/its'
 
 module WorkerHelper
   require 'pathname'
@@ -36,6 +35,7 @@ SimpleCov.start do
 end 
 
 RSpec.configure do |config|
+  config.raise_errors_for_deprecations!
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end

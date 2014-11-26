@@ -10,17 +10,17 @@ describe Cikl::Worker::Base::Tracker do
     it "should return true if it has the object" do
       x = Object.new
       @tracker.add(x)
-      expect(@tracker.has?(x)).to be_true
+      expect(@tracker.has?(x)).to be true
     end
     it "should return false if it does not have the object" do
-      expect(@tracker.has?(Object.new)).to be_false
+      expect(@tracker.has?(Object.new)).to be false
     end
 
     it "should return false if the object has been deleted" do
       x = Object.new
       @tracker.add(x)
       @tracker.delete(x)
-      expect(@tracker.has?(x)).to be_false
+      expect(@tracker.has?(x)).to be false
     end
   end
 
@@ -104,9 +104,9 @@ describe Cikl::Worker::Base::Tracker do
     it "should stop tracking the object" do
       object = Object.new
       @tracker.add(object)
-      expect(@tracker.has?(object)).to be_true
+      expect(@tracker.has?(object)).to be true
       @tracker.delete(object)
-      expect(@tracker.has?(object)).to be_false
+      expect(@tracker.has?(object)).to be false
     end
 
     it "should return the object if it been deleted" do

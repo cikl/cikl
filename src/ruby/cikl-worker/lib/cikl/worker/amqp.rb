@@ -43,7 +43,7 @@ module Cikl
         end
         @job_result_handler ||= 
           Cikl::Worker::Base::JobResultAMQPProducer.new(
-            @bunny.default_channel.default_exchange, 
+            @bunny.create_channel.default_exchange, 
             @results_routing_key,
             @worker_name
         )
@@ -51,16 +51,11 @@ module Cikl
 
       def init_bunny(amqp_config)
         bunny_config = {
-          :host => amqp_config[:host],
-          :port => amqp_config[:port],
-          :username => amqp_config[:username],
-          :password => amqp_config[:password],
-          :vhost => amqp_config[:vhost],
-          :ssl => amqp_config[:ssl],
           :recover_from_connection_close => amqp_config[:recover_from_connection_close],
           :network_recovery_interval => amqp_config[:network_recovery_interval]
         }
-        Bunny.new(bunny_config)
+          
+        Bunny.new(amqp_config[:url], bunny_config)
       end
       private :init_bunny
 
@@ -144,7 +139,7 @@ module Cikl
           channel.prefetch(consumer.prefetch)
           queue = channel.queue(consumer.routing_key, :auto_delete => false)
 
-          subscription = queue.subscribe(:blocking => false, :ack => true) do |delivery_info, properties, payload|
+          subscription = queue.subscribe(:blocking => false, :manual_ack => true) do |delivery_info, properties, payload|
             consumer.handle_payload(payload, self, delivery_info)
           end
           @consumers << [consumer, subscription]
