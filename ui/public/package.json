@@ -1,0 +1,12 @@
+{
+  "name": "cikl",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-jasmine": "~0.8.1"
+  },
+  "scripts": {
+    "test": "grunt jasmine --verbose"
+  }
+}

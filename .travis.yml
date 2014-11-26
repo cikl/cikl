@@ -1,18 +1,25 @@
-language: ruby
-
-rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.0
-
 services: 
   - rabbitmq
   - mongodb
   - elasticsearch
 
+matrix:
+  include:
+    - language: ruby
+      rvm: 1.9.3
+      env: TEST_SUITE=ruby
+    - language: ruby
+      rvm: 2.0.0
+      env: TEST_SUITE=ruby
+    - language: ruby
+      rvm: 2.1.0
+      env: TEST_SUITE=ruby
+    - language: node_js
+      node: 0.10
+      env: TEST_SUITE=ui
+
 env:
     global:
-      - JRUBY_OPTS=--debug
       - NOKOGIRI_USE_SYSTEM_LIBRARIES=1
       - CIKL_MONGO_URI=mongodb://localhost/cikl_test
       - CIKL_ELASTICSEARCH_URI=http://localhost:9200/
@@ -21,12 +28,10 @@ env:
 
 before_install:
   - travis_retry sudo apt-get update -qq
-  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.deb && sudo dpkg -i --force-confnew elasticsearch-1.2.4.deb
-  - sudo service elasticsearch restart
-  - travis_retry travis/ruby/before_install.sh
+  - travis_retry travis/$TEST_SUITE/before_install.sh
 
 install: 
-  - travis_retry travis/ruby/install.sh
+  - travis_retry travis/$TEST_SUITE/install.sh
 
 script:
-  - travis_retry travis/ruby/script.sh
+  - travis_retry travis/$TEST_SUITE/script.sh
