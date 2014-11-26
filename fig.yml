@@ -1,0 +1,52 @@
+api:
+  build: src/ruby
+  volumes:
+    - src/ruby:/opt/cikl/ruby
+  links:
+    - elasticsearch
+    - mongodb
+  command: api
+  ports:
+    - 9292:9292
+dnsworker:
+  build: src/ruby
+  volumes:
+    - src/ruby:/opt/cikl/ruby
+  links:
+    - rabbitmq
+  command: dns-worker
+ui:
+  build: ui
+  volumes:
+    - ui/public:/opt/cikl-ui/public
+  links:
+    - api:api
+  ports:
+    - "8080:80"
+rabbitmq:
+  image: cikl/rabbitmq:0.0.3
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+elasticsearch:
+  image: cikl/elasticsearch:0.0.2
+  ports:
+    - "9200:9200"
+mongodb:
+  image: cikl/mongodb:0.0.3
+  ports:
+    - "27017:27017"
+  environment:
+    CIKL_ENV: development
+logstash:
+  image: cikl/logstash:0.0.3
+  links:
+    - rabbitmq:rabbitmq
+    - elasticsearch:elasticsearch
+    - mongodb:mongodb
+#threatinator:
+#  build: src/ruby
+#  volumes:
+#    - src/ruby:/opt/cikl/ruby
+#  links:
+#    - rabbitmq
