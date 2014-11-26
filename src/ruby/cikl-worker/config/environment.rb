@@ -1,6 +1,4 @@
 require 'rubygems'
-require 'bundler'
-Bundler.setup :default
 require 'pathname'
 
 module WorkerEnvironment

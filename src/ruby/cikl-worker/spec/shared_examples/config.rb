@@ -9,12 +9,7 @@ shared_examples_for "a default config" do
 
   context :amqp do
     subject { config[:amqp] }
-    its([:host]) { should eq("localhost") }
-    its([:port]) { should eq(5672) }
-    its([:username]) { should eq("guest") }
-    its([:password]) { should eq("guest") }
-    its([:vhost]) { should eq("/") }
-    its([:ssl]) { should be_false }
+    its([:url]) { should eq(ENV['CIKL_RABBITMQ_URL'] || "amqp://guest:guest@localhost/%2Fcikl") }
   end
 end
 

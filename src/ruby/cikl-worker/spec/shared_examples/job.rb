@@ -4,7 +4,7 @@ shared_examples_for "a job" do
   let(:result) { double("result") }
   let(:on_finish_callback) { 
     ret = double("callback")
-    ret.stub(:call) 
+    allow(ret).to receive(:call) 
     ret
   }
   let(:job) { described_class.new(payload, :on_finish => on_finish_callback) }
@@ -12,7 +12,7 @@ shared_examples_for "a job" do
   describe "#start!" do
     it "should fire a ':job_start' observation" do
       observer = double("observer")
-      observer.should_receive(:update).with(:job_start, job)
+      expect(observer).to receive(:update).with(:job_start, job)
       job.add_observer(observer)
       job.start!
     end
@@ -20,19 +20,19 @@ shared_examples_for "a job" do
 
   describe "#started?" do
     it "should not be started if it hasn't started" do
-      expect(job.started?).to be_false
+      expect(job.started?).to be false
     end
 
     it "should be finished after finish! is called" do
       job.start!()
-      expect(job.started?).to be_true
+      expect(job.started?).to be true
     end
   end
 
   describe "#finish!" do
     it "should fire a ':job_finish' observation" do
       observer = double("observer")
-      observer.should_receive(:update).with(:job_finish, job, result)
+      expect(observer).to receive(:update).with(:job_finish, job, result)
       job.add_observer(observer)
       job.finish!(result)
     end
@@ -46,11 +46,11 @@ shared_examples_for "a job" do
 
   describe "#finished?" do
     it "should not be finished if it hasn't started" do
-      expect(job.finished?).to be_false
+      expect(job.finished?).to be false
     end
     it "should be finished after finish! is called" do
       job.finish!(result)
-      expect(job.finished?).to be_true
+      expect(job.finished?).to be true
     end
   end
 end

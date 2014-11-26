@@ -1,7 +1,5 @@
 require 'rubygems'
-require 'bundler'
 require 'pathname'
-Bundler.setup :default, :test
 
 SPEC_ROOT = Pathname.new(__FILE__).dirname.expand_path
 PROJECT_ROOT = (SPEC_ROOT + '../').expand_path

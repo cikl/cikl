@@ -171,6 +171,9 @@ module Cikl
 
         def build_facets(es_response) 
           aggs = es_response["aggregations"]
+          if aggs.nil?
+            return Cikl::Models::Facets.new
+          end
           sources = aggs["sources_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }
           feed_providers = aggs["feed_providers_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }
           feed_names = aggs["feed_names_top20"]["buckets"].map { |h| [h['key'], h['doc_count']] }

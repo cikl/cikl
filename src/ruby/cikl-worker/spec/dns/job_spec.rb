@@ -27,15 +27,15 @@ describe Cikl::Worker::DNS::Job do
     it "should finish the job when all queries have been finished" do
       queries = job.each_remaining_query.to_a
       expect(queries.count).to eq(4)
-      expect(job.finished?).to be_false
+      expect(job.finished?).to be false
       queries.shift.cancel!
-      expect(job.finished?).to be_false
+      expect(job.finished?).to be false
       queries.shift.cancel!
-      expect(job.finished?).to be_false
+      expect(job.finished?).to be false
       queries.shift.cancel!
-      expect(job.finished?).to be_false
+      expect(job.finished?).to be false
       queries.shift.cancel!
-      expect(job.finished?).to be_true
+      expect(job.finished?).to be true
       expect(job.each_remaining_query.to_a.count).to eq(0)
     end
   end

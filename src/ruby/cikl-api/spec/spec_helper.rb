@@ -1,8 +1,6 @@
 require 'rubygems'
-require 'bundler'
 require 'rspec/its'
 require 'pathname'
-Bundler.setup :default, :test
 ENV['RACK_ENV'] = 'test'
 
 SPEC_ROOT = Pathname.new(__FILE__).dirname.expand_path

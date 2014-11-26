@@ -3,7 +3,7 @@ module Cikl
     module Helpers
       module Mongo
         def get_event_by_id(_id)
-          Cikl::MongoEventCollection.find_one(_id: BSON::ObjectId.from_string(_id))
+          Cikl.mongo_event_collection.find_one(_id: BSON::ObjectId.from_string(_id))
         end
 
         def mongo_each_event(ids)
@@ -11,7 +11,7 @@ module Cikl
 
           ids = ids.map { |x| BSON::ObjectId.from_string(x) }
 
-          Cikl::MongoEventCollection.find(_id: { :"$in" => ids }).each do |obj|
+          Cikl.mongo_event_collection.find(_id: { :"$in" => ids }).each do |obj|
             mapping[obj["_id"]] = obj
           end
           ids.each do |_id|

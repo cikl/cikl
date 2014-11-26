@@ -52,7 +52,7 @@ module Threatinator
 
           @bunny = Bunny.new(bunny_config)
           @bunny.start
-          @exchange = @bunny.default_channel.default_exchange
+          @exchange = @bunny.create_channel.default_exchange
           @routing_key = config.routing_key
         end
 

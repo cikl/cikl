@@ -1,6 +1,2 @@
 *.swp
 *.swo
-/puppet/.librarian
-/puppet/.tmp
-.vagrant
-/vagrantconfig_local.yaml

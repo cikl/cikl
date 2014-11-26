@@ -8,16 +8,21 @@ rvm:
 services: 
   - rabbitmq
   - mongodb
+  - elasticsearch
 
 env:
     global:
       - JRUBY_OPTS=--debug
-      - TEST_CLUSTER_COMMAND=/tmp/elasticsearch-1.2.1/bin/elasticsearch
       - NOKOGIRI_USE_SYSTEM_LIBRARIES=1
+      - CIKL_MONGO_URI=mongodb://localhost/cikl_test
+      - CIKL_ELASTICSEARCH_URI=http://localhost:9200/
+      - CIKL_ELASTICSEARCH_INDEX=cikl_test
+      - CIKL_RABBITMQ_URL=amqp://guest:guest@localhost/%2F
 
 before_install:
   - travis_retry sudo apt-get update -qq
-  - travis_retry curl -# https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.tar.gz | tar xz -C /tmp || true
+  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.deb && sudo dpkg -i --force-confnew elasticsearch-1.2.4.deb
+  - sudo service elasticsearch restart
   - travis_retry travis/ruby/before_install.sh
 
 install: 

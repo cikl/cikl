@@ -1,9 +1,7 @@
 [![Build Status](https://travis-ci.org/cikl/cikl.svg)](https://travis-ci.org/cikl/cikl)
 
 # Cikl
-Cikl is a cyber threat intelligence management system. It is a fork of the [Collective Intelligence Framework (CIF)](https://code.google.com/p/collective-intelligence-framework/), which aims for the same goal. The primary goals of this (currently experimental) fork is to improve speed, scalability, functionality, and ease of installation. 
-
-The codebase will be evolved over time from Perl to Ruby (likely with an emphasis on JRuby). In the meantime, the project will likely consist of some hybrid of the two languages until we stabilize features. 
+Cikl is a cyber threat intelligence management system. It began as a fork of the [Collective Intelligence Framework (CIF)](https://code.google.com/p/collective-intelligence-framework/), which aims for the same goal. Cikl aims to provide a threat intelligence management system that scales well and is easy to deploy. 
 
 ## Documentation
 Currently? We haven't got much in the way of documentation. Please accept my appologies.
@@ -11,64 +9,69 @@ Currently? We haven't got much in the way of documentation. Please accept my app
 ## Development Environment
 
 ### Prerequisites 
-We use Vagrant, VirtualBox, and Puppet to manage our development environment. 
-Vagrant takes care of initializing the virtual machine, and hands things off
-to Puppet to handle the provisioning and setup. 
+Development for Cikl is done within a set of Docker containers managed by Fig.
 
-- Hardware
 - Software Requirements
-  - [VirtualBox](https://www.virtualbox.org/wiki/Downloads) >= 4.3
-    - Tested with VirtualBox 4.3.10 on OS X 10.9.2
-  - [Vagrant](http://www.vagrantup.com/downloads.html) >= 1.5
-    - Tested with Vagrant 1.5.3 on OS X 10.9.2. 
-    - I strongly recommend downloading and install the latest version of Vagrant. 
-    - If your OS distribution provides Vagrant as a package, it will very likely be very out of date and not work. 
+  - [Docker](https://www.docker.com/) 
+    - Provides the container framework 
+    - Tested/recommended with docker >= 1.3.0
+    - The particulars of installing and running Docker will vary by platform. 
+      For Windows and Mac OS X, see [boot2docker](http://boot2docker.io/). 
+      Linux packages are available for a large number of distributions.
+  - [Fig](http://www.fig.sh/)
+    - Manages our Docker containers.
+    - Tested with fig 1.0.0
+    - Install with: ```sudo pip install -U fig```
 
-### Starting the development environment
-
-- Clone and start up the Vagrant VM:
+### Get the code
 ```
 git clone https://github.com/cikl/cikl.git
 cd cikl
 ```
-- Bring up the virtual machine:
-```
-vagrant up
-```
+
+### Starting all services in the background:
+```fig up -d```
+
+- Remove '-d' if you want to start all services and watch their logs. Hitting 
+  ctrl-c will stop all services.
 - That's it! You should now be able to access the environment.
 
-### Accessing the development environment
+### Viewing logs
+To tail the logs for all services started by fig:
+```fig logs```
 
+Hit ctrl-c to stop tailing the logs.
+
+If you want to tail the logs of a single service (example: 'api'):
+```fig logs api```
+
+### Listing the status of services:
+This command will list the names of the Docker containers that are running the
+services, as well as their statuses:
+```fig ps```
+
+### Stopping services
+The following will stop all services:
+```fig stop```
+
+To stop a specific service (example: 'dnsworker'):
+```fig stop dnsworker```
+
+### Opening a root shell on a container that's running a service:
+First, get the name of the docker container:
+```fig ps```
+
+Execute a shell:
+```docker exec -ti cikl_api_1 /bin/bash```
+
+
+### Accessing the development environment
 - [Cikl UI](http://localhost:8080/)
 - [API Documentation](http://localhost:8080/api/doc/)
+
+Currently broken:
 - [Elasticsearch Head](http://localhost:9292/_plugin/head/)
-- For shell access, type ```vagrant ssh```, and you'll be dropped into the 
-  virtual machine as the 'vagrant' user. You'll notice that the base of the
-  git repository has been mounted at '/vagrant'. You should have full sudo 
-  privileges.
 
-### Shutting down the development environment
-With Vagrant, it's easy to forget that you've got a virtual machine running in 
-the background. If you're done for the day, you can shut the VM down using:
-```vagrant halt```
-
-### Updating 
-This is an actively developed project, so you'll want to keep things up to
-date. 
-
-```
-# Stop your virtual machine:
-vagrant halt
-# OPTIONAL: Destroy the existing vagrant virtual machine. We only do this
-# when material changes have been made to Vagrantfile or the puppet/ directory.
-vagrant destroy
-# Switch to your master branch
-git checkout master
-# Pull any updatream changes into your master branch
-git pull origin master
-# Recreate the vagrant virtual machine.
-vagrant up
-```
 
 ### Importing data
 
@@ -81,34 +84,39 @@ Threatinators usage on its project page.
 
 To see all threatinator feeds that are currently available:
 ```
-vagrant ssh -c "threatinator list"
+fig run dnsworker threatinator list
 ```
 
 When importing data into Cikl, you must specify that the 'cikl' output be used. 
 
 For example: 
 ```
-vagrant ssh -c "threatinator run --run.output.format=cikl mirc domain_reputation"
+fig run dnsworker threatinator run --run.output.cikl.host=rabbitmq --run.output.cikl.username=cikl --run.output.cikl.password=cikl --run.output.cikl.vhost=/cikl --run.output.format=cikl mirc domain_reputation
+```
+
+Note: We're aware of how ugly this looks. We'll make it better, promise.
+
+### Updating 
+This is an actively developed project, so you'll want to keep things up to
+date. 
+
+```
+# Stop all services
+fig stop
+# Switch to your master branch
+git checkout master
+# Pull any updatream changes into your master branch
+git pull origin master
+# Bring services back up:
+fig up
 ```
 
 ### Clearing out existing data after an upgrade
+This is accomplished by stopping and removing all existing services (and data):
 ```
-vagrant ssh -c "/vagrant/util/drop_data.sh"
+fig stop
+fig rm --force
 ```
-
-### FAQ:
-
-#### Why do I get prompted to select a network interface when I run 'vagrant up'? Why do you require bridged network access?
-Normally, virtual machine traffic would be handled by the VirtualBox NAT 
-process. However, I've found in testing that the Cikl's high-speed DNS resolver
-quickly overwhelms VirtualBox's NAT socket tracking. In order to get around 
-this hurdle, we've enabled bridged network access on the development VM. As a result,
-you will be prompted to select a network adapter with which to bridge. If you 
-see this message, select your primary network adapter.
-
-If you want to disable this behavior, add ```bridge_networking: true``` to your
-vagrantconfig_local.yaml, and run ```vagrant reload```
-
 
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).

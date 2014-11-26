@@ -32,27 +32,9 @@ module Cikl
                         :default => ENV['HOSTNAME'] || Socket.gethostname || 'unknown'
 
 
-          config.define "amqp.host",
-                        :description => "Hostname/IP for the RabbitMQ server",
-                        :default => "localhost"
-          config.define "amqp.port",
-                        :description => "Port number for the RabbitMQ server",
-                        :type => Integer,
-                        :default => 5672
-          config.define "amqp.username",
-                        :description => "RabbitMQ username",
-                        :default => "guest"
-          config.define "amqp.password",
-                        :description => "RabbitMQ password",
-                        :default => "guest"
-          config.define "amqp.vhost",
-                        :description => "RabbitMQ vhost",
-                        :default => "/"
-          config.define "amqp.ssl",
-                        :description => "Enable SSL connection to RabbitMQ",
-                        :type => :boolean,
-                        :default => false
-
+          config.define "amqp.url",
+                        :description => "URI for AMQP server",
+                        :default => ENV['CIKL_RABBITMQ_URL'] || "amqp://guest:guest@localhost/%2Fcikl"
           config.define "amqp.recover_from_connection_close",
                         :description => "Retry closed connections",
                         :type => :boolean,

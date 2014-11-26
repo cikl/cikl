@@ -15,7 +15,7 @@ describe Cikl::Worker::DNS::JobResult do
 
   def create_answer(str)
     ret = double("answer")
-    ret.stub(:to_resolv).and_return(Resolv::DNS::Message.decode(str))
+    allow(ret).to receive(:to_resolv).and_return(Resolv::DNS::Message.decode(str))
     ret
   end
 
