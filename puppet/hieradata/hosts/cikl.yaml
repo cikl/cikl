@@ -1,4 +1,0 @@
----
-roles: 
-  - role::does_everything
-  - role::web
