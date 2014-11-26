@@ -14,6 +14,9 @@ matrix:
     - language: ruby
       rvm: 2.1.0
       env: TEST_SUITE=ruby
+    - language: node_js
+      node: 0.10
+      env: TEST_SUITE=ui
 
 env:
     global:
