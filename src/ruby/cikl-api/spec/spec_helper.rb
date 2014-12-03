@@ -11,6 +11,13 @@ RSpec::Core::RubyProject.add_to_load_path('config')
 
 require 'simplecov'
 
+if ENV['COVERAGE_DIR']
+  SimpleCov.coverage_dir(ENV['COVERAGE_DIR'])
+  SimpleCov.at_exit {
+    SimpleCov.result
+  }
+end
+SimpleCov.command_name 'cikl-api'
 SimpleCov.start do
   add_filter PROJECT_ROOT.join('spec').to_s
   add_filter PROJECT_ROOT.join('.gem').to_s

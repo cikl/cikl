@@ -118,6 +118,17 @@ fig stop
 fig rm --force
 ```
 
+### Running unit and integration tests
+To run all the unit tests for Cikl:
+
+```
+fig -f fig-test.yml up
+```
+
+You'll see all the test executions scroll past. If all goes well, it will exit
+without error and generate a coverage report in the coverage/ directory.
+
+
 ## Roadmap
 You can find our roadmap [here](https://github.com/cikl/cikl/wiki/Roadmap).
 

@@ -8,6 +8,13 @@ FIXTURES_ROOT =  SPEC_ROOT.join('fixtures')
 
 require 'simplecov'
 
+if ENV['COVERAGE_DIR']
+  SimpleCov.coverage_dir(ENV['COVERAGE_DIR'])
+  SimpleCov.at_exit {
+    SimpleCov.result
+  }
+end
+SimpleCov.command_name 'threatinator-output-cikl'
 SimpleCov.start do
   project_root = RSpec::Core::RubyProject.root
   add_filter PROJECT_ROOT.join('spec').to_s

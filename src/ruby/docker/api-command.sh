@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 cd /opt/cikl/ruby/cikl-api
-exec puma config.ru
+exec bundle exec puma config.ru
