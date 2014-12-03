@@ -12,6 +12,13 @@ RUN \
 # Ensure that theonly thing that triggers a rebuild is modifications to the 
 # Gemfile, and not anything else inside the src dir.
 ADD Gemfile /opt/cikl/ruby/Gemfile
+ADD VERSION /opt/cikl/ruby/VERSION
+ADD cikl.gemspec /opt/cikl/ruby/cikl.gemspec
+ADD cikl-api/cikl-api.gemspec /opt/cikl/ruby/cikl-api/cikl-api.gemspec
+ADD cikl-worker/cikl-worker.gemspec /opt/cikl/ruby/cikl-worker/cikl-worker.gemspec
+ADD cikl-event/cikl-event.gemspec /opt/cikl/ruby/cikl-event/cikl-event.gemspec
+ADD threatinator-output-cikl/threatinator-output-cikl.gemspec /opt/cikl/ruby/threatinator-output-cikl/threatinator-output-cikl.gemspec
+
 WORKDIR /opt/cikl/ruby
 RUN \
   export DEBIAN_FRONTEND=noninteractive && \
@@ -20,7 +27,7 @@ RUN \
   apt-get install -y --no-install-recommends $buildDeps && \
   gem install bundler && \
   bundle config build.nokogiri --use-system-libraries --with-xml2-include=/usr/include/libxml2/ && \
-  bundle install --system --jobs=7 && \
+  bundle install --jobs=7 && \
   rm /var/lib/gems/2.1.0/cache/*.gem && \
   apt-get remove -y --purge --auto-remove $buildDeps && \
   apt-get autoremove -y && \
@@ -30,11 +37,13 @@ ADD . /opt/cikl/ruby
 ADD docker/threatinator-command.sh /etc/docker-entrypoint/commands.d/threatinator
 ADD docker/dns-worker-command.sh /etc/docker-entrypoint/commands.d/dns-worker
 ADD docker/api-command.sh /etc/docker-entrypoint/commands.d/api
+ADD docker/test-unit-command.sh /etc/docker-entrypoint/commands.d/test-unit
 ADD docker/core-pre.sh /etc/docker-entrypoint/pre.d/core.sh
 
 RUN chmod a+x /etc/docker-entrypoint/commands.d/threatinator \
               /etc/docker-entrypoint/commands.d/dns-worker \
-              /etc/docker-entrypoint/commands.d/api
+              /etc/docker-entrypoint/commands.d/api \
+              /etc/docker-entrypoint/commands.d/test-unit
 
 VOLUME [ "/data" ]
 RUN useradd -s /bin/false -d /data -m cikl

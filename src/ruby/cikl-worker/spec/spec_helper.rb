@@ -28,6 +28,9 @@ end
 require 'simplecov'
 
 SimpleCov.start do
+  if ENV['COVERAGE_DIR']
+    coverage_dir(ENV['COVERAGE_DIR'])
+  end
   project_root = RSpec::Core::RubyProject.root
   add_filter WorkerHelper::PROJECT_ROOT.join('spec').to_s
   add_filter WorkerHelper::PROJECT_ROOT.join('.gem').to_s

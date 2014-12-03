@@ -1,5 +1,5 @@
 NAME = cikl/core
-VERSION = 0.0.1
+VERSION := $(shell $(cat) VERSION)
 
 include $(abspath ../../common-docker.mf)
 

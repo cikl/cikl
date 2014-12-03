@@ -9,6 +9,9 @@ FIXTURES_ROOT =  SPEC_ROOT.join('fixtures')
 require 'simplecov'
 
 SimpleCov.start do
+  if ENV['COVERAGE_DIR']
+    coverage_dir(ENV['COVERAGE_DIR'])
+  end
   project_root = RSpec::Core::RubyProject.root
   add_filter PROJECT_ROOT.join('spec').to_s
   add_filter PROJECT_ROOT.join('.gem').to_s

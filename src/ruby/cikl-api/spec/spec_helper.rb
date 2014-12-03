@@ -12,6 +12,9 @@ RSpec::Core::RubyProject.add_to_load_path('config')
 require 'simplecov'
 
 SimpleCov.start do
+  if ENV['COVERAGE_DIR']
+    coverage_dir(ENV['COVERAGE_DIR'])
+  end
   add_filter PROJECT_ROOT.join('spec').to_s
   add_filter PROJECT_ROOT.join('.gem').to_s
   add_group 'app', PROJECT_ROOT.join('app').to_s

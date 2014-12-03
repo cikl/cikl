@@ -7,6 +7,9 @@ PROJECT_ROOT = (SPEC_ROOT + '../').expand_path
 require 'simplecov'
 
 SimpleCov.start do
+  if ENV['COVERAGE_DIR']
+    coverage_dir(ENV['COVERAGE_DIR'])
+  end
 #  add_filter PROJECT_ROOT.join('spec').to_s
 #  add_filter PROJECT_ROOT.join('.gem').to_s
 #  add_group 'lib', PROJECT_ROOT.join('lib').to_s
