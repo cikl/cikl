@@ -1,0 +1,29 @@
+coretest:
+  build: src/ruby
+  volumes:
+    - coverage/:/data/coverage
+  links:
+    - testelasticsearch:elasticsearch
+    - testmongodb:mongodb
+    - testrabbitmq:rabbitmq
+  command: test-all
+  environment:
+    - CIKL_MONGO_URI=mongodb://mongodb/cikl_test
+    - CIKL_ELASTICSEARCH_URI=http://elasticsearch:9200/
+    - CIKL_ELASTICSEARCH_INDEX=cikl_test
+    - CIKL_RABBITMQ_URL=amqp://cikl:cikl@rabbitmq/%2Fcikl
+testrabbitmq:
+  image: cikl/rabbitmq:0.0.3
+testelasticsearch:
+  image: cikl/elasticsearch:0.0.2
+testmongodb:
+  image: cikl/mongodb:0.0.3
+  environment:
+    CIKL_ENV: development
+#threatinator:
+#  build: src/ruby
+#  volumes:
+#    - src/ruby:/opt/cikl/ruby
+#  links:
+#    - rabbitmq
+

@@ -12,12 +12,11 @@ task :subprojects do
   end
 end
 
-def setup_coverage(project)
-  if ENV['COVERAGE_ROOT']
-    puts "COVERAGE_ROOT=#{ENV['COVERAGE_ROOT']}"
-    ENV['COVERAGE_DIR'] = File.join(ENV['COVERAGE_ROOT'], project)
-  else
-    ENV.delete('COVERAGE_DIR')
+def build_coverage_report
+  if ENV['COVERAGE_DIR']
+    require 'simplecov'
+    SimpleCov.coverage_dir(ENV['COVERAGE_DIR'])
+    SimpleCov.result.format!
   end
 end
 
@@ -25,30 +24,30 @@ namespace :test do
   desc "Run unit tests in all subprojects"
   task :unit do
     subprojects.each do |project|
-      setup_coverage(project)
       puts '-'*80
       sh "cd #{__current__.join(project)} && rake spec:unit"
       puts "\n"
     end
+    build_coverage_report()
   end
 
   desc "Run integration tests in all subprojects"
   task :integration do
     subprojects.each do |project|
-      setup_coverage(project)
       puts '-'*80
       sh "cd #{__current__.join(project)} && rake spec:integration"
       puts "\n"
     end
+    build_coverage_report()
   end
 
   desc "Run all tests in all subprojects"
   task :all do
     subprojects.each do |project|
-      setup_coverage(project)
       puts '-'*80
       sh "cd #{__current__.join(project)} && rake spec:all"
       puts "\n"
     end
+    build_coverage_report()
   end
 end

@@ -2,6 +2,7 @@ Next
 ====
 
 * Add your message and a link to your github account right below this line.
+* Add 'fig-test.yml', for executing tests. [@jusftalter](https://github.com/justfalter)
 * Add unit tests for UI - [@dsweet04](https://github.com/dsweet04)
 * Dockerize UI - [@justfalter](https://github.com/justfalter)
 * Remove Vagrant/puppet - [@justfalter](https://github.com/justfalter)

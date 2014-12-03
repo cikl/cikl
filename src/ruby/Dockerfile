@@ -33,17 +33,18 @@ RUN \
   apt-get autoremove -y && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ADD . /opt/cikl/ruby
 ADD docker/threatinator-command.sh /etc/docker-entrypoint/commands.d/threatinator
 ADD docker/dns-worker-command.sh /etc/docker-entrypoint/commands.d/dns-worker
 ADD docker/api-command.sh /etc/docker-entrypoint/commands.d/api
 ADD docker/test-unit-command.sh /etc/docker-entrypoint/commands.d/test-unit
+ADD docker/test-all-command.sh /etc/docker-entrypoint/commands.d/test-all
 ADD docker/core-pre.sh /etc/docker-entrypoint/pre.d/core.sh
 
 RUN chmod a+x /etc/docker-entrypoint/commands.d/threatinator \
               /etc/docker-entrypoint/commands.d/dns-worker \
               /etc/docker-entrypoint/commands.d/api \
-              /etc/docker-entrypoint/commands.d/test-unit
+              /etc/docker-entrypoint/commands.d/test-unit \
+              /etc/docker-entrypoint/commands.d/test-all
 
 VOLUME [ "/data" ]
 RUN useradd -s /bin/false -d /data -m cikl
@@ -61,3 +62,6 @@ CMD [ "help" ]
 
 # Expose cikl-api service
 EXPOSE 9292
+
+ADD . /opt/cikl/ruby
+
