@@ -1,0 +1,5 @@
+source "https://rubygems.org"
+
+gemspec name: 'cikl-scheduler', path: 'cikl-scheduler/'
+gemspec name: 'cikl-event', path: 'cikl-event/'
+gemspec name: 'threatinator-output-cikl', path: 'threatinator-output-cikl/'

@@ -1,0 +1,20 @@
+source "https://rubygems.org"
+
+gemspec name: 'cikl-core', path: 'cikl-core/'
+gemspec name: 'cikl-api', path: 'cikl-api/'
+gemspec name: 'cikl-event', path: 'cikl-event/'
+gemspec name: 'cikl-worker', path: 'cikl-worker/'
+
+
+group :development do
+  gem 'rake', ">= 10.0"
+  gem 'rspec', ">= 3.0.0"
+  gem 'simplecov', "~> 0.8.0"
+
+  # API
+  gem 'rspec-its', ">= 1.0.0"
+  gem 'rack-test', ">= 0.6.2"
+  gem 'elasticsearch-extensions', ">= 0.0.15"
+  gem 'fabrication', "~> 2.11.0"
+  gem 'timecop', "~> 0.7.0"
+end

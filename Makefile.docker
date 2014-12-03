@@ -1,0 +1,64 @@
+ifeq ("", "$(NAME)")
+$(error NAME is not defined or empty)
+endif
+ifeq ("", "$(VERSION)")
+$(error VERSION is not defined or empty)
+endif
+
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(SELF_DIR)/Makefile.common
+
+GIT_TAG = $(NAME)-$(VERSION)
+DOCKER_TAG = $(NAME):$(VERSION)
+DOCKER_DEVTAG = $(NAME):dev
+DOCKER_TARBALL := docker_build.tar
+MANIFEST = manifest
+MANIFEST_FILTERED = $(MANIFEST)-filtered
+BUILD_ROOT := $(shell pwd)
+
+.PHONY: all build $(DOCKER_TARBALL)
+.INTERMEDIATE: $(DOCKER_TARBALL) $(MANIFEST_FILTERED)
+
+all: build
+
+$(MANIFEST_FILTERED): $(MANIFEST)
+	cd $(PROJECT_ROOT); \
+	  xargs -a $(BUILD_ROOT)/$(MANIFEST) git ls-files -- > $(BUILD_ROOT)/$(MANIFEST_FILTERED)
+	
+
+$(DOCKER_TARBALL): Dockerfile $(MANIFEST_FILTERED)
+	tar cf $(DOCKER_TARBALL) Dockerfile
+	tar rf $(DOCKER_TARBALL) -C $(PROJECT_ROOT) -T $(MANIFEST_FILTERED)
+
+build: $(DOCKER_TARBALL)
+	cat $(DOCKER_TARBALL) | docker build -t $(DOCKER_DEVTAG) --rm -
+
+clean:
+	docker rmi $(DOCKER_DEVTAG)
+
+docker_tag_dev: build
+	docker tag $(DOCKER_DEVTAG) $(DOCKER_TAG)
+
+check_git:
+	@status=$$(git status --porcelain); \
+        if test "x$${status}" != x; then \
+            echo Working directory is dirty >&2; \
+	    false; \
+        fi
+	@branch=$$(git rev-parse --abbrev-ref HEAD); \
+        if test "$${branch}" != master; then \
+            echo Must be in 'master' branch! >&2; \
+	    false; \
+        fi
+
+git_tag: check_git
+	@git describe --tags $(GIT_TAG) >/dev/null 2>&1 || git tag $(GIT_TAG)
+	@git diff --quiet refs/heads/master..refs/tags/$(GIT_TAG) || ( echo "refs/tags/$(GIT_TAG) does not match refs/heads/master."; false) 
+
+push_to_git: git_tag
+	git push upstream master refs/tags/$(GIT_TAG)
+
+push_to_docker: check_git build
+	docker push $(DOCKER_TAG)
+
+release: push_to_git push_to_docker
