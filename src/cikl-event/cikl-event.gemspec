@@ -22,6 +22,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'virtus',                    '>= 1.0.0'
   s.add_dependency 'equalizer',                 '>= 0.0.0'
+
+  s.add_development_dependency 'rake',          '>= 10.0'
+  s.add_development_dependency 'rspec',         '>= 3.0.0'
+  s.add_development_dependency 'simplecov',     '~> 0.8.0'
 end
 
 

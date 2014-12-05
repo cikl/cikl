@@ -33,5 +33,9 @@ Gem::Specification.new do |s|
   else
     s.add_runtime_dependency('oj', ">= 2.9.0")
   end
-end
 
+  s.add_development_dependency 'rake',          '>= 10.0'
+  s.add_development_dependency 'rspec',         '>= 3.0.0'
+  s.add_development_dependency 'simplecov',     '~> 0.8.0'
+  s.add_development_dependency 'rspec-its',     '>= 1.0.0'
+end

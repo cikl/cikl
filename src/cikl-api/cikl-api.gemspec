@@ -44,4 +44,13 @@ Gem::Specification.new do |s|
   else
     s.add_runtime_dependency('oj', ">= 2.9.0")
   end
+
+  s.add_development_dependency 'rake',          '>= 10.0'
+  s.add_development_dependency 'rspec',         '>= 3.0.0'
+  s.add_development_dependency 'simplecov',     '~> 0.8.0'
+  s.add_development_dependency 'rspec-its',     '>= 1.0.0'
+  s.add_development_dependency 'rack-test',     '>= 0.6.2'
+  s.add_development_dependency 'elasticsearch-extensions', '>= 0.0.15'
+  s.add_development_dependency 'fabrication',   '~> 2.11.0'
+  s.add_development_dependency 'timecop',       '~> 0.7.0'
 end

@@ -1,6 +1,6 @@
 require 'pathname'
 
-subprojects = %w| cikl-api cikl-event cikl-worker threatinator-output-cikl |
+subprojects = %w| cikl-api cikl-event cikl-worker |
 __current__ = Pathname( File.expand_path('..', __FILE__) )
 
 task :subprojects do
