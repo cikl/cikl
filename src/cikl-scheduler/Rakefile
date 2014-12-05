@@ -1,0 +1,18 @@
+require 'rake'
+
+namespace :threatinator do
+  desc "Run's all known threatinator feeds"
+  task "run-all" do
+    load 'worker_env.rb'
+    Cikl::Workers::ThreatinatorRunAllWorker.perform_async()
+  end
+
+  desc "Run's a specific feed specified by the PROVIDER and NAME environment variables"
+  task "run" do
+    load 'worker_env.rb'
+    if ENV['FEED_PROVIDER'].nil? or ENV['FEED_NAME'].nil?
+      raise "Invalid arguments. Specify like: 'rake threatinator:run FEED_PROVIDER=someprovider FEED_NAME=somefeed'"
+    end
+    Cikl::Workers::ThreatinatorWorker.perform_async(ENV['FEED_PROVIDER'], ENV['FEED_NAME'])
+  end
+end

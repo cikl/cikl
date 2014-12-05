@@ -6,14 +6,17 @@ services:
 matrix:
   include:
     - language: ruby
-      rvm: 1.9.3
-      env: TEST_SUITE=ruby
-    - language: ruby
-      rvm: 2.0.0
-      env: TEST_SUITE=ruby
+      rvm: 2.1.0
+      env: TEST_SUITE=threatinator-output-cikl
     - language: ruby
       rvm: 2.1.0
-      env: TEST_SUITE=ruby
+      env: TEST_SUITE=cikl-api
+    - language: ruby
+      rvm: 2.1.0
+      env: TEST_SUITE=cikl-event
+    - language: ruby
+      rvm: 2.1.0
+      env: TEST_SUITE=cikl-worker
     - language: node_js
       node: 0.10
       env: TEST_SUITE=ui

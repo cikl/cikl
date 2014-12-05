@@ -1,17 +1,19 @@
 api:
-  build: src/ruby
+  image: cikl/core:dev
   volumes:
-    - src/ruby:/opt/cikl/ruby
+    - src/cikl-api:/opt/cikl/core/cikl-api
+    - src/cikl-event:/opt/cikl/core/cikl-event
+    - src/cikl-core:/opt/cikl/core/cikl-core
   links:
     - elasticsearch
     - mongodb
   command: api
-  ports:
-    - 9292:9292
 dnsworker:
-  build: src/ruby
+  image: cikl/core:dev
   volumes:
-    - src/ruby:/opt/cikl/ruby
+    - src/cikl-event:/opt/cikl/core/cikl-event
+    - src/cikl-core:/opt/cikl/core/cikl-core
+    - src/cikl-worker:/opt/cikl/core/cikl-worker
   links:
     - rabbitmq
   command: dns-worker
@@ -23,6 +25,34 @@ ui:
     - api:api
   ports:
     - "8080:80"
+scheduler:
+  image: cikl/scheduler:dev
+  command: 'scheduler'
+  volumes:
+    - src/cikl-scheduler:/opt/cikl/scheduler/cikl-scheduler
+  links:
+    - redis:redis
+schedulerweb:
+  image: cikl/scheduler:dev
+  command: 'scheduler-web'
+  volumes:
+    - src/cikl-scheduler:/opt/cikl/scheduler/cikl-scheduler
+  links:
+    - redis:redis
+  ports:
+    - 9292:9292
+schedulerworker:
+  image: cikl/scheduler:dev
+  command: 'scheduler-worker'
+  volumes:
+    - src/cikl-event:/opt/cikl/scheduler/cikl-event
+    - src/cikl-scheduler:/opt/cikl/scheduler/cikl-scheduler
+    - src/threatinator-output-cikl:/opt/cikl/scheduler/threatinator-output-cikl
+  links:
+    - redis:redis
+    - rabbitmq:rabbitmq
+
+# Supporting services:
 rabbitmq:
   image: cikl/rabbitmq:0.0.3
   ports:
@@ -44,9 +74,5 @@ logstash:
     - rabbitmq:rabbitmq
     - elasticsearch:elasticsearch
     - mongodb:mongodb
-#threatinator:
-#  build: src/ruby
-#  volumes:
-#    - src/ruby:/opt/cikl/ruby
-#  links:
-#    - rabbitmq
+redis:
+  image: cikl/redis:0.0.1

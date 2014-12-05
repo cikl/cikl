@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gemspec name: 'cikl-core', path: 'cikl-core/'
+gemspec name: 'cikl-api', path: 'cikl-api/'
+gemspec name: 'cikl-event', path: 'cikl-event/'
+gemspec name: 'cikl-worker', path: 'cikl-worker/'

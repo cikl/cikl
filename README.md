@@ -30,10 +30,10 @@ cd cikl
 ```
 
 ### Starting all services in the background:
-```fig up -d```
+```make dev-up```
 
-- Remove '-d' if you want to start all services and watch their logs. Hitting 
-  ctrl-c will stop all services.
+- This will build all the require docker images, and then bring the dev 
+  environment up.
 - That's it! You should now be able to access the environment.
 
 ### Viewing logs
@@ -52,6 +52,10 @@ services, as well as their statuses:
 
 ### Stopping services
 The following will stop all services:
+```make dev-stop```
+
+or
+
 ```fig stop```
 
 To stop a specific service (example: 'dnsworker'):
@@ -82,47 +86,52 @@ Cikl uses [Threatinator](https://github.com/cikl/threatinator) for all of its
 threat data feed fetching and parsing needs. You can find details on 
 Threatinators usage on its project page.
 
-To see all threatinator feeds that are currently available:
+#### Listing all feeds
+
 ```
-fig run dnsworker threatinator list
+fig run scheduler threatinator-list
 ```
 
-When importing data into Cikl, you must specify that the 'cikl' output be used. 
+#### Running a specific feed
 
-For example: 
+If you want to import the 'mirc' 'domain_reputation' feed:
 ```
-fig run dnsworker threatinator run --run.output.cikl.host=rabbitmq --run.output.cikl.username=cikl --run.output.cikl.password=cikl --run.output.cikl.vhost=/cikl --run.output.format=cikl mirc domain_reputation
+fig run dnsworker threatinator-run mirc domain_reputation
 ```
 
-Note: We're aware of how ugly this looks. We'll make it better, promise.
+#### Running all feeds
+If you're especially brave, you can import all feeds with one easy command:
+
+```
+fig run dnsworker threatinator-run-all
+```
 
 ### Updating 
 This is an actively developed project, so you'll want to keep things up to
 date. 
 
 ```
-# Stop all services
-fig stop
+# Stop all services and clean builds
+make dev-stop
 # Switch to your master branch
 git checkout master
 # Pull any updatream changes into your master branch
 git pull origin master
 # Bring services back up:
-fig up
+make dev-up
 ```
 
 ### Clearing out existing data after an upgrade
 This is accomplished by stopping and removing all existing services (and data):
 ```
-fig stop
-fig rm --force
+make clean
 ```
 
 ### Running unit and integration tests
 To run all the unit tests for Cikl:
 
 ```
-fig -f fig-test.yml up
+make test
 ```
 
 You'll see all the test executions scroll past. If all goes well, it will exit
